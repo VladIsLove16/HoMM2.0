@@ -1,4 +1,4 @@
 ﻿public interface IDamageSource
 {
-    StatusEffectManager StatusEffectManager { get; }
+    UnitStats UnitStats {  get; }
 }

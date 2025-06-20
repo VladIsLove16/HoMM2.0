@@ -8,10 +8,10 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private GridController gameController;
     private GameGridModel gridModel;
     private GameGridViewModel gameGridViewModel;
-    [SerializeField] private GameGridSceneView gridView;
+    [SerializeField] private GridView gridView;
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private GameObject singleGridPrefab;
-    [SerializeField] private UnitDataSO[] unitDatas;
+    [SerializeField] private UnitDefinitionSO[] unitDatas;
 
     public enum GridRenderStrategy { PerCell, Single }
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
@@ -29,12 +29,20 @@ public class GameLogicMonoInstaller : MonoInstaller
                 break;
         }
         //Container.Bind<IGridContentFactory>().To<UnitGridContentFactory>().AsSingle();
+
+        Container.Bind<UnitViewFactory>().AsSingle();
+        Container.Bind<UnitModelFactory>().AsSingle();
+
         Container.Bind<GameGridModel>().AsSingle();
         Container.Bind<GameGridViewModel>()
          .AsSingle()
          .NonLazy();
 
-        Container.Bind<GameGridSceneView>()
+        Container.Bind<GameGridView3D>()
+         .AsSingle()
+         .NonLazy();
+
+        Container.Bind<GridView>()
         .FromInstance(gridView)
         .AsSingle()
         .NonLazy();
@@ -43,11 +51,11 @@ public class GameLogicMonoInstaller : MonoInstaller
         .FromComponentInHierarchy()
         .AsSingle();
 
-        Container.Bind<IEnumerable<UnitDataSO>>()
+        Container.Bind<IEnumerable<UnitDefinitionSO>>()
                  .FromInstance(unitDatas);
 
         Container.Bind<CombatController>().AsSingle();
-        Container.Bind<UnitFactory>().AsSingle();
+
 
         Container.Bind<Transform>()
                  .WithId("UnitsParent")

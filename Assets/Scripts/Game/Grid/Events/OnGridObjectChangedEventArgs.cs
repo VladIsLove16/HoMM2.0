@@ -1,8 +1,13 @@
 ﻿using System;
-    public class GridCellChangedEventArgs : EventArgs {
+    public class GridCellUnitSpawnedEventArgs : EventArgs {
         public int x;
         public int y;
         public IGridContent addedContent;
+    } 
+    public class GridCellContentRemovedEventArgs : EventArgs {
+        public int x;
+        public int y;
+        public IGridContent removedContent;
     } 
 
 
@@ -22,7 +27,7 @@
 //    Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
 //    Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
 
-//    OnGridObjectChanged += (object sender, GridCellChangedEventArgs eventArgs) => {
+//    OnGridObjectChanged += (object sender, GridCellUnitSpawnedEventArgs eventArgs) => {
 //        debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
 //    };
 //}

@@ -1,17 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+[Serializable]
 public class UnitStats 
 {
-    public int Health;
-    public int MaxHealth;
-    public int Damage;
-    public int Amount;
-    public UnitStats (UnitDataSO data, int amount)
+    private UnitDefinitionSO unitDefinitionSO;
+
+    public UnitStats(UnitDefinitionSO unitDefinitionSO)
     {
-        MaxHealth = data.Health;
-        Health = data.Health;
-        Damage = data.Damage;
-        Amount = amount;
+        MaxHealth = unitDefinitionSO.BaseHealth;
+        Health = unitDefinitionSO.BaseHealth;
+        Damage = unitDefinitionSO.BaseDamage;
+        Offense = unitDefinitionSO.BaseOffense;
+        Defense = unitDefinitionSO.BaseDefense;
     }
 
+    public int MaxHealth { get; set; }
+    public int Health { get; set; }
+    public int Damage { get; set; }
+    public int Offense { get; set; }
+    public int Defense { get; set; }
+
     public int LastDamageAmount { get; internal set; }
+    public StatusEffectManager StatusEffectManager { get; internal set; }
 }

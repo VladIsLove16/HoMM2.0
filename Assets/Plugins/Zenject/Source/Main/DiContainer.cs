@@ -3559,11 +3559,6 @@ namespace Zenject
                 .FromInstance(ValuePair.New(type, order)).WhenInjectedInto<PoolableManager>();
         }
 
-        public object InstantiatePrefabForComponent<T>(object unitViewPrefab, Vector3 pos, Quaternion identity, Transform unitsParent)
-        {
-            throw new NotImplementedException();
-        }
-
         class ProviderInfo
         {
             public ProviderInfo(

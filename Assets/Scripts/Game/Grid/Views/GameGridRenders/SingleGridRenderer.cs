@@ -34,4 +34,9 @@ public class SingleGridRenderer : ICellGridRenderer
         float cellOffset = cellSize + padding;
         return origin + new Vector3(cellOffset *x, ySize, cellOffset *y);
     }
+
+    public Vector3 ToWorld(Vector2Int vector2Int)
+    {
+      return ToWorld(vector2Int.x, vector2Int.y);
+    }
 }

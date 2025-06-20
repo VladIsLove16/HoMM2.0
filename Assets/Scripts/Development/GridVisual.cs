@@ -54,11 +54,11 @@ public class GridVisual<TGridObject> : GridXZ<TGridObject> where TGridObject : M
         z = Mathf.RoundToInt((worldPosition - originPosition).z / cellSize);
     }
 
-    public void SetGridObject(Vector3 worldPosition, TGridObject value)
-    {
-        GetXZ(worldPosition, out int x, out int z);
-        SetGridObject(x, z, value);
-    }
+    //public void SetGridObject(Vector3 worldPosition, TGridObject value)
+    //{
+    //    GetXZ(worldPosition, out int x, out int z);
+    //    SetGridObject(x, z, value);
+    //}
 
     public TGridObject GetGridObject(Vector3 worldPosition)
     {

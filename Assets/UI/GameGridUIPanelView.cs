@@ -36,8 +36,8 @@ public class GameGridUIPanelView : MonoBehaviour
         }
     }
  
-
     private GameGridViewModel viewModel;
+
     [Inject]
     public void Construct(GameGridViewModel viewModel)
     {
@@ -46,18 +46,25 @@ public class GameGridUIPanelView : MonoBehaviour
         btnSpawnRandom.onClick.AddListener(() =>
         {
             Debug.Log("btnSpawnRandom clicked");
-            viewModel.SpawnRandomUnit();
+            viewModel.SpawnUnitAtRandomPlace();
         });
         btnSpawnAt.onClick.AddListener(() => viewModel.SpawnUnitAt(xText.text, yText.text));
-        btnSelectCell.onClick.AddListener(() => viewModel.GetCell(xText.text, yText.text)?.GetDescription());
-
-        
+        btnSelectCell.onClick.AddListener(BtnSelectCell_onClick);
         btnSpawnAt.onClick.AddListener(() => Debug.Log("btnSpawnAt clicked"));
         btnSelectCell.onClick.AddListener(() => Debug.Log("btnSelectCell clicked"));
 
-        viewModel.OnSelectedCellChanged += desc => selectedCellDescriptionText.text = desc;
-        viewModel.OnCellChanged += desc => lastChangedCellDescriptionText.text = desc.addedContent is IDescriptable descriptable ? descriptable.GetDescription() : desc.addedContent.ToString();
         viewModel.OnError += msg => ShowError(msg);
+    }
+
+    private void BtnSelectCell_onClick()
+    {
+        var cell = viewModel.GetCellContent(xText.text, yText.text);
+        selectedCellDescriptionText.text = GetDescription(cell);
+    }
+
+    private void ViewModel_OnCellChanged(GridCellUnitSpawnedEventArgs args)
+    {
+         lastChangedCellDescriptionText.text = GetDescription(args.addedContent);
     }
 
     private void ShowError(string msg)
@@ -71,9 +78,22 @@ public class GameGridUIPanelView : MonoBehaviour
         errorText.text = string.Empty;
     }
 
-    private void HandleCellChanged(GridCellChangedEventArgs args)
+    private void HandleCellChanged(GridCellUnitSpawnedEventArgs args)
     {
-        lastChangedCellDescriptionText.text = viewModel.GetDescription(X, Y);
+        lastChangedCellDescriptionText.text = GetDescription(args.addedContent);
+    }
+    private string GetDescription(IGridCell gridContent)
+    {
+        string description = string.Empty;
+        foreach (IGridContent content in gridContent.Contents)
+        {
+            description += GetDescription(content) + ", ";
+        }
+        return description;
+    }
+    private string GetDescription(IGridContent gridContent)
+    {
+       return gridContent.ToString();
     }
 
 }

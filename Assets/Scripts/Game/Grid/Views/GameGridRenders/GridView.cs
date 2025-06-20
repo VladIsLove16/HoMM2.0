@@ -2,7 +2,7 @@
 using UnityEngine;
 using Zenject;
 
-public class GameGridSceneView : MonoBehaviour
+public class GridView : MonoBehaviour
 {
     [SerializeField] private Transform originPosition;
     [SerializeField] private float cellSize;
@@ -29,15 +29,12 @@ public class GameGridSceneView : MonoBehaviour
         _gridRenderer.Render(width, height, cellSize, originPosition.position, padding);
     }
 
-    private void UpdateCellVisual(GridCellChangedEventArgs args)
+    private void UpdateCellVisual(GridCellUnitSpawnedEventArgs args)
     {
     }
 
     private void OnDestroy()
     {
-        if (_viewModel != null)
-            _viewModel.OnCellChanged -= UpdateCellVisual;
-
         _gridRenderer.Clear();
     }
 

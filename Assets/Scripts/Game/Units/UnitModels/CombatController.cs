@@ -6,7 +6,7 @@ public class CombatController
     public void DealDamage(IDamageable target, int amount, IDamageSource source)
     {
         var ctx = new DamageContext(target, amount, source);
-        source.StatusEffectManager.ApplyOnOut(ctx);
+        source.UnitStats.StatusEffectManager.ApplyOnOut(ctx);
         if(target is IEffectable receiver)
             receiver.StatusEffectManager.ApplyOnIn(ctx);
         target.ReceiveDamage(ctx.Amount);

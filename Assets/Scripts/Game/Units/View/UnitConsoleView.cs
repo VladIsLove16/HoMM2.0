@@ -15,15 +15,25 @@ public class UnitConsoleView
 
     private void OnAttack(DamageContext context)
     {
-        IDescriptable source = context.Source as IDescriptable;
-        string sourceDescription = source != null ? source.GetDescription() : context.Source.ToString();
+        var source = context.Source;
+        var target = context.Target;
 
-        IDescriptable target = context.Target as IDescriptable;
-        string targetDescription = source != null ? target.GetDescription() : context.Target.ToString();
+        string sourceDescription = source.ToString();
+
+        string targetDescription = target.ToString();
        
         Debug.Log(sourceDescription + " dealing to " + targetDescription + " " + context.Amount + " Damage");
     }
 
+    private string GetDescription(IGridCell gridContent)
+    {
+        return "";
+        //foreach (IGridContent content in gridContent.Contents)
+        //{
+        //    description += content.GetDescription() + ", ";
+        //}
+        //return description;
+    }
     private void OnTakeDamage(int dmg)
     {
         Debug.Log($"{unitViewModel.GetDescription()} get {dmg} Damage");

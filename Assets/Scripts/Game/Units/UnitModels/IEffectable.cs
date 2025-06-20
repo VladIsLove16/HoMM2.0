@@ -6,5 +6,5 @@ public interface IEffectable : IGridContent, IDamageable
     public event Action<int> OnHealthChanged;
     public event Action OnTurnStart;
     public event Action OnDeath;
-    StatusEffectManager StatusEffectManager { get; }
+    public StatusEffectManager StatusEffectManager { get; }
 }

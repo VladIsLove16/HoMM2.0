@@ -1678,6 +1678,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Heigh: 8
   Weight: 8
+  unitContentEntrySO: {fileID: 11400000, guid: 86da8a9724ca2de4986c1a3fdb7a34fa, type: 2}
 --- !u!1 &1122294277
 GameObject:
   m_ObjectHideFlags: 0

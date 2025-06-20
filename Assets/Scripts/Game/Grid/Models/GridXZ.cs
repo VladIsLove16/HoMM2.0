@@ -2,11 +2,11 @@
 using UnityEngine;
 public partial class GridXZ<TGridObject> {
 
-    public event EventHandler<GridCellChangedEventArgs> OnGridObjectChanged;
+    public event EventHandler<EventArgs> OnGridObjectChanged;
     
     private int width;
     private int height;
-    protected TGridObject[,] gridArray;
+    protected readonly TGridObject[,] gridArray;
     public GridXZ(int width, int height, Func<GridXZ<TGridObject>, int, int, TGridObject> createGridObject) {
         this.width = width;
         this.height = height;
@@ -30,15 +30,15 @@ public partial class GridXZ<TGridObject> {
 
    
 
-    public void SetGridObject(int x, int z, TGridObject value) {
-        if (x >= 0 && z >= 0 && x < width && z < height) {
-            gridArray[x, z] = value;
-            TriggerGridObjectChanged(x, z);
-        }
-    }
+    //public void SetGridObject(int x, int z, TGridObject value) {
+    //    if (x >= 0 && z >= 0 && x < width && z < height) {
+    //        gridArray[x, z] = value;
+    //        TriggerGridObjectChanged(x, z);
+    //    }
+    //}
 
-    public void TriggerGridObjectChanged(int x, int z) {
-        OnGridObjectChanged?.Invoke(this, new GridCellChangedEventArgs { x = x, y = z });
+    public void TriggerGridObjectChanged(EventArgs args) {
+        OnGridObjectChanged?.Invoke(this, args);
     }
 
     public bool TryGetGridObject(int x, int z, out TGridObject result)
@@ -53,14 +53,14 @@ public partial class GridXZ<TGridObject> {
         return false;
     }
 
-    public void ClearGridObject(int x, int z)
-    {
-        if (!IsInBounds(x, z))
-            throw new ArgumentOutOfRangeException();
+    //public void ClearGridObject(int x, int z)
+    //{
+    //    if (!IsInBounds(x, z))
+    //        throw new ArgumentOutOfRangeException();
 
-        gridArray[x, z] = default;
-        TriggerGridObjectChanged(x, z);
-    }
+    //    gridArray[x, z] = default;
+    //    TriggerGridObjectChanged(x, z);
+    //}
 
     public bool IsInBounds(int x, int z)
     {
@@ -132,7 +132,7 @@ public partial class GridXZ<TGridObject> {
 //    Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
 //    Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
 
-//    OnGridObjectChanged += (object sender, GridCellChangedEventArgs eventArgs) => {
+//    OnGridObjectChanged += (object sender, GridCellUnitSpawnedEventArgs eventArgs) => {
 //        debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
 //    };
 //}

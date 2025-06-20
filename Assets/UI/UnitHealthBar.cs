@@ -7,26 +7,36 @@ public class UnitHealthBar : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI HealthText;
     [SerializeField] Image HealthImage;
+    [SerializeField] bool HideOnFullHP;
     public void SetRatio(float ratio)
     {
-        if (ratio != 1)
-            Show();
-        else
-            Hide();
+        ToggleFullHPVision(ratio);
         HealthImage.fillAmount = ratio;
     }
+    public void Init()
+    {
+        SetRatio(1f);
+    }
 
-    internal void Hide()
+    private void ToggleFullHPVision(float ratio)
+    {
+        if (HideOnFullHP)
+        {
+            if (ratio != 1)
+                Show();
+            else
+                Hide();
+        }
+    }
+
+    private void Hide()
     {
         HealthImage.gameObject.SetActive(false);
     }
-    internal void Show()
+    private void Show()
     {
         HealthImage.gameObject.SetActive(true);
     }
 
-    internal void Init()
-    {
-        SetRatio(1f);
-    }
+  
 }

@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6af1cc4405b903443b1c02445e0e07ae, type: 3}
   m_Name: Archer
   m_EditorClassIdentifier: 
-  UnitName: Archer
-  UnitType: 0
-  Health: 10
-  Damage: 6
-  StartingEffects: []
   UnitViewPrefab: {fileID: 160728551508680894, guid: 7895d8bfdb3487541afce12685f878e6, type: 3}
+  Name: 
+  UnitType: 0
+  BaseHealth: 4
+  BaseDamage: 32
+  BaseOffense: 0
+  BaseDefense: 1
+  startingEffects: []

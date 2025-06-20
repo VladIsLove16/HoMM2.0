@@ -4,13 +4,32 @@ using System.Linq;
 using System.Text;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+public interface IGridCell
+{
+    int X { get; }
+    int Y { get; }
+    bool IsEmpty { get; }
+    IReadOnlyList<IGridContent> Contents { get; }
 
-public class GameGridCell : IDescriptable
+}
+
+public class GameGridCell : IGridCell
 {
     protected GridXZ<GameGridCell> mainGrid;
-    private List<IGridContent> gameGridObjectContents = new();
+    private List<IGridContent> gameGridObjectContents = new List<IGridContent>();
     public int x;
     public int y;
+    public int X => x;
+    public int Y => y;
+    public virtual bool IsEmpty
+    {
+        get
+        {
+           return !gameGridObjectContents.Any();
+        }
+    }
+
+    public IReadOnlyList<IGridContent> Contents => gameGridObjectContents as IReadOnlyList<IGridContent>;
     public GameGridCell(GridXZ<GameGridCell> grid, int x, int y)
     {
         this.mainGrid = (grid);
@@ -28,17 +47,37 @@ public class GameGridCell : IDescriptable
         if (content == null)
             throw new ArgumentNullException("cant add null content");
         gameGridObjectContents.Add(content);
-        mainGrid.TriggerGridObjectChanged(x, y);
+        GridCellUnitSpawnedEventArgs gridCellChangedEventArgs = new GridCellUnitSpawnedEventArgs()
+        {
+            addedContent = content,
+            x = content.X,
+            y = content.Y,
+        };
+        Debug.Log($"content {content.UnitType} added to {X} {Y}");
+        mainGrid.TriggerGridObjectChanged(gridCellChangedEventArgs);
     }
+
     public void RemoveContent(IGridContent content)
     {
         gameGridObjectContents.Remove(content);
-        mainGrid.TriggerGridObjectChanged(x, y);
+        GridCellContentRemovedEventArgs args = new GridCellContentRemovedEventArgs()
+        {
+            removedContent = content,
+            x = content.X,
+            y = content.Y,
+        };
+        mainGrid.TriggerGridObjectChanged(args);
     }
-    public virtual bool IsEmpty()
+
+    public void Clear()
     {
-        return !gameGridObjectContents.Any();
+        var content = gameGridObjectContents.ToList();
+        foreach(var contentObj in content)
+        {
+            RemoveContent(contentObj);
+        }
     }
+
     public bool CanMove()
     {
         foreach (IGridContent content in gameGridObjectContents)
@@ -56,10 +95,7 @@ public class GameGridCell : IDescriptable
         stringBuilder.AppendLine(x + " " + y);
         foreach(var content in gameGridObjectContents)
         {
-            if(content is IDescriptable descriptable)
-                stringBuilder.AppendLine(descriptable.GetDescription());
-            else
-                stringBuilder.AppendLine(content.ToString());
+            stringBuilder.AppendLine(content.ToString());
         }
         return stringBuilder.ToString();
     }
@@ -81,14 +117,39 @@ public class GameGridCell : IDescriptable
         Debug.Log("Neigbour Count" +  neighbors.Count);
         return neighbors;
     }
-    public string GetDescription()
+
+    public bool ContainsUnit()
     {
-        // Выводим описание всех объектов на клетке
-        string description = "GameGridModel " + x + " " + y + " contains: ";
-        foreach (IGridContent content in gameGridObjectContents)
+        foreach(var  cell in gameGridObjectContents)
         {
-            description += content.GetDescription() + ", ";
+           if (cell is UnitModel)
+            {
+                return true;
+            }
         }
-        return description;
+        return false;
+    }
+
+    public void RemoveUnit()
+    {
+        foreach (var cell in gameGridObjectContents)
+        {
+            if (cell is UnitModel unit)
+            {
+                gameGridObjectContents.Remove(unit);
+            }
+        }
+    }
+
+    public UnitModel GetUnit()
+    {
+        foreach (var cell in gameGridObjectContents)
+        {
+            if (cell is UnitModel unit)
+            {
+                return unit;
+            }
+        }
+        return null;
     }
 }

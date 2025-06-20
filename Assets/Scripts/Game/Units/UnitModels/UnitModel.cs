@@ -2,7 +2,7 @@
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 //IBlockable, IEffectable, IAttackable,
-public class UnitModel : IGridContent,  IDamageSource, IDescriptable, IDamageable, IEffectable, IEffectApplier
+public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable, IEffectApplier
 {
     public event Action<DamageContext> OnBeforeDealDamage;
     public event Action<DamageContext> OnBeforeTakeDamage;
@@ -12,44 +12,64 @@ public class UnitModel : IGridContent,  IDamageSource, IDescriptable, IDamageabl
     public event Action OnAttack;
     public event Action OnHit;
 
-    public UnitStats Stats { get; }
-    public string Name = string.Empty;
-    public StatusEffectManager StatusEffectManager { get; }
+    public UnitStats UnitStats { get; }
+    public int X { get;}
+    public int Y { get; }
+    public int Amount { get; internal set; }
+    public UnitType UnitType { get; }
+    public string Name { get; }
+    public bool IsPlayer { get; }
+    public StatusEffectManager StatusEffectManager => UnitStats.StatusEffectManager;
 
-    public UnitModel(UnitDataSO data, int amount)
+    public UnitModel(UnitDefinitionSO unitDefinitionSO, int x,int y, int amount, bool isPlayer)
     {
-        Stats = new UnitStats(data, amount);
-        StatusEffectManager = new StatusEffectManager(data.StartingEffects, this);
-        Name = data.name;
+        
+        UnitStats = new UnitStats(unitDefinitionSO);
+        foreach (var effect in unitDefinitionSO.StartingEffects)
+        {
+            StatusEffect statusEffect = new StatusEffect(effect, this, this);
+            StatusEffectManager.Add(statusEffect);
+        }
+        X = x;
+        Y = y;
+        Amount = amount;
+        UnitType = unitDefinitionSO.UnitType;
+        Name = unitDefinitionSO.Name;
+        IsPlayer = isPlayer;
     }
 
     public void ReceiveDamage(int damage)
     {
-        int prev = Stats.Health;
-        Stats.LastDamageAmount = damage;
-        Stats.Health = Mathf.Max(Stats.Health - damage, 0);
-        OnHealthChanged?.Invoke(Stats.Health);
+        int prev = UnitStats.Health;
+        UnitStats.LastDamageAmount = damage;
+        UnitStats.Health = Mathf.Max(UnitStats.Health - damage, 0);
+        OnHealthChanged?.Invoke(UnitStats.Health);
         OnHit?.Invoke();
 
-        if (Stats.Health == 0)
+        if (UnitStats.Health == 0)
             OnDeath?.Invoke();
     }
 
     public void Heal(int amount)
     {
-        Stats.Health = Mathf.Min(Stats.Health + amount, Stats.MaxHealth);
-        OnHealthChanged?.Invoke(Stats.Health);
+        UnitStats.Health = Mathf.Min(UnitStats.Health + amount, UnitStats.MaxHealth);
+        OnHealthChanged?.Invoke(UnitStats.Health);
     }
 
     public void AddMaxHP(int amount)
     {
-        Stats.MaxHealth += amount;
+        UnitStats.MaxHealth += amount;
     }
 
     internal void TriggerAttack() => OnAttack?.Invoke();
 
+    public override string ToString()
+    {
+        return $"{Name} + ({Amount})";
+    }
+
     public string GetDescription()
     {
-        return $"{Name} + ({Stats.Amount})";
+        return ToString();
     }
 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-public class UnitGridConsoleView : IView
+public class UnitGridViewConsole : IView
 {
     private GameGridViewModel gameGridViewModel;
     public enum RenderType
@@ -10,14 +10,14 @@ public class UnitGridConsoleView : IView
         gridContent,
         allCells
     }
-    public UnitGridConsoleView(GameGridViewModel gameGridViewModel)
+    public UnitGridViewConsole(GameGridViewModel gameGridViewModel)
     {
         this.gameGridViewModel = gameGridViewModel;
         Render();
-        gameGridViewModel.OnCellChanged += GameGridViewModel_OnCellChanged;
+        //gameGridViewModel.OnCellChanged += GameGridViewModel_OnCellChanged;
     }
 
-    private void GameGridViewModel_OnCellChanged(GridCellChangedEventArgs args)
+    private void GameGridViewModel_OnCellChanged(GridCellUnitSpawnedEventArgs args)
     {
         Debug.Log("new content at " + args.x +  ";" + args.y + " : " + args.addedContent.ToString());
     }
@@ -31,7 +31,7 @@ public class UnitGridConsoleView : IView
         {
             foreach (var cell in gameGridViewModel.GetCells())
             {
-                if(!cell.IsEmpty())
+                if(!cell.IsEmpty)
                     Debug.Log(cell.ToString());
             }
         }
@@ -42,4 +42,3 @@ public class UnitGridConsoleView : IView
             }
     }
 }
-

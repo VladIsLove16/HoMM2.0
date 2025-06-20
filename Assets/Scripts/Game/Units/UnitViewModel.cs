@@ -6,7 +6,7 @@ public class UnitViewModel
 {
     // Самая «тонкая» модель, где лежат stats и эффекты
     public UnitModel Model { get; }
-    private readonly CombatController _combatController;
+    private readonly CombatController _combatController = new();
 
     // События для View
     public event Action<DamageContext> OnOutDamage;
@@ -16,17 +16,19 @@ public class UnitViewModel
     public event Action OnDeath;
 
     // «Вычисляемые» свойства для View
-    public int Health => Model.Stats.Health;
-    public int MaxHealth => Model.Stats.MaxHealth;
-    public int Damage => Model.Stats.Damage;
-    public int Amount => Model.Stats.Amount;
+    public int Health => Model.UnitStats.Health;
+    public int MaxHealth => Model.UnitStats.MaxHealth;
+    public int Damage => Model.UnitStats.Damage;
+    public int Amount => Model.Amount;
     public string Name => Model.Name;
     public IReadOnlyList<StatusEffect> StatusEffects => Model.StatusEffectManager.Effects;
+    public UnitType UnitType => Model.UnitType;
+    public int X => Model.X;
+    public int Y => Model.Y;
 
-    public UnitViewModel(UnitDataSO data, int amount, CombatController combatController)
+    public UnitViewModel(UnitModel unitModel)
     {
-        _combatController = combatController;
-        Model = new UnitModel(data, amount);
+        Model = unitModel;
         SubscribeModelEvents();
     }
 
@@ -44,8 +46,8 @@ public class UnitViewModel
         // После вычета ХП
         Model.OnHealthChanged += finalHp =>
         {
-            // Model.Stats.LastDamageAmount — приватно сохраняется в UnitModel
-            OnTakeDamage?.Invoke(Model.Stats.LastDamageAmount);
+            // Model.UnitStats.LastDamageAmount — приватно сохраняется в UnitModel
+            OnTakeDamage?.Invoke(Model.UnitStats.LastDamageAmount);
         };
 
         // Смерть
