@@ -1,8 +1,9 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 //IBlockable, IEffectable, IAttackable,
-public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable, IEffectApplier
+public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable, IEffectApplier, ICombatUnit
 {
     public event Action<DamageContext> OnBeforeDealDamage;
     public event Action<DamageContext> OnBeforeTakeDamage;
@@ -13,13 +14,19 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
     public event Action OnHit;
 
     public UnitStats UnitStats { get; }
-    public int X { get;}
-    public int Y { get; }
+    private int x;
+    private int y;
+    public int X => x;
+    public int Y => y;
     public int Amount { get; internal set; }
     public UnitType UnitType { get; }
     public string Name { get; }
-    public bool IsPlayer { get; }
+    public bool IsBlueTeam { get; }
     public StatusEffectManager StatusEffectManager => UnitStats.StatusEffectManager;
+
+    public event Action<ICombatUnit> OnTurnEnded;
+
+    public event Action<ICombatUnit> OnTurnTaken;
 
     public UnitModel(UnitDefinitionSO unitDefinitionSO, int x,int y, int amount, bool isPlayer)
     {
@@ -30,12 +37,12 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
             StatusEffect statusEffect = new StatusEffect(effect, this, this);
             StatusEffectManager.Add(statusEffect);
         }
-        X = x;
-        Y = y;
+        this.x = x;
+        this.y = y;
         Amount = amount;
         UnitType = unitDefinitionSO.UnitType;
         Name = unitDefinitionSO.Name;
-        IsPlayer = isPlayer;
+        IsBlueTeam = isPlayer;
     }
 
     public void ReceiveDamage(int damage)
@@ -71,5 +78,16 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
     public string GetDescription()
     {
         return ToString();
+    }
+
+    public void SetCoords(int x, int y)
+    {
+        this.x = x; 
+        this.y = y;
+    }
+
+    public void TakeTurn()
+    {
+        OnTurnStart?.Invoke();
     }
 }

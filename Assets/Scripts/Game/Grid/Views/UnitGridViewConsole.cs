@@ -4,17 +4,17 @@ using UnityEngine.Rendering.Universal;
 
 public class UnitGridViewConsole : IView
 {
-    private GameGridViewModel gameGridViewModel;
+    private GameViewModel gameGridViewModel;
     public enum RenderType
     {
         gridContent,
         allCells
     }
-    public UnitGridViewConsole(GameGridViewModel gameGridViewModel)
+    public UnitGridViewConsole(GameViewModel gameGridViewModel)
     {
         this.gameGridViewModel = gameGridViewModel;
         Render();
-        //gameGridViewModel.OnCellChanged += GameGridViewModel_OnCellChanged;
+        //_gameGridViewModel.OnCellChanged += GameGridViewModel_OnCellChanged;
     }
 
     private void GameGridViewModel_OnCellChanged(GridCellUnitSpawnedEventArgs args)

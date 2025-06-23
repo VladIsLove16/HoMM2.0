@@ -7,7 +7,7 @@ public class SingleGridRenderer : ICellGridRenderer
     private float ySize = 1f;
     private float cellSize;
     private float padding;
-    public SingleGridRenderer(GameObject prefab)
+    public SingleGridRenderer(GameObject prefab, Material cellSelectMaterial)
     {
         this.prefab = prefab;
     }
@@ -38,5 +38,25 @@ public class SingleGridRenderer : ICellGridRenderer
     public Vector3 ToWorld(Vector2Int vector2Int)
     {
       return ToWorld(vector2Int.x, vector2Int.y);
+    }
+
+    public Vector2Int ToGrid(Vector3 position)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void SetSelectableState(Vector2Int cellCoords, bool v)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool ToGrid(Vector3 position, out Vector2Int coords)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void SetCellState(Vector2Int cellCoords, CellState v)
+    {
+        throw new System.NotImplementedException();
     }
 }

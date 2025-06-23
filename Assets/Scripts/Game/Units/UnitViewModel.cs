@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UnitViewModel
@@ -85,4 +86,9 @@ public class UnitViewModel
 
     // Для IGridContent, IBlockable и т.д. просто дефолт
     public bool CanMoveThrough() => false;
+
+    internal List<Vector2Int> GetMoveableCells()
+    {
+        return Model.GetMoveableCells();
+    }
 }

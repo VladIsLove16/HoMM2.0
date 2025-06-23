@@ -4,26 +4,34 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
-public class GameGridModel
+public class GameModel
 {
     public Action<UnitModelCreatedParams> OnCellContentAdded;
     public Action<UnitModelRemovedParams> OnCellContentRemoved;
+    public Action<UnitModelsSwapped> OnCellContentSwaped;
+    public Action<UnitModel, Vector2Int> OnCellContentMoved;
+    public Action<UnitModel> OnTurnStarted;
 
     [Inject] private UnitModelFactory _unitModelFactory;
-    private GridXZ<GameGridCell> _grid;
+    private GridXZ<GameCell> _grid;
+    private MovementSystem _movementSystem;
+
+
     public void InitializeGrid(int width, int height)
     {
-        _grid = new GridXZ<GameGridCell>(width, height, CreateEmptyGameGridObject);
+        _grid = new GridXZ<GameCell>(width, height, CreateEmptyGameGridObject);
+        _movementSystem = new MovementSystem(_grid);
+        Debug.Log("_grid created");
     }
     public bool IsInBounds(int x, int y) => _grid.IsInBounds(x, y);
 
-    private GameGridCell CreateEmptyGameGridObject(GridXZ<GameGridCell> grid, int x, int y)
+    private GameCell CreateEmptyGameGridObject(GridXZ<GameCell> grid, int x, int y)
     {
-        return new GameGridCell(grid, x, y);
+        return new GameCell(grid, x, y);
     }
     public bool TryGetCell(int x, int y, out IGridCell cell)
     {
-        bool resutlt = _grid.TryGetGridObject(x, y, out GameGridCell gameGridCellell);
+        bool resutlt = _grid.TryGetGridObject(x, y, out GameCell gameGridCellell);
         cell = gameGridCellell;
         return resutlt;
     }
@@ -78,8 +86,9 @@ public class GameGridModel
             return new OperationResult(false,$"Cell ({unitSpawnParams.X},{unitSpawnParams.Y}) is not empty");
         // Создаём контент через выбранную фабрику
         UnitModel unit = _unitModelFactory.Create(unitSpawnParams);
+        unit.OnTurnStart +=  () => OnTurnStarted?.Invoke(unit);
 
-        var cell = (GameGridCell)GetCell(unitSpawnParams.X, unitSpawnParams.Y);
+        var cell = (GameCell)GetCell(unitSpawnParams.X, unitSpawnParams.Y);
         AddContent(cell,unit);
 
         return new OperationResult(true);
@@ -90,7 +99,7 @@ public class GameGridModel
     /// </summary>
     public bool TryRemoveUnit(int x, int y)
     {
-        var cell = (GameGridCell)GetCell(x, y);
+        var cell = (GameCell)GetCell(x, y);
         if (!cell.ContainsUnit())
             return false;
 
@@ -107,7 +116,7 @@ public class GameGridModel
 
     public void ClearGrid()
     {
-        foreach (var cell in GetAllCells().Cast<GameGridCell>())
+        foreach (var cell in GetAllCells().Cast<GameCell>())
         {
             var unit = cell.GetUnit();
             if(unit == null)
@@ -136,12 +145,12 @@ public class GameGridModel
         {
             foreach(var content in cell.Contents)
             {
-                AddContent((GameGridCell)cell,content);
+                AddContent((GameCell)cell,content);
             }
         }
     }
 
-    private void AddContent(GameGridCell gameGridCell, IGridContent content)
+    private void AddContent(GameCell gameGridCell, IGridContent content)
     {
         gameGridCell.AddContent(content);
         Debug.Log("content Added");
@@ -149,10 +158,62 @@ public class GameGridModel
         OnCellContentAdded?.Invoke(unitModelCreatedParams);
     }
 
-    private void RemoveContent(GameGridCell gameGridCell, IGridContent content)
+    private void RemoveContent(GameCell gameGridCell, IGridContent content)
     {
         gameGridCell.RemoveContent(content);
         UnitModelRemovedParams unitModelRemovedParams = new UnitModelRemovedParams(content as UnitModel);
         OnCellContentRemoved?.Invoke(unitModelRemovedParams);
+    }
+
+    internal bool SwapUnits(Vector2Int to, Vector2Int from)
+    {
+        if(CanSwap(to, from))
+        {
+            GameCell fromCell = (GameCell) GetCell(from);
+            GameCell toCell = (GameCell) GetCell(to);
+            UnitModel fromUnit = fromCell.GetUnit();
+            UnitModel toUnit = toCell.GetUnit();
+            if (fromUnit != null && toUnit != null)
+            {
+                fromCell.RemoveUnit();
+                toCell.RemoveUnit();
+                fromCell.AddContent(toUnit);
+                toCell.AddContent(fromUnit);
+                OnCellContentSwaped?.Invoke(new UnitModelsSwapped(toUnit, fromUnit));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool CanSwap(Vector2Int coords, Vector2Int selectedCellCoords)
+    {
+        return true;
+    }
+
+    public bool ContainsUnit(Vector2Int coords)
+    {
+        return ((GameCell)GetCell(coords)).ContainsUnit();
+    }
+
+    public List<Vector2Int> GetAvailableMovePoints(Vector2Int from,int speed)
+    {
+       return _movementSystem.GetReachableCells(from,speed);
+    }
+
+    public bool MoveUnit(Vector2Int to, Vector2Int from)
+    {
+        GameCell fromCell = (GameCell)GetCell(from);
+        GameCell toCell = (GameCell)GetCell(to);
+        UnitModel fromUnit = fromCell.GetUnit();
+        if(fromUnit == null)
+        {
+            Debug.LogWarning("no unit in " + fromCell.x + " " + fromCell.y);
+            return false;
+        }
+        fromCell.RemoveUnit();
+        toCell.AddContent(fromUnit);
+        OnCellContentMoved?.Invoke(fromUnit, to);
+        return true;
     }
 }

@@ -24,6 +24,7 @@ public class Grid<TGridObject> {
         this.width = width;
         this.height = height;
         this.cellSize = cellSize;
+        this.padding = padding;
         this.originPosition = originPosition;
 
         gridArray = new TGridObject[width, height];
@@ -49,7 +50,7 @@ public class Grid<TGridObject> {
     }
 
     public float GetCellSize() {
-        return cellSize + padding;
+        return cellSize;
     }
 
     public Vector3 GetWorldPosition(int x, int y) {
@@ -57,8 +58,11 @@ public class Grid<TGridObject> {
     }
 
     public void GetXY(Vector3 worldPosition, out int x, out int y) {
-        x = Mathf.FloorToInt((worldPosition - originPosition).x / (cellSize + padding));
-        y = Mathf.FloorToInt((worldPosition - originPosition).y / (cellSize + padding));
+        float xPos =( (worldPosition - originPosition).x + (cellSize / 2 + padding / 2)) / (cellSize + padding) ;
+        float yPos = ((worldPosition - originPosition).z + (cellSize / 2 + padding / 2)) / (cellSize + padding) ;
+        x = Mathf.FloorToInt(xPos);
+        y = Mathf.FloorToInt(yPos);
+        Debug.Log(x + " " + y);
     }
 
     public void SetGridObject(int x, int y, TGridObject value) {
@@ -91,4 +95,14 @@ public class Grid<TGridObject> {
         return GetGridObject(x, y);
     }
 
+    public Vector2Int GetXY(Vector3 worldPosition) {
+        int x, y;
+        GetXY(worldPosition, out x, out y);
+        return new Vector2Int(x,y);
+    }
+
+    internal bool IsInBounds(Vector2Int vector2Int)
+    {
+       return vector2Int.x<=width && vector2Int.y<=height && vector2Int.x>=0 && vector2Int.y >=0;
+    }
 }

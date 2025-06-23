@@ -6,36 +6,38 @@ public class Mouse3D : MonoBehaviour {
 
     [SerializeField] private LayerMask mouseColliderLayerMask = new LayerMask();
     [SerializeField] private Transform mouseTransform;
-
+    private Ray currenRay;
     private void Awake() {
         Instance = this;
     }
-
-    private void Update() {
+    private void Update()
+    {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, mouseColliderLayerMask)) {
-            transform.position = raycastHit.point;
-        }
-        if (mouseTransform != null) {
-            //mouseTransform.position = GetMouseWorldPosition();
-            mouseTransform.position = Vector3.Lerp(mouseTransform.position, GetMouseWorldPosition(), Time.deltaTime * 20f);
-        }
+        currenRay = ray;
     }
-
-    public static Vector3 GetMouseWorldPosition() {
+    public static bool GetMouseWorldPosition(out Vector3 position) {
         if (Instance == null) {
             Debug.LogError("Mouse3D Object does not exist!");
         }
-        return Instance.GetMouseWorldPosition_Instance();
+        return Instance.GetMouseWorldPosition_Instance(out position);
     }
 
-    private Vector3 GetMouseWorldPosition_Instance() {
+    private bool GetMouseWorldPosition_Instance(out Vector3 position) {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, mouseColliderLayerMask)) {
-            return raycastHit.point;
-        } else {
-            return Vector3.zero;
+            Debug.Log(raycastHit.collider.gameObject.name);
+            position = raycastHit.point;
+            return true;
+        } 
+        else
+        {
+            position = Vector3.zero;
+            return false;
         }
     }
-
+    private void OnDrawGizmos()
+    {
+        Gizmos.color= Color.yellow;
+        Gizmos.DrawRay(currenRay.origin,currenRay.direction*100f);
+    }
 }

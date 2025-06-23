@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
 using Zenject;
 
 /// <summary>
-/// ViewModel: связывает GameGridModel и представления, обрабатывает команды и генерирует готовые к отображению данные.
+/// ViewModel: связывает GameModel и представления, обрабатывает команды и генерирует готовые к отображению данные.
 /// </summary>
-public class GameGridViewModel : IInitializable, IDisposable
+public class GameViewModel : IInitializable, IDisposable
 {
-    private readonly GameGridModel _model;
+    private readonly GameModel _model;
 
     public event Action<string> OnError;
     public event Action<string> OnLastChangedCellDescription;
@@ -17,9 +16,13 @@ public class GameGridViewModel : IInitializable, IDisposable
 
     public Action<UnitViewModel> OnCellContentAdded;
     public Action<UnitViewModel> OnCellContentRemoved;
+    public Action<UnitViewModel, UnitViewModel> OnCellContentSwaped;
+    public Action<UnitViewModel, Vector2Int> OnCellContentMoved;
+    public Action<UnitViewModel> OnTurnStarted;
 
     private Dictionary<UnitModel, UnitViewModel> _models = new();
-    public GameGridViewModel(GameGridModel model)
+
+    public GameViewModel(GameModel model)
     {
         _model = model;
         Initialize();
@@ -29,12 +32,18 @@ public class GameGridViewModel : IInitializable, IDisposable
     {
         _model.OnCellContentAdded += HandleContentAdded;
         _model.OnCellContentRemoved += HandleContentRemoved;
+        _model.OnCellContentSwaped += HandleContentSwaped;
+        _model.OnCellContentMoved += HandleContentMoved;
+        _model.OnTurnStarted += HandleTurnStarted;
     }
+
 
     public void Dispose()
     {
         _model.OnCellContentAdded -= HandleContentAdded;
         _model.OnCellContentRemoved -= HandleContentRemoved;
+        _model.OnCellContentSwaped -= HandleContentSwaped;
+        _model.OnCellContentMoved -= HandleContentMoved;
     }
 
     public int GetWidth() => _model.GetWidth();
@@ -77,7 +86,7 @@ public class GameGridViewModel : IInitializable, IDisposable
     //{
     //    try
     //    {
-    //        var cell = _model.GetCell(x, y);
+    //        var cell = _gameModel.GetCell(x, y);
     //        OnSelectedCellDescription?.Invoke(cell.ToString());
     //        return new OperationResult()
     //        {
@@ -107,7 +116,6 @@ public class GameGridViewModel : IInitializable, IDisposable
 
         Debug.Log($"unitViewModel {unitViewModel.UnitType} created {unitViewModel.X} {unitViewModel.Y}");
         OnCellContentAdded?.Invoke(unitViewModel);
-
         var desc = _model.GetCell(e.UnitModel.X, e.UnitModel.Y).ToString();
         OnLastChangedCellDescription?.Invoke(desc);
     }
@@ -119,6 +127,25 @@ public class GameGridViewModel : IInitializable, IDisposable
         Debug.Log("content removed");
         OnCellContentRemoved?.Invoke(unitViewModel);
     }
+    private void HandleContentSwaped(UnitModelsSwapped swapped)
+    {
+        UnitViewModel toViewModel = _models[swapped.to];
+        UnitViewModel fromViewModel = _models[swapped.from];
+        Debug.Log(" HandleContentSwaped(UnitModelsSwapped swapped)");
+        OnCellContentSwaped?.Invoke(toViewModel, fromViewModel);
+    }
+    private void HandleContentMoved(UnitModel model, Vector2Int to)
+    {
+        UnitViewModel viewModel = _models[model];
+        Debug.Log(" OnCellContentMoved?.Invoke(viewModel, to);");
+        OnCellContentMoved?.Invoke(viewModel, to);
+    }
+
+    private void HandleTurnStarted(UnitModel model)
+    {
+        OnTurnStarted?.Invoke(_models[model]);
+    }
+
     private OperationResult Parse( string xRaw, string yRaw, out Vector2Int coords)
     {
         if (!int.TryParse(xRaw, out var x) || !int.TryParse(yRaw, out var y))
@@ -133,13 +160,16 @@ public class GameGridViewModel : IInitializable, IDisposable
         }
         coords = new Vector2Int(x,y);
         return new OperationResult(true);
-
-
     }
 
     internal IGridCell GetCellContent(string text1, string text2)
     {
         Parse(text1, text2, out var coords);
         return _model.GetCell(coords);
+    }
+
+    internal bool IsPlayerTurn()
+    {
+        throw new NotImplementedException();
     }
 }

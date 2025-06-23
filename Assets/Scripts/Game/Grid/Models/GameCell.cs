@@ -13,10 +13,10 @@ public interface IGridCell
 
 }
 
-public class GameGridCell : IGridCell
+public class GameCell : IGridCell
 {
-    protected GridXZ<GameGridCell> mainGrid;
-    private List<IGridContent> gameGridObjectContents = new List<IGridContent>();
+    protected GridXZ<GameCell> mainGrid;
+    private List<IGridContent> _gameGridObjectContents = new List<IGridContent>();
     public int x;
     public int y;
     public int X => x;
@@ -25,18 +25,18 @@ public class GameGridCell : IGridCell
     {
         get
         {
-           return !gameGridObjectContents.Any();
+           return !_gameGridObjectContents.Any();
         }
     }
 
-    public IReadOnlyList<IGridContent> Contents => gameGridObjectContents as IReadOnlyList<IGridContent>;
-    public GameGridCell(GridXZ<GameGridCell> grid, int x, int y)
+    public IReadOnlyList<IGridContent> Contents => _gameGridObjectContents as IReadOnlyList<IGridContent>;
+    public GameCell(GridXZ<GameCell> grid, int x, int y)
     {
         this.mainGrid = (grid);
         this.x = x;
         this.y = y;
     }
-    public void Setup(GridXZ<GameGridCell> grid, int x, int y)
+    public void Setup(GridXZ<GameCell> grid, int x, int y)
     {
         this.mainGrid = (grid);
         this.x = x;
@@ -45,8 +45,12 @@ public class GameGridCell : IGridCell
     public void AddContent(IGridContent content)
     {
         if (content == null)
-            throw new ArgumentNullException("cant add null content");
-        gameGridObjectContents.Add(content);
+        {
+            Debug.Log("null content have not added");
+            return;
+        }
+        _gameGridObjectContents.Add(content);
+        content.SetCoords(X, Y);
         GridCellUnitSpawnedEventArgs gridCellChangedEventArgs = new GridCellUnitSpawnedEventArgs()
         {
             addedContent = content,
@@ -59,7 +63,7 @@ public class GameGridCell : IGridCell
 
     public void RemoveContent(IGridContent content)
     {
-        gameGridObjectContents.Remove(content);
+        _gameGridObjectContents.Remove(content);
         GridCellContentRemovedEventArgs args = new GridCellContentRemovedEventArgs()
         {
             removedContent = content,
@@ -71,7 +75,7 @@ public class GameGridCell : IGridCell
 
     public void Clear()
     {
-        var content = gameGridObjectContents.ToList();
+        var content = _gameGridObjectContents.ToList();
         foreach(var contentObj in content)
         {
             RemoveContent(contentObj);
@@ -80,7 +84,7 @@ public class GameGridCell : IGridCell
 
     public bool CanMove()
     {
-        foreach (IGridContent content in gameGridObjectContents)
+        foreach (IGridContent content in _gameGridObjectContents)
         {
             if (content is IBlockable blockable && !blockable.CanMoveThrough())
             {
@@ -93,15 +97,15 @@ public class GameGridCell : IGridCell
     {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.AppendLine(x + " " + y);
-        foreach(var content in gameGridObjectContents)
+        foreach(var content in _gameGridObjectContents)
         {
             stringBuilder.AppendLine(content.ToString());
         }
         return stringBuilder.ToString();
     }
-    public List<GameGridCell> GetNeigbours(int range,bool AddCorners)
+    public List<GameCell> GetNeigbours(int range,bool AddCorners)
     {
-        List<GameGridCell> neighbors = new List<GameGridCell>();
+        List<GameCell> neighbors = new List<GameCell>();
         for (int i = x - range; i <= x + range; i++)
         {
             for (int j = y - range; j <= y + range; j++)
@@ -120,7 +124,7 @@ public class GameGridCell : IGridCell
 
     public bool ContainsUnit()
     {
-        foreach(var  cell in gameGridObjectContents)
+        foreach(var  cell in _gameGridObjectContents)
         {
            if (cell is UnitModel)
             {
@@ -132,18 +136,19 @@ public class GameGridCell : IGridCell
 
     public void RemoveUnit()
     {
+        var gameGridObjectContents = _gameGridObjectContents.ToList();
         foreach (var cell in gameGridObjectContents)
         {
             if (cell is UnitModel unit)
             {
-                gameGridObjectContents.Remove(unit);
+                _gameGridObjectContents.Remove(unit);
             }
         }
     }
 
     public UnitModel GetUnit()
     {
-        foreach (var cell in gameGridObjectContents)
+        foreach (var cell in _gameGridObjectContents)
         {
             if (cell is UnitModel unit)
             {

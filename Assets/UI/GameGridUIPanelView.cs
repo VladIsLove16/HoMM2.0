@@ -36,10 +36,10 @@ public class GameGridUIPanelView : MonoBehaviour
         }
     }
  
-    private GameGridViewModel viewModel;
+    private GameViewModel viewModel;
 
     [Inject]
-    public void Construct(GameGridViewModel viewModel)
+    public void Construct(GameViewModel viewModel)
     {
         this.viewModel = viewModel;
 

@@ -27,7 +27,6 @@ public class SpellCasterService
             if (target == null) continue;
             _combatController.DealDamage(target, data.Damage, source);
 
-            // 2) Навешиваем эффекты
             foreach (var se in data.StatusEffects)
             {
                 var effect = new StatusEffect(se, target, source );

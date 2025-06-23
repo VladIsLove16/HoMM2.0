@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-using static UnityEditor.Profiling.HierarchyFrameDataView;
 public enum UnitType
 {
     Archer,
@@ -19,7 +18,6 @@ public class UnitViewFactory
     readonly Dictionary<UnitType, UnitDefinitionSO> _dataMap;
     readonly Transform _unitsParent;
     readonly ICellGridRenderer _gridRenderer;
-    // Внедряем все SO-объекты через Zenject
     public UnitViewFactory(
         DiContainer container,
         IEnumerable<UnitDefinitionSO> allUnitDatas,
@@ -33,6 +31,7 @@ public class UnitViewFactory
         _gridRenderer = gridRenderer;
         // Собираем словарь по enum’у
         _dataMap = allUnitDatas.ToDictionary(d => d.UnitType);
+        Debug.Log("UnitViewFactory is ready");
     }
 
     /// <summary>
@@ -41,7 +40,10 @@ public class UnitViewFactory
     public UnitView3D Create(UnitViewModel viewModel)
     {
         if (!_dataMap.TryGetValue(viewModel.UnitType, out var data))
-            throw new KeyNotFoundException($"Нет UnitDefinitionSO для типа {viewModel.UnitType}");
+        {
+            Debug.LogError($"Нет UnitDefinitionSO для типа {viewModel.UnitType}");
+            return null;
+        }
 
         Vector3 worldPos = _gridRenderer.ToWorld(viewModel.X, viewModel.Y);
 
