@@ -17,11 +17,11 @@ public class UnitViewFactory
     readonly CombatController _combatController;
     readonly Dictionary<UnitType, UnitDefinitionSO> _dataMap;
     readonly Transform _unitsParent;
-    readonly ICellGridRenderer _gridRenderer;
+    readonly IGridCellRenderer _gridRenderer;
     public UnitViewFactory(
         DiContainer container,
         IEnumerable<UnitDefinitionSO> allUnitDatas,
-        ICellGridRenderer gridRenderer,
+        IGridCellRenderer gridRenderer,
         CombatController combatController,
         [Inject(Id = "UnitsParent")] Transform unitsParent)
     {
@@ -37,15 +37,15 @@ public class UnitViewFactory
     /// <summary>
     /// СоздаётUnitView3D (префаб) на позиции (x,y).
     /// </summary>
-    public UnitView3D Create(UnitViewModel viewModel)
+    public UnitView3D Create(UnitModel model)
     {
-        if (!_dataMap.TryGetValue(viewModel.UnitType, out var data))
+        if (!_dataMap.TryGetValue(model.UnitType, out var data))
         {
-            Debug.LogError($"Нет UnitDefinitionSO для типа {viewModel.UnitType}");
+            Debug.LogError($"Нет UnitDefinitionSO для типа {model.UnitType}");
             return null;
         }
 
-        Vector3 worldPos = _gridRenderer.ToWorld(viewModel.X, viewModel.Y);
+        Vector3 worldPos = _gridRenderer.ToWorld(model.X, model.Y);
 
         var view = _container
             .InstantiatePrefabForComponent<UnitView3D>(
@@ -54,7 +54,7 @@ public class UnitViewFactory
                 Quaternion.identity,
                 _unitsParent
             );
-        Debug.Log($"UnitView3D {viewModel.UnitType} created {viewModel.X} {viewModel.Y}");
+        Debug.Log($"UnitView3D {model.UnitType} created {model.X} {model.Y}");
         return view;
     }
 }

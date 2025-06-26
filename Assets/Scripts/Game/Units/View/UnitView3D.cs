@@ -3,29 +3,27 @@ using UnityEngine;
 using Zenject;
 public class UnitView3D : MonoBehaviour
 {
-    private UnitViewModel _vm;
+    private UnitModel _model;
     private Animator _animator;
     [SerializeField] private UnitViewUI _viewUI;
-    public void Init(UnitViewModel vm)
+    public void Init(UnitModel vm)
     {
-        _vm = vm;
+        _model = vm;
 
         _animator = GetComponent<Animator>();
 
-        _vm.OnTakeDamage += OnTakeDamage;
-        _vm.OnOutDamage += OnAttack;
-        _vm.OnDeath += OnDeath;
-        _vm.OnTurnStart += OnTurnStart;
-
-        _viewUI.Init(vm);
+        _model.OnHit += OnHit;
+        _model.OnAttack += OnAttack;
+        _model.OnDeath += OnDeath;
+        _model.OnTurnStart += OnTurnStart;
     }
 
-    private void OnAttack(DamageContext context)
+    private void OnAttack()
     {
         _animator.SetTrigger("DealDamage");
     }
 
-    private void OnTakeDamage(int dmg)
+    private void OnHit(int dmg)
     {
         _animator.SetTrigger("Hit");
     }

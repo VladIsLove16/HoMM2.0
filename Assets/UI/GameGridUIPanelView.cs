@@ -17,7 +17,6 @@ public class GameGridUIPanelView : MonoBehaviour
     [SerializeField] private TMP_InputField xText;
     [SerializeField] private TMP_InputField yText;
     [SerializeField] private TMP_Text errorText;
-
     private int X 
     {
         get

@@ -2,6 +2,7 @@ using NaughtyAttributes;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using static PerCellGridRenderer;
 
 public class GameLogicMonoInstaller : MonoInstaller
 {
@@ -11,14 +12,15 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private GameObject singleGridPrefab;
     [SerializeField] private UnitDefinitionSO[] _unitDatas;
-    [SerializeField] private Material cellSelectMaterial;
+    [SerializeField] private  List<CellMaterials> materials;
 
     public enum GridRenderStrategy { PerCell, Single }
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
-    private ICellGridRenderer _currentRenderer;
+    private IGridCellRenderer _currentRenderer;
     public override void InstallBindings()
     {
+        Container.Bind<InputSystem_Actions>().AsSingle();
         Container.Bind<UnitViewFactory>().AsSingle();
         Container.Bind<UnitModelFactory>().AsSingle();
 
@@ -43,6 +45,10 @@ public class GameLogicMonoInstaller : MonoInstaller
         .AsSingle()
         .NonLazy();
 
+
+        Container.Bind<List<CellMaterials>>()
+                 .FromInstance(materials);
+
         BindPerCell();
         Container.Bind<IEnumerable<UnitDefinitionSO>>()
                  .FromInstance(_unitDatas);
@@ -56,22 +62,20 @@ public class GameLogicMonoInstaller : MonoInstaller
 
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
-
-        Container.Bind<InputManager>().AsSingle().NonLazy();
     }
     private void BindPerCell()
     {
-        Container.Bind<ICellGridRenderer>().To<PerCellGridRenderer>().AsSingle().WithArguments(cellPrefab, _gridView.gameObject, cellSelectMaterial);
-        _currentRenderer = Container.Resolve<ICellGridRenderer>();
+        Container.Bind<IGridCellRenderer>().To<PerCellGridRenderer>().AsSingle().WithArguments(cellPrefab, _gridView.gameObject, materials);
+        _currentRenderer = Container.Resolve<IGridCellRenderer>();
     }
     private void BindSingle()
     {
-        Container.Bind<ICellGridRenderer>().To<SingleGridRenderer>().AsSingle().WithArguments(cellPrefab, cellSelectMaterial);
-        _currentRenderer = Container.Resolve<ICellGridRenderer>();
+        Container.Bind<IGridCellRenderer>().To<SingleGridRenderer>().AsSingle().WithArguments(cellPrefab, materials);
+        _currentRenderer = Container.Resolve<IGridCellRenderer>();
     }
     private void UnBind()
     {
-        Container.Unbind<ICellGridRenderer>();
+        Container.Unbind<IGridCellRenderer>();
         _currentRenderer?.Clear();
     }
     [Button]
@@ -97,7 +101,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     //    var newRenderer = new SingleGridRenderer(cellPrefab, cellSelectMaterial);
 
     //    // Обновим зависимость в контейнере
-    //    Container.Unbind<ICellGridRenderer>();
+    //    Container.Unbind<IGridCellRenderer>();
     //    BindSingle();
 
     //    // Обновим визуал

@@ -8,47 +8,47 @@ using Zenject;
 /// </summary>
 public class GameViewModel : IInitializable, IDisposable
 {
-    private readonly GameModel _model;
+    private readonly GameModel _gameModel;
 
     public event Action<string> OnError;
     public event Action<string> OnLastChangedCellDescription;
-    public event Action<string> OnSelectedCellDescription;
+    //public event Action<string> OnSelectedCellDescription;
 
-    public Action<UnitViewModel> OnCellContentAdded;
-    public Action<UnitViewModel> OnCellContentRemoved;
-    public Action<UnitViewModel, UnitViewModel> OnCellContentSwaped;
-    public Action<UnitViewModel, Vector2Int> OnCellContentMoved;
-    public Action<UnitViewModel> OnTurnStarted;
+    public Action<UnitModel> OnCellContentAdded;
+    public Action<UnitModel> OnCellContentRemoved;
+    public Action<UnitModel, UnitModel> OnCellContentSwaped;
+    public Action<UnitModel, Vector2Int> OnCellContentMoved;
+    public Action<List<Vector2Int>> OnReachableCellsChanged;
+    public Action<UnitModel> OnTurnStarted;
 
-    private Dictionary<UnitModel, UnitViewModel> _models = new();
-
+    private Vector2Int selectedCell;
+    private bool isCellSelected;
     public GameViewModel(GameModel model)
     {
-        _model = model;
+        _gameModel = model;
         Initialize();
     }
 
     public void Initialize()
     {
-        _model.OnCellContentAdded += HandleContentAdded;
-        _model.OnCellContentRemoved += HandleContentRemoved;
-        _model.OnCellContentSwaped += HandleContentSwaped;
-        _model.OnCellContentMoved += HandleContentMoved;
-        _model.OnTurnStarted += HandleTurnStarted;
+        _gameModel.OnCellContentAdded += HandleContentAdded;
+        _gameModel.OnCellContentRemoved += HandleContentRemoved;
+        _gameModel.OnCellContentSwaped += HandleContentSwaped;
+        _gameModel.OnCellContentMoved += HandleContentMoved;
+        _gameModel.OnTurnStarted += HandleTurnStarted;
     }
-
 
     public void Dispose()
     {
-        _model.OnCellContentAdded -= HandleContentAdded;
-        _model.OnCellContentRemoved -= HandleContentRemoved;
-        _model.OnCellContentSwaped -= HandleContentSwaped;
-        _model.OnCellContentMoved -= HandleContentMoved;
+        _gameModel.OnCellContentAdded -= HandleContentAdded;
+        _gameModel.OnCellContentRemoved -= HandleContentRemoved;
+        _gameModel.OnCellContentSwaped -= HandleContentSwaped;
+        _gameModel.OnCellContentMoved -= HandleContentMoved;
     }
 
-    public int GetWidth() => _model.GetWidth();
-    public int GetHeight() => _model.GetHeight();
-    public IReadOnlyList<IGridCell> GetCells() => _model.GetAllCells();
+    public int GetWidth() => _gameModel.GetWidth();
+    public int GetHeight() => _gameModel.GetHeight();
+    public IReadOnlyList<IGridCell> GetCells() => _gameModel.GetAllCells();
 
     /// <summary>
     /// Спавнит юнит, парсит координаты и вызывает модель.
@@ -58,10 +58,10 @@ public class GameViewModel : IInitializable, IDisposable
         if (!int.TryParse(xRaw, out var x) || !int.TryParse(yRaw, out var y))
         {
             OnError?.Invoke("Координаты должны быть числами");
-            return new OperationResult(false,"Invalid coordinates");
+            return new OperationResult(false, "Invalid coordinates");
         }
         UnitSpawnParams @params = new(x, y, type);
-        var result = _model.SpawnUnit(@params);
+        var result = _gameModel.SpawnUnit(@params);
         if (!result.IsSuccess)
             OnError?.Invoke(result.Message);
         return result;
@@ -72,9 +72,9 @@ public class GameViewModel : IInitializable, IDisposable
     /// </summary>
     public void SpawnUnitAtRandomPlace()
     {
-        var (x, y) = _model.GetEmpty();
+        var (x, y) = _gameModel.GetEmpty();
         UnitSpawnParams @params = new(x, y);
-        var result = _model.SpawnUnit(@params);
+        var result = _gameModel.SpawnUnit(@params);
         if (!result.IsSuccess)
             OnError?.Invoke(result.Message);
     }
@@ -107,46 +107,35 @@ public class GameViewModel : IInitializable, IDisposable
 
     private void HandleContentAdded(UnitModelCreatedParams e)
     {
-        UnitViewModel unitViewModel = new UnitViewModel(e.UnitModel);
-        if(_models == null)
-        {
-            _models = new();
-        }
-        _models[e.UnitModel] = unitViewModel;
-
-        Debug.Log($"unitViewModel {unitViewModel.UnitType} created {unitViewModel.X} {unitViewModel.Y}");
-        OnCellContentAdded?.Invoke(unitViewModel);
-        var desc = _model.GetCell(e.UnitModel.X, e.UnitModel.Y).ToString();
+        OnCellContentAdded?.Invoke(e.UnitModel);
+        var desc = _gameModel.GetCell(e.UnitModel.X, e.UnitModel.Y).ToString();
         OnLastChangedCellDescription?.Invoke(desc);
     }
 
     private void HandleContentRemoved(UnitModelRemovedParams e)
     {
-        UnitViewModel unitViewModel = _models[e.UnitModel];
-        _models.Remove(e.UnitModel);
         Debug.Log("content removed");
-        OnCellContentRemoved?.Invoke(unitViewModel);
+        OnCellContentRemoved?.Invoke(e.UnitModel);
     }
-    private void HandleContentSwaped(UnitModelsSwapped swapped)
+    private void HandleContentSwaped(UnitModelsSwapped e)
     {
-        UnitViewModel toViewModel = _models[swapped.to];
-        UnitViewModel fromViewModel = _models[swapped.from];
         Debug.Log(" HandleContentSwaped(UnitModelsSwapped swapped)");
-        OnCellContentSwaped?.Invoke(toViewModel, fromViewModel);
+        OnCellContentSwaped?.Invoke(e.from, e.to);
     }
     private void HandleContentMoved(UnitModel model, Vector2Int to)
     {
-        UnitViewModel viewModel = _models[model];
         Debug.Log(" OnCellContentMoved?.Invoke(viewModel, to);");
-        OnCellContentMoved?.Invoke(viewModel, to);
+        OnCellContentMoved?.Invoke(model, to);
     }
 
     private void HandleTurnStarted(UnitModel model)
     {
-        OnTurnStarted?.Invoke(_models[model]);
+        var cells = _gameModel.GetAvailableMovePoints(model.Coodrs, model.UnitStats.Speed);
+        OnReachableCellsChanged.Invoke(cells);
     }
 
-    private OperationResult Parse( string xRaw, string yRaw, out Vector2Int coords)
+
+    private OperationResult Parse(string xRaw, string yRaw, out Vector2Int coords)
     {
         if (!int.TryParse(xRaw, out var x) || !int.TryParse(yRaw, out var y))
         {
@@ -158,18 +147,49 @@ public class GameViewModel : IInitializable, IDisposable
                 IsSuccess = false
             };
         }
-        coords = new Vector2Int(x,y);
+        coords = new Vector2Int(x, y);
         return new OperationResult(true);
     }
 
-    internal IGridCell GetCellContent(string text1, string text2)
+    public IGridCell GetCellContent(string text1, string text2)
     {
         Parse(text1, text2, out var coords);
-        return _model.GetCell(coords);
+        return _gameModel.GetCell(coords);
     }
 
-    internal bool IsPlayerTurn()
+    public bool IsPlayerTurn()
     {
-        throw new NotImplementedException();
+        return true;
+    }
+
+    public void HandleCellSelected(Vector2Int coords)
+    {
+        Debug.Log("selectedCell" + selectedCell);
+        selectedCell = coords;
+        isCellSelected = true;
+    }
+
+    public void HandleActionPerformed(Vector2Int coords)
+    {
+        Debug.Log("performing action for " + coords + " from " + selectedCell);
+        if (isCellSelected && _gameModel.SwapUnits(coords, selectedCell))
+        {
+            isCellSelected = false;
+        }
+        else if (isCellSelected && _gameModel.MoveUnit(coords, selectedCell))
+        {
+            selectedCell = coords;
+            isCellSelected = true;
+        }
+    }
+
+    public void HandleCellHovered(Vector2Int coords)
+    {
+
+    }
+
+    internal Vector2Int GetSelectedCell()
+    {
+        return selectedCell;
     }
 }

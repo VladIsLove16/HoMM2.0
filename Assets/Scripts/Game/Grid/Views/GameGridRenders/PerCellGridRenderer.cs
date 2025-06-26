@@ -4,7 +4,7 @@ using UnityEngine;
 using static UnityEngine.UI.Image;
 using System.Linq;
 
-public class PerCellGridRenderer : ICellGridRenderer
+public class PerCellGridRenderer : IGridCellRenderer
 {
     [Serializable]
     public class CellMaterials
@@ -20,6 +20,7 @@ public class PerCellGridRenderer : ICellGridRenderer
     Grid<GameObject> grid;
     private Dictionary<CellState,CellMaterials> materials = new ();
     private Dictionary<Vector2Int,CellState> cellStates = new ();
+    private Dictionary<Vector2Int,CellState> previousStates = new ();
     public PerCellGridRenderer(GameObject prefab, GameObject parent, List<CellMaterials> materials)
     {
         this.parent = parent;
@@ -39,13 +40,39 @@ public class PerCellGridRenderer : ICellGridRenderer
     {
         Clear();
         grid = new Grid<GameObject>(width, height, cellSize, origin, padding, CreateCellView);
+        for(int i = 0; i< width; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                previousStates[new Vector2Int(i,j)] = CellState.normal;
+            }
+        }
+        
     }
 
     public void SetCellState(Vector2Int cellCoords, CellState v)
     {
+        SetCellState(cellCoords, v,true);
+    }
+
+    public void HoverCell(Vector2Int cellCoords)
+    {
+        
+    }
+    public void SetCellState(Vector2Int cellCoords, CellState v, bool rewriteStory)
+    {
+        bool res = cellStates.TryGetValue(cellCoords, out CellState cellState);
+        if(res && v == cellState)
+        {
+            return;
+        }
+
         GameObject cell = grid.GetGridObject(cellCoords.x, cellCoords.y);
         cell.GetComponent<Renderer>().material = materials[v].Material;
+        if (res)
+            SetPrevState(cellCoords, cellStates[cellCoords]);
         cellStates[cellCoords] = v;
+        Debug.Log(cellCoords + " setted " + v);
     }
 
     public bool ToGrid(Vector3 position,out Vector2Int coords)
@@ -74,5 +101,20 @@ public class PerCellGridRenderer : ICellGridRenderer
     public CellState GetCellState(Vector2Int coords)
     {
         return cellStates[coords];
+    }
+
+    public void ReturnState(Vector2Int cell)
+    {
+        SetCellState(cell, previousStates[cell],false);
+    }
+
+    public CellState GetPrevState(Vector2Int hoveredCell)
+    {
+        return previousStates[hoveredCell];
+    }
+
+    private void SetPrevState(Vector2Int cell,CellState cellState)
+    {
+        previousStates[cell] = cellState;
     }
 }

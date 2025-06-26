@@ -7,6 +7,8 @@ public class GameController : MonoBehaviour
 {
     [SerializeField] private int Heigh;
     [SerializeField] private int Weight;
+    [SerializeField] private int x;
+    [SerializeField] private int y;
     [SerializeField] private UnitContentEntrySO unitContentEntrySO;
     private GameModel _gameModel;
     private GameViewModel _gameViewModel;
@@ -51,32 +53,9 @@ public class GameController : MonoBehaviour
             _gameModel.SpawnUnit(unitSpawnParams);
         }
     }
-
-    public void SelectCell(Vector2Int coords)
+    [Button]
+    public void StartTurn()
     {
-        _gridView.SelectCell(coords);
-        selectedCellCoords = coords;
-        isCellSelected = true;
-    }
-
-    public void PerformAction(Vector2Int coords)
-    {
-        Debug.Log("performing action for "  + coords + " from " + selectedCellCoords);
-        if(_gameModel.SwapUnits(coords, selectedCellCoords))
-        {
-            isCellSelected = false;      
-            _gridView.UnSelect();
-        }
-            
-        else if(_gameModel.MoveUnit(coords, selectedCellCoords))
-        {
-            selectedCellCoords = coords;
-            SelectCell(coords);
-        }
-    }
-
-    internal void Hover(Vector2Int coords)
-    {
-        _gridView.Hover(coords);
+      _gameModel.GetCell(_gameViewModel.GetSelectedCell()).Unit.TakeTurn();
     }
 }

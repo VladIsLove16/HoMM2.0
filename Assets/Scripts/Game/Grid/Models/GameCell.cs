@@ -11,6 +11,7 @@ public interface IGridCell
     bool IsEmpty { get; }
     IReadOnlyList<IGridContent> Contents { get; }
 
+    UnitModel Unit { get; }
 }
 
 public class GameCell : IGridCell
@@ -21,6 +22,7 @@ public class GameCell : IGridCell
     public int y;
     public int X => x;
     public int Y => y;
+    public UnitModel Unit => GetUnit();
     public virtual bool IsEmpty
     {
         get
@@ -155,6 +157,7 @@ public class GameCell : IGridCell
                 return unit;
             }
         }
+        Debug.Log("no unit found " + x + " " + y);
         return null;
     }
 }

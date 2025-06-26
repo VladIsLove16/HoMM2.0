@@ -11,13 +11,14 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
     public event Action OnTurnStart;
     public event Action OnDeath;
     public event Action OnAttack;
-    public event Action OnHit;
+    public event Action<int> OnHit;
 
     public UnitStats UnitStats { get; }
     private int x;
     private int y;
     public int X => x;
     public int Y => y;
+    public Vector2Int Coodrs => new(x,y);
     public int Amount { get; internal set; }
     public UnitType UnitType { get; }
     public string Name { get; }
@@ -51,7 +52,7 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
         UnitStats.LastDamageAmount = damage;
         UnitStats.Health = Mathf.Max(UnitStats.Health - damage, 0);
         OnHealthChanged?.Invoke(UnitStats.Health);
-        OnHit?.Invoke();
+        OnHit?.Invoke(damage);
 
         if (UnitStats.Health == 0)
             OnDeath?.Invoke();

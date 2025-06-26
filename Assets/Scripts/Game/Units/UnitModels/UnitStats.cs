@@ -12,6 +12,7 @@ public class UnitStats
         Damage = unitDefinitionSO.BaseDamage;
         Offense = unitDefinitionSO.BaseOffense;
         Defense = unitDefinitionSO.BaseDefense;
+        Speed = unitDefinitionSO.BaseSpeed;
     }
 
     public int MaxHealth { get; set; }

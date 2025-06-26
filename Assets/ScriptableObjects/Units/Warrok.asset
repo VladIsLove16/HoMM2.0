@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6af1cc4405b903443b1c02445e0e07ae, type: 3}
   m_Name: Warrok
   m_EditorClassIdentifier: 
-  UnitName: Warrok
-  UnitType: 2
-  Health: 24
-  Damage: 8
-  StartingEffects: []
   UnitViewPrefab: {fileID: 5985448834381532279, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
+  UnitIcon: {fileID: 21300000, guid: d155d370bcbcb264b955d5b3a6db08ec, type: 3}
+  Name: 
+  UnitType: 2
+  BaseHealth: 0
+  BaseDamage: 0
+  BaseOffense: 0
+  BaseDefense: 0
+  BaseSpeed: 3
+  startingEffects: []

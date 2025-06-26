@@ -3,5 +3,6 @@
     moveAvailable,
     selected,
     hovered,
+    hovered2,
     normal
 }

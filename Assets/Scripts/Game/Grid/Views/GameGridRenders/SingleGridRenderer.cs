@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SingleGridRenderer : ICellGridRenderer
+public class SingleGridRenderer : IGridCellRenderer
 {
     private GameObject prefab;
     private GameObject singleObject;
@@ -56,6 +56,21 @@ public class SingleGridRenderer : ICellGridRenderer
     }
 
     public void SetCellState(Vector2Int cellCoords, CellState v)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public CellState GetCellState(Vector2Int coords)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void ReturnState(Vector2Int hoveredCell)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public CellState GetPrevState(Vector2Int hoveredCell)
     {
         throw new System.NotImplementedException();
     }

@@ -62,7 +62,6 @@ public class Grid<TGridObject> {
         float yPos = ((worldPosition - originPosition).z + (cellSize / 2 + padding / 2)) / (cellSize + padding) ;
         x = Mathf.FloorToInt(xPos);
         y = Mathf.FloorToInt(yPos);
-        Debug.Log(x + " " + y);
     }
 
     public void SetGridObject(int x, int y, TGridObject value) {

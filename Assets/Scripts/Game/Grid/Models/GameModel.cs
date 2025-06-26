@@ -86,7 +86,7 @@ public class GameModel
             return new OperationResult(false,$"Cell ({unitSpawnParams.X},{unitSpawnParams.Y}) is not empty");
         // Создаём контент через выбранную фабрику
         UnitModel unit = _unitModelFactory.Create(unitSpawnParams);
-        unit.OnTurnStart +=  () => OnTurnStarted?.Invoke(unit);
+        unit.OnTurnStart +=() => OnTurnStarted?.Invoke(unit);
 
         var cell = (GameCell)GetCell(unitSpawnParams.X, unitSpawnParams.Y);
         AddContent(cell,unit);
@@ -199,6 +199,11 @@ public class GameModel
     public List<Vector2Int> GetAvailableMovePoints(Vector2Int from,int speed)
     {
        return _movementSystem.GetReachableCells(from,speed);
+    }
+
+    public List<Vector2Int> GetAvailableMovePoints(int x,int y,int speed)
+    {
+        return GetAvailableMovePoints(new Vector2Int(x,y),speed);
     }
 
     public bool MoveUnit(Vector2Int to, Vector2Int from)
