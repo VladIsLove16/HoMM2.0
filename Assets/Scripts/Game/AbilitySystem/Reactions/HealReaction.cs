@@ -7,9 +7,8 @@ public class HealReaction : EffectReactionBase
     [Tooltip("Исцеление на каждый триггер")]
     public int Amount;
 
-    public override void Execute(EffectContext context)
+    public override void Execute(EffectReactionContext context)
     {
-        if(context.Target is UnitModel unit)
-            unit.Heal(Amount);
+        context.Target.UnitState.Health = Mathf.Min(context.Target.UnitState.MaxHealth, context.Target.UnitState.Health + Amount);
     }
 }

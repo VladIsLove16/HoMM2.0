@@ -5,7 +5,6 @@ public class SpellCasterService
     private readonly CombatController _combatController;
     private readonly SpellZoneFactory _zoneFactory;
 
-    
     public SpellCasterService(
         CombatController combat,
         SpellZoneFactory zoneFactory)
@@ -25,12 +24,13 @@ public class SpellCasterService
             var pos = origin + offset;
             var target = getUnitAt(pos);
             if (target == null) continue;
-            _combatController.DealDamage(target, data.Damage, source);
+            DamageContext damageContext = new(data.Damage, data.DamageType, source);
+            target.ReceiveDamage(damageContext);
+            //_combatController.DealDamage(target, data.Damage, source);
 
             foreach (var se in data.StatusEffects)
             {
-                var effect = new StatusEffect(se, target, source );
-                _combatController.ApplyStatusEffect(target, effect);
+                target.ApplyEffect(se, source);
             }
         }
     }

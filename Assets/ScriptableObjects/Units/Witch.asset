@@ -15,10 +15,14 @@ MonoBehaviour:
   UnitViewPrefab: {fileID: 7157924015712183769, guid: cf703134070eed3459f210e7cbdc6039, type: 3}
   UnitIcon: {fileID: 21300000, guid: 2c55d3bf7f48d1040878060c86494ffe, type: 3}
   Name: 
+  BlueTeamMaterial: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
+  RedTeamMaterial: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
   UnitType: 1
   BaseHealth: 0
   BaseDamage: 0
   BaseOffense: 0
   BaseDefense: 0
   BaseSpeed: 4
-  startingEffects: []
+  startingEffects:
+  - {fileID: 11400000, guid: 3d9aa456805570549b796206c2d71cbb, type: 2}
+  invulnerableEffects: []

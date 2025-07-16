@@ -1,5 +1,6 @@
 using NaughtyAttributes;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 using static PerCellGridRenderer;
@@ -8,32 +9,44 @@ public class GameLogicMonoInstaller : MonoInstaller
 {
     [SerializeField] private GameController _gameController;
     [SerializeField] private GameView3D _gameView3D;
+    [SerializeField] private MVVMUnitTurnPanel _MVVMUnitTurnPanel;
     [SerializeField] private GridView _gridView;
-    [SerializeField] private GameObject cellPrefab;
+    [SerializeField] private CellView cellPrefab;
     [SerializeField] private GameObject singleGridPrefab;
     [SerializeField] private UnitDefinitionSO[] _unitDatas;
-    [SerializeField] private  List<CellMaterials> materials;
-
+    [SerializeField] private List<CellMaterials> materials;
+    [SerializeField] private List<StatusEffectData> statusEffectDatas;
     public enum GridRenderStrategy { PerCell, Single }
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
-    private IGridCellRenderer _currentRenderer;
     public override void InstallBindings()
     {
+        Container.Bind<List<StatusEffectData>>().FromInstance(statusEffectDatas).AsSingle();
+
         Container.Bind<InputSystem_Actions>().AsSingle();
         Container.Bind<UnitViewFactory>().AsSingle();
         Container.Bind<UnitModelFactory>().AsSingle();
-
+        Container.Bind<TurnSystem>().AsSingle();
         Container.Bind<GameModel>().AsSingle();
 
         Container.Bind<GameViewModel>()
          .AsSingle()
          .NonLazy();
 
+        Container.Bind<UnitTurnPanelViewModel>()
+         .AsSingle()
+         .NonLazy();
+
         Container.Bind<GameView3D>()
          .FromInstance(_gameView3D)
          .AsSingle();
-         
+
+        Container.Bind<MVVMUnitTurnPanel>()
+         .FromInstance(_MVVMUnitTurnPanel)
+         .AsSingle();
+
+        BindCellMaterials();
+        BindPerCell();
 
         Container.Bind<GridView>()
         .FromInstance(_gridView)
@@ -46,10 +59,6 @@ public class GameLogicMonoInstaller : MonoInstaller
         .NonLazy();
 
 
-        Container.Bind<List<CellMaterials>>()
-                 .FromInstance(materials);
-
-        BindPerCell();
         Container.Bind<IEnumerable<UnitDefinitionSO>>()
                  .FromInstance(_unitDatas);
 
@@ -62,22 +71,34 @@ public class GameLogicMonoInstaller : MonoInstaller
 
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
+
     }
+
+    private void BindCellMaterials()
+    {
+        Container.Bind<List<CellMaterials>>()
+                         .FromInstance(materials);
+
+        Dictionary<CellState, CellMaterials> keyValuePairs = materials.ToDictionary(x => x.CellState);
+        Container.Bind<IReadOnlyDictionary<CellState, CellMaterials>>()
+                 .FromInstance(keyValuePairs);
+    }
+
     private void BindPerCell()
     {
         Container.Bind<IGridCellRenderer>().To<PerCellGridRenderer>().AsSingle().WithArguments(cellPrefab, _gridView.gameObject, materials);
-        _currentRenderer = Container.Resolve<IGridCellRenderer>();
     }
+
     private void BindSingle()
     {
         Container.Bind<IGridCellRenderer>().To<SingleGridRenderer>().AsSingle().WithArguments(cellPrefab, materials);
-        _currentRenderer = Container.Resolve<IGridCellRenderer>();
     }
+
     private void UnBind()
     {
-        Container.Unbind<IGridCellRenderer>();
-        _currentRenderer?.Clear();
+        Container.Resolve<IGridCellRenderer>()?.Clear();
     }
+
     [Button]
     public void SwitchStrategy()
     {

@@ -74,4 +74,19 @@ public class SingleGridRenderer : IGridCellRenderer
     {
         throw new System.NotImplementedException();
     }
+
+    public CellState[] GetCellStates(Vector2Int coords)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void AddState(Vector2Int coords, CellState hovered)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void RemoveState(Vector2Int hoveredCell, CellState hovered)
+    {
+        throw new System.NotImplementedException();
+    }
 }

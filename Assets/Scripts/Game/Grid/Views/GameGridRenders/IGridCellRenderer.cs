@@ -7,8 +7,7 @@ public interface IGridCellRenderer
     void Render(int width, int height, float cellSize, Vector3 origin, float padding);
     Vector3 ToWorld(int x, int y);
     bool ToGrid(Vector3 position, out Vector2Int coords);
-    void SetCellState(Vector2Int cellCoords, CellState v);
-    CellState GetCellState(Vector2Int coords);
-    void ReturnState(Vector2Int hoveredCell);
-    CellState GetPrevState(Vector2Int hoveredCell);
+    CellState[] GetCellStates(Vector2Int coords);
+    void AddState(Vector2Int coords, CellState hovered);
+    void RemoveState(Vector2Int hoveredCell, CellState hovered);
 }

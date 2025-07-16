@@ -1,8 +1,23 @@
 ﻿using System;
 using UnityEngine;
 public partial class GridXZ<TGridObject> {
+    public class GridObjectChangedEventArgs : EventArgs
+    {
+        public int X { get; }
+        public int Z { get; }
+        public IGridContent NewObject { get; }
+        public IGridContent RemovedObjet { get; }
 
-    public event EventHandler<EventArgs> OnGridObjectChanged;
+        public GridObjectChangedEventArgs(int x, int z, IGridContent newObject, IGridContent removedObjet)
+        {
+            X = x;
+            Z = z;
+            NewObject = newObject;
+            RemovedObjet = removedObjet;
+        }
+    }
+
+    public event EventHandler<GridObjectChangedEventArgs> GridObjectChanged;
     
     private int width;
     private int height;
@@ -37,8 +52,9 @@ public partial class GridXZ<TGridObject> {
     //    }
     //}
 
-    public void TriggerGridObjectChanged(EventArgs args) {
-        OnGridObjectChanged?.Invoke(this, args);
+    public void TriggerGridObjectChanged(GridObjectChangedEventArgs args)
+    { 
+        GridObjectChanged?.Invoke(this, args);
     }
 
     public bool TryGetGridObject(int x, int z, out TGridObject result)
@@ -70,11 +86,15 @@ public partial class GridXZ<TGridObject> {
     public TGridObject GetGridObject(int x, int z)
     {
         if (!IsInBounds(x, z))
-            throw new ArgumentOutOfRangeException($"GameModel index ({x},{z}) is out of bounds ({width},{height})");
+            Debug.Log($"GameModel index ({x},{z}) is out of bounds ({width},{height})");
 
         return gridArray[x, z];
     }
 
+    public TGridObject GetGridObject(Vector2Int position)
+    {
+        return GetGridObject(position.x, position.y);
+    }
 
     public TGridObject[,] GetGridArray()
     {
@@ -132,7 +152,7 @@ public partial class GridXZ<TGridObject> {
 //    Debug.DrawLine(GetWorldPosition(0, height), GetWorldPosition(width, height), Color.white, 100f);
 //    Debug.DrawLine(GetWorldPosition(width, 0), GetWorldPosition(width, height), Color.white, 100f);
 
-//    OnGridObjectChanged += (object sender, GridCellUnitSpawnedEventArgs eventArgs) => {
+//    GridObjectChanged += (object sender, GridCellUnitSpawnedEventArgs eventArgs) => {
 //        debugTextArray[eventArgs.x, eventArgs.y].text = gridArray[eventArgs.x, eventArgs.y]?.ToString();
 //    };
 //}

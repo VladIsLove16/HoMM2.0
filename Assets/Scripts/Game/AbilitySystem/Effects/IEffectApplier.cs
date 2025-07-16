@@ -1,4 +1,7 @@
 ﻿// Model/StatusEffect.cs
-public interface IEffectApplier
+/// <summary>
+/// Тот, кто может накладывать эффекты
+/// </summary>
+public interface IEffectApplier : IDamageSource
 {
 }

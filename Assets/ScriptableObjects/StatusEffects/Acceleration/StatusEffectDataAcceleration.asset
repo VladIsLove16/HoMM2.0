@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8314611435984354e89be16a8073d662, type: 3}
+  m_Name: StatusEffectDataAcceleration
+  m_EditorClassIdentifier: 
+  EffectName: Acceleration
+  sprite: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
+  ExpirationConditions:
+  - {fileID: 11400000, guid: 919b4a89a316d5049b2f2b13d58612fa, type: 2}
+  OnApply:
+  - {fileID: 11400000, guid: 751500a389811d74384682f71f65ad4d, type: 2}
+  OnTurnStart: []
+  OnInDamage: []
+  OnOutDamage: []
+  OnRemove:
+  - {fileID: 11400000, guid: db5c2e32cfe916942aade514eb9eb7a4, type: 2}

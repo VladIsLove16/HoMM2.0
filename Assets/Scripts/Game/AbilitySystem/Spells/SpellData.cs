@@ -8,7 +8,8 @@ public class SpellData : ScriptableObject
 {
     public string SpellName;
     public int Damage;
+    public DamageType DamageType;
     public List<StatusEffectData> StatusEffects;
     public SpellZoneType ZoneType;
 }
-public enum SpellZoneType { Cross, Quad, Circle, Custom }
+public enum SpellZoneType { Cross, Quad, Circle, Target, Custom } 

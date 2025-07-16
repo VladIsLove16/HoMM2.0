@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
@@ -19,18 +20,22 @@ public class GameView3D : MonoBehaviour
     private Vector2Int selectedCell;
     private bool isCellHovered;
     private bool isCellSelected;
-
+    private List<Vector2Int> currentReachableCells = new();
+    [SerializeField] private List<(Vector2Int,bool)> currentRoutePoints= new();
+    [SerializeField] bool cellSelectionAvailable;
     [Inject]
     public void Construct(GameViewModel gameGridViewModel, InputSystem_Actions inputActions)
     {
         Debug.Log("GameView3D is ready");
         _gameViewModel = gameGridViewModel;
-        gameGridViewModel.OnCellContentAdded += GameGridViewModel_OnCellContentAdded;
-        gameGridViewModel.OnCellContentRemoved += GameGridViewModel_OnCellContentRemoved;
-        gameGridViewModel.OnCellContentSwaped += GameGridViewModel_OnCellContentSwapped;
-        gameGridViewModel.OnCellContentMoved += GameGridViewModel_OnCellContentMoved;
-        gameGridViewModel.OnReachableCellsChanged += GameGridViewModel_OnReachableCellsChanged;
-
+        gameGridViewModel.CellContentAdded += GameGridViewModel_OnCellContentAdded;
+        gameGridViewModel.CellContentRemoved += GameGridViewModel_OnCellContentRemoved;
+        gameGridViewModel.CellContentSwaped += GameGridViewModel_OnCellContentSwapped;
+        gameGridViewModel.CellContentMoved += GameGridViewModel_OnCellContentMoved;
+        gameGridViewModel.CellContentMovedByRoute += GameGridViewModel_OnCellContentMovedByRoute;
+        gameGridViewModel.ReachableCellsChanged += GameGridViewModel_OnReachableCellsChanged;
+        gameGridViewModel.CellSelected += GameGridViewModel_OnCellSelected;
+        gameGridViewModel.RoutePointsChanged += GameGridViewModel_OnRoutePointsChanged;
         _inputActions = inputActions;
         _inputActions.Enable();
         _inputActions.Grid.Select.performed += OnSelectPerformed;
@@ -38,6 +43,29 @@ public class GameView3D : MonoBehaviour
         _inputActions.Grid.MousePosition.performed += OnMousePositionChanged;
     }
 
+    private void GameGridViewModel_OnRoutePointsChanged(List<(Vector2Int,bool)> list)
+    {
+        Debug.Log(currentRoutePoints.Count);
+        Debug.Log(list.Count);
+        foreach (var point in currentRoutePoints)
+        {
+            Debug.Log("removing " + point);
+            _gridCellRenderer.RemoveState(point.Item1, point.Item2 ? CellState.accessibleRoutePoint : CellState.inaccessibleRoutePoint);
+        }
+        foreach (var point in list) 
+        {
+            Debug.Log("adding " + point);
+            _gridCellRenderer.AddState(point.Item1, point.Item2 ? CellState.accessibleRoutePoint : CellState.inaccessibleRoutePoint);
+        }
+        currentRoutePoints = list.ToList();
+
+    }
+
+    private void GameGridViewModel_OnCellSelected(Vector2Int coords)
+    {
+        selectedCell = coords;
+        Select(coords);
+    }
 
     private void GameGridViewModel_OnCellContentSwapped(UnitModel toModel, UnitModel fromModel)
     {
@@ -74,6 +102,21 @@ public class GameView3D : MonoBehaviour
             yield return null;
         }
     }
+    private IEnumerator PlayMoveAnimation(List<Vector3> to, UnitView3D unit)
+    { 
+        Debug.Log("Playing MoveAnimation");
+        foreach (var item in to)
+        {
+            float time = 0f;
+            Vector3 fromPos = unit.transform.position;
+            while (time < movingTime)
+            {
+                time += Time.deltaTime;
+                unit.transform.position = Vector3.Lerp(fromPos, item, time / movingTime);
+                yield return null;
+            }
+        }
+    }
     private void GameGridViewModel_OnCellContentAdded(UnitModel model)
     {
         Debug.Log("unitView3D creating in " + model.X + " " + model.Y);
@@ -97,7 +140,12 @@ public class GameView3D : MonoBehaviour
         Vector3 toPos = _gridCellRenderer.ToWorld(to.x,to.y);
         StartCoroutine(PlayMoveAnimation(toPos, unitView3D));
     }
-
+    private void GameGridViewModel_OnCellContentMovedByRoute(UnitModel model, List<Vector2Int> route)
+    {
+        UnitView3D unitView3D = views[model];
+        List<Vector3> worldPoints = route.Select(point => _gridCellRenderer.ToWorld(point.x, point.y)).ToList();
+        StartCoroutine(PlayMoveAnimation(worldPoints, unitView3D));
+    }
     private void GameGridViewModel_OnReachableCellsChanged(List<Vector2Int> list)
     {
         ShowReachableCells(list);
@@ -105,10 +153,15 @@ public class GameView3D : MonoBehaviour
 
     public void ShowReachableCells(List<Vector2Int> moveableCells)
     {
+        foreach(var a in currentReachableCells)
+        {
+            _gridCellRenderer.RemoveState(a, CellState.moveAvailable);
+        }
         foreach (Vector2Int cellCoords in moveableCells)
         {
-            _gridCellRenderer.SetCellState(cellCoords, CellState.moveAvailable);
+            _gridCellRenderer.AddState(cellCoords, CellState.moveAvailable);
         }
+        currentReachableCells = moveableCells;
     }
 
     private void Destroy(UnitView3D unitView3D,float time = 0f)
@@ -122,7 +175,12 @@ public class GameView3D : MonoBehaviour
 
     private void OnSelectPerformed(InputAction.CallbackContext context)
     {
-        Debug.Log("Select performed");
+        Debug.Log("SetSelected performed");
+        if(!cellSelectionAvailable)
+        {
+            Debug.Log("cellSelection is not available");
+            return; 
+        }
         bool hitCollider = Mouse3D.GetMouseWorldPosition(out Vector3 worldPos);
         if (!hitCollider)
         {
@@ -146,32 +204,29 @@ public class GameView3D : MonoBehaviour
     {
         if (isCellHovered)
         {
-            _gameViewModel.HandleActionPerformed(hoveredCell);
+            _gameViewModel.PerformAction(hoveredCell);
             Select(hoveredCell);
         }
         else
             Debug.Log("no cell hovered");
     }
 
-   
-
     private void OnMousePositionChanged(InputAction.CallbackContext context)
     {
-        bool hitCollider = Mouse3D.GetMouseWorldPosition(out Vector3 worldPos);
-        if (!hitCollider)
+        bool hit = Mouse3D.GetMouseWorldPosition(out Vector3 worldPos);
+        if (!hit)
         {
             return;
         }
         bool success = _gridCellRenderer.ToGrid(worldPos, out Vector2Int coords);
         if ((success))
         {
-            Hover(coords);
-
-            _gameViewModel.HandleCellHovered(coords);
-
+            HoverCell(coords);
         }
         else
+        {
             isCellHovered = false;
+        }
     }
 
     private void Select(Vector2Int coords)
@@ -179,29 +234,29 @@ public class GameView3D : MonoBehaviour
         if (selectedCell == coords)
             return;
         if (isCellSelected)
-            _gridCellRenderer.SetCellState(selectedCell, CellState.normal);
+        {
+            _gridCellRenderer.RemoveState(selectedCell,CellState.selected);
+        }
 
         selectedCell = coords;
         isCellSelected = true;
 
-        _gridCellRenderer.SetCellState(coords, CellState.selected);
+        _gridCellRenderer.AddState(coords, CellState.selected);
     }
 
-    private void Hover(Vector2Int coords)
+    private void HoverCell(Vector2Int coords)
     {
         if (coords == hoveredCell)
             return;
         if (isCellHovered)
         {
-            CellState prevState = _gridCellRenderer.GetPrevState(hoveredCell);
-            _gridCellRenderer.SetCellState(hoveredCell, prevState);
-            Debug.Log("cell hovered" +  coords);
+            _gridCellRenderer.RemoveState(hoveredCell,CellState.hovered);
         }
 
         hoveredCell = coords;
         isCellHovered = true;
 
-        _gridCellRenderer.SetCellState(coords, CellState.hovered);
+        _gridCellRenderer.AddState(coords, CellState.hovered);
+        _gameViewModel.HandleCellHovered(coords);
     }
 }
-

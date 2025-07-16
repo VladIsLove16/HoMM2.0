@@ -1,8 +1,10 @@
 ﻿public enum CellState
 {
     moveAvailable,
+    accessibleRoutePoint,
+    inaccessibleRoutePoint,
     selected,
     hovered,
-    hovered2,
-    normal
+    normal,
+    None
 }

@@ -1,10 +1,15 @@
 ﻿using System;
-public interface IEffectable : IGridContent, IDamageable
+/// <summary>
+/// Тот, кто может быть целью эффектов
+/// </summary>
+public interface IEffectable : IGridContent, IDamagable
 {
-    public event Action<DamageContext> OnBeforeDealDamage;
-    public event Action<DamageContext> OnBeforeTakeDamage;
-    public event Action<int> OnHealthChanged;
-    public event Action OnTurnStart;
-    public event Action OnDeath;
-    public StatusEffectManager StatusEffectManager { get; }
+    event Action<DamageContext> BeforeInDamage;
+    event Action<DamageContext> BeforeOutDamage;
+    public event Action TurnStarted;
+    public event Action TurnEnded;
+    public UnitState UnitState { get; }
+
+    public void ApplyEffect(StatusEffectData statusEffect,IEffectApplier effectApplier);
+    public void RemoveEffect(StatusEffect statusEffect);
 }

@@ -20,6 +20,8 @@ public class GameCell : IGridCell
     private List<IGridContent> _gameGridObjectContents = new List<IGridContent>();
     public int x;
     public int y;
+    public Vector2Int Position => new Vector2Int(x, y);
+
     public int X => x;
     public int Y => y;
     public UnitModel Unit => GetUnit();
@@ -51,28 +53,19 @@ public class GameCell : IGridCell
             Debug.Log("null content have not added");
             return;
         }
+        Debug.Log($"content {content.UnitType} added to {X} {Y}");
+
         _gameGridObjectContents.Add(content);
         content.SetCoords(X, Y);
-        GridCellUnitSpawnedEventArgs gridCellChangedEventArgs = new GridCellUnitSpawnedEventArgs()
-        {
-            addedContent = content,
-            x = content.X,
-            y = content.Y,
-        };
-        Debug.Log($"content {content.UnitType} added to {X} {Y}");
-        mainGrid.TriggerGridObjectChanged(gridCellChangedEventArgs);
+
+        mainGrid.TriggerGridObjectChanged(new(content.X, content.Y, content, null));
+
     }
 
     public void RemoveContent(IGridContent content)
     {
         _gameGridObjectContents.Remove(content);
-        GridCellContentRemovedEventArgs args = new GridCellContentRemovedEventArgs()
-        {
-            removedContent = content,
-            x = content.X,
-            y = content.Y,
-        };
-        mainGrid.TriggerGridObjectChanged(args);
+        mainGrid.TriggerGridObjectChanged(new(content.X, content.Y, null, content));
     }
 
     public void Clear()
@@ -144,6 +137,8 @@ public class GameCell : IGridCell
             if (cell is UnitModel unit)
             {
                 _gameGridObjectContents.Remove(unit);
+                mainGrid.TriggerGridObjectChanged(new GridXZ<GameCell>.GridObjectChangedEventArgs(unit.X, unit.Y, null, unit));
+                return;
             }
         }
     }
@@ -157,7 +152,6 @@ public class GameCell : IGridCell
                 return unit;
             }
         }
-        Debug.Log("no unit found " + x + " " + y);
         return null;
     }
 }

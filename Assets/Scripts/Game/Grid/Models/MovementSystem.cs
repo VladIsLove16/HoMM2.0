@@ -1,68 +1,177 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MovementSystem
 {
     private GridXZ<GameCell> _grid;
+    private Dictionary<Vector2Int, List<Vector2Int>> reachableCellsCache = new();
+    private Dictionary<(Vector2Int,Vector2Int), List<Vector2Int>> routesCache = new();
+
     public MovementSystem(GridXZ<GameCell> grid)
     {
         _grid = grid;
+        _grid.GridObjectChanged += OnGridChanged;
     }
+
+    private void OnGridChanged(object sender, GridXZ<GameCell>.GridObjectChangedEventArgs e)
+    {
+        reachableCellsCache.Clear();
+    }
+
     public List<Vector2Int> GetReachableCells(Vector2Int startCell, int movementRange)
     {
-        List<Vector2Int> reachableCells = new List<Vector2Int>();
-        Dictionary<Vector2Int, float> moveCosts = new Dictionary<Vector2Int, float>();
-        Queue<Vector2Int> cellsToCheck = new Queue<Vector2Int>();
+        if (reachableCellsCache.TryGetValue(startCell, out var cached))
+            return cached;
 
-        // Initialize with starting cell
-        reachableCells.Add(startCell);
-        moveCosts.Add(startCell, 0);
-        cellsToCheck.Enqueue(startCell);
-
-        while (cellsToCheck.Count > 0)
-        {
-            Vector2Int currentCell = cellsToCheck.Dequeue();
-            float currentCost = moveCosts[currentCell];
-
-            Vector2Int[] neighbors = new Vector2Int[]
-            {
-                currentCell + Vector2Int.up,
-                currentCell + Vector2Int.right,
-                currentCell + Vector2Int.down,
-                currentCell + Vector2Int.left,
-                currentCell + Vector2Int.up +  Vector2Int.right,
-                currentCell + Vector2Int.up +  Vector2Int.left,
-                currentCell + Vector2Int.down +  Vector2Int.right,
-                currentCell + Vector2Int.down +  Vector2Int.left,
-            };
-
-            foreach (Vector2Int neighbor in neighbors)
-            {
-                if (!_grid.GetGridObject(neighbor.x,neighbor.y).IsEmpty)
-                    continue;
-
-                float newCost = currentCost + GetMovementCost(currentCell,neighbor);
-
-                if (newCost <= movementRange &&
-                   (!moveCosts.ContainsKey(neighbor) || newCost < moveCosts[neighbor]))
-                {
-                    if (!moveCosts.ContainsKey(neighbor))
-                    {
-                        reachableCells.Add(neighbor);
-                    }
-
-                    moveCosts[neighbor] = newCost;
-                    cellsToCheck.Enqueue(neighbor);
-                }
-            }
-        }
-
+        bool _ = RunPathfinding(startCell, movementRange, null, out List<Vector2Int> reachableCells, out var route);
+        reachableCellsCache[startCell] = reachableCells;
         return reachableCells;
     }
 
-    // Get movement cost between two adjacent cells (override for different terrain costs)
-    private float GetMovementCost(Vector2Int fromCell, Vector2Int toCell)
+    public bool GetRoute(Vector2Int fromCell, Vector2Int toCell, out List<Vector2Int> route)
     {
-        return Mathf.Abs((fromCell-toCell).magnitude);
+        if (routesCache.TryGetValue((fromCell, toCell), out route))
+        {
+            Debug.Log("route found in cache " + RouteToString(route));
+            return true;
+        }
+        if(RunPathfinding(fromCell, int.MaxValue, toCell, out _, out route))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Объединённый алгоритм для получения достижимых клеток и маршрута.
+    /// </summary>
+    private bool RunPathfinding(
+        Vector2Int startCell,
+        int movementRange,
+        Vector2Int? targetCell,
+        out List<Vector2Int> reachableCells,
+        out List<Vector2Int> route)
+    {
+        reachableCells = new List<Vector2Int>();
+        route = new List<Vector2Int>();
+
+        Dictionary<Vector2Int, float> moveCosts = new();
+        Dictionary<Vector2Int, Vector2Int> cameFrom = new();
+        Queue<Vector2Int> open = new();
+
+        moveCosts[startCell] = 0;
+        open.Enqueue(startCell);
+        reachableCells.Add(startCell);
+
+        while (open.Count > 0)
+        {
+            Vector2Int current = open.Dequeue();
+            float costSoFar = moveCosts[current];
+
+            // Check for goal
+            if (targetCell.HasValue && current == targetCell.Value)
+            {
+                // Build path
+                Vector2Int step = current;
+                while (step != startCell)
+                {
+                    route.Add(step);
+                    step = cameFrom[step];
+                }
+                route.Add(startCell);
+                route.Reverse();
+                var target = (Vector2Int)targetCell;
+                Debug.Log("route from " + startCell + " to cell " + targetCell + " found " + RouteToString(route));
+                routesCache[(startCell, target)] = route;
+                Debug.Log("route found");
+                return true;
+            }
+
+            foreach (var neighbor in GetNeighbors(current))
+            {
+                if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell) || !cell.IsEmpty)
+                    continue;
+
+                float newCost = costSoFar + GetDistanceMagnitude(current, neighbor);
+
+                if (newCost <= movementRange && (!moveCosts.ContainsKey(neighbor) || newCost < moveCosts[neighbor]))
+                {
+                    moveCosts[neighbor] = newCost;
+                    cameFrom[neighbor] = current;
+                    open.Enqueue(neighbor);
+
+                    if (!reachableCells.Contains(neighbor))
+                        reachableCells.Add(neighbor);
+                }
+            }
+        }
+        Debug.Log("route not found "  + targetCell == null);
+        return targetCell == null;
+    }
+
+    private float GetDistanceMagnitude(Vector2Int from, Vector2Int to)
+    {
+        return (from - to).magnitude;
+    }
+
+    public float GetRouteCost(List<Vector2Int> route)
+    {
+        var tempRoute = route.ToList();
+        float cost = 0;
+        Vector2Int start = tempRoute[0];
+        tempRoute.Remove(start);
+        foreach (var a in route)
+        {
+            cost += GetDistanceMagnitude(start, a);
+            start = a;
+        }
+        return cost;
+    }
+
+    public List<Vector2Int> GetAccessibleRoutePoints(List<Vector2Int> route,int moveSpeed)
+    {
+        var tempRoute = route.ToList();
+        var resultRoute = new List<Vector2Int>();
+        float cost = 0;
+        Vector2Int start = tempRoute[0];
+        tempRoute.Remove(start);
+        resultRoute.Add(start);
+        foreach (var a in tempRoute)
+        {
+            cost += GetDistanceMagnitude(start, a);
+            start = a;
+            if(cost<=moveSpeed)
+            {
+                resultRoute.Add(a);
+            }
+            else
+                return resultRoute;
+        }
+        return resultRoute;
+    }
+
+    public string RouteToString(List<Vector2Int> vector2Ints)
+    {
+        string path = "path: ";
+        foreach(var  a in vector2Ints)
+        {
+            path += a.ToString();
+        }
+        return path;
+    }
+    private Vector2Int[] GetNeighbors(Vector2Int cell)
+    {
+        return new Vector2Int[]
+        {
+            cell + Vector2Int.up,
+            cell + Vector2Int.right,
+            cell + Vector2Int.down,
+            cell + Vector2Int.left,
+            cell + Vector2Int.up + Vector2Int.right,
+            cell + Vector2Int.up + Vector2Int.left,
+            cell + Vector2Int.down + Vector2Int.right,
+            cell + Vector2Int.down + Vector2Int.left,
+        };
     }
 }

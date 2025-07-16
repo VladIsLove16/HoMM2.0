@@ -3,12 +3,17 @@ using System.Linq;
 using TMPro;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using Zenject;
 
 public class GameGridUIPanelView : MonoBehaviour
 {
+    private GameViewModel viewModel;
+    private GameController gameController;
     private const float showErrorTime = 5f;
+    [SerializeField] private Button Create;
+    [SerializeField] private Button RunBattle;
     [SerializeField] private Button btnSpawnAt;
     [SerializeField] private Button btnSpawnRandom;
     [SerializeField] private Button btnSelectCell;
@@ -35,24 +40,27 @@ public class GameGridUIPanelView : MonoBehaviour
         }
     }
  
-    private GameViewModel viewModel;
 
     [Inject]
-    public void Construct(GameViewModel viewModel)
+    public void Construct(GameViewModel viewModel, GameController gameController)
     {
         this.viewModel = viewModel;
+        this.gameController = gameController;
 
-        btnSpawnRandom.onClick.AddListener(() =>
-        {
-            Debug.Log("btnSpawnRandom clicked");
-            viewModel.SpawnUnitAtRandomPlace();
-        });
+        Create.onClick.AddListener(() => gameController.Create());
+        RunBattle.onClick.AddListener(()=> gameController.RunBattle());
+        btnSpawnRandom.onClick.AddListener(OnBtnSpawnRandom_Clicked);
         btnSpawnAt.onClick.AddListener(() => viewModel.SpawnUnitAt(xText.text, yText.text));
         btnSelectCell.onClick.AddListener(BtnSelectCell_onClick);
         btnSpawnAt.onClick.AddListener(() => Debug.Log("btnSpawnAt clicked"));
         btnSelectCell.onClick.AddListener(() => Debug.Log("btnSelectCell clicked"));
 
-        viewModel.OnError += msg => ShowError(msg);
+        viewModel.Error += msg => ShowError(msg);
+    }
+    private void OnBtnSpawnRandom_Clicked()
+    {
+        Debug.Log("btnSpawnRandom clicked");
+        viewModel.SpawnUnitAtRandomPlace();
     }
 
     private void BtnSelectCell_onClick()

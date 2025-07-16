@@ -1,7 +1,7 @@
 ﻿// EffectReactionBase.cs
 using UnityEngine;
 
-public abstract class EffectReactionBase : ScriptableObject, IEffectReaction
+public abstract class EffectReactionBase : ScriptableObject
 {
-    public abstract void Execute(EffectContext context);
+    public abstract void Execute(EffectReactionContext context);
 }

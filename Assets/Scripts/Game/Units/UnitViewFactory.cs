@@ -54,6 +54,8 @@ public class UnitViewFactory
                 Quaternion.identity,
                 _unitsParent
             );
+        view.SetMaterial(model.IsBlueTeam ? _dataMap[model.UnitType].BlueTeamMaterial : _dataMap[model.UnitType].RedTeamMaterial);
+
         Debug.Log($"UnitView3D {model.UnitType} created {model.X} {model.Y}");
         return view;
     }

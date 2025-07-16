@@ -17,19 +17,24 @@ MonoBehaviour:
     Amount: 1
     X: 2
     Y: 2
+    isPlayer: 1
   - unitType: 0
     Amount: 1
     X: 1
     Y: 2
+    isPlayer: 1
   - unitType: 0
     Amount: 1
     X: 3
     Y: 2
+    isPlayer: 1
   - unitType: 0
     Amount: 1
     X: 2
     Y: 1
+    isPlayer: 0
   - unitType: 0
     Amount: 1
     X: 2
     Y: 3
+    isPlayer: 0

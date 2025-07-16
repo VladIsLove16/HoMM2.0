@@ -1,19 +1,26 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor;
 using UnityEngine;
-//IBlockable, IEffectable, IAttackable,
-public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable, IEffectApplier, ICombatUnit
+public class UnitModel : IGridContent,  IDamageSource, IDamagable, IEffectable, IEffectApplier, ICombatUnit
 {
-    public event Action<DamageContext> OnBeforeDealDamage;
-    public event Action<DamageContext> OnBeforeTakeDamage;
-    public event Action<int> OnHealthChanged;
-    public event Action OnTurnStart;
-    public event Action OnDeath;
-    public event Action OnAttack;
-    public event Action<int> OnHit;
-
-    public UnitStats UnitStats { get; }
+    public event Action<DamageContext> BeforeInDamage;
+    public event Action<DamageContext> BeforeOutDamage;
+    public event Action<int> HealthChanged;
+    public event Action TurnStarted;
+    public event Action TurnEnded;
+    public event Action Died;
+    public event Action Attacked;
+    public event Action<int> Hitted;
+    public IReadOnlyList<StatusEffect> ActiveEffects => _activeEffects.AsReadOnly();
+    private UnitState _baseStats;
+    private UnitState _currentStats;
+    public UnitState UnitState => _currentStats;
+    private List<StatusEffect> _activeEffects = new();
+    private List<StatusEffectData> _invulnerableEffects = new();
     private int x;
     private int y;
     public int X => x;
@@ -23,20 +30,15 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
     public UnitType UnitType { get; }
     public string Name { get; }
     public bool IsBlueTeam { get; }
-    public StatusEffectManager StatusEffectManager => UnitStats.StatusEffectManager;
-
-    public event Action<ICombatUnit> OnTurnEnded;
-
-    public event Action<ICombatUnit> OnTurnTaken;
 
     public UnitModel(UnitDefinitionSO unitDefinitionSO, int x,int y, int amount, bool isPlayer)
     {
-        
-        UnitStats = new UnitStats(unitDefinitionSO);
-        foreach (var effect in unitDefinitionSO.StartingEffects)
+        _baseStats = new UnitState(unitDefinitionSO);
+        _currentStats = _baseStats;
+        _invulnerableEffects = unitDefinitionSO.InvulnerableEffects.ToList();
+        foreach (var effectData in unitDefinitionSO.StartingEffects)
         {
-            StatusEffect statusEffect = new StatusEffect(effect, this, this);
-            StatusEffectManager.Add(statusEffect);
+            ApplyEffect(effectData,this);
         }
         this.x = x;
         this.y = y;
@@ -46,30 +48,32 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
         IsBlueTeam = isPlayer;
     }
 
-    public void ReceiveDamage(int damage)
+    public void ReceiveDamage(DamageContext damageCtx)
     {
-        int prev = UnitStats.Health;
-        UnitStats.LastDamageAmount = damage;
-        UnitStats.Health = Mathf.Max(UnitStats.Health - damage, 0);
-        OnHealthChanged?.Invoke(UnitStats.Health);
-        OnHit?.Invoke(damage);
+        int prev = UnitState.Health;
+        BeforeInDamage?.Invoke(damageCtx);
 
-        if (UnitStats.Health == 0)
-            OnDeath?.Invoke();
+        UnitState.LastDamageAmount = damageCtx.DamageAmount;
+        UnitState.Health = Mathf.Max(UnitState.Health - damageCtx.DamageAmount, 0);
+        HealthChanged?.Invoke(UnitState.Health);
+        Hitted?.Invoke(damageCtx.DamageAmount);
+
+        if (UnitState.Health == 0)
+            Died?.Invoke();
     }
 
     public void Heal(int amount)
     {
-        UnitStats.Health = Mathf.Min(UnitStats.Health + amount, UnitStats.MaxHealth);
-        OnHealthChanged?.Invoke(UnitStats.Health);
+        UnitState.Health = Mathf.Min(UnitState.Health + amount, UnitState.MaxHealth);
+        HealthChanged?.Invoke(UnitState.Health);
     }
 
     public void AddMaxHP(int amount)
     {
-        UnitStats.MaxHealth += amount;
+        UnitState.MaxHealth += amount;
     }
 
-    internal void TriggerAttack() => OnAttack?.Invoke();
+    internal void TriggerAttack() => Attacked?.Invoke();
 
     public override string ToString()
     {
@@ -89,6 +93,25 @@ public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable,
 
     public void TakeTurn()
     {
-        OnTurnStart?.Invoke();
+        TurnStarted?.Invoke();
+    }
+
+    public void EndTurn()
+    {
+        TurnEnded?.Invoke();
+    }
+
+    public void ApplyEffect(StatusEffectData statusEffect,IEffectApplier effectApplier)
+    {
+        if(!_invulnerableEffects.Contains(statusEffect))
+        {
+            StatusEffect se = new StatusEffect(statusEffect, this, effectApplier);
+            _activeEffects.Add(se);
+        }
+    }
+
+    public void RemoveEffect(StatusEffect statusEffect)
+    {
+        _activeEffects.Remove(statusEffect);
     }
 }

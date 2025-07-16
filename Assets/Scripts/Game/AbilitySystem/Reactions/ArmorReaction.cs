@@ -12,6 +12,6 @@ public class ArmorReaction : DamageReactionBase
 
     public override void Execute(DamageContext ctx)
     {
-        ctx.Amount -= armor;
+        ctx.DamageAmount -= armor;
     }
 }

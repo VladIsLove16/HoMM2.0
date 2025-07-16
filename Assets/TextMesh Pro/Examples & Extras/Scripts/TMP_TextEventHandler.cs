@@ -101,7 +101,7 @@ namespace TMPro
             // Get a reference to the text component.
             m_TextComponent = gameObject.GetComponent<TMP_Text>();
 
-            // Get a reference to the camera rendering the text taking into consideration the text component type.
+            // Get a reference to the camera rendering the text taking into consideration the text component damageType.
             if (m_TextComponent.GetType() == typeof(TextMeshProUGUI))
             {
                 m_Canvas = gameObject.GetComponentInParent<Canvas>();
@@ -208,7 +208,7 @@ namespace TMPro
             }
             else
             {
-                // Reset all selections given we are hovering outside the text container bounds.
+                // ResetState all selections given we are hovering outside the text container bounds.
                 m_selectedLink = -1;
                 m_lastCharIndex = -1;
                 m_lastWordIndex = -1;

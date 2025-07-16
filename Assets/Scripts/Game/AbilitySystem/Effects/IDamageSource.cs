@@ -1,4 +1,7 @@
-﻿public interface IDamageSource
+﻿using NUnit.Framework;
+using System.Collections.Generic;
+
+public interface IDamageSource
 {
-    UnitStats UnitStats {  get; }
+    UnitState UnitState {  get; }
 }

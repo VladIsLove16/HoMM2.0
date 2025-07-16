@@ -7,13 +7,13 @@
 //    private void Construct(UnitViewModel unit)
 //    {
 //        this.unitViewModel = unit;
-//        unitViewModel.OnHealthChanged += OnHealthChanged;
-//        unitViewModel.OnOutDamage += OnAttack;
+//        unitViewModel.HealthChanged += HealthChanged;
+//        unitViewModel.OnOutDamage += Attacked;
 //        unitViewModel.OnDeath += OnDeath;
-//        unitViewModel.OnTurnStart += OnTurnStart;
+//        unitViewModel.TurnStarted += TurnStarted;
 //    }
 
-//    private void OnAttack(DamageContext context)
+//    private void Attacked(EffectReactionContext context)
 //    {
 //        var source = context.Source;
 //        var target = context.Target;
@@ -34,7 +34,7 @@
 //        //}
 //        //return description;
 //    }
-//    private void OnHealthChanged(int dmg)
+//    private void HealthChanged(int dmg)
 //    {
 //        Debug.Log($"{unitViewModel.GetDescription()} get {dmg} Damage");
 //    }
@@ -44,7 +44,7 @@
 //        Debug.Log($"{unitViewModel.GetDescription()} is DEAD!");
 //    }
 
-//    private void OnTurnStart()
+//    private void TurnStarted()
 //    {
 //        Debug.Log($"{unitViewModel.GetDescription()} takes a turn");
 //    }

@@ -1,17 +1,12 @@
-﻿using UnityEditor.Experimental.GraphView;
-
-/// <summary>
-/// Перехватывает и модифицирует урон перед применением.
-/// </summary>
-public class DamageContext
+﻿public class DamageContext
 {
-    public int Amount;
-    public readonly IDamageable Target;   // чтобы внутри реакций можно было отписаться
-    public readonly IDamageSource Source;
-    public DamageContext(IDamageable target,  int amount, IDamageSource source)
+    public int DamageAmount;
+    public DamageType damageType;
+    public IDamageSource damageSource;
+    public DamageContext(int damageAmount, DamageType damageType, IDamageSource damageSource)
     {
-        Amount = amount;
-        Source = source;
-        Target = target;
+        DamageAmount = damageAmount;
+        this.damageType = damageType;
+        this.damageSource = damageSource;
     }
 }

@@ -202,8 +202,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _viewUI: {fileID: 9001596722977981929}
+  meshes:
+  - {fileID: 8412983519895542611}
 --- !u!4 &6366760203574449869 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+  m_PrefabInstance: {fileID: 6904580978167738662}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &8412983519895542611 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3103283877742750325, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
   m_PrefabInstance: {fileID: 6904580978167738662}
   m_PrefabAsset: {fileID: 0}

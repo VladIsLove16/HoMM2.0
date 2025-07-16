@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// ViewModel: связывает GameModel и представления, обрабатывает команды и генерирует готовые к отображению данные.
@@ -10,40 +11,54 @@ public class GameViewModel : IInitializable, IDisposable
 {
     private readonly GameModel _gameModel;
 
-    public event Action<string> OnError;
-    public event Action<string> OnLastChangedCellDescription;
+    public event Action<string> Error;
+    public event Action<string> LastChangedCellDescription;
     //public event Action<string> OnSelectedCellDescription;
 
-    public Action<UnitModel> OnCellContentAdded;
-    public Action<UnitModel> OnCellContentRemoved;
-    public Action<UnitModel, UnitModel> OnCellContentSwaped;
-    public Action<UnitModel, Vector2Int> OnCellContentMoved;
-    public Action<List<Vector2Int>> OnReachableCellsChanged;
+    public Action<UnitModel> CellContentAdded;
+    public Action<UnitModel> CellContentRemoved;
+    public Action<UnitModel, UnitModel> CellContentSwaped;
+    public Action<UnitModel, Vector2Int> CellContentMoved;
+    public Action<UnitModel, List<Vector2Int>> CellContentMovedByRoute;
+    public Action<List<Vector2Int>> ReachableCellsChanged;
+    public Action<List<(Vector2Int,bool)>> RoutePointsChanged;
     public Action<UnitModel> OnTurnStarted;
+    public Action<Vector2Int> CellSelected;
 
     private Vector2Int selectedCell;
     private bool isCellSelected;
-    public GameViewModel(GameModel model)
+
+    private readonly ICursorService _cursorService;
+    public GameViewModel(GameModel model, ICursorService cursorService)
     {
         _gameModel = model;
+        _cursorService = cursorService;
         Initialize();
     }
 
     public void Initialize()
     {
-        _gameModel.OnCellContentAdded += HandleContentAdded;
-        _gameModel.OnCellContentRemoved += HandleContentRemoved;
-        _gameModel.OnCellContentSwaped += HandleContentSwaped;
-        _gameModel.OnCellContentMoved += HandleContentMoved;
-        _gameModel.OnTurnStarted += HandleTurnStarted;
+        _gameModel.CellContentAdded += HandleContentAdded;
+        _gameModel.CellContentRemoved += HandleContentRemoved;
+        _gameModel.CellContentSwaped += HandleContentSwaped;
+        _gameModel.CellContentMoved += HandleContentMoved;
+        _gameModel.CellContentMovedByRoute += HandleContentMovedByRoute;
+        _gameModel.TurnStarted += HandleTurnStarted;
+
+        _cursorService.SetCursorVisibility(true);
+    }
+
+    private void HandleContentMovedByRoute(UnitModel model, List<Vector2Int> list)
+    {
+        CellContentMovedByRoute?.Invoke(model, list);
     }
 
     public void Dispose()
     {
-        _gameModel.OnCellContentAdded -= HandleContentAdded;
-        _gameModel.OnCellContentRemoved -= HandleContentRemoved;
-        _gameModel.OnCellContentSwaped -= HandleContentSwaped;
-        _gameModel.OnCellContentMoved -= HandleContentMoved;
+        _gameModel.CellContentAdded -= HandleContentAdded;
+        _gameModel.CellContentRemoved -= HandleContentRemoved;
+        _gameModel.CellContentSwaped -= HandleContentSwaped;
+        _gameModel.CellContentMoved -= HandleContentMoved;
     }
 
     public int GetWidth() => _gameModel.GetWidth();
@@ -57,13 +72,13 @@ public class GameViewModel : IInitializable, IDisposable
     {
         if (!int.TryParse(xRaw, out var x) || !int.TryParse(yRaw, out var y))
         {
-            OnError?.Invoke("Координаты должны быть числами");
+            Error?.Invoke("Координаты должны быть числами");
             return new OperationResult(false, "Invalid coordinates");
         }
         UnitSpawnParams @params = new(x, y, type);
         var result = _gameModel.SpawnUnit(@params);
         if (!result.IsSuccess)
-            OnError?.Invoke(result.Message);
+            Error?.Invoke(result.Message);
         return result;
     }
 
@@ -76,7 +91,7 @@ public class GameViewModel : IInitializable, IDisposable
         UnitSpawnParams @params = new(x, y);
         var result = _gameModel.SpawnUnit(@params);
         if (!result.IsSuccess)
-            OnError?.Invoke(result.Message);
+            Error?.Invoke(result.Message);
     }
 
     ///// <summary>
@@ -96,7 +111,7 @@ public class GameViewModel : IInitializable, IDisposable
     //    }
     //    catch (Exception ex)
     //    {
-    //        OnError?.Invoke(ex.Message);
+    //        Error?.Invoke(ex.Message);
     //        return new OperationResult()
     //        {
     //            Message = ex.Message,
@@ -107,39 +122,38 @@ public class GameViewModel : IInitializable, IDisposable
 
     private void HandleContentAdded(UnitModelCreatedParams e)
     {
-        OnCellContentAdded?.Invoke(e.UnitModel);
+        CellContentAdded?.Invoke(e.UnitModel);
         var desc = _gameModel.GetCell(e.UnitModel.X, e.UnitModel.Y).ToString();
-        OnLastChangedCellDescription?.Invoke(desc);
+        LastChangedCellDescription?.Invoke(desc);
     }
 
     private void HandleContentRemoved(UnitModelRemovedParams e)
     {
         Debug.Log("content removed");
-        OnCellContentRemoved?.Invoke(e.UnitModel);
+        CellContentRemoved?.Invoke(e.UnitModel);
     }
     private void HandleContentSwaped(UnitModelsSwapped e)
     {
         Debug.Log(" HandleContentSwaped(UnitModelsSwapped swapped)");
-        OnCellContentSwaped?.Invoke(e.from, e.to);
+        CellContentSwaped?.Invoke(e.from, e.to);
     }
     private void HandleContentMoved(UnitModel model, Vector2Int to)
     {
-        Debug.Log(" OnCellContentMoved?.Invoke(viewModel, to);");
-        OnCellContentMoved?.Invoke(model, to);
+        Debug.Log(" CellContentMoved?.Invoke(viewModel, to);");
+        CellContentMoved?.Invoke(model, to);
     }
 
     private void HandleTurnStarted(UnitModel model)
     {
-        var cells = _gameModel.GetAvailableMovePoints(model.Coodrs, model.UnitStats.Speed);
-        OnReachableCellsChanged.Invoke(cells);
+        var cells = _gameModel.GetAvailableMovePoints(model.Coodrs, model.UnitState.MoveSpeed);
+        ReachableCellsChanged.Invoke(cells);
     }
-
 
     private OperationResult Parse(string xRaw, string yRaw, out Vector2Int coords)
     {
         if (!int.TryParse(xRaw, out var x) || !int.TryParse(yRaw, out var y))
         {
-            OnError?.Invoke("Координаты должны быть числами");
+            Error?.Invoke("Координаты должны быть числами");
             coords = default;
             return new OperationResult()
             {
@@ -169,23 +183,30 @@ public class GameViewModel : IInitializable, IDisposable
         isCellSelected = true;
     }
 
-    public void HandleActionPerformed(Vector2Int coords)
+    public void PerformAction(Vector2Int coords)
     {
         Debug.Log("performing action for " + coords + " from " + selectedCell);
-        if (isCellSelected && _gameModel.SwapUnits(coords, selectedCell))
+        if (_gameModel.CurrentAction != null)
         {
-            isCellSelected = false;
-        }
-        else if (isCellSelected && _gameModel.MoveUnit(coords, selectedCell))
-        {
-            selectedCell = coords;
-            isCellSelected = true;
+            GameCell gameCell = (GameCell)_gameModel.GetCell(coords);
+            _gameModel.PerformAction(gameCell);
         }
     }
 
     public void HandleCellHovered(Vector2Int coords)
     {
+        if(_gameModel.CurrentAction != null)
+        {
+            GameCell gameCell = (GameCell)_gameModel.GetCell(coords);
+            if (!_gameModel.CurrentAction.IsAvailable(gameCell))
+                _cursorService.SetCursorState(CursorState.ActionNotAvailable);
+            else
+                _cursorService.SetCursorState(CursorState.ActionAvailable);
+            var route = _gameModel.CurrentAction.GetRoute(gameCell);
 
+            Debug.Log("HandleCellHovered" + route.Count);
+            RoutePointsChanged?.Invoke(route);
+        }
     }
 
     internal Vector2Int GetSelectedCell()

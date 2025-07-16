@@ -5,5 +5,5 @@
 /// </summary>
 public interface IDamageInterceptor
 {
-    void OnBeforeDamage(DamageContext ctx);
+    void OnBeforeDamage(EffectReactionContext ctx);
 }

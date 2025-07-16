@@ -4,17 +4,30 @@ using System.Linq;
 
 public class StatusEffect
 {
-    public readonly StatusEffectData Data;
+    /// <summary>
+    /// Образующие эффект данные
+    /// </summary>
+    public readonly StatusEffectData data;
+    /// <summary>
+    /// Цель эффекта (обладатель)
+    /// </summary>
     private readonly IEffectable target;
+    /// <summary>
+    /// Кастер эффекта (накладыватель)
+    /// </summary>
     private readonly IEffectApplier source;
+    /// <summary>
+    /// Условия исчезновения эффекта
+    /// </summary>
     private readonly ExpirationConditionBase[] conditions;
-
+    public string Name { get => data.name; }
     public StatusEffect(
+       
         StatusEffectData data,
         IEffectable target,
         IEffectApplier source = null)
     {
-        Data = data;
+        this.data = data;
         this.source = source;
         this.target = target;
 
@@ -25,26 +38,60 @@ public class StatusEffect
         foreach (var cond in conditions)
         {
             cond.Initialize();
-            cond.OnApply();
         }
 
-        // Подписываемся на события модели
-        target.OnTurnStart += HandleTurnStart;
-        target.OnDeath += HandleRemove;
+        target.TurnStarted += HandleTurnStart;
+        target.Died += HandleRemove;
+        target.BeforeInDamage += OnIn;
+        target.BeforeOutDamage += OnOut;
 
-        // Реакции OnApply
-        var applyCtx = new EffectContext(target, source, data);
-        foreach (var r in data.OnApply)
-            r.Execute(applyCtx);
+        HandleApply();
+    }
+
+    private void OnOut(DamageContext ctx)
+    {
+        foreach (var reaction in data.OnOutDamage)
+            reaction.Execute(ctx);
+
+        foreach (var cond in conditions)
+            cond.OnOutDamage(ctx);
+
+        CheckExpire();
+    }
+
+    private void OnIn(DamageContext ctx)
+    {
+        foreach (var reaction in data.OnInDamage)
+            reaction.Execute(ctx);
+
+        foreach (var cond in conditions)
+            cond.OnInDamage(ctx);
+
+        CheckExpire();
+    }
+
+    /// <summary>
+    /// Для UI: сколько ходов / уронов осталось до снятия
+    /// </summary>
+    public string[] GetExpirations()
+        => conditions.Select(c => c.GetRemaining()).ToArray();
+    private void HandleApply()
+    {
+        var applyCtx = new EffectReactionContext(target, source);
+        foreach (var reaction in data.OnApply)
+            reaction.Execute(applyCtx);
+
+        foreach (var cond in conditions)
+            cond.OnApply();
 
         CheckExpire();
     }
 
     private void HandleTurnStart()
     {
-        var ctx = new EffectContext(target, source, Data);
-        foreach (var r in Data.OnTurnStart)
-            r.Execute(ctx);
+        EffectReactionContext ctx = new EffectReactionContext(target ,source);
+        foreach (var reaction in data.OnTurnStart)
+            reaction.Execute(ctx);
 
         foreach (var cond in conditions)
             cond.OnTurn();
@@ -61,42 +108,17 @@ public class StatusEffect
     private void HandleRemove()
     {
         // Реакции OnRemove
-        var ctx = new EffectContext(target, source, Data);
-        foreach (var r in Data.OnRemove)
-            r.Execute(ctx);
+        var ctx = new EffectReactionContext(target, source);
+        foreach (var reaction in data.OnRemove)
+            reaction.Execute(ctx);
 
         // Отписка
-        target.OnTurnStart -= HandleTurnStart;
-        target.OnDeath -= HandleRemove;
+        target.TurnStarted -= HandleTurnStart;
+        target.Died -= HandleRemove;
         // Убираем себя из менеджера эффектов
-        target.StatusEffectManager.Remove(this);
+        target.RemoveEffect(this);
     }
+   
 
-    /// <summary>
-    /// Для UI: сколько ходов / уронов осталось до снятия
-    /// </summary>
-    public string[] GetExpirations()
-        => conditions.Select(c => c.GetRemaining()).ToArray();
-
-    internal void OnOut(DamageContext ctx)
-    {
-        foreach (var r in Data.OnOutDamage)
-            r.Execute(ctx);
-
-        foreach (var cond in conditions)
-            cond.OnOutDamage(ctx);
-
-        CheckExpire();
-    }
-
-    internal void OnIn(DamageContext ctx)
-    {
-        foreach (var r in Data.OnInDamage)
-            r.Execute(ctx);
-
-        foreach (var cond in conditions)
-            cond.OnInDamage(ctx);
-
-        CheckExpire();
-    }
+    
 }
