@@ -9,7 +9,7 @@ public class HealReaction : EffectReactionBase
 
     public override void Execute(EffectContext context)
     {
-        if(context.Target is UnitModel unit)
-            unit.Heal(Amount);
+        //if(context.Target is UnitModelLegacy unit)
+        //    unit.Heal(Amount);
     }
 }

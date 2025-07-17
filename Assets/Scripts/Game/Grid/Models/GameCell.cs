@@ -126,7 +126,7 @@ public class GameCell : IGridCell
     {
         foreach(var  cell in _gameGridObjectContents)
         {
-           if (cell is UnitModel)
+           if (cell is UnitModelLegacy)
             {
                 return true;
             }
@@ -139,18 +139,18 @@ public class GameCell : IGridCell
         var gameGridObjectContents = _gameGridObjectContents.ToList();
         foreach (var cell in gameGridObjectContents)
         {
-            if (cell is UnitModel unit)
+            if (cell is UnitModelLegacy unit)
             {
                 _gameGridObjectContents.Remove(unit);
             }
         }
     }
 
-    public UnitModel GetUnit()
+    public UnitModelLegacy GetUnit()
     {
         foreach (var cell in _gameGridObjectContents)
         {
-            if (cell is UnitModel unit)
+            if (cell is UnitModelLegacy unit)
             {
                 return unit;
             }

@@ -9,7 +9,7 @@ public class ModifyMaxHPReaction : EffectReactionBase
 
     public override void Execute(EffectContext context)
     {
-        if(context.Target is UnitModel model)
-            model.AddMaxHP(Amount);
+        //if(context.Target is UnitModelLegacy model)
+        //    model.AddMaxHP(Amount);
     }
 }

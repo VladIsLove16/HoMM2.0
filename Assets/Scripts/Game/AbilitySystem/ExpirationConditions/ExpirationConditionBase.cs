@@ -4,11 +4,32 @@ public abstract class ExpirationConditionBase : ScriptableObject
 {
     /// <summary>Создать копию для рантайма с собственным состоянием</summary>
     public abstract ExpirationConditionBase CreateRuntimeInstance();
-    public abstract void Initialize();           // инициализация состояния
-    public abstract void OnApply();            // инициализация состояния
-    public abstract void OnTurn();                // ход
+    /// <summary>
+    /// Инициализация состояния
+    /// </summary>
+    public abstract void Initialize();        
+    /// <summary>
+    /// При применении эффекта
+    /// </summary>
+    public abstract void OnApply();
+    /// <summary>
+    /// При старте хода
+    /// </summary>
+    public abstract void OnTurn();
+    /// <summary>
+    /// При получении урона
+    /// </summary>
     public abstract void OnInDamage(DamageContext ctx);
+    /// <summary>
+    /// При нанесении урона
+    /// </summary>
     public abstract void OnOutDamage(DamageContext ctx);
-    public abstract bool ShouldRemove { get; }    // признак удаления
-    public abstract string GetRemaining();       // для UI отображения остатка
+    /// <summary>
+    /// Признак удаления
+    /// </summary>
+    public abstract bool ShouldRemove { get; }
+    /// <summary>
+    /// Количество оставшихся срабатываний
+    /// </summary>
+    public abstract string GetRemaining();       
 }

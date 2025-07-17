@@ -20,7 +20,7 @@ public class GameViewModel : IInitializable, IDisposable
     public Action<UnitViewModel, Vector2Int> OnCellContentMoved;
     public Action<UnitViewModel> OnTurnStarted;
 
-    private Dictionary<UnitModel, UnitViewModel> _models = new();
+    private Dictionary<UnitModelLegacy, UnitViewModel> _models = new();
 
     public GameViewModel(GameModel model)
     {
@@ -134,14 +134,14 @@ public class GameViewModel : IInitializable, IDisposable
         Debug.Log(" HandleContentSwaped(UnitModelsSwapped swapped)");
         OnCellContentSwaped?.Invoke(toViewModel, fromViewModel);
     }
-    private void HandleContentMoved(UnitModel model, Vector2Int to)
+    private void HandleContentMoved(UnitModelLegacy model, Vector2Int to)
     {
         UnitViewModel viewModel = _models[model];
         Debug.Log(" OnCellContentMoved?.Invoke(viewModel, to);");
         OnCellContentMoved?.Invoke(viewModel, to);
     }
 
-    private void HandleTurnStarted(UnitModel model)
+    private void HandleTurnStarted(UnitModelLegacy model)
     {
         OnTurnStarted?.Invoke(_models[model]);
     }
@@ -169,6 +169,11 @@ public class GameViewModel : IInitializable, IDisposable
     }
 
     internal bool IsPlayerTurn()
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void GetAvailableMoves()
     {
         throw new NotImplementedException();
     }

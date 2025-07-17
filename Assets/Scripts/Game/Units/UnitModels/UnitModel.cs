@@ -1,93 +1,70 @@
-﻿using NUnit.Framework;
-using System;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
+﻿using System;
+using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
-//IBlockable, IEffectable, IAttackable,
-public class UnitModel : IGridContent,  IDamageSource, IDamageable, IEffectable, IEffectApplier, ICombatUnit
+using UnityEngine.UIElements;
+public interface IEffectable
 {
-    public event Action<DamageContext> OnBeforeDealDamage;
-    public event Action<DamageContext> OnBeforeTakeDamage;
-    public event Action<int> OnHealthChanged;
-    public event Action OnTurnStart;
-    public event Action OnDeath;
-    public event Action OnAttack;
-    public event Action OnHit;
-
-    public UnitStats UnitStats { get; }
-    private int x;
-    private int y;
-    public int X => x;
-    public int Y => y;
-    public int Amount { get; internal set; }
-    public UnitType UnitType { get; }
-    public string Name { get; }
-    public bool IsBlueTeam { get; }
-    public StatusEffectManager StatusEffectManager => UnitStats.StatusEffectManager;
-
-    public event Action<ICombatUnit> OnTurnEnded;
-
-    public event Action<ICombatUnit> OnTurnTaken;
-
-    public UnitModel(UnitDefinitionSO unitDefinitionSO, int x,int y, int amount, bool isPlayer)
+    public void ApplyStatusEffect(StatusEffect statusEffect);
+}
+public interface IEffectApplier
+{
+    public int SpellPower { get; }
+}
+public class UnitModel : IEffectable, IEffectApplier, IDamageable, IDamageSource
+{
+    public UnitModel(UnitStats stats, int x, int y, int amount, bool isPlayer)
     {
-        
-        UnitStats = new UnitStats(unitDefinitionSO);
-        foreach (var effect in unitDefinitionSO.StartingEffects)
-        {
-            StatusEffect statusEffect = new StatusEffect(effect, this, this);
-            StatusEffectManager.Add(statusEffect);
-        }
-        this.x = x;
-        this.y = y;
-        Amount = amount;
-        UnitType = unitDefinitionSO.UnitType;
-        Name = unitDefinitionSO.Name;
-        IsBlueTeam = isPlayer;
+        Position.Value = new Vector2Int(x, y);
+        Amount.Value = amount;
+        IsBlueTeam.Value = isPlayer;
+        UnitType.Value = stats.UnitType;
+        Health.Value = stats.Health;
+        MaxHealth.Value = stats.MaxHealth;
+        Damage.Value = stats.Damage;
+        SpellPower.Value = stats.SpellPower;
+        Damage.Value = stats.Offense;
+        Defense.Value = stats.Defense;
+        MoveSpeed.Value = stats.MoveSpeed;
+        AttackRange.Value = stats.AttackRange;
+        CanFly.Value = stats.CanFly;
+        InvulnerableEffects = stats.InvulnerableEffects;
+    }
+    public UnitStats UnitStats { get; } 
+    public ReactiveProperty<Vector2Int> Position { get; } = new();
+    public ReactiveProperty<int> Amount { get; } = new();
+    public ReactiveProperty<int> MovementRange { get; } = new();
+    public ReactiveProperty<int> AttackRange { get; } = new();
+    public ReactiveProperty<int> MaxHealth { get; } = new();
+    public ReactiveProperty<int> Health { get; } = new();
+    public ReactiveProperty<int> MoveSpeed { get; } = new();
+    public ReactiveProperty<int> Offense { get; } = new();
+    public ReactiveProperty<int> Defense { get; } = new();
+    public ReactiveProperty<int> Damage { get; } = new();
+    public ReactiveProperty<int> SpellPower { get; } = new();
+    public ReactiveProperty<bool> CanAct { get; } = new(true);
+    public ReactiveProperty<bool> CanMove { get; } = new(true);
+    public ReactiveProperty<bool> CanFly { get; } = new(true);
+    public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
+    public List<StatusEffectType> InvulnerableEffects;
+
+    public ReactiveProperty< UnitType> UnitType;
+    private StatusEffectManager statusEffectManager = new();
+    int IEffectApplier.SpellPower => SpellPower.Value;
+    public void ApplyStatusEffect(StatusEffect effect)
+    {
+        if(!InvulnerableEffects.Contains(effect.Type))
+            statusEffectManager.Apply(effect);
     }
 
-    public void ReceiveDamage(int damage)
+    public void SendDamage(DamageContext ctx)
     {
-        int prev = UnitStats.Health;
-        UnitStats.LastDamageAmount = damage;
-        UnitStats.Health = Mathf.Max(UnitStats.Health - damage, 0);
-        OnHealthChanged?.Invoke(UnitStats.Health);
-        OnHit?.Invoke();
-
-        if (UnitStats.Health == 0)
-            OnDeath?.Invoke();
+        statusEffectManager.HandleInDamage(ctx);
     }
 
-    public void Heal(int amount)
+    public void ReceiveDamage(DamageContext ctx)
     {
-        UnitStats.Health = Mathf.Min(UnitStats.Health + amount, UnitStats.MaxHealth);
-        OnHealthChanged?.Invoke(UnitStats.Health);
-    }
-
-    public void AddMaxHP(int amount)
-    {
-        UnitStats.MaxHealth += amount;
-    }
-
-    internal void TriggerAttack() => OnAttack?.Invoke();
-
-    public override string ToString()
-    {
-        return $"{Name} + ({Amount})";
-    }
-
-    public string GetDescription()
-    {
-        return ToString();
-    }
-
-    public void SetCoords(int x, int y)
-    {
-        this.x = x; 
-        this.y = y;
-    }
-
-    public void TakeTurn()
-    {
-        OnTurnStart?.Invoke();
+        statusEffectManager.HandleOutDamage(ctx);
     }
 }
+

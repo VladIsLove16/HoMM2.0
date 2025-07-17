@@ -9,6 +9,8 @@ public class StatusEffect
     private readonly IEffectApplier source;
     private readonly ExpirationConditionBase[] conditions;
 
+    public StatusEffectType Type => Data.Type;
+
     public StatusEffect(
         StatusEffectData data,
         IEffectable target,
@@ -25,22 +27,22 @@ public class StatusEffect
         foreach (var cond in conditions)
         {
             cond.Initialize();
-            cond.OnApply();
         }
+    }
 
-        // Подписываемся на события модели
-        target.OnTurnStart += HandleTurnStart;
-        target.OnDeath += HandleRemove;
+    public void HandleApply()
+    {
+        var ctx = new EffectContext(target, source, Data);
+        foreach (var r in Data.OnApply)
+            r.Execute(ctx);
 
-        // Реакции OnApply
-        var applyCtx = new EffectContext(target, source, data);
-        foreach (var r in data.OnApply)
-            r.Execute(applyCtx);
+        foreach (var cond in conditions)
+            cond.OnApply();
 
         CheckExpire();
     }
 
-    private void HandleTurnStart()
+    public void HandleTurnStart()
     {
         var ctx = new EffectContext(target, source, Data);
         foreach (var r in Data.OnTurnStart)
@@ -52,33 +54,20 @@ public class StatusEffect
         CheckExpire();
     }
 
-    private void CheckExpire()
-    {
-        if (conditions.Any(c => c.ShouldRemove))
-            HandleRemove();
-    }
 
-    private void HandleRemove()
+    public void HandleRemove()
     {
         // Реакции OnRemove
         var ctx = new EffectContext(target, source, Data);
         foreach (var r in Data.OnRemove)
             r.Execute(ctx);
-
-        // Отписка
-        target.OnTurnStart -= HandleTurnStart;
-        target.OnDeath -= HandleRemove;
-        // Убираем себя из менеджера эффектов
-        target.StatusEffectManager.Remove(this);
     }
 
     /// <summary>
     /// Для UI: сколько ходов / уронов осталось до снятия
     /// </summary>
-    public string[] GetExpirations()
-        => conditions.Select(c => c.GetRemaining()).ToArray();
 
-    internal void OnOut(DamageContext ctx)
+    public void HandleOutDamage(DamageContext ctx)
     {
         foreach (var r in Data.OnOutDamage)
             r.Execute(ctx);
@@ -89,7 +78,7 @@ public class StatusEffect
         CheckExpire();
     }
 
-    internal void OnIn(DamageContext ctx)
+    public void HandleInDamage(DamageContext ctx)
     {
         foreach (var r in Data.OnInDamage)
             r.Execute(ctx);
@@ -98,5 +87,13 @@ public class StatusEffect
             cond.OnInDamage(ctx);
 
         CheckExpire();
+    }
+    public string[] GetExpirations()
+        => conditions.Select(c => c.GetRemaining()).ToArray();
+
+    private void CheckExpire()
+    {
+        if (conditions.Any(c => c.ShouldRemove))
+            HandleRemove();
     }
 }

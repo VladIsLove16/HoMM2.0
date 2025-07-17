@@ -59,4 +59,9 @@ public class SingleGridRenderer : ICellGridRenderer
     {
         throw new System.NotImplementedException();
     }
+
+    public CellState GetCellState(Vector2Int coords)
+    {
+        throw new System.NotImplementedException();
+    }
 }

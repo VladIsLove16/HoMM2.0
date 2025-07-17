@@ -12,9 +12,9 @@ public class UnitModelFactory
     {
         _dataMap = allUnitDatas.ToDictionary(d => d.UnitType);
     }
-    public UnitModel Create(UnitSpawnParams unitSpawnParams)
+    public UnitModelLegacy Create(UnitSpawnParams unitSpawnParams)
     {
         UnitDefinitionSO unitDefinitionSO = _dataMap[unitSpawnParams.UnitType];
-        return new UnitModel(unitDefinitionSO, unitSpawnParams.X,unitSpawnParams.Y, unitSpawnParams.Amount,unitSpawnParams.IsPlayer);
+        return new UnitModelLegacy(unitDefinitionSO, unitSpawnParams.X,unitSpawnParams.Y, unitSpawnParams.Amount,unitSpawnParams.IsPlayer);
     }
 }

@@ -60,7 +60,6 @@ public class MovementSystem
         return reachableCells;
     }
 
-    // Get movement cost between two adjacent cells (override for different terrain costs)
     private float GetMovementCost(Vector2Int fromCell, Vector2Int toCell)
     {
         return Mathf.Abs((fromCell-toCell).magnitude);

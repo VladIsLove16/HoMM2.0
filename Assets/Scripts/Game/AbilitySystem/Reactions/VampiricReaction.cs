@@ -13,7 +13,7 @@ public class VampiricReaction : DamageReactionBase
 
     public override void Execute(DamageContext ctx)
     {
-        if(ctx.Target is UnitModel unit)
-            unit.Heal((int)vampisimPercent*ctx.Amount);
+        //if(ctx.Target is UnitModelLegacy unit)
+        //    unit.Heal((int)vampisimPercent*ctx.Amount);
     }
 }

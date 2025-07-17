@@ -2,9 +2,9 @@
 
 public class UnitModelsSwapped
 {
-    public UnitModel from;
-    public UnitModel to;
-    public UnitModelsSwapped(UnitModel from, UnitModel to)
+    public UnitModelLegacy from;
+    public UnitModelLegacy to;
+    public UnitModelsSwapped(UnitModelLegacy from, UnitModelLegacy to)
     {
         this.from = from;
         this.to = to;

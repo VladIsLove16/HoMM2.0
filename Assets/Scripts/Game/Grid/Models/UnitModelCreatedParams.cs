@@ -1,7 +1,7 @@
 ﻿public class UnitModelCreatedParams
 {
-    public UnitModel UnitModel { get; }
-    public UnitModelCreatedParams(UnitModel unitModel)
+    public UnitModelLegacy UnitModel { get; }
+    public UnitModelCreatedParams(UnitModelLegacy unitModel)
     {
         this.UnitModel = unitModel;
     }

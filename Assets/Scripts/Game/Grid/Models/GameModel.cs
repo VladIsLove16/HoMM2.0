@@ -9,8 +9,8 @@ public class GameModel
     public Action<UnitModelCreatedParams> OnCellContentAdded;
     public Action<UnitModelRemovedParams> OnCellContentRemoved;
     public Action<UnitModelsSwapped> OnCellContentSwaped;
-    public Action<UnitModel, Vector2Int> OnCellContentMoved;
-    public Action<UnitModel> OnTurnStarted;
+    public Action<UnitModelLegacy, Vector2Int> OnCellContentMoved;
+    public Action<UnitModelLegacy> OnTurnStarted;
 
     [Inject] private UnitModelFactory _unitModelFactory;
     private GridXZ<GameCell> _grid;
@@ -85,7 +85,7 @@ public class GameModel
         if (!IsEmpty(unitSpawnParams.X, unitSpawnParams.Y))
             return new OperationResult(false,$"Cell ({unitSpawnParams.X},{unitSpawnParams.Y}) is not empty");
         // Создаём контент через выбранную фабрику
-        UnitModel unit = _unitModelFactory.Create(unitSpawnParams);
+        UnitModelLegacy unit = _unitModelFactory.Create(unitSpawnParams);
         unit.OnTurnStart +=  () => OnTurnStarted?.Invoke(unit);
 
         var cell = (GameCell)GetCell(unitSpawnParams.X, unitSpawnParams.Y);
@@ -104,7 +104,7 @@ public class GameModel
             return false;
 
         cell.RemoveUnit();
-        UnitModel unitModel = cell.GetUnit();
+        UnitModelLegacy unitModel = cell.GetUnit();
         OnCellContentRemoved?.Invoke(new UnitModelRemovedParams(unitModel));
         return true;
     }
@@ -154,14 +154,14 @@ public class GameModel
     {
         gameGridCell.AddContent(content);
         Debug.Log("content Added");
-        UnitModelCreatedParams unitModelCreatedParams = new UnitModelCreatedParams(content as UnitModel);
+        UnitModelCreatedParams unitModelCreatedParams = new UnitModelCreatedParams(content as UnitModelLegacy);
         OnCellContentAdded?.Invoke(unitModelCreatedParams);
     }
 
     private void RemoveContent(GameCell gameGridCell, IGridContent content)
     {
         gameGridCell.RemoveContent(content);
-        UnitModelRemovedParams unitModelRemovedParams = new UnitModelRemovedParams(content as UnitModel);
+        UnitModelRemovedParams unitModelRemovedParams = new UnitModelRemovedParams(content as UnitModelLegacy);
         OnCellContentRemoved?.Invoke(unitModelRemovedParams);
     }
 
@@ -171,8 +171,8 @@ public class GameModel
         {
             GameCell fromCell = (GameCell) GetCell(from);
             GameCell toCell = (GameCell) GetCell(to);
-            UnitModel fromUnit = fromCell.GetUnit();
-            UnitModel toUnit = toCell.GetUnit();
+            UnitModelLegacy fromUnit = fromCell.GetUnit();
+            UnitModelLegacy toUnit = toCell.GetUnit();
             if (fromUnit != null && toUnit != null)
             {
                 fromCell.RemoveUnit();
@@ -205,7 +205,7 @@ public class GameModel
     {
         GameCell fromCell = (GameCell)GetCell(from);
         GameCell toCell = (GameCell)GetCell(to);
-        UnitModel fromUnit = fromCell.GetUnit();
+        UnitModelLegacy fromUnit = fromCell.GetUnit();
         if(fromUnit == null)
         {
             Debug.LogWarning("no unit in " + fromCell.x + " " + fromCell.y);

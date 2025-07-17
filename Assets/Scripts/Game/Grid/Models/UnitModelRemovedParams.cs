@@ -1,7 +1,7 @@
 ﻿public class UnitModelRemovedParams
 {
-    public UnitModel UnitModel { get; set; }
-    public UnitModelRemovedParams (UnitModel unitModel)
+    public UnitModelLegacy UnitModel { get; set; }
+    public UnitModelRemovedParams (UnitModelLegacy unitModel)
     {
         this.UnitModel = unitModel; 
     }

@@ -16,7 +16,7 @@ public class SpellCasterService
 
     public void Cast(SpellData data,
                      Vector2Int origin,
-                     Func<Vector2Int, IEffectable?> getUnitAt,
+                     Func<Vector2Int, IEffectableLegacy?> getUnitAt,
                      ISpellCaster source)
     {
         var zone = _zoneFactory.Create(data.ZoneType);
