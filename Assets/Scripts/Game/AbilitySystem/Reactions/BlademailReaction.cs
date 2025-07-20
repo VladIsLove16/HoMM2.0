@@ -8,9 +8,9 @@ public class BlademailReaction : DamageReactionBase
 
     public override void Execute(DamageContext ctx)
     {
-        if (ctx.damageSource is IDamagable damagable)
+        if (ctx.Source is IDamagable damagable)
         {
-            var сtx = new DamageContext(ctx.DamageAmount * BlademailPercent, DamageType.pure, ctx.damageSource);
+            var сtx = new DamageContext(ctx.DamageAmount * BlademailPercent, DamageType.pure, ctx.Source);
             damagable.ReceiveDamage(сtx);
         }
     }

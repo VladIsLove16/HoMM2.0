@@ -145,7 +145,7 @@ public class GameViewModel : IInitializable, IDisposable
 
     private void HandleTurnStarted(UnitModel model)
     {
-        var cells = _gameModel.GetAvailableMovePoints(model.Coodrs, model.UnitState.MoveSpeed);
+        var cells = _gameModel.GetAvailableMovePoints(model.Position.Value, model.ModifiedStats.MoveSpeed);
         ReachableCellsChanged.Invoke(cells);
     }
 

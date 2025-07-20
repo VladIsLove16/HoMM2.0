@@ -1,15 +1,12 @@
 ﻿// ModifyMaxHPReaction.cs
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Magic/Reactions/Modify Max HP")]
-public class ModifyMaxHPReaction : EffectReactionBase
+[CreateAssetMenu(menuName = "Magic/Reactions/StatModifier")]
+public class StatModifierEffectReaction : StatModifierEffectReactionBase
 {
-    [Tooltip("Изменение MaxHP")]
-    public int Amount;
-
     public override void Execute(EffectReactionContext context)
     {
-        if(context.Target is UnitModel model)
-            model.AddMaxHP(Amount);
+        IEffectable target = context.Target;
+        target.ModifiedStats += StatModifier;
     }
 }

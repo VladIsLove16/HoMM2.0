@@ -100,7 +100,7 @@ public class GameModel
     {
         GameCell cell = (GameCell)GetCell(unit.X, unit.Y);
         Debug.Log("turn started in cell" + cell.x + ", " + cell.y);
-        CurrentAction = new MoveUnitAcion(_movementSystem, cell,unit.UnitState.MoveSpeed, (route) => CellContentMovedByRoute?.Invoke(unit,route));
+        CurrentAction = new MoveUnitAcion(_movementSystem, cell,unit.ModifiedStats.MoveSpeed, (route) => CellContentMovedByRoute?.Invoke(unit,route));
         //CurrentAction = new TeleportUnitAction(cell,(coords)=> CellContentMoved?.Invoke(unit, coords));
         TurnStarted?.Invoke(unit);
     }
@@ -202,5 +202,11 @@ public class GameModel
         {
             _turnSystem.EndTurn();
         }
+    }
+
+    public bool IsInAttackRange(Vector2Int from, Vector2Int targetCell, int attackRange)
+    {
+         _movementSystem.GetRouteIgnoringObstacles(from,targetCell,out var route);
+        return _movementSystem.GetRouteCost(route) <= attackRange;
     }
 }

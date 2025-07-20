@@ -28,9 +28,10 @@ public class SpellCasterService
             target.ReceiveDamage(damageContext);
             //_combatController.DealDamage(target, data.Damage, source);
 
-            foreach (var se in data.StatusEffects)
+            foreach (var seData in data.StatusEffects)
             {
-                target.ApplyEffect(se, source);
+                StatusEffect statusEffect = new(seData, target, source);
+                target.ApplyStatusEffect(statusEffect);
             }
         }
     }

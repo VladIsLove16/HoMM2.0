@@ -1,13 +1,18 @@
 ﻿// Model/StatusEffect.cs
 using System;
 using System.Linq;
+using static UnityEngine.InputSystem.HID.HID;
 
 public class StatusEffect
 {
     /// <summary>
     /// Образующие эффект данные
     /// </summary>
-    public readonly StatusEffectData data;
+    private readonly StatusEffectData data;
+    /// <summary>
+    /// Тип эффекта
+    /// </summary>
+    public readonly StatusEffectType Type;
     /// <summary>
     /// Цель эффекта (обладатель)
     /// </summary>
@@ -39,43 +44,55 @@ public class StatusEffect
         {
             cond.Initialize();
         }
-
-        target.TurnStarted += HandleTurnStart;
-        target.Died += HandleRemove;
-        target.BeforeInDamage += OnIn;
-        target.BeforeOutDamage += OnOut;
-
-        HandleApply();
     }
 
-    private void OnOut(DamageContext ctx)
+    public void HandleOutDamage(DamageContext ctx, bool simulation = false)
     {
         foreach (var reaction in data.OnOutDamage)
-            reaction.Execute(ctx);
+            reaction.Execute(ctx, simulation);
+        if(!simulation)
+        {
+            foreach (var cond in conditions)
+                cond.OnOutDamage(ctx);
 
-        foreach (var cond in conditions)
-            cond.OnOutDamage(ctx);
-
-        CheckExpire();
+            CheckExpire();
+        }
     }
 
-    private void OnIn(DamageContext ctx)
+    public void HandleInDamage(DamageContext ctx, bool simulation = false)
     {
         foreach (var reaction in data.OnInDamage)
-            reaction.Execute(ctx);
+            reaction.Execute(ctx, simulation);
+        if (!simulation)
+        {
+            foreach (var cond in conditions)
+                cond.OnInDamage(ctx);
 
+            CheckExpire();
+        }
+    }
+    public void HandleTurnStart()
+    {
+        EffectReactionContext ctx = new EffectReactionContext(target, source);
+        foreach (var reaction in data.OnTurnStart)
+            reaction.Execute(ctx);
         foreach (var cond in conditions)
-            cond.OnInDamage(ctx);
+                cond.OnTurn();
 
         CheckExpire();
     }
+    internal void HandleTurnEnd()
+    {
+        EffectReactionContext ctx = new EffectReactionContext(target, source);
+        foreach (var reaction in data.OnTurnEnd)
+            reaction.Execute(ctx);
 
-    /// <summary>
-    /// Для UI: сколько ходов / уронов осталось до снятия
-    /// </summary>
-    public string[] GetExpirations()
-        => conditions.Select(c => c.GetRemaining()).ToArray();
-    private void HandleApply()
+        foreach (var cond in conditions)
+            cond.OnTurnEnd();
+
+        CheckExpire();
+    }
+    public void HandleApply()
     {
         var applyCtx = new EffectReactionContext(target, source);
         foreach (var reaction in data.OnApply)
@@ -87,17 +104,23 @@ public class StatusEffect
         CheckExpire();
     }
 
-    private void HandleTurnStart()
+    public void HandleRemove()
     {
-        EffectReactionContext ctx = new EffectReactionContext(target ,source);
-        foreach (var reaction in data.OnTurnStart)
+        // Реакции OnRemove
+        var ctx = new EffectReactionContext(target, source);
+        foreach (var reaction in data.OnRemove)
             reaction.Execute(ctx);
 
-        foreach (var cond in conditions)
-            cond.OnTurn();
-
-        CheckExpire();
+        target.RemoveEffect(this);
     }
+
+    /// <summary>
+    /// Для UI: сколько ходов / уронов осталось до снятия
+    /// </summary>
+    public string[] GetExpirations()
+        => conditions.Select(c => c.GetRemaining()).ToArray();
+    
+
 
     private void CheckExpire()
     {
@@ -105,20 +128,5 @@ public class StatusEffect
             HandleRemove();
     }
 
-    private void HandleRemove()
-    {
-        // Реакции OnRemove
-        var ctx = new EffectReactionContext(target, source);
-        foreach (var reaction in data.OnRemove)
-            reaction.Execute(ctx);
-
-        // Отписка
-        target.TurnStarted -= HandleTurnStart;
-        target.Died -= HandleRemove;
-        // Убираем себя из менеджера эффектов
-        target.RemoveEffect(this);
-    }
    
-
-    
 }

@@ -53,19 +53,19 @@ public class GameCell : IGridCell
             Debug.Log("null content have not added");
             return;
         }
-        Debug.Log($"content {content.UnitType} added to {X} {Y}");
+        Debug.Log($"content {content.GridContentType} added to {X} {Y}");
 
         _gameGridObjectContents.Add(content);
-        content.SetCoords(X, Y);
+        content.Position = new Vector2Int(X, y);
 
-        mainGrid.TriggerGridObjectChanged(new(content.X, content.Y, content, null));
+        mainGrid.TriggerGridObjectChanged(new(content.Position.x, content.Position.y, content, null));
 
     }
 
     public void RemoveContent(IGridContent content)
     {
         _gameGridObjectContents.Remove(content);
-        mainGrid.TriggerGridObjectChanged(new(content.X, content.Y, null, content));
+        mainGrid.TriggerGridObjectChanged(new(content.Position.x, content.Position.y, null, content));
     }
 
     public void Clear()
@@ -132,12 +132,12 @@ public class GameCell : IGridCell
     public void RemoveUnit()
     {
         var gameGridObjectContents = _gameGridObjectContents.ToList();
-        foreach (var cell in gameGridObjectContents)
+        foreach (var cellContent in gameGridObjectContents)
         {
-            if (cell is UnitModel unit)
+            if (cellContent is UnitModel unit)
             {
                 _gameGridObjectContents.Remove(unit);
-                mainGrid.TriggerGridObjectChanged(new GridXZ<GameCell>.GridObjectChangedEventArgs(unit.X, unit.Y, null, unit));
+                mainGrid.TriggerGridObjectChanged(new GridXZ<GameCell>.GridObjectChangedEventArgs(cellContent.Position.x, cellContent.Position.y, null, unit));
                 return;
             }
         }

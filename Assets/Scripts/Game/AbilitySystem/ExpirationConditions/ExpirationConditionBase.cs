@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public abstract class ExpirationConditionBase : ScriptableObject
 {
@@ -11,4 +12,9 @@ public abstract class ExpirationConditionBase : ScriptableObject
     public abstract void OnOutDamage(DamageContext ctx);
     public abstract bool ShouldRemove { get; }    // признак удаления
     public abstract string GetRemaining();       // для UI отображения остатка
+
+    internal void OnTurnEnd()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -7,6 +7,6 @@ public class AccelerateReaction : EffectReactionBase
     [SerializeField] int accelerateAmount;
     public override void Execute(EffectReactionContext ctx)
     {
-        ctx.Target.UnitState.MoveSpeed+= accelerateAmount; 
+        //ctx.Target.UnitState.MoveSpeed+= accelerateAmount; 
     }
 }

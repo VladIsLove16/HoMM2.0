@@ -1,12 +1,12 @@
 ﻿public class DamageContext
 {
     public int DamageAmount;
-    public DamageType damageType;
-    public IDamageSource damageSource;
+    public DamageType Type;
+    public IDamageSource Source;
     public DamageContext(int damageAmount, DamageType damageType, IDamageSource damageSource)
     {
         DamageAmount = damageAmount;
-        this.damageType = damageType;
-        this.damageSource = damageSource;
+        this.Type = damageType;
+        this.Source = damageSource;
     }
 }

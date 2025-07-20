@@ -15,6 +15,6 @@ public class UnitModelFactory
     public UnitModel Create(UnitSpawnParams unitSpawnParams)
     {
         UnitDefinitionSO unitDefinitionSO = _dataMap[unitSpawnParams.UnitType];
-        return new UnitModel(unitDefinitionSO, unitSpawnParams.X,unitSpawnParams.Y, unitSpawnParams.Amount,unitSpawnParams.IsPlayer);
+        return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.X,unitSpawnParams.Y, unitSpawnParams.Amount,unitSpawnParams.IsPlayer);
     }
 }

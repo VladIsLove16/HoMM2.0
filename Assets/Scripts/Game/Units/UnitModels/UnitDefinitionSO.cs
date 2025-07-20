@@ -13,11 +13,7 @@ public class UnitDefinitionSO : ScriptableObject
     public Material RedTeamMaterial;
     public Material HoveredRedTeamMaterial;
     public UnitType UnitType;
-    public int BaseHealth;
-    public int BaseDamage;
-    public int BaseOffense;
-    public int BaseDefense;
-    public int BaseSpeed;
+    public UnitStats Stats;
     [SerializeField] private List<StatusEffectData> startingEffects = new List<StatusEffectData>();
     [SerializeField] private List<StatusEffectData> invulnerableEffects = new List<StatusEffectData>();
     public IReadOnlyList<StatusEffectData> StartingEffects => startingEffects;

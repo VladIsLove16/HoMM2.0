@@ -11,11 +11,13 @@ public class StatusEffectData : ScriptableObject
     [SerializeField] private Sprite sprite;
     public Sprite Sprite => sprite;
 
+
     public List<ExpirationConditionBase> ExpirationConditions;
 
     [Tooltip("Реакции, которые нужно выполнить при событиях")]
     public List<EffectReactionBase> OnApply;
     public List<EffectReactionBase> OnTurnStart;
+    public List<EffectReactionBase> OnTurnEnd;
     public List<DamageReactionBase> OnInDamage;
     public List<DamageReactionBase> OnOutDamage;
     public List<EffectReactionBase> OnRemove;

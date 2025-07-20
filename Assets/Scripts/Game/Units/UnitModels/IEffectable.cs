@@ -1,15 +1,6 @@
-﻿using System;
-/// <summary>
-/// Тот, кто может быть целью эффектов
-/// </summary>
-public interface IEffectable : IGridContent, IDamagable
+﻿public interface IEffectable : IDamagable
 {
-    event Action<DamageContext> BeforeInDamage;
-    event Action<DamageContext> BeforeOutDamage;
-    public event Action TurnStarted;
-    public event Action TurnEnded;
-    public UnitState UnitState { get; }
-
-    public void ApplyEffect(StatusEffectData statusEffect,IEffectApplier effectApplier);
+    public void ApplyStatusEffect(StatusEffect statusEffect);
+    public UnitStats ModifiedStats { get; set; }    
     public void RemoveEffect(StatusEffect statusEffect);
 }

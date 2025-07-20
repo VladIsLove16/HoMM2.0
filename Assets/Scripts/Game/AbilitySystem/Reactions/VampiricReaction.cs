@@ -10,6 +10,6 @@ public class VampiricReaction : DamageReactionBase
 
     public override void Execute(DamageContext ctx)
     {
-        ctx.damageSource.UnitState.Health = Math.Min(ctx.damageSource.UnitState.MaxHealth, ctx.damageSource.UnitState.Health + ctx.DamageAmount*vampirismPercent);
+        //ctx.Source.UnitState.Health = Math.Min(ctx.Source.UnitState.MaxHealth, ctx.Source.UnitState.Health + ctx.DamageAmount*vampirismPercent);
     }
 }

@@ -6,5 +6,6 @@
     selected,
     hovered,
     normal,
-    None
+    None,
+    attackTarget
 }

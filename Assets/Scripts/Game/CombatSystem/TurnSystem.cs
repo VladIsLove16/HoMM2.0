@@ -3,24 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
-public interface ICombatAction
-{
-    void Execute(IDamageSource source, IDamagable target);
-}
-public interface ICombatUnit
-{
-    void TakeTurn();
-    void EndTurn();
-    bool IsBlueTeam { get; }
-    UnitType  UnitType { get; }
-}
-public enum BattleState
-{
-    none,
-    inProgress,
-    blueTeamWins,
-    redTeamWins
-}
 public class TurnSystem
 {
     public List<ICombatUnit> CombatUnits { get; } = new List<ICombatUnit>();
@@ -36,7 +18,7 @@ public class TurnSystem
     {
         CombatUnits.Add(unit);
     }
-    internal void RemoveCombatUnit(UnitModel unit)
+    internal void RemoveCombatUnit(ICombatUnit unit)
     {
         CombatUnits.Remove(unit);
     }
@@ -105,14 +87,17 @@ public class TurnSystem
         turnDict[turn].Add(unit);
         CombatUnitsAdded?.Invoke(new UnitTurnInfo(unit, turn));
     }
-
-    internal void EndTurn()
+    private void StartTurn(ICombatUnit unit)
+    {
+        unit.TakeTurn();
+        ActiveUnitChanged?.Invoke();
+    }
+    public void EndTurn()
     {
         currentUnit.EndTurn();
         ICombatUnit nextUnit = DequeueUnit();
         currentUnit = nextUnit;
-        nextUnit.TakeTurn();
-        ActiveUnitChanged?.Invoke();
+        StartTurn(currentUnit);
     }
     private ICombatUnit DequeueUnit()
     {

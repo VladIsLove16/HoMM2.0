@@ -7,18 +7,18 @@ public class UnitViewUI : MonoBehaviour
 {
     [SerializeField] UnitHealthBar healthBar;
     [SerializeField] TextMeshProUGUI AmountText;
-    private UnitModel _unitModel;
+    private UnitViewModel _unitvViewModel;
   
-    public void Init(UnitModel vm)
+    public void Init(UnitViewModel vm)
     {
-        _unitModel = vm;
+        _unitvViewModel = vm;
 
-        _unitModel.HealthChanged += OnHealthChanged;
-        _unitModel.Died += OnDeath;
-        _unitModel.TurnStarted += OnTurnStart;
+        _unitvViewModel.HealthChanged += OnHealthChanged;
+        _unitvViewModel.Died += OnDeath;
+        _unitvViewModel.TurnStarted += OnTurnStart;
 
         healthBar.Init();
-        SetHealthRatio((float)_unitModel.UnitState.Health / _unitModel.UnitState.MaxHealth);
+        SetHealthRatio((float)_unitvViewModel.UnitState.Health / _unitvViewModel.UnitState.MaxHealth);
         SetAmount(vm.Amount);
     }
 
@@ -39,7 +39,7 @@ public class UnitViewUI : MonoBehaviour
 
     private void OnHealthChanged(int obj)
     {
-        SetHealthRatio((float)_unitModel.UnitState.Health / _unitModel.UnitState.MaxHealth);
+        SetHealthRatio((float)_unitvViewModel.UnitState.Health / _unitvViewModel.UnitState.MaxHealth);
     }
 
     public void SetHealthRatio(float ration)

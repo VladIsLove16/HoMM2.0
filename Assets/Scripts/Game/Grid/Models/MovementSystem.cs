@@ -7,6 +7,7 @@ public class MovementSystem
     private GridXZ<GameCell> _grid;
     private Dictionary<Vector2Int, List<Vector2Int>> reachableCellsCache = new();
     private Dictionary<(Vector2Int,Vector2Int), List<Vector2Int>> routesCache = new();
+    private Dictionary<(Vector2Int,Vector2Int), List<Vector2Int>> ignoreObstaclesRoutesCache = new();
 
     public MovementSystem(GridXZ<GameCell> grid)
     {
@@ -43,6 +44,20 @@ public class MovementSystem
         return false;
     }
 
+    public bool GetRouteIgnoringObstacles(Vector2Int fromCell, Vector2Int toCell, out List<Vector2Int> route)
+    {
+        if (ignoreObstaclesRoutesCache.TryGetValue((fromCell, toCell), out route))
+        {
+            Debug.Log("route found in cache " + RouteToString(route));
+            return true;
+        }
+        if (RunPathfinding(fromCell, int.MaxValue, toCell, out _, out route,true))
+        {
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// Объединённый алгоритм для получения достижимых клеток и маршрута.
     /// </summary>
@@ -51,7 +66,8 @@ public class MovementSystem
         int movementRange,
         Vector2Int? targetCell,
         out List<Vector2Int> reachableCells,
-        out List<Vector2Int> route)
+        out List<Vector2Int> route,
+        bool ignoreOstacles = false)
     {
         reachableCells = new List<Vector2Int>();
         route = new List<Vector2Int>();
@@ -90,7 +106,9 @@ public class MovementSystem
 
             foreach (var neighbor in GetNeighbors(current))
             {
-                if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell) || !cell.IsEmpty)
+                if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell))
+                    continue;
+                if(!cell.IsEmpty && !ignoreOstacles)
                     continue;
 
                 float newCost = costSoFar + GetDistanceMagnitude(current, neighbor);
@@ -101,8 +119,10 @@ public class MovementSystem
                     cameFrom[neighbor] = current;
                     open.Enqueue(neighbor);
 
-                    if (!reachableCells.Contains(neighbor))
+                    if (!reachableCells.Contains(neighbor) && cell.IsEmpty)
+                    {
                         reachableCells.Add(neighbor);
+                    }
                 }
             }
         }
