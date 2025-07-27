@@ -4,27 +4,66 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Zenject;
+public class MoveActionHandlerFactory : PlaceholderFactory<UnitModel, MoveActionHandler>
+{
+    [Inject] private DiContainer _container;
+
+    public override MoveActionHandler Create(UnitModel unit)
+    {
+        // Создаём нужный подтип
+        var handler = new MoveActionHandlerDebugger(unit);
+
+        _container.Inject(handler);
+
+        return handler;
+    }
+}
+
+
+public class MoveActionHandlerDebugger : MoveActionHandler
+{
+    public MoveActionHandlerDebugger(UnitModel model) : base(model) { }
+
+    public override bool CanHandle(ActionContext ctx)
+    {
+        bool res = base.CanHandle(ctx);
+        if (!res)
+        {
+            Debug.Log("MoveActionHandlerDebugger: can't handle action at " + ctx.TargetCell);
+        }
+        return res;
+    }
+}
+
 
 public class MoveActionHandler : IActionHandler
 {
-    [Inject] private MovementSystem _movementSystem;
-    [Inject] private VisualHintSystem _hints;
+    private UnitModel _activeUnit;
+    [Inject] protected MovementSystem _movementSystem;
+    [Inject] protected IGridCellRenderer _renderer;
+    [Inject] protected VisualHintSystem _hints;
+    [Inject] protected GameModel _gm;
     private List<Vector2Int> lastSavedRoute = new();
     private Vector2Int lastSavedpoint;
-    public bool CanHandle(ActionContext ctx)
+    public MoveActionHandler(UnitModel model)
     {
-        return ctx.TargetUnit == null;
+        _activeUnit = model;
+    }
+    public virtual bool CanHandle(ActionContext ctx)
+    {
+        return ctx.TargetObject == null;
     }
     public bool CanShowPreview(ActionContext ctx)
     {
-        return ctx.TargetUnit == null;
+        return ctx.TargetObject == null;
     }
 
-    public IEnumerator Execute(ActionContext ctx)
+    public void Execute(ActionContext ctx)
     {
         List<Vector2Int> moveRoute = GetMoveRoute(ctx);
-        yield return ctx.Unit.MoveAlongRoute(moveRoute);
+        _gm.MoveUnit(_activeUnit, moveRoute);
     }
 
     public void ShowPreview(ActionContext ctx)
@@ -32,7 +71,22 @@ public class MoveActionHandler : IActionHandler
         var route = GetRoute(ctx);
         var moveRoute = GetMoveRoute(ctx);
         var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-        _hints.ShowRoute(moveRoute, inaccessRoute);
+        _renderer.RemoveStates(CellState.accessibleRoutePoint);
+        _renderer.RemoveStates(CellState.inaccessibleRoutePoint);
+        _renderer.RemoveStates(CellState.moveAvailable);
+        _renderer.AddStates(moveRoute, CellState.accessibleRoutePoint);
+        _renderer.AddStates(inaccessRoute, CellState.inaccessibleRoutePoint);
+    }
+
+    public void ShowAvaiableTargetCells()
+    {
+        var pos = _activeUnit.Position.Value;
+        var stats = _activeUnit.ModifiedStats;
+        var speed = stats.MoveSpeed;
+        _renderer.AddState(new(0, 0), CellState.moveAvailable);
+        var movaAvailableCells = _movementSystem.GetReachableCells(pos,speed);
+        _renderer.RemoveStates(CellState.moveAvailable);
+        _renderer.AddStates(movaAvailableCells, CellState.moveAvailable);
     }
 
     private static List<Vector2Int> GetInaccessibleRoute(List<Vector2Int> route, List<Vector2Int> moveRoute)
@@ -49,18 +103,18 @@ public class MoveActionHandler : IActionHandler
     private List<Vector2Int> GetRoute(ActionContext ctx)
     {
         var route = new List<Vector2Int>();
-        if (ctx.Unit.Model.ModifiedStats.CanFly)
+        if (_activeUnit.ModifiedStats.CanFly)
         {
-            _movementSystem.GetRouteIgnoringObstacles(ctx.Unit.Model.Position.Value, ctx.TargetCell, out route);
+            _movementSystem.GetRouteIgnoringObstacles(_activeUnit.Position.Value, ctx.TargetCell, out route);
         }
         else
-            _movementSystem.GetRoute(ctx.Unit.Model.Position.Value, ctx.TargetCell, out route);
+            _movementSystem.GetRoute(_activeUnit.Position.Value, ctx.TargetCell, out route);
         return route;
     }
     private List<Vector2Int> GetMoveRoute(ActionContext ctx)
     {
         var route = GetRoute(ctx);
-        int moveSpeed = ctx.Unit.Model.ModifiedStats.MoveSpeed;
+        int moveSpeed = _activeUnit.ModifiedStats.MoveSpeed;
         var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveSpeed);
         return moveRoute;
     }

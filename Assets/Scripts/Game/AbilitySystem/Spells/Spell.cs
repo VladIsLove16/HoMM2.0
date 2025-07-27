@@ -2,21 +2,18 @@
 using UnityEngine;
 public class SpellCasterService
 {
-    private readonly CombatController _combatController;
     private readonly SpellZoneFactory _zoneFactory;
 
     public SpellCasterService(
-        CombatController combat,
         SpellZoneFactory zoneFactory)
     {
-        _combatController = combat;
         _zoneFactory = zoneFactory;
     }
 
     public void Cast(SpellData data,
                      Vector2Int origin,
                      Func<Vector2Int, IEffectable> getUnitAt,
-                     ISpellCaster source)
+                     IEffectApplier source)
     {
         var zone = _zoneFactory.Create(data.ZoneType);
         foreach (var offset in zone.GetCells())
@@ -25,7 +22,7 @@ public class SpellCasterService
             var target = getUnitAt(pos);
             if (target == null) continue;
             DamageContext damageContext = new(data.Damage, data.DamageType, source);
-            target.ReceiveDamage(damageContext);
+            target.RecieveDamage(damageContext);
             //_combatController.DealDamage(target, data.Damage, source);
 
             foreach (var seData in data.StatusEffects)

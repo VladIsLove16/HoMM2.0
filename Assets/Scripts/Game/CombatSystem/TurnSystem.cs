@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 public class TurnSystem
 {
-    public List<ICombatUnit> CombatUnits { get; } = new List<ICombatUnit>();
-    public int TurnNumber { get;private set; } = 0;
-    public Action<int> TurnNumberChanged;
-    public ICombatUnit currentUnit;
+    public List<ICombatObject> CombatUnits { get; } = new List<ICombatObject>();
+    public ReactiveProperty<int> TurnNumber = new(0);
+    public ReactiveProperty<ICombatObject> ActiveObject = new();
     int turnTowards = 3;
-    public Action ActiveUnitChanged;
     public Action<UnitTurnInfo> CombatUnitsAdded;
-    private Dictionary<int, List<ICombatUnit>> turnDict = new();
+    protected Dictionary<int, List<ICombatObject>> turnDict = new();
     private BattleState BattleState = BattleState.none;
-    public void AddCombatUnit(ICombatUnit unit)
+    public void AddCombatUnit(ICombatObject unit)
     {
         CombatUnits.Add(unit);
     }
-    internal void RemoveCombatUnit(ICombatUnit unit)
+    internal void RemoveCombatUnit(ICombatObject unit)
     {
         CombatUnits.Remove(unit);
     }
@@ -28,18 +27,39 @@ public class TurnSystem
     }
     public void RunBattle()
     {
-        AddFirstUnits();
-        TakeFirstTurn();
-    }
-
-    private void TakeFirstTurn()
-    {
         BattleState = BattleState.inProgress;
-        ICombatUnit combatUnit = DequeueUnit();
-        currentUnit = combatUnit;
-        combatUnit.TakeTurn();
+        AddFirstUnits();
+        TakeTurn();
     }
-
+    public void TakeTurn()
+    {
+        ICombatObject combatObject = GetFirstObject();
+        combatObject.TakeTurn();
+        ActiveObject.SetValueAndForceNotify(combatObject);
+    }
+    protected virtual ICombatObject GetFirstObject()
+    {
+        return turnDict[TurnNumber.Value][0];
+    }
+    public void EndTurn()
+    {
+        ActiveObject.Value.EndTurn();
+        ICombatObject nextUnit = DequeueUnit();
+    }
+    public BattleState UpdateBattleState()
+    {
+        bool team1;
+        team1 = CombatUnits[TurnNumber.Value].IsBlueTeam;
+        for (int i = 1; i < CombatUnits.Count; i++)
+        {
+            if (CombatUnits[i].IsBlueTeam != team1)
+            {
+                return BattleState.inProgress;
+            }
+        }
+        BattleState = team1 == true ? BattleState.blueTeamWins : BattleState.redTeamWins;
+        return BattleState;
+    }
 
     private void AddFirstUnits()
     {
@@ -50,21 +70,7 @@ public class TurnSystem
         }
         AddUnitsUntil(turnTowards);
     }
-
-    public BattleState UpdateBattleState()
-    {
-        bool team1;
-        team1 = CombatUnits[TurnNumber].IsBlueTeam;
-        for(int i = 1; i< CombatUnits.Count; i++)
-        {
-            if(CombatUnits[i].IsBlueTeam != team1)
-            {
-                return BattleState.inProgress;
-            }
-        }
-        BattleState = team1 == true ? BattleState.blueTeamWins : BattleState.redTeamWins;
-        return BattleState;
-    }
+    
     private void AddUnitsUntil(int turn)
     {
         for (int i = turnDict.Count; i < turn; i++)
@@ -77,8 +83,7 @@ public class TurnSystem
         }
     }
 
-
-    private void AddUnitToTurn(int turn, ICombatUnit unit)
+    private void AddUnitToTurn(int turn, ICombatObject unit)
     {
         if (!turnDict.ContainsKey(turn))
         {
@@ -87,44 +92,48 @@ public class TurnSystem
         turnDict[turn].Add(unit);
         CombatUnitsAdded?.Invoke(new UnitTurnInfo(unit, turn));
     }
-    private void StartTurn(ICombatUnit unit)
+
+    private ICombatObject DequeueUnit()
     {
-        unit.TakeTurn();
-        ActiveUnitChanged?.Invoke();
-    }
-    public void EndTurn()
-    {
-        currentUnit.EndTurn();
-        ICombatUnit nextUnit = DequeueUnit();
-        currentUnit = nextUnit;
-        StartTurn(currentUnit);
-    }
-    private ICombatUnit DequeueUnit()
-    {
-        if (turnDict[TurnNumber].Count == 0)
+        if (turnDict[TurnNumber.Value].Count == 0)
         {
             Debug.Log("unit dequied,no left units");
-            turnDict.Remove(TurnNumber);
-            TurnNumber++;
-            TurnNumberChanged.Invoke(TurnNumber);
+            turnDict.Remove(TurnNumber.Value);
+            TurnNumber.SetValueAndForceNotify(TurnNumber.Value + 1);
         }
         else
         {
             string a = string.Empty;
-            foreach(var b in turnDict[TurnNumber])
+            foreach(var b in turnDict[TurnNumber.Value])
             {
                 a += b.ToString();
             }
             Debug.Log("unit dequied,left units" + a);
 
         }
-        if(turnDict.Count<=TurnNumber+turnTowards)
+        if(turnDict.Count<=TurnNumber.Value +turnTowards)
         {
-            AddUnitsUntil(TurnNumber + turnTowards);
+            AddUnitsUntil(TurnNumber.Value + turnTowards);
         }
-        ICombatUnit combatUnit = turnDict[TurnNumber][0];
-        turnDict[TurnNumber].Remove(combatUnit);
+        ICombatObject combatUnit = turnDict[TurnNumber.Value][0];
+        turnDict[TurnNumber.Value].Remove(combatUnit);
         return combatUnit;
     }
 
+}
+
+public class TurnSystemDebugger : TurnSystem
+{
+    protected override ICombatObject GetFirstObject()
+    {
+        if(turnDict.Count == 0)
+        {
+            Debug.Log("turnDict.Count == 0");
+        }
+        if (turnDict[0].Count == 0)
+        {
+            Debug.Log("turnDict[0].Count == 0");
+        }
+        return  base.GetFirstObject();
+    }
 }

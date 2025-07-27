@@ -5,6 +5,7 @@
     ActionAvailable,
     Hover,
     Attack,
+    RangedAttack,
     Move,
     Disabled
 }

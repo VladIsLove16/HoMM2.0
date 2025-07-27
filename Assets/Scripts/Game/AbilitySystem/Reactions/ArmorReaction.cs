@@ -10,7 +10,7 @@ public class ArmorReaction : DamageReactionBase
         this.armor = armor;
     }
 
-    public override void Execute(DamageContext ctx)
+    public override void Execute(DamageContext ctx, bool simulation = false)
     {
         ctx.DamageAmount -= armor;
     }

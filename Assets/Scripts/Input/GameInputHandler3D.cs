@@ -1,44 +1,73 @@
 using System;
+using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 using Zenject;
 
 public class GameInputHandler3D : MonoBehaviour
 {
-	[Inject] private IGridCellRenderer _renderer;
-	[Inject] private InputSystem_Actions _inputActions;
+    [SerializeField] private LayerMask mouseColliderLayerMask;
+    private InputSystem_Actions _inputActions;
+    [Inject] private IWorldToCellProvider _renderer;
+    
+    public ReactiveProperty<Vector2Int> HoveredCell;
+    public ReactiveProperty<Vector2Int> SelectedCell;
+    public ReactiveProperty<Vector2Int> ActionPerformed;
+    public ReactiveProperty<Collider> HoveredCollider;
+    public ReactiveProperty<Vector3> WorldMousePosition;
+    private void OnEnable()
+    {
+        if(_inputActions == null)
+            _inputActions = new();
+        _inputActions.Enable();
+        _inputActions.Grid.MousePosition.performed += OnMouseMoved;
+        _inputActions.Grid.Select.performed += OnSelectPerformed;
+        _inputActions.Grid.Action.performed += OnActionPerformed;
+    }
 
-	public event Action<Vector2Int> CellHovered;
-	public event Action<Vector2Int> CellSelected;
-	public event Action ActionRequested;
+    private void OnDisable()
+    {
+        _inputActions.Grid.MousePosition.performed -= OnMouseMoved;
+        _inputActions.Grid.Select.performed -= OnSelectPerformed;
+        _inputActions.Grid.Action.performed -= OnActionPerformed;
+        _inputActions.Disable();
+    }
 
-	public Vector2Int CurrentHoveredCell { get; private set; }
-
-	private void Start()
-	{
-		_inputActions.Enable();
-		_inputActions.Grid.MousePosition.performed += OnMouseMoved;
-		_inputActions.Grid.Select.performed += OnCellSelected;
-		_inputActions.Grid.Action.performed += OnAction;
-	}
-
-	private void OnMouseMoved(InputAction.CallbackContext context)
-	{
-		if (Mouse3D.GetMouseWorldPosition(out Vector3 worldPos) &&
-			_renderer.ToGrid(worldPos, out Vector2Int coords))
-		{
-			CurrentHoveredCell = coords;
-			CellHovered?.Invoke(coords);
-		}
-	}
-
-	private void OnCellSelected(InputAction.CallbackContext context)
-	{
-		CellSelected?.Invoke(CurrentHoveredCell);
-	}
-
-	private void OnAction(InputAction.CallbackContext context)
-	{
-		ActionRequested?.Invoke();
-	}
+    private void OnMouseMoved(InputAction.CallbackContext ctx)
+    {
+        if (GetHit(out RaycastHit raycastHit,out Ray ray))
+        {
+            if(raycastHit.collider != HoveredCollider.Value)
+                HoveredCollider.SetValueAndForceNotify(raycastHit.collider);
+            if (raycastHit.point != WorldMousePosition.Value)
+                WorldMousePosition.SetValueAndForceNotify(raycastHit.point);
+            if(_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
+            {
+                if(coords != HoveredCell.Value)
+                    HoveredCell.SetValueAndForceNotify(coords);
+            }
+        }
+    }
+    private bool GetHit(out RaycastHit raycastHit, out Ray ray)
+    {
+        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        return Physics.Raycast(ray, out raycastHit, 999f, mouseColliderLayerMask);
+    }
+    private void OnSelectPerformed(InputAction.CallbackContext ctx)
+    {
+        if(GetHit(out var raycastHit,out var ray))
+        {
+            if (_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
+                SelectedCell.SetValueAndForceNotify(coords);
+        }
+    }
+    private void OnActionPerformed(InputAction.CallbackContext ctx)
+    {
+        if (GetHit(out var raycastHit, out var ray))
+        {
+            if (_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
+                ActionPerformed.SetValueAndForceNotify(coords);
+        }
+    }
 }

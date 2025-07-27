@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using UniRx;
 
 public class UnitTurnPanelViewModel
 {
     private readonly TurnSystem _turnSystem;
     public List<UnitTurnInfo> turnList = new();
-    public Action<int> TurnNumberChanged;
-    public int TurnNumber
-    {
-        get
-        {
-            if (_turnSystem != null)
-                return _turnSystem.TurnNumber + 1;
-            else return 0;
-        }
-    }
-    public Action ActiveUnitChanged;
+    public ReactiveProperty<int> TurnNumber = new(0);
+    public ReactiveProperty<ICombatObject> ActiveUnit = new();
     public Action<UnitTurnInfo> CombatUnitsAdded;
-    public UnitTurnPanelViewModel(TurnSystem combatSystem)
+    public UnitTurnPanelViewModel(TurnSystem turnSystem)
     {
-        _turnSystem = combatSystem;
+        _turnSystem = turnSystem;
         _turnSystem.CombatUnitsAdded += OnCombatUnitsAdded;
-        _turnSystem.ActiveUnitChanged += () => ActiveUnitChanged.Invoke();
-        _turnSystem.TurnNumberChanged += (turn) =>
-        {
-            TurnNumberChanged?.Invoke(turn + 1);
-        };
+        _turnSystem.ActiveObject.Subscribe(ActiveObjectChanged);
+        _turnSystem.TurnNumber.Subscribe(TurnNumberChanged);
+    }
+
+    private void ActiveObjectChanged(ICombatObject combatObject)
+    {
+        ActiveUnit.SetValueAndForceNotify(combatObject);
+    }
+
+    private void TurnNumberChanged(int turn)
+    {
+        TurnNumber.SetValueAndForceNotify(turn + 1);
     }
 
     private void OnCombatUnitsAdded(UnitTurnInfo unitTurnInfo)

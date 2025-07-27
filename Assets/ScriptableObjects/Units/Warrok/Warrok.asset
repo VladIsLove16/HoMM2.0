@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6af1cc4405b903443b1c02445e0e07ae, type: 3}
+  m_Name: Warrok
+  m_EditorClassIdentifier: 
+  UnitType: 2
+  UnitViewPrefab: {fileID: 5985448834381532279, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
+  UnitIcon: {fileID: 21300000, guid: d155d370bcbcb264b955d5b3a6db08ec, type: 3}
+  Name: Warrok
+  BlueTeamMaterial: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
+  HoveredBlueTeamMaterial: {fileID: 2100000, guid: 33898210659debf4cab578d2673590ac, type: 2}
+  RedTeamMaterial: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
+  HoveredRedTeamMaterial: {fileID: 2100000, guid: f08efeeaf720620419d10802d99114e1, type: 2}
+  Stats: {fileID: 11400000, guid: f72e18b3f703ae74484e57bd3aa7ab32, type: 2}
+  startingEffects:
+  - {fileID: 11400000, guid: 08440a7316463c044afe6e91c042582a, type: 2}
+  invulnerableEffects: []

@@ -1,32 +1,79 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Zenject;
+public class RangedAttackHandlerFactory : PlaceholderFactory<UnitModel, RangedAttackHandler>
+{
+    [Inject] private DiContainer _container;
 
-internal class RangedAttackHandler : IActionHandler
+    public override RangedAttackHandler Create(UnitModel unit)
+    {
+        // Создаём нужный подтип
+        var handler = new RangedAttackHandler(unit);
+
+        // Внедряем зависимости, помеченные [Inject]
+        _container.Inject(handler);
+
+        return handler;
+    }
+}
+
+
+public class RangedAttackHandler : IActionHandler
 {
     [Inject] MovementSystem _movementSystem;
     [Inject] GameModel _gameModel;
     [Inject] VisualHintSystem _hints;
+    [Inject] IGridCellRenderer _renderer;
+    public UnitModel _activeUnit;
+    public RangedAttackHandler(UnitModel unitModel)
+    {
+        _activeUnit = unitModel;
+    }
     public bool CanHandle(ActionContext ctx)
     {
-        //_movementSystem.GetRouteIgnoringObstacles(ctx.Unit.Model.Position.Value, ctx.TargetCell, out var attackRoute);
-        //var routeCost =_movementSystem.GetRouteCost(attackRoute);
-        return _gameModel.IsInAttackRange(ctx.Unit.Model.Position.Value,ctx.TargetCell,ctx.Unit.Model.ModifiedStats.AttackRange);
-    }
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        return ctx.TargetUnit !=null;
+        var from = _activeUnit.Position.Value;
+        var to = ctx.TargetCell;
+
+        return _movementSystem.HasLineOfSight(from, to);
     }
 
-    public IEnumerator Execute(ActionContext ctx)
+
+    public bool CanShowPreview(ActionContext ctx)
     {
-        yield return ctx.Unit.Attack(ctx.TargetUnit);
+        return ctx.TargetObject !=null;
+    }
+
+    public void Execute(ActionContext ctx)
+    {
+        _activeUnit.SendDamage(new(ctx.TargetObject));
     }
 
     public void ShowPreview(ActionContext ctx)
     {
-        int predictedDamage = ctx.Unit.Model.ModifiedStats.Damage;
+        if (!CanHandle(ctx))
+            return;
+        DamageContext damageContext = _activeUnit.SimulateSendDamage(new(_activeUnit));
+        _hints.ShowAttackHint(ctx.TargetCell, damageContext, CursorState.RangedAttack, "Ranged attack");
+        var movaAvailableCells = _movementSystem.GetReachableCells(_activeUnit.Position.Value, _activeUnit.ModifiedStats.MoveSpeed);
+        _renderer.AddStates(movaAvailableCells, CellState.moveAvailable);
+    }
 
-        _hints.ShowAttackHint(ctx.TargetCell, predictedDamage, icon, "Ranged attack");
+    public void ShowAvaiableTargetCells()
+    {
+        var units = _gameModel.GetUnits();
+        List<Vector2Int> unitPositions = units.Select(x => x.Position.Value).ToList();
+        foreach (var unit in units)
+        {
+            ActionContext ctx = new ActionContext() { TargetCell = unit.Position.Value, TargetObject = unit, AbilityUsed = null };
+            if (!CanHandle(ctx))
+            {
+                unitPositions.Remove(unit.Position.Value);
+            }
+        }
+        _renderer.RemoveStates(CellState.moveAvailable);
+        _renderer.AddStates(unitPositions, CellState.moveAvailable);
     }
 }

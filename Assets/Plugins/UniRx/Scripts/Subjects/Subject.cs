@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UniRx.InternalUtil;
+using UnityEngine;
 
 namespace UniRx
 {
@@ -164,6 +165,11 @@ namespace UniRx
                     }
                 }
             }
+        }
+
+        public static implicit operator Subject<T>(Subject<List<Vector2Int>> v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

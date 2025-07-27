@@ -47,26 +47,25 @@ public class GameGridUIPanelView : MonoBehaviour
         this.viewModel = viewModel;
         this.gameController = gameController;
 
-        Create.onClick.AddListener(() => gameController.Create());
+        Create.onClick.AddListener(() => gameController.CreateGridContent());
         RunBattle.onClick.AddListener(()=> gameController.RunBattle());
         btnSpawnRandom.onClick.AddListener(OnBtnSpawnRandom_Clicked);
-        btnSpawnAt.onClick.AddListener(() => viewModel.SpawnUnitAt(xText.text, yText.text));
+        //btnSpawnAt.onClick.AddListener(() => viewModel.SpawnUnitAt(xText.text, yText.text));
         btnSelectCell.onClick.AddListener(BtnSelectCell_onClick);
         btnSpawnAt.onClick.AddListener(() => Debug.Log("btnSpawnAt clicked"));
         btnSelectCell.onClick.AddListener(() => Debug.Log("btnSelectCell clicked"));
 
-        viewModel.Error += msg => ShowError(msg);
     }
     private void OnBtnSpawnRandom_Clicked()
     {
         Debug.Log("btnSpawnRandom clicked");
-        viewModel.SpawnUnitAtRandomPlace();
+        //viewModel.SpawnUnitAtRandomPlace();
     }
 
     private void BtnSelectCell_onClick()
     {
-        var cell = viewModel.GetCellContent(xText.text, yText.text);
-        selectedCellDescriptionText.text = GetDescription(cell);
+        //var cell = viewModel.GetCellContent(xText.text, yText.text);
+        //selectedCellDescriptionText.text = GetDescription(cell);
     }
 
     private void ViewModel_OnCellChanged(GridCellUnitSpawnedEventArgs args)

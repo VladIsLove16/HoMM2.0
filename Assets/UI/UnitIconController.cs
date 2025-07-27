@@ -14,11 +14,10 @@ public class UnitIconController : MonoBehaviour
 
     public Sprite Sprite => UnitIcon.sprite;
     public bool IsBlueTeam { get; internal set; }
-    public ICombatUnit CombatUnit { get; internal set; }
+    public ICombatObject CombatUnit { get; internal set; }
 
     public void SetInfo(Sprite sprite, bool isBlueTeam)
     {
-        Debug.Log(name + " setted to " + sprite.name);
         SetUnitIcon(sprite);
         SetTeamColor(isBlueTeam);
     }
@@ -40,11 +39,10 @@ public class UnitIconController : MonoBehaviour
         Link(unitIconController.CombatUnit);
     }
 
-    public void Link(ICombatUnit model, int turn = 0)
+    public void Link(ICombatObject model, int turn = 0)
     {
         if (model != null)
         {
-            Debug.Log("linking UnitIconController" + name + " with " + model.UnitType);
             CombatUnit = model;
             unitType = model.UnitType;
         }

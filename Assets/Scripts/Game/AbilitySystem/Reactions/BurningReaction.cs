@@ -11,6 +11,6 @@ public class BurningReaction : EffectReactionBase
     public override void Execute(EffectReactionContext context)
     {
         var ctx =  new DamageContext(Amount, damageType, context.Source);
-        context.Target.ReceiveDamage(ctx);
+        context.Target.RecieveDamage(ctx);
     }
 }

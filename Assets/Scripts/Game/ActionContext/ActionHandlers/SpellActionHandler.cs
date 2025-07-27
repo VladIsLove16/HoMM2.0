@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SpellActionHandler : IActionHandler
 {
-    private ISpellCaster caster;
+    private IEffectApplier caster;
     private SpellCasterService spellCasterService;
     public SpellActionHandler(SpellCasterService spellCasterService)
     {
@@ -44,11 +44,21 @@ public class SpellActionHandler : IActionHandler
     {
         SpellData spellData = null;
         GridXZ< GameCell> gridXZ = null;    
-        spellCasterService.Cast(spellData, gameCell.Position, (pos)=> gridXZ.GetGridObject(pos).GetUnit(), caster);
+        spellCasterService.Cast(spellData, gameCell.Position, (pos)=> gridXZ.GetGridObject(pos).Unit, caster);
         return true;
     }
 
+    public void ShowAvaiableTargetCells()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void ShowPreview(ActionContext ctx)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    void IActionHandler.Execute(ActionContext ctx)
     {
         throw new System.NotImplementedException();
     }

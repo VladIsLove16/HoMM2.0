@@ -1,54 +1,67 @@
 using System;
 using TMPro;
 using UnityEngine;
-using Zenject;
+using UniRx;
 
-public class UnitViewUI : MonoBehaviour
+public class UnitViewUI : MonoBehaviour, IDisposable
 {
-    [SerializeField] UnitHealthBar healthBar;
-    [SerializeField] TextMeshProUGUI AmountText;
-    private UnitViewModel _unitvViewModel;
-  
+    [SerializeField] private UnitHealthBar healthBar;
+    [SerializeField] private TextMeshProUGUI amountText;
+
+    private UnitViewModel _unitViewModel;
+    private CompositeDisposable _disposables = new();
+
     public void Init(UnitViewModel vm)
     {
-        _unitvViewModel = vm;
+        _unitViewModel = vm;
 
-        _unitvViewModel.HealthChanged += OnHealthChanged;
-        _unitvViewModel.Died += OnDeath;
-        _unitvViewModel.TurnStarted += OnTurnStart;
+        // Подписываемся на события из ViewModel через UniRx
+        _unitViewModel.OnHealthChanged
+            .Subscribe(_ => UpdateHealth())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnDeath
+            .Subscribe(_ => OnDeath())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnTurnStarted
+            .Subscribe(_ => OnTurnStart())
+            .AddTo(_disposables);
 
         healthBar.Init();
-        SetHealthRatio((float)_unitvViewModel.UnitState.Health / _unitvViewModel.UnitState.MaxHealth);
-        SetAmount(vm.Amount);
+
+        UpdateHealth();
+        UpdateAmount();
     }
 
-    private void OnTurnStart()
+    private void UpdateHealth()
     {
-        
+        // Безопасно получаем здоровье и максимум
+        var health = _unitViewModel.Model.ModifiedStats.Health;
+        var maxHealth = _unitViewModel.Model.ModifiedStats.MaxHealth;
+
+        float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
+        healthBar.SetRatio(ratio);
+    }
+
+    private void UpdateAmount()
+    {
+        amountText.text = _unitViewModel.Model.Amount.ToString();
     }
 
     private void OnDeath()
     {
-        AmountText.color = Color.black;
+        amountText.color = Color.black;
+        // Можно добавить эффект исчезновения, или другие анимации
     }
 
-    private void OnAttack(EffectReactionContext context)
+    private void OnTurnStart()
     {
-        
+        // Можно например подсветить юнита, показать UI активности и т.п.
     }
 
-    private void OnHealthChanged(int obj)
+    public void Dispose()
     {
-        SetHealthRatio((float)_unitvViewModel.UnitState.Health / _unitvViewModel.UnitState.MaxHealth);
-    }
-
-    public void SetHealthRatio(float ration)
-    {
-        healthBar.SetRatio(ration);
-    }
-
-    public void SetAmount(int amount)
-    {
-        AmountText.text = amount.ToString();
+        _disposables.Dispose();
     }
 }

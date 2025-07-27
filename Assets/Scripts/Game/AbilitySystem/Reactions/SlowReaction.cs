@@ -7,6 +7,6 @@ public class SlowReaction : EffectReactionBase
     [SerializeField] int slowAmount;
     public override void Execute(EffectReactionContext ctx)
     {
-        //ctx.Target.UnitState.MoveSpeed-=slowAmount; 
+        //ctx.TargetObject.UnitState.MoveSpeed-=slowAmount; 
     }
 }

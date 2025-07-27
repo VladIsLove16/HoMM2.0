@@ -1,4 +1,4 @@
-﻿// Model/StatusEffect.cs
+﻿// Unit/StatusEffect.cs
 using System;
 using System.Linq;
 using static UnityEngine.InputSystem.HID.HID;

@@ -25,7 +25,7 @@ public class MVPUnitTurnPanel : MonoBehaviour
     {
         foreach (UnitModel model in unitcontents)
         {
-            UnitDefinitionSO unitDefinitionSO = unitDatas.First(x => x.Stats.UnitType == model.UnitType.Value);
+            UnitDefinitionSO unitDefinitionSO = unitDatas.First(x => x.UnitType == model.UnitType.Value);
             Sprite sprite = unitDefinitionSO.UnitIcon;
             Image image = AddIcon(sprite);
             Link(image, model);

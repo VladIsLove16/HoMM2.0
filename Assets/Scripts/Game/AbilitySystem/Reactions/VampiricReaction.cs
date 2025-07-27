@@ -8,8 +8,11 @@ public class VampiricReaction : DamageReactionBase
 {
     int vampirismPercent;
 
-    public override void Execute(DamageContext ctx)
+    public override void Execute(DamageContext ctx, bool simulation = false)
     {
-        //ctx.Source.UnitState.Health = Math.Min(ctx.Source.UnitState.MaxHealth, ctx.Source.UnitState.Health + ctx.DamageAmount*vampirismPercent);
+        if(ctx.Source is UnitModel model)
+        {
+            model.ModifiedStats.Health = Math.Min(model.ModifiedStats.MaxHealth, model.ModifiedStats.Health + ctx.DamageAmount * vampirismPercent);
+        }
     }
 }

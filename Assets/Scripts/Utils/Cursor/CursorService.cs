@@ -11,7 +11,6 @@ public class CursorService : ICursorService
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
     public CursorService(List<CursorStateTexture> cursorStateTextures)
     {
-        // Инициализируем стандартный курсор
         _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state,y=> y.texture);
         SetDefaultCursor();
     }

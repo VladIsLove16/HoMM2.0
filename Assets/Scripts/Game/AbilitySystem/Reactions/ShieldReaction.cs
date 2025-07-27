@@ -9,12 +9,14 @@ public class ShieldReaction : DamageReactionBase
     // локальное поле, хранит остаток щита
     private int remainingShield;
 
-    public override void Execute(DamageContext dmgCtx)
+    public override void Execute(DamageContext dmgCtx, bool simulation = false)
     {
         if (remainingShield <= 0) return;
 
         int absorbed = Mathf.Min(remainingShield, dmgCtx.DamageAmount);
+       
         dmgCtx.DamageAmount -= absorbed;
-        remainingShield -= absorbed;
+        if (!simulation)
+            remainingShield -= absorbed;
     }
 }

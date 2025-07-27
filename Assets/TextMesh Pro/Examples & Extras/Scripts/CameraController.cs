@@ -71,7 +71,7 @@ namespace TMPro.Examples
             if (CameraTarget == null)
             {
                 // If we don't have a target (assigned by the player, create a dummy in the center of the scene).
-                dummyTarget = new GameObject("Camera Target").transform;
+                dummyTarget = new GameObject("Camera TargetObject").transform;
                 CameraTarget = dummyTarget;
             }
         }
@@ -223,8 +223,8 @@ namespace TMPro.Examples
                 {
                     if (dummyTarget == null)
                     {
-                        // We need a Dummy Target to anchor the Camera
-                        dummyTarget = new GameObject("Camera Target").transform;
+                        // We need a Dummy TargetObject to anchor the Camera
+                        dummyTarget = new GameObject("Camera TargetObject").transform;
                         dummyTarget.position = CameraTarget.position;
                         dummyTarget.rotation = CameraTarget.rotation;
                         CameraTarget = dummyTarget;

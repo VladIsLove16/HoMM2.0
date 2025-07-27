@@ -9,6 +9,6 @@ public class HealReaction : EffectReactionBase
 
     public override void Execute(EffectReactionContext context)
     {
-        //context.Target.UnitState.Health = Mathf.Min(context.Target.UnitState.MaxHealth, context.Target.UnitState.Health + Amount);
+        //context.TargetObject.UnitState.Health = Mathf.Min(context.TargetObject.UnitState.MaxHealth, context.TargetObject.UnitState.Health + Amount);
     }
 }

@@ -1,113 +1,95 @@
 using NaughtyAttributes;
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
+
 public class GameController : MonoBehaviour
 {
-    [SerializeField] private int Heigh;
-    [SerializeField] private int Weight;
-    [SerializeField] private int x;
-    [SerializeField] private int y;
-    [SerializeField] private UnitContentEntrySO unitContentEntrySO;
+    [SerializeField] private int Height;
+    [SerializeField] private int Width;
+    [SerializeField] private GridContentEntrySO gridContentEntrySO;
+
     private GameModel _gameModel;
-    private GameViewModel _gameViewModel;
-    private GridView _gridView;
     private TurnSystem _combatSystem;
-    private Vector2Int selectedCellCoords;
+
+    // Текущая выбранная клетка и флаг
+    private Vector2Int? selectedCellCoords;
     private bool isCellSelected;
-    //private ActionService ActionService;
+
     [Inject]
     public void Construct(GameViewModel viewModel, GridView view, GameModel model, TurnSystem combatSystem)
     {
-        Debug.Log("_gameController Construct start");
-        this._gameViewModel = viewModel;
-        this._gridView = view;
-        this._gameModel = model;
-        this._combatSystem = combatSystem;
+        _gameModel = model;
+        _combatSystem = combatSystem;
 
-        Setup(Weight, Heigh);
-        InitCombatSystem();
-
+        
     }
-
+    private void Start()
+    {
+        Setup(Width, Height);
+        InitCombatSystem();
+        CreateGridContent();
+        RunBattle();
+    }
     private void InitCombatSystem()
     {
         _combatSystem.ClearUnits();
+
         foreach (var unit in _gameModel.GetUnits())
         {
-            unit.Died += () =>  OnCombatUnitDied(unit);
+            Action onDied = null;
+            onDied = () =>
+            {
+                OnCombatUnitDied(unit);
+                unit.Died -= onDied;
+            };
+            unit.Died += onDied;
+
             _combatSystem.AddCombatUnit(unit);
         }
-        _gameModel.CellContentAdded += OnGameModel_CellContentAdded;
 
+        _gameModel.UnitSpawned += OnGameModel_CellContentAdded;
     }
 
     private void OnCombatUnitDied(UnitModel unit)
     {
         _combatSystem.RemoveCombatUnit(unit);
-        //unit.Died -= () => OnCombatUnitDied(unit);
     }
 
     private void OnGameModel_CellContentAdded(UnitModelCreatedParams @params)
     {
-        ICombatUnit combatUnit = @params.UnitModel;
+        ICombatObject combatUnit = @params.UnitModel;
         _combatSystem.AddCombatUnit(combatUnit);
     }
 
     [Button]
     public void Setup()
     {
-        Setup(Weight, Heigh);
+        Setup(Width, Height);
     }
-    
 
     [Button]
     public void RunBattle()
     {
-        Debug.Log("run attle");
+        Debug.Log("Run battle");
         _combatSystem.RunBattle();
     }
-
-    public void Setup(int width, int height)
-    {
-        Debug.Log("grid init " + width + "x" + height);
-        _gameModel.InitializeGrid(width, height);
-        _gridView.CreateGrid();
-    }
-
     [Button]
-    public void Create()
+    public void CreateGridContent()
     {
-        CreateGridContent(unitContentEntrySO);
+        CreateGridContent(gridContentEntrySO);
     }
 
-    public void CreateGridContent(UnitContentEntrySO unitContentEntrySO)
+    public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
     {
-        _gameModel.ClearGrid();
         foreach (var content in unitContentEntrySO.contents)
         {
-            UnitSpawnParams unitSpawnParams = new UnitSpawnParams(content.X, content.Y,content.unitType,content.Amount,content.isPlayer);
+            UnitSpawnParams unitSpawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, content.isPlayer);
             _gameModel.SpawnUnit(unitSpawnParams);
         }
     }
-    [Button]
-    public void StartTurn()
+    public void Setup(int width, int height)
     {
-        Vector2Int selectedCell = _gameViewModel.GetSelectedCell();
-        if (selectedCell == null)
-        {
-            Debug.LogWarning("select cell first");
-            return;
-        }
-        IGridCell gridCell = _gameModel.GetCell(selectedCell);
-        UnitModel unitModel = gridCell.Unit;
-        if(unitModel == null)
-        {
-            Debug.LogWarning("no unit in selected cell");
-            return;
-        }
-        unitModel.TakeTurn();
-
+        _gameModel.InitializeGrid(width, height);
     }
 }
