@@ -8,6 +8,7 @@ public class UnitStatsViewModel : IDisposable
     public ReactiveProperty<int> MaxHealth { get; }
     public ReactiveProperty<int> AttackDamage { get; }
     public ReactiveProperty<int> MoveSpeed { get; }
+    public ReactiveProperty<bool> IsVisible { get; }
     public ReactiveCollection<StatusEffectViewModel> StatusEffects { get; }
 
     public readonly UnitModel Model;

@@ -70,13 +70,10 @@ public partial class PlayerInputHandler
     }
     protected virtual void ShowUnitStatsPanel(Vector2Int cell)
     {
-        if(!GetUnitAt(cell, out var model))
-        {
-            return;
-        }
-        UnitStatsViewModel unitStatsViewModel = new(model);
-        _unitStatsPanel.Init(unitStatsViewModel);
-        _unitStatsPanel.Show();
+        if (!GetUnitAt(cell, out var model)) return;
+
+        var vm = new UnitStatsViewModel(model);
+        _unitStatsPanel.Init(vm); // Подписка на изменения
     }
 
     private ActionContext BuildActionContext(Vector2Int cell)
