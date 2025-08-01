@@ -35,6 +35,11 @@ public class SpellActionHandler : IActionHandler
         return new() { ( gameCell.Position,true) };
     }
 
+    public void HidePreview()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public bool IsAvailable(GameCell gameCell)
     {
         return true;

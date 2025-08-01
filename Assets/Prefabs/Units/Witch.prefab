@@ -98,7 +98,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8504360353631629215, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -201,7 +201,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _viewUI: {fileID: 530917129021811343}
+  unitViewUI: {fileID: 530917129021811343}
+  animationMoveSpeed: 3
   meshes:
   - {fileID: 7403018180747870941}
 --- !u!137 &7403018180747870941 stripped

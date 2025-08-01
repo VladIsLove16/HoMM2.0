@@ -9,18 +9,20 @@ public class CellView : MonoBehaviour
     private Renderer _renderer;
     [SerializeField] private MeshRenderer _hoverRenderer;
     [SerializeField] private MeshRenderer _routePointRenderer;
-    [Inject] private IReadOnlyDictionary<CellState, CellMaterials> materials;
+    private IReadOnlyDictionary<CellState, CellMaterials> _materials;
     [SerializeField] private List<CellState> cellStates = new();
 
     private void Awake()
     {
         _renderer = GetComponent<Renderer>();
+    }
+    private void Start()
+    {
         UpdateView();
     }
-    [Inject]
-    public void Init(IReadOnlyDictionary<CellState, CellMaterials> materials)
+    internal void Init(IReadOnlyDictionary<CellState, CellMaterials> materials)
     {
-        this.materials = materials;
+        _materials = materials;
     }
 
     public void AddState(CellState state)
@@ -59,25 +61,26 @@ public class CellView : MonoBehaviour
             _routePointRenderer.gameObject.SetActive(false);
 
         if (cellStates.Contains(CellState.accessibleRoutePoint))
-            _routePointRenderer.material = materials[CellState.accessibleRoutePoint].Material;
+            _routePointRenderer.material = _materials[CellState.accessibleRoutePoint].Material;
 
         if (cellStates.Contains(CellState.inaccessibleRoutePoint))
-            _routePointRenderer.material = materials[CellState.inaccessibleRoutePoint].Material;
+            _routePointRenderer.material = _materials[CellState.inaccessibleRoutePoint].Material;
 
 
         if (cellStates.Contains(CellState.selected))
         {
-            SetMaterial(materials[CellState.selected].Material);
+            SetMaterial(_materials[CellState.selected].Material);
         }
         else if (cellStates.Contains(CellState.moveAvailable))
         {
-            SetMaterial(materials[CellState.moveAvailable].Material);
+            SetMaterial(_materials[CellState.moveAvailable].Material);
         }
         else
-            SetMaterial(materials[CellState.normal].Material);
+            SetMaterial(_materials[CellState.normal].Material);
     }
     private void SetMaterial(Material material)
     {
         _renderer.material = material;
     }
+
 }

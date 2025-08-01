@@ -4,10 +4,10 @@ using Zenject;
 
 public class UnitViewModelFactory
 {
-    private Dictionary<UnitType,UnitDefinitionSO> _dataMap;
-    public UnitViewModelFactory(Dictionary<UnitType, UnitDefinitionSO> dataMap)
+   [Inject] private IReadOnlyDictionary<UnitType,UnitDefinitionSO> _dataMap;
+    public UnitViewModelFactory()
     {
-        _dataMap = dataMap;
+        
     }
 
     public UnitViewModel Create(UnitModel model)

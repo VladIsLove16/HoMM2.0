@@ -10,10 +10,10 @@ public class GameInputHandler3D : MonoBehaviour
     [SerializeField] private LayerMask mouseColliderLayerMask;
     private InputSystem_Actions _inputActions;
     [Inject] private IWorldToCellProvider _renderer;
-    
     public ReactiveProperty<Vector2Int> HoveredCell;
     public ReactiveProperty<Vector2Int> SelectedCell;
     public ReactiveProperty<Vector2Int> ActionPerformed;
+    public Action ActionCanceled;
     public ReactiveProperty<Collider> HoveredCollider;
     public ReactiveProperty<Vector3> WorldMousePosition;
     private void OnEnable()
@@ -69,5 +69,7 @@ public class GameInputHandler3D : MonoBehaviour
             if (_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
                 ActionPerformed.SetValueAndForceNotify(coords);
         }
+        else
+            ActionCanceled?.Invoke();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using UniRx;
+using Unity.VisualScripting;
 
 public class UnitStatsViewModel : IDisposable
 {
@@ -8,6 +9,7 @@ public class UnitStatsViewModel : IDisposable
     public ReactiveProperty<int> MaxHealth { get; }
     public ReactiveProperty<int> AttackDamage { get; }
     public ReactiveProperty<int> MoveSpeed { get; }
+    public ReactiveProperty<int> Amount { get; }
     public ReactiveProperty<bool> IsVisible { get; }
     public ReactiveCollection<StatusEffectViewModel> StatusEffects { get; }
 
@@ -26,6 +28,7 @@ public class UnitStatsViewModel : IDisposable
         MaxHealth = new ReactiveProperty<int>(stats.MaxHealth).AddTo(_disposables);
         AttackDamage = new ReactiveProperty<int>(stats.Damage).AddTo(_disposables);
         MoveSpeed = new ReactiveProperty<int>(stats.MoveSpeed).AddTo(_disposables);
+        Amount = new ReactiveProperty<int>(model.Amount.Value).AddTo(_disposables);
 
         StatusEffects = new ReactiveCollection<StatusEffectViewModel>();
 

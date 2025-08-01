@@ -107,6 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unitViewUI: {fileID: 3083594480019860279}
   animationMoveSpeed: 3
   meshes:
   - {fileID: 4435776240030517890}
@@ -250,6 +251,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+--- !u!114 &3083594480019860279 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3812734579938919237, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+  m_PrefabInstance: {fileID: 2171488399950342258}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 878035ad48ab29e469e1c10fc679bcf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &3268807609796159668 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}

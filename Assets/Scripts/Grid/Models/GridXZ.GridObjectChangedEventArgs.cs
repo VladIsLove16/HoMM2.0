@@ -4,15 +4,13 @@ public partial class GridXZ<TGridObject> {
     {
         public int X { get; }
         public int Z { get; }
-        public TGridObject NewObject { get; }
-        public TGridObject RemovedObjet { get; }
+        public TGridObject Object { get; }
 
-        public GridObjectChangedEventArgs(int x, int z, TGridObject newObject, TGridObject removedObjet)
+        public GridObjectChangedEventArgs(int x, int z, TGridObject newObject)
         {
             X = x;
             Z = z;
-            NewObject = newObject;
-            RemovedObjet = removedObjet;
+            Object = newObject;
         }
     }
 

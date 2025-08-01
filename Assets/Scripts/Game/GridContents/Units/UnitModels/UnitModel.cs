@@ -6,7 +6,7 @@ using UniRx;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor;
 using UnityEngine;
-public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable
+public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable, IMoveable
 {
     public UnitModel(UnitStats stats,UnitType unitType, int x, int y, int amount, bool isPlayer)
     {
@@ -34,7 +34,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     }
     public UnitStats BaseUnitStats { get; }
     public UnitStats ModifiedStats { get; set; }
-    public ReactiveProperty<Vector2Int> Position { get; } = new();
+    public ReactiveProperty<Vector2Int> Position { get; private set; } = new();
     public int X => Position.Value.x;
     public int Y => Position.Value.y;
     public ReactiveProperty<int> Amount { get; } = new();
@@ -43,13 +43,15 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
     public List<StatusEffectType> InvulnerableEffects;
     public Action StatusEffectsChanged;
-
+    public Action<List<Vector2Int>> MovedByRoute;
     public IReadOnlyList<StatusEffect> ActiveEffects => _statusEffectManager.ActiveEffects;
 
     public ReactiveProperty<UnitType> UnitType=new();
     private StatusEffectManager _statusEffectManager = new();
 
     bool ICombatObject.IsBlueTeam => IsBlueTeam.Value;
+    bool IDamagable.IsBlueTeam => IsBlueTeam.Value;
+    UnitStats ICombatObject.Stats => ModifiedStats;
 
 
     UnitType ICombatObject.UnitType => UnitType.Value;
@@ -68,10 +70,10 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public Action<List<Vector2Int>> Moved { get; internal set; }
     public Action StatsChanged { get; internal set; }
 
-    public void Move(List<Vector2Int> route)
+    public void MoveByRoute(List<Vector2Int> route)
     {
         Position.SetValueAndForceNotify(route[route.Count-1]);
-        Moved.Invoke(route);
+        Moved?.Invoke(route);
     }
     public void ApplyStatusEffect(StatusEffect effect)
     {
@@ -81,10 +83,17 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
 
     public DamageContext SendDamage(AttackContext ctx)
     {
-        DamageContext damageContext = new(ModifiedStats.Damage, DamageType.physical, this);
+        DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
         _statusEffectManager.HandleOutDamage(damageContext);
         ctx.Target.RecieveDamage(damageContext);
         Attacked?.Invoke(damageContext);
+        return damageContext;
+    }
+    public DamageContext SimulateSendDamage(AttackContext defender)
+    {
+        DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
+        _statusEffectManager.HandleOutDamage(damageContext, true);
+        defender.Target.SimulateRecieveDamage(damageContext);
         return damageContext;
     }
 
@@ -124,13 +133,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             Died?.Invoke();
         }
     }
-    public DamageContext SimulateSendDamage(AttackContext defender)
-    {
-        DamageContext damageContext = new(ModifiedStats.Damage, DamageType.physical, this);
-        _statusEffectManager.HandleOutDamage(damageContext,true);
-        defender.Target.SimulateRecieveDamage(damageContext);
-        return damageContext;
-    }
     public void SimulateRecieveDamage(DamageContext ctx)
     {
         _statusEffectManager.HandleOutDamage(ctx,true);
@@ -140,12 +142,12 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     {
         _statusEffectManager.HandleTurnStart();
         Debug.Log(UnitType + " takes turn");
-        TurnStarted?.Invoke();
     }
 
     public void EndTurn()
     {
         _statusEffectManager.HandleTurnEnd();
+
     }
 
     public void RemoveEffect(StatusEffect statusEffect)
@@ -160,22 +162,5 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public override string ToString()
     {
         return UnitType.ToString();
-    }
-    public List<IActionHandler> GetAvailableActions()
-    {
-        var list = new List<IActionHandler>();
-        if (CanMove.Value)
-        {
-            list.Add(new MoveActionHandler(this));
-        }
-        if (CanAct.Value)
-        {
-            list.Add(new MoveThenAttackHandler(this));
-        }
-        if (ModifiedStats.AttackRange > 1)
-        {
-            list.Add(new RangedAttackHandler(this));
-        }
-        return list;
     }
 }

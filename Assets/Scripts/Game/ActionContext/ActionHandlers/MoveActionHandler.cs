@@ -6,14 +6,16 @@ using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-public class MoveActionHandlerFactory : PlaceholderFactory<UnitModel, MoveActionHandler>
+public class MoveActionHandlerFactory : PlaceholderFactory<ICombatObject, MoveActionHandler>
 {
     [Inject] private DiContainer _container;
 
-    public override MoveActionHandler Create(UnitModel unit)
+    public override MoveActionHandler Create(ICombatObject unit)
     {
         // Создаём нужный подтип
-        var handler = new MoveActionHandlerDebugger(unit);
+        MovementSystem movementSystem = _container.Resolve<MovementSystem>();
+        movementSystem.HasLineOfSight(new Vector2Int(0,0), new Vector2Int(1,1));
+        var handler = new MoveActionHandlerDebugger(unit, movementSystem);
 
         _container.Inject(handler);
 
@@ -21,39 +23,28 @@ public class MoveActionHandlerFactory : PlaceholderFactory<UnitModel, MoveAction
     }
 }
 
-
 public class MoveActionHandlerDebugger : MoveActionHandler
 {
-    public MoveActionHandlerDebugger(UnitModel model) : base(model) { }
-
-    public override bool CanHandle(ActionContext ctx)
-    {
-        bool res = base.CanHandle(ctx);
-        if (!res)
-        {
-            Debug.Log("MoveActionHandlerDebugger: can't handle action at " + ctx.TargetCell);
-        }
-        return res;
-    }
+    public MoveActionHandlerDebugger(ICombatObject model, MovementSystem movementSystem) : base(model, movementSystem) { }
 }
-
 
 public class MoveActionHandler : IActionHandler
 {
-    private UnitModel _activeUnit;
+    private ICombatObject _activeUnit;
     [Inject] protected MovementSystem _movementSystem;
     [Inject] protected IGridCellRenderer _renderer;
-    [Inject] protected VisualHintSystem _hints;
     [Inject] protected GameModel _gm;
+    [Inject] IAttackActionPanel _attackPanel;
+    [Inject] ICursorService CursorService;
     private List<Vector2Int> lastSavedRoute = new();
     private Vector2Int lastSavedpoint;
-    public MoveActionHandler(UnitModel model)
+    private List<Vector2Int> reachableCells;
+    private Dictionary<CellState, List<Vector2Int>> _preview = new();
+    public MoveActionHandler(ICombatObject model, MovementSystem movementSystem)
     {
         _activeUnit = model;
-    }
-    public virtual bool CanHandle(ActionContext ctx)
-    {
-        return ctx.TargetObject == null;
+        _movementSystem = movementSystem;
+        reachableCells = _movementSystem.GetReachableCells(model.Position, model.Stats.MoveSpeed);
     }
     public bool CanShowPreview(ActionContext ctx)
     {
@@ -63,7 +54,10 @@ public class MoveActionHandler : IActionHandler
     public void Execute(ActionContext ctx)
     {
         List<Vector2Int> moveRoute = GetMoveRoute(ctx);
-        _gm.MoveUnit(_activeUnit, moveRoute);
+        if (_activeUnit is IMoveable moveable)
+        {
+            _gm.MoveObject(moveable, moveRoute);
+        }
     }
 
     public void ShowPreview(ActionContext ctx)
@@ -71,22 +65,37 @@ public class MoveActionHandler : IActionHandler
         var route = GetRoute(ctx);
         var moveRoute = GetMoveRoute(ctx);
         var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-        _renderer.RemoveStates(CellState.accessibleRoutePoint);
-        _renderer.RemoveStates(CellState.inaccessibleRoutePoint);
-        _renderer.RemoveStates(CellState.moveAvailable);
-        _renderer.AddStates(moveRoute, CellState.accessibleRoutePoint);
-        _renderer.AddStates(inaccessRoute, CellState.inaccessibleRoutePoint);
+        AddPreview(moveRoute, CellState.accessibleRoutePoint);
+        AddPreview(inaccessRoute, CellState.inaccessibleRoutePoint);
+        AddPreview(reachableCells, CellState.moveAvailable);
+        if(inaccessRoute.Count == 0)
+            CursorService.SetCursorState(CursorState.ActionAvailable);
+        else
+            CursorService.SetCursorState(CursorState.ActionNotAvailable);
     }
 
+    private void AddPreview(List<Vector2Int> cells, CellState state)
+    {
+        _preview[state] = cells.ToList();
+        _renderer.SetStates(cells, state);
+    }
+
+    public void HidePreview()
+    {
+        foreach (var state in _preview)
+        {
+            _renderer.RemoveStates(state.Key);
+        }
+        _preview.Clear();
+        _attackPanel.Hide();
+    }
     public void ShowAvaiableTargetCells()
     {
-        var pos = _activeUnit.Position.Value;
-        var stats = _activeUnit.ModifiedStats;
+        var pos = _activeUnit.Position;
+        var stats = _activeUnit.Stats;
         var speed = stats.MoveSpeed;
-        _renderer.AddState(new(0, 0), CellState.moveAvailable);
         var movaAvailableCells = _movementSystem.GetReachableCells(pos,speed);
-        _renderer.RemoveStates(CellState.moveAvailable);
-        _renderer.AddStates(movaAvailableCells, CellState.moveAvailable);
+        AddPreview(movaAvailableCells, CellState.moveAvailable);
     }
 
     private static List<Vector2Int> GetInaccessibleRoute(List<Vector2Int> route, List<Vector2Int> moveRoute)
@@ -103,20 +112,19 @@ public class MoveActionHandler : IActionHandler
     private List<Vector2Int> GetRoute(ActionContext ctx)
     {
         var route = new List<Vector2Int>();
-        if (_activeUnit.ModifiedStats.CanFly)
+        if (_activeUnit.Stats.CanFly)
         {
-            _movementSystem.GetRouteIgnoringObstacles(_activeUnit.Position.Value, ctx.TargetCell, out route);
+            _movementSystem.GetRouteIgnoringObstacles(_activeUnit.Position, ctx.TargetCell, out route);
         }
         else
-            _movementSystem.GetRoute(_activeUnit.Position.Value, ctx.TargetCell, out route);
+            _movementSystem.GetRoute(_activeUnit.Position, ctx.TargetCell, out route);
         return route;
     }
     private List<Vector2Int> GetMoveRoute(ActionContext ctx)
     {
         var route = GetRoute(ctx);
-        int moveSpeed = _activeUnit.ModifiedStats.MoveSpeed;
+        int moveSpeed = _activeUnit.Stats.MoveSpeed;
         var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveSpeed);
         return moveRoute;
     }
-
 }

@@ -100,4 +100,9 @@ public class SingleGridRenderer : IGridCellRenderer
     {
         throw new System.NotImplementedException();
     }
+
+    public void SetStates(List<Vector2Int> points, CellState state)
+    {
+        throw new System.NotImplementedException();
+    }
 }

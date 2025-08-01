@@ -13,9 +13,16 @@ public class MovementSystem
         _grid = grid;
         _grid.GridObjectChanged += OnGridChanged;
     }
-    private void OnGridChanged(object sender, GridXZ<GameCell>.GridObjectChangedEventArgs e)
+    private void OnGridChanged(GameCell gameCell)
+    {
+        ClearCaches();
+    }
+
+    private void ClearCaches()
     {
         reachableCellsCache.Clear();
+        routesCache.Clear();
+        ignoreObstaclesRoutesCache.Clear();
     }
 
     public List<Vector2Int> GetReachableCells(Vector2Int startCell, int movementRange)
@@ -32,7 +39,6 @@ public class MovementSystem
     {
         if (routesCache.TryGetValue((fromCell, toCell), out route))
         {
-            Debug.Log("route found in cache " + RouteToString(route));
             return true;
         }
         if(RunPathfinding(fromCell, int.MaxValue, toCell, out _, out route))
@@ -96,9 +102,7 @@ public class MovementSystem
                 route.Add(startCell);
                 route.Reverse();
                 var target = (Vector2Int)targetCell;
-                Debug.Log("route from " + startCell + " to cell " + targetCell + " found " + RouteToString(route));
                 routesCache[(startCell, target)] = route;
-                Debug.Log("route found");
                 return true;
             }
 
@@ -124,7 +128,6 @@ public class MovementSystem
                 }
             }
         }
-        Debug.Log("route not found "  + targetCell == null);
         return targetCell == null;
     }
 

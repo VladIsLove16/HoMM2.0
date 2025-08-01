@@ -17,8 +17,7 @@ public class VisualHintSystem : MonoBehaviour
         var info = new AttackPreviewInfo
         {
             TargetPosition = targetCell,
-            PredictedDamage = predictedDamage,
-            CursorState = cursorState,
+            DamageContext = predictedDamage,
             Description = description
         };
 
@@ -29,7 +28,6 @@ public class VisualHintSystem : MonoBehaviour
 public class AttackPreviewInfo
 {
     public Vector2Int TargetPosition;
-    public DamageContext PredictedDamage;
-    public CursorState CursorState; // меч, лук, молния, и т.п.
+    public DamageContext DamageContext;
     public string Description;
 }

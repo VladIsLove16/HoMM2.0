@@ -3,7 +3,7 @@ using System.Text;
 using UnityEngine;
 public partial class GridXZ<TGridObject> {
 
-    public event EventHandler<GridObjectChangedEventArgs> GridObjectChanged;
+    public event Action<TGridObject> GridObjectChanged;
     
     private int width;
     private int height;
@@ -38,9 +38,9 @@ public partial class GridXZ<TGridObject> {
     //    }
     //}
 
-    public void TriggerGridObjectChanged(GridObjectChangedEventArgs args)
+    public void TriggerGridObjectChanged(TGridObject args)
     { 
-        GridObjectChanged?.Invoke(this, args);
+        GridObjectChanged?.Invoke(args);
     }
 
     public bool TryGetGridObject(int x, int z, out TGridObject result)
@@ -59,10 +59,9 @@ public partial class GridXZ<TGridObject> {
     {
         if (!IsInBounds(x, z))
             throw new ArgumentOutOfRangeException();
-        var oldContent = gridArray[x, z];
+        var content = gridArray[x, z];
         gridArray[x, z] = default;
         Debug.Log($"Grid {x} {z}  Cleared");
-        TriggerGridObjectChanged(new(x, z, default, oldContent));
     }
 
     public void ClearGrid()
@@ -102,9 +101,6 @@ public partial class GridXZ<TGridObject> {
     {
         return gridArray;
     }
-
-
-
     public Vector2Int ValidateGridPosition(Vector2Int gridPosition) {
         return new Vector2Int(
             Mathf.Clamp(gridPosition.x, 0, width - 1),

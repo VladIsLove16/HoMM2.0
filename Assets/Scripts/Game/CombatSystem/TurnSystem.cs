@@ -13,7 +13,7 @@ public class TurnSystem
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
     private BattleState BattleState = BattleState.none;
-    public void AddCombatUnit(ICombatObject unit)
+    public virtual void AddCombatUnit(ICombatObject unit)
     {
         CombatUnits.Add(unit);
     }
@@ -31,21 +31,6 @@ public class TurnSystem
         AddFirstUnits();
         TakeTurn();
     }
-    public void TakeTurn()
-    {
-        ICombatObject combatObject = GetFirstObject();
-        combatObject.TakeTurn();
-        ActiveObject.SetValueAndForceNotify(combatObject);
-    }
-    protected virtual ICombatObject GetFirstObject()
-    {
-        return turnDict[TurnNumber.Value][0];
-    }
-    public void EndTurn()
-    {
-        ActiveObject.Value.EndTurn();
-        ICombatObject nextUnit = DequeueUnit();
-    }
     public BattleState UpdateBattleState()
     {
         bool team1;
@@ -60,6 +45,29 @@ public class TurnSystem
         BattleState = team1 == true ? BattleState.blueTeamWins : BattleState.redTeamWins;
         return BattleState;
     }
+    protected virtual ICombatObject GetFirstObject()
+    {
+        return turnDict[TurnNumber.Value][0];
+    }
+    public void TakeTurn()
+    {
+       
+        ICombatObject combatObject = GetFirstObject();
+        if (ActiveObject.Value == combatObject)
+        {
+            Debug.LogWarning("Turn already taken by first unit " + ActiveObject.Value.ToString());
+            return;
+        }
+        combatObject.TakeTurn();
+        ActiveObject.SetValueAndForceNotify(combatObject);
+    }
+    public void EndTurn()
+    {
+        ActiveObject.Value.EndTurn();
+        ICombatObject nextUnit = DequeueUnit();
+        TakeTurn();
+    }
+    
 
     private void AddFirstUnits()
     {
@@ -93,33 +101,30 @@ public class TurnSystem
         CombatUnitsAdded?.Invoke(new UnitTurnInfo(unit, turn));
     }
 
-    private ICombatObject DequeueUnit()
+    protected virtual ICombatObject DequeueUnit()
     {
         if (turnDict[TurnNumber.Value].Count == 0)
         {
-            Debug.Log("unit dequied,no left units");
-            turnDict.Remove(TurnNumber.Value);
-            TurnNumber.SetValueAndForceNotify(TurnNumber.Value + 1);
+            OnNoTurnUnitsLeft();
         }
-        else
+        turnDict[TurnNumber.Value].Remove(ActiveObject.Value);
+        if (turnDict[TurnNumber.Value].Count == 0)
         {
-            string a = string.Empty;
-            foreach(var b in turnDict[TurnNumber.Value])
-            {
-                a += b.ToString();
-            }
-            Debug.Log("unit dequied,left units" + a);
-
-        }
-        if(turnDict.Count<=TurnNumber.Value +turnTowards)
-        {
-            AddUnitsUntil(TurnNumber.Value + turnTowards);
+            OnNoTurnUnitsLeft();
         }
         ICombatObject combatUnit = turnDict[TurnNumber.Value][0];
-        turnDict[TurnNumber.Value].Remove(combatUnit);
         return combatUnit;
     }
 
+    private void OnNoTurnUnitsLeft()
+    {
+        turnDict.Remove(TurnNumber.Value);
+        TurnNumber.SetValueAndForceNotify(TurnNumber.Value + 1);
+        if (turnDict.Count <= TurnNumber.Value + turnTowards)
+        {
+            AddUnitsUntil(TurnNumber.Value + turnTowards);
+        }
+    }
 }
 
 public class TurnSystemDebugger : TurnSystem
@@ -130,10 +135,26 @@ public class TurnSystemDebugger : TurnSystem
         {
             Debug.Log("turnDict.Count == 0");
         }
-        if (turnDict[0].Count == 0)
+        if (turnDict.ContainsKey(0) && turnDict[0].Count == 0)
         {
             Debug.Log("turnDict[0].Count == 0");
         }
         return  base.GetFirstObject();
+    }
+    protected override ICombatObject DequeueUnit()
+    {
+        ICombatObject @object =  base.DequeueUnit();
+        string a = string.Empty;
+        foreach (var b in turnDict[TurnNumber.Value])
+        {
+            a += b.ToString();
+        }
+        Debug.Log("unit dequied,left units" + a);
+        return @object;
+    }
+    public override void AddCombatUnit(ICombatObject unit)
+    {
+        Debug.Log("unit added called " + unit.ToString());
+        base.AddCombatUnit(unit);
     }
 }

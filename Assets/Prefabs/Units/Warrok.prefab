@@ -201,7 +201,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _viewUI: {fileID: 9001596722977981929}
+  unitViewUI: {fileID: 9001596722977981929}
+  animationMoveSpeed: 3
   meshes:
   - {fileID: 8412983519895542611}
 --- !u!4 &6366760203574449869 stripped

@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using Zenject;
 
 public partial class PlayerInputHandler
 {
-    [Inject] private ActionResolver _actionResolver;
+    [Inject] protected MoveThenAttackHandlerFactory _moveThenAttackFactory = new();
+    [Inject] protected MoveActionHandlerFactory _moveActionFactory = new();
+    [Inject] protected RangedAttackHandlerFactory _rangedAttackHandlerFactory = new();
+    MoveActionHandler _moveActionHandler;
+    MoveThenAttackHandler _moveThenAttackHandler;
+    RangedAttackHandler _rangedAttackHandler;
+    //[Inject] private ActionResolver _actionResolver;
     [Inject] private GameModel _gameModel;
     [Inject] private GameInputHandler3D _gameInputHandler;
     [Inject] private UnitStatsPanel _unitStatsPanel;
     [Inject] private TurnSystem _turnSystem;
-    public ReactiveProperty<IActionHandler> CurrentAction = new();
+    [Inject] private MovementSystem _movementSystem;
+    IActionHandler currentACtionView;
+    ICombatObject activeObject;
     public PlayerInputHandler(GameInputHandler3D gameInputHandler3D, UnitStatsPanel unitStatsPanel, GameModel gameModel, TurnSystem turnSystem)
     {
         _gameInputHandler = gameInputHandler3D;
@@ -23,46 +32,70 @@ public partial class PlayerInputHandler
         _gameInputHandler.HoveredCell.Skip(1).Subscribe(OnCellHovered);
         _gameInputHandler.SelectedCell.Skip(1).Subscribe(OnCellSelected);
         _gameInputHandler.ActionPerformed.Skip(1).Subscribe(OnActionPerformed);
+        _gameInputHandler.ActionCanceled+=OnActionCanceled;
 
         turnSystem.ActiveObject.Skip(1).Subscribe(OnActiveObjectChanged);
+    }
 
+    private void OnActionCanceled()
+    {
+        //if (CurrentAction != null)
+        //{
+        //    CurrentAction.Cancel();
+        //}
     }
 
     private void OnActiveObjectChanged(ICombatObject @object)
     {
+        Debug.Log("OnActiveObjectChanged " + @object.ToString());
         if (@object is UnitModel unit)
         {
-            _actionResolver.SetActions(unit);
-
-            foreach (var h in _actionResolver._handlers)
-            {
-                h.ShowAvaiableTargetCells();
-            }
+            _moveActionHandler = _moveActionFactory.Create(unit);
+            _rangedAttackHandler = _rangedAttackHandlerFactory.Create(unit);
+            _moveThenAttackHandler = _moveThenAttackFactory.Create(unit);
+            _moveActionHandler.ShowAvaiableTargetCells();
         }
+        activeObject = @object;
     }
 
 
     protected virtual void OnCellHovered(Vector2Int cell)
     {
         var context = BuildActionContext(cell);
-        _actionResolver.Resolve(context, out var handler);
-
-        if (handler != null)
+        if (context .TargetObject != null)
         {
-            CurrentAction.SetValueAndForceNotify(handler);
-            handler.ShowPreview(context);
+            //if (_movementSystem.HasLineOfSight(activeObject.Position, cell))
+            //{
+            currentACtionView?.HidePreview();
+            _rangedAttackHandler.ShowPreview(context);
+            currentACtionView = _rangedAttackHandler;
+            //}
+        }
+        else
+        {
+            currentACtionView?.HidePreview();
+            _moveActionHandler.ShowPreview(context);
+            currentACtionView = _moveActionHandler;
+            
         }
     }
-
     protected virtual void OnCellSelected(Vector2Int cell)
     {
         var context = BuildActionContext(cell);
-        _actionResolver.Resolve(context, out var handler);
-
-        if (handler != null)
+        if (context.TargetObject != null)
         {
-            handler.Execute(context);
+            //if (_movementSystem.HasLineOfSight(activeObject.Position, cell))
+            //{
+            _rangedAttackHandler.Execute(context);
+            _turnSystem.EndTurn();
+            //}
         }
+        else
+        {
+            _moveActionHandler.Execute(context);
+            _turnSystem.EndTurn();
+        }
+            
     }
     protected virtual void OnActionPerformed(Vector2Int cell)
     {
@@ -103,9 +136,9 @@ public partial class PlayerInputHandler
     }
 
 }
-public class CellClickHandlerDebugger : PlayerInputHandler
+public class PlayerInputHandlerDebugger : PlayerInputHandler
 {
-    public CellClickHandlerDebugger(GameInputHandler3D gameInputHandler3D, UnitStatsPanel unitStatsPanel, GameModel gameModel,TurnSystem turnSystem) : base(gameInputHandler3D, unitStatsPanel,gameModel, turnSystem)
+    public PlayerInputHandlerDebugger(GameInputHandler3D gameInputHandler3D, UnitStatsPanel unitStatsPanel, GameModel gameModel,TurnSystem turnSystem) : base(gameInputHandler3D, unitStatsPanel,gameModel, turnSystem)
     {
         Debug.Log("PlayerInputHandler is ready");
     }
@@ -126,7 +159,7 @@ public class CellClickHandlerDebugger : PlayerInputHandler
     }
     protected override bool GetUnitAt(Vector2Int pos, out UnitModel unitModel)
     {
-        Debug.Log("CellClickHandlerDebugger GetUnitAt called " + pos);
+        Debug.Log("PlayerInputHandlerDebugger GetUnitAt called " + pos);
         bool res = base.GetUnitAt(pos, out unitModel);
         if (!res)
             Debug.Log("unitModel is null");

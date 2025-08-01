@@ -80,8 +80,18 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
             AddState(point, state);
         }
     }
+    public void SetStates(List<Vector2Int> points, CellState state)
+    {
+        RemoveStates(state);
+        AddStates(points, state);
+    }
     public void RemoveStates(CellState state)
     {
+
+        if (!_cellStates.ContainsKey(state))
+        {
+            return;
+        }
         var states = _cellStates[state].ToList();
         foreach (var c in states)
         {

@@ -12,7 +12,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private GameController _gameController;
     [SerializeField] private GameInputHandler3D _gameInputHandler3D;
     [SerializeField] private GameView3D _gameView3D;
-    [SerializeField] private VisualHintSystem _visualHintSystem;
+    [SerializeField] private AttackActionPanel _attackActionPanel;
     [SerializeField] private UnitTurnPanelView _MVVMUnitTurnPanel;
     [SerializeField] private InGameUI _inGameUI;
     [SerializeField] private UnitStatsPanel _unitStatsPanel;
@@ -33,23 +33,22 @@ public class GameLogicMonoInstaller : MonoInstaller
         BindGridRenderer();
         BindViews();
         BindInputHandlers();
-
     }
 
     private void BindInputHandlers()
     {
         Container.Bind<GameInputHandler3D>().FromInstance(_gameInputHandler3D);
-        Container.Bind<PlayerInputHandler>().To<CellClickHandlerDebugger>().AsSingle().NonLazy();
+        Container.Bind<PlayerInputHandler>().To<PlayerInputHandler>().AsSingle().NonLazy();
     }
 
     private void BindModels()
     {
-        Container.Bind<GameModel>().To<GameModelDebugger>().AsSingle().NonLazy();
+        Container.Bind<GameModel>().To<GameModel>().AsSingle().NonLazy();
 
         Dictionary<CellState, CellMaterials> cellMaterials = _materials.ToDictionary(x => x.CellState);
         Container.Bind<IReadOnlyDictionary<CellState, CellMaterials>>().FromInstance(cellMaterials);
 
-        Container.Bind<List>().FromInstance(cellMaterials);
+        //Container.Bind<List>().FromInstance(cellMaterials);
 
         Dictionary<UnitType, UnitDefinitionSO> unitDatas = _unitDatas.ToDictionary(x => x.UnitType);
         Container.Bind<IReadOnlyDictionary<UnitType, UnitDefinitionSO>>().FromInstance(unitDatas);
@@ -61,7 +60,7 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindViewModels()
     {
-        Container.Bind<GameViewModel>().To<GameViewModelDebugger>().AsSingle().NonLazy();
+        Container.Bind<GameViewModel>().To<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
     }
 
@@ -73,24 +72,25 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<UnitStatsPanel>().FromInstance(_unitStatsPanel).AsSingle();
         Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
         Container.Bind<InGameUI>().FromInstance(_inGameUI).AsSingle();
-        Container.Bind<VisualHintSystem>().FromInstance(_visualHintSystem).AsSingle();
+        Container.Bind<IAttackActionPanel>().FromInstance(_attackActionPanel).AsSingle();
+        
     }
 
     private void BindServices()
     {
         Container.Bind<UnitModelFactory>().AsSingle();
         Container.Bind<UnitViewModelFactory>().AsSingle();
-        Container.Bind<UnitViewFactory>().To<UnitViewFactory>().AsSingle();
-        Container.Bind<TurnSystem>().To<TurnSystemDebugger>().AsSingle();
+        Container.Bind<UnitViewFactory>().AsSingle();
+        Container.Bind<TurnSystem>().To<TurnSystem>().AsSingle();
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
 
-        Container.BindFactory<UnitModel, MoveActionHandler, MoveActionHandlerFactory>();
-        Container.BindFactory<UnitModel, RangedAttackHandler, RangedAttackHandlerFactory>();
-        Container.BindFactory<UnitModel, MoveThenAttackHandler, MoveThenAttackHandlerFactory>();
+        Container.BindFactory<ICombatObject, MoveActionHandler, MoveActionHandlerFactory>();
+        Container.BindFactory<ICombatObject, RangedAttackHandler, RangedAttackHandlerFactory>();
+        Container.BindFactory<ICombatObject, MoveThenAttackHandler, MoveThenAttackHandlerFactory>();
 
-        Container.Bind<ActionResolver>().To<ActionResolverDebugger>().AsSingle().NonLazy();
+        //Container.Bind<ActionResolver>().To<ActionResolverDebugger>().AsSingle().NonLazy();
     }
 
     private void BindGridRenderer()

@@ -16,6 +16,7 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     [SerializeField] TextMeshProUGUI maxHealthText;
     [SerializeField] TextMeshProUGUI attackDamageText;
     [SerializeField] TextMeshProUGUI moveSpeedText;
+    [SerializeField] TextMeshProUGUI amountText;
     [SerializeField] Transform statusEffectIconsParent;
     [SerializeField] Vector3 showOffset;
     [SerializeField] Vector3 screenEdgeOffset;
@@ -42,6 +43,7 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
         _vm.MaxHealth.Subscribe(val => maxHealthText.text = val.ToString()).AddTo(_disposables);
         _vm.AttackDamage.Subscribe(val => attackDamageText.text = val.ToString()).AddTo(_disposables);
         _vm.MoveSpeed.Subscribe(val => moveSpeedText.text = val.ToString()).AddTo(_disposables);
+        _vm.Amount.Subscribe(OnAmountChanged).AddTo(_disposables);
 
         _vm.StatusEffects.ObserveAdd().Subscribe(e => AddStatusEffect(e.Value)).AddTo(_disposables);
         _vm.StatusEffects.ObserveReset().Subscribe(_ => RefreshStatusEffects()).AddTo(_disposables);
@@ -50,6 +52,11 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
         RefreshStatusEffects();
         Show();
+    }
+
+    private void OnAmountChanged(int obj)
+    {
+        amountText.text = obj.ToString();
     }
 
     private void AddStatusEffect(StatusEffectViewModel e)

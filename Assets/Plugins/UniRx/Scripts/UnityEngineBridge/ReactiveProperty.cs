@@ -245,6 +245,11 @@ namespace UniRx
         {
             return false;
         }
+
+        public void Cancel()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>

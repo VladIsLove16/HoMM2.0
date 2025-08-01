@@ -1,13 +1,15 @@
 ﻿// GameView3D.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 
 public class GameView3D : MonoBehaviour
 {
     private UnitViewFactory _factory;
-    private Dictionary<UnitViewModel, UnitView3D> _views = new();
+    private Dictionary<IViewModel, UnitView3D> _views = new();
     private Dictionary<UnitModel, UnitView3D> _models = new();
     private GameViewModel _gameVM;
     IGridCellRenderer _renderer;
@@ -22,16 +24,27 @@ public class GameView3D : MonoBehaviour
 
         _gameVM.UnitSpawned += OnUnitSpawned;
         _gameVM.UnitRemoved += OnUnitRemoved;
+        _gameVM.UnitMovedByRoute += OnUnitMovedByRoute;
     }
-    public virtual void OnUnitSpawned(UnitViewModel viewModel)
+
+    private void OnUnitMovedByRoute(IViewModel viewModel, List<Vector3> route)
+    {
+        var view = _views[viewModel];
+        view.MoveByRoute(route);
+    }
+
+    public virtual void OnUnitSpawned(IViewModel viewModel)
     {
         var view = _factory.Create(viewModel);
         _views[viewModel] = view;
-        UnitModel unitModel = viewModel.Model;
-        _models[unitModel] = view;
+        if(viewModel is UnitViewModel unitVM)
+        {
+            UnitModel unitModel = unitVM.Model;
+            _models[unitModel] = view;
+        }
     }
 
-    public void OnUnitRemoved(UnitViewModel viewModel)
+    public void OnUnitRemoved(IViewModel viewModel)
     {
         if (_views.TryGetValue(viewModel, out var view))
         {

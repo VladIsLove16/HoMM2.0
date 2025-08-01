@@ -6,11 +6,10 @@ using Zenject;
 
 public class UnitModelFactory
 {
-    [Inject] readonly Dictionary<UnitType, UnitDefinitionSO> _dataMap;
-    public UnitModelFactory(
-        Dictionary<UnitType, UnitDefinitionSO> allUnitDatas )
+    [Inject] readonly IReadOnlyDictionary<UnitType, UnitDefinitionSO> _dataMap;
+    public UnitModelFactory( )
     {
-        _dataMap = allUnitDatas;
+        
     }
     public UnitModel Create(UnitSpawnParams unitSpawnParams)
     {

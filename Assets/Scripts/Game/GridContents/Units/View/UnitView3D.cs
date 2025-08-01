@@ -10,6 +10,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     private CompositeDisposable _disposables = new();
     private Animator _animator;
 
+    [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
 
@@ -29,12 +30,18 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         SetMaterial(vm.TeamMaterial);
         _animator = GetComponent<Animator>();
         vm.OnAttacked.Subscribe(_ => EnqueueAction(PlayAnimation(UnitAnimationState.Attack))).AddTo(_disposables);
-        vm.OnMoved.Subscribe(route => EnqueueAction(MoveAlongRoute(route))).AddTo(_disposables);
+        //vm.OnMoved.Subscribe(route => EnqueueAction(MoveAlongRoute(route))).AddTo(_disposables);
         vm.OnHit.Subscribe(_ => EnqueueAction(PlayAnimation(UnitAnimationState.Hit))).AddTo(_disposables);
         vm.OnDeath.Subscribe(_ => EnqueueAction(HandleDeath())).AddTo(_disposables);
         vm.OnTurnStarted.Subscribe(_ => EnqueueAction(PlayAnimation(UnitAnimationState.Idle))).AddTo(_disposables);
+
+        unitViewUI.Init(vm);
     }
 
+    internal void MoveByRoute(List<Vector3> route)
+    {
+        EnqueueAction(MoveAlongRoute(route));
+    }
 
     private void SetMaterial(Material material)
     {

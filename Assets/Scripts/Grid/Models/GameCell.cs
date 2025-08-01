@@ -6,15 +6,11 @@ using UnityEngine;
 
 public class GameCell : IGridCell
 {
-    public event Action<IGridContent> ContentAdded;
-    public event Action<IGridContent> ContentRemoved;
-
     private readonly List<IGridContent> _contents = new();
     private GridXZ<GameCell> _grid;
     public int X { get; private set; }
     public int Y { get; private set; }
     public Vector2Int Position => new(X, Y);
-
     public bool IsEmpty => !_contents.Any();
     public IReadOnlyList<IGridContent> Contents => _contents;
     public UnitModel Unit => _contents.OfType<UnitModel>().FirstOrDefault();
@@ -27,15 +23,24 @@ public class GameCell : IGridCell
 
     public void AddContent(IGridContent c)
     {
-        if (c == null) return;
+        if (c == null) 
+            return;
         _contents.Add(c);
-        ContentAdded?.Invoke(c);
+        _grid.TriggerGridObjectChanged(this);
     }
 
     public void RemoveContent(IGridContent c)
     {
-        if (_contents.Remove(c))
-            ContentRemoved?.Invoke(c);
+        _contents.Remove(c);
+        _grid.TriggerGridObjectChanged(this);
+    }
+
+    public void TryRemoveUnit(IGridContent c)
+    {
+        if(Unit!=null)
+        {
+            RemoveContent(Unit);
+        }
     }
 
     public void Clear()
