@@ -47,7 +47,6 @@ public partial class PlayerInputHandler
 
     private void OnActiveObjectChanged(ICombatObject @object)
     {
-        Debug.Log("OnActiveObjectChanged " + @object.ToString());
         if (@object is UnitModel unit)
         {
             _moveActionHandler = _moveActionFactory.Create(unit);

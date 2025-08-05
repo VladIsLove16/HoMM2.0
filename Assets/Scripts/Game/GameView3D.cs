@@ -48,9 +48,7 @@ public class GameView3D : MonoBehaviour
     {
         if (_views.TryGetValue(viewModel, out var view))
         {
-            GameObject.Destroy(view.gameObject);
             _views.Remove(viewModel);
-
         }
     }
     public UnitView3D GetView(UnitModel model)

@@ -183,6 +183,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5640353169115779475}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7005818065557252448}
   m_SourcePrefab: {fileID: 100100000, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
 --- !u!1 &5985448834381532279 stripped
 GameObject:
@@ -205,6 +208,26 @@ MonoBehaviour:
   animationMoveSpeed: 3
   meshes:
   - {fileID: 8412983519895542611}
+--- !u!114 &-7005818065557252448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5985448834381532279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28ef396909f1c084bb50c8f9c2a6eb26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableDebugger: 1
+  logEvents: 1
+  logAnimations: 0
+  logMovement: 0
+  logMaterialChanges: 0
+  showGizmos: 1
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  gizmoSize: 0.5
 --- !u!4 &6366760203574449869 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
