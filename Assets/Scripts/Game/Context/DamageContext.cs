@@ -1,6 +1,4 @@
-﻿using static UnityEngine.GraphicsBuffer;
-
-public class DamageContext
+﻿public class DamageContext
 {
     public int DamageAmount;
     public DamageType Type;

@@ -15,7 +15,6 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     {
         _unitViewModel = vm;
 
-        // Подписываемся на события из ViewModel через UniRx
         _unitViewModel.OnHealthChanged
             .Subscribe(_ => UpdateHealth())
             .AddTo(_disposables);
@@ -38,7 +37,7 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
     private void UpdateHealth()
     {
-        // Безопасно получаем здоровье и максимум
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         var health = _unitViewModel.Model.ModifiedStats.Health;
         var maxHealth = _unitViewModel.Model.ModifiedStats.MaxHealth;
 
@@ -54,12 +53,12 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     private void OnDeath()
     {
         amountText.color = Color.black;
-        // Можно добавить эффект исчезновения, или другие анимации
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     private void OnTurnStart()
     {
-        // Можно например подсветить юнита, показать UI активности и т.п.
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ UI пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅ.пїЅ.
     }
 
     public void Dispose()

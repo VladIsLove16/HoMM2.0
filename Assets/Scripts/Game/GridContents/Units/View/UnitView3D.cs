@@ -5,12 +5,12 @@ using UniRx;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
+public class UnitView3D : MonoBehaviour, IDisposable, global::IHoverable
 {
     private CompositeDisposable _disposables = new();
     private Animator _animator;
 
-    [SerializeField] private UnitViewUI unitViewUI;
+    [SerializeField] private global::UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
 
@@ -141,7 +141,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         //Destroy(gameObject);
     }
 
-    private void Play(UnitAnimationState state)
+    public void Play(UnitAnimationState state)
     {
         if (_animator == null) return;
 
@@ -188,13 +188,14 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         Debug.Log($"[UnitView3D Debug] {eventMessage}");
         
         // Отправляем событие в дебаггеры
-        var componentDebugger = GetComponent<UnitView3DComponentDebugger>();
-        componentDebugger?.LogCustomEvent(eventMessage);
+        // var componentDebugger = GetComponent<UnitView3DComponentDebugger>();
+        // componentDebugger?.LogCustomEvent(eventMessage);
         
-        // Также можно добавить логирование в Editor дебаггер
-        #if UNITY_EDITOR
-        var editorDebugger = UnityEditor.Editor.CreateEditor(this) as Development.Editor.UnitView3DEditorDebugger;
-        editorDebugger?.AddEventToHistory(eventMessage);
-        #endif
+        // // Также можно добавить логирование в Editor дебаггер
+        // #if UNITY_EDITOR
+        // var editorDebugger = UnityEditor.Editor.CreateEditor(this) as Development.Editor.UnitView3DEditorDebugger;
+        // editorDebugger?.AddEventToHistory(eventMessage);
+        // #endif
     }
 }
+ 

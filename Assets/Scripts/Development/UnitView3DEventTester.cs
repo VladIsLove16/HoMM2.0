@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UniRx;
 
 namespace Development
 {
@@ -75,11 +76,8 @@ namespace Development
             var vm = GetViewModel();
             if (vm != null)
             {
-                vm.OnAttacked.OnNext(Unit.Default);
+                TryInvokeSubject(vm, "_onAttacked");
             }
-            
-            // Также вызываем напрямую
-            unitView.Play(UnitAnimationState.Attack);
         }
         
         private void TestHit()
@@ -90,11 +88,8 @@ namespace Development
             var vm = GetViewModel();
             if (vm != null)
             {
-                vm.OnHit.OnNext(Unit.Default);
+                TryInvokeSubject(vm, "_onHit");
             }
-            
-            // Также вызываем напрямую
-            unitView.Play(UnitAnimationState.Hit);
         }
         
         private void TestDeath()
@@ -105,7 +100,7 @@ namespace Development
             var vm = GetViewModel();
             if (vm != null)
             {
-                vm.OnDeath.OnNext(Unit.Default);
+                TryInvokeSubject(vm, "_onDeath");
             }
         }
         
@@ -147,6 +142,13 @@ namespace Development
             var vmField = unitView.GetType().GetField("_vm", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             return vmField?.GetValue(unitView) as UnitViewModel;
+        }
+        
+        private void TryInvokeSubject(UnitViewModel vm, string fieldName)
+        {
+            var field = typeof(UnitViewModel).GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var subject = field?.GetValue(vm) as Subject<Unit>;
+            subject?.OnNext(Unit.Default);
         }
         
         private void OnGUI()
