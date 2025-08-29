@@ -221,7 +221,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6763089761734387457}
   - component: {fileID: 3395211491130544556}
-  - component: {fileID: 2646441836253441731}
+  - component: {fileID: 1960635804455149540}
   m_Layer: 0
   m_Name: UnitIcon
   m_TagString: Untagged
@@ -259,7 +259,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5739293113370357883}
   m_CullTransparentMesh: 1
---- !u!114 &2646441836253441731
+--- !u!114 &1960635804455149540
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -268,13 +268,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5739293113370357883}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c095079908614eb49857704f9ff9c4b4, type: 3}
+  m_Script: {fileID: 11500000, guid: af6e5ed467ac42848985b2bb2bbcd0f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   UnitIcon: {fileID: 8517083001973014317}
   UnitTeamBorder: {fileID: 5605026903991808459}
-  BlueTeamColor: {r: 0.06728373, g: 0.3138506, b: 0.6792453, a: 1}
-  RedTeamColor: {r: 0.754717, g: 0.22485334, b: 0.046279836, a: 1}
+  BlueTeamColor: {r: 0.09525072, g: 0, b: 0.8773585, a: 0}
+  RedTeamColor: {r: 0.6415094, g: 0.14597477, b: 0.057493754, a: 0}
   unitType: 0
   turnText: {fileID: 5019072153130777414}
 --- !u!1 &7905713205495046859

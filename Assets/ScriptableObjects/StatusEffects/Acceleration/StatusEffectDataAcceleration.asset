@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectName: Acceleration
   sprite: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
+  type: 6
   ExpirationConditions:
   - {fileID: 11400000, guid: 919b4a89a316d5049b2f2b13d58612fa, type: 2}
   OnApply:
   - {fileID: 11400000, guid: 751500a389811d74384682f71f65ad4d, type: 2}
   OnTurnStart: []
+  OnTurnEnd: []
   OnInDamage: []
   OnOutDamage: []
   OnRemove:

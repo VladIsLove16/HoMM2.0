@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectName: IncreasingDmg
   sprite: {fileID: 21300000, guid: 4a5d5dd8b6a787c4db7eca03c7e9b783, type: 3}
+  type: 8
   ExpirationConditions: []
   OnApply: []
   OnTurnStart: []
+  OnTurnEnd: []
   OnInDamage: []
   OnOutDamage:
   - {fileID: 11400000, guid: 4d3a36a905959724db9e4d693c0ba639, type: 2}

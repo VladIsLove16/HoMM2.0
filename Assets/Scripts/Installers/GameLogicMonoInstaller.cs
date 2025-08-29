@@ -22,6 +22,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private UnitDefinitionSO[] _unitDatas;
     [SerializeField] private List<CellMaterials> _materials;
     [SerializeField] private List<StatusEffectData> statusEffectDatas;
+    [SerializeField] private MaterialProvider materialProvider;
 
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
@@ -44,6 +45,8 @@ public class GameLogicMonoInstaller : MonoInstaller
     private void BindModels()
     {
         Container.Bind<GameModel>().To<GameModel>().AsSingle().NonLazy();
+        Container.Bind<IMaterialProvider>().To<MaterialProvider>().FromInstance(materialProvider);
+
 
         Dictionary<CellState, CellMaterials> cellMaterials = _materials.ToDictionary(x => x.CellState);
         Container.Bind<IReadOnlyDictionary<CellState, CellMaterials>>().FromInstance(cellMaterials);

@@ -9,6 +9,8 @@ public class StatusEffectData : ScriptableObject
     [Tooltip("Имя эффекта")]
     public string EffectName;
     [SerializeField] private Sprite sprite;
+    [SerializeField] private StatusEffectType type;
+    public StatusEffectType Type => type;
     public Sprite Sprite => sprite;
 
 

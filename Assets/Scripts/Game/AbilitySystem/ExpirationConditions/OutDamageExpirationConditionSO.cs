@@ -8,7 +8,8 @@ public class OutDamageExpirationConditionSO : ExpirationConditionBase
 
     public override ExpirationConditionBase CreateRuntimeInstance() => Instantiate(this);
     public override void Initialize() => remaining = MaxHits;
-    public override void OnTurn() { }
+    public override void OnTurnStarted() { }
+    public override void OnTurnEnded() { }
     public override void OnInDamage(DamageContext ctx) { }
     public override void OnOutDamage(DamageContext ctx) { if (remaining > 0) remaining--; }
     public override bool ShouldRemove => remaining <= 0;

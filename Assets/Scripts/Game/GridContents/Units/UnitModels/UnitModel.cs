@@ -62,35 +62,60 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         set { Position.SetValueAndForceNotify(value); }
     }
     public GridContentType GridContentType => GridContentType.unit;
-    public Action Died { get; internal set; }
-    public Action<DamageContext> Hitted { get; internal set; }
-    public Action<DamageContext> Attacked { get; internal set; }
-    public Action TurnStarted { get; internal set; }
-    public Action HealthChanged { get; internal set; }
-    public Action<List<Vector2Int>> Moved { get; internal set; }
-    public Action StatsChanged { get; internal set; }
+    public Action Died;
+    public Action<DamageContext> Hitted;
+    public Action<DamageContext> Attacked;
+    public Action TurnStarted;
+    public Action HealthChanged;
+    public Action<List<Vector2Int>> Moved;
+    public Action StatsChanged;
 
     public void MoveByRoute(List<Vector2Int> route)
     {
+        if (route == null)
+            throw new ArgumentNullException(nameof(route), "Route cannot be null");
+        
+        if (route.Count == 0)
+            return; // Не меняем позицию если маршрут пустой
+            
         Position.SetValueAndForceNotify(route[route.Count-1]);
         Moved?.Invoke(route);
     }
-    public void ApplyStatusEffect(StatusEffect effect)
+    
+    public void ApplyEffect(StatusEffect effect)
     {
+        if (effect == null)
+            throw new ArgumentNullException(nameof(effect), "StatusEffect cannot be null");
+            
         if (!InvulnerableEffects.Contains(effect.Type))
             _statusEffectManager.Apply(effect);
     }
 
     public DamageContext SendDamage(AttackContext ctx)
     {
+        if (Amount.Value <= 0)
+            throw new ArgumentException("Cant attack unit with 0 or less amount");
+        if (ctx == null)
+            throw new ArgumentNullException(nameof(ctx), "AttackContext cannot be null");
+            
+        if (ModifiedStats.Damage < 0)
+            throw new ArgumentException("Damage cannot be negative", nameof(ModifiedStats.Damage));
+            
         DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
         _statusEffectManager.HandleOutDamage(damageContext);
         ctx.Target.RecieveDamage(damageContext);
         Attacked?.Invoke(damageContext);
         return damageContext;
     }
+    
     public DamageContext SimulateSendDamage(AttackContext defender)
     {
+        if (defender == null)
+            throw new ArgumentNullException(nameof(defender), "AttackContext cannot be null");
+            
+        if (ModifiedStats.Damage < 0)
+            throw new ArgumentException("Damage cannot be negative", nameof(ModifiedStats.Damage));
+            
         DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
         _statusEffectManager.HandleOutDamage(damageContext, true);
         defender.Target.SimulateRecieveDamage(damageContext);
@@ -99,6 +124,12 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
 
     public void RecieveDamage(DamageContext ctx)
     {
+        if (ctx == null)
+            throw new ArgumentNullException(nameof(ctx), "DamageContext cannot be null");
+            
+        if (ctx.DamageAmount < 0)
+            throw new ArgumentException("Damage amount cannot be negative", nameof(ctx.DamageAmount));
+            
         _statusEffectManager.HandleOutDamage(ctx);
         int damageLeft = ctx.DamageAmount;
 
@@ -133,25 +164,32 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             Died?.Invoke();
         }
     }
+    
     public void SimulateRecieveDamage(DamageContext ctx)
     {
-        _statusEffectManager.HandleOutDamage(ctx,true);
+        if (ctx == null)
+            throw new ArgumentNullException(nameof(ctx), "DamageContext cannot be null");
+            
+        _statusEffectManager.HandleOutDamage(ctx, true);
     }
 
     public void TakeTurn()
     {
         _statusEffectManager.HandleTurnStart();
+        TurnStarted?.Invoke();
         Debug.Log(UnitType + " takes turn");
     }
 
     public void EndTurn()
     {
         _statusEffectManager.HandleTurnEnd();
-
     }
 
     public void RemoveEffect(StatusEffect statusEffect)
     {
+        if (statusEffect == null)
+            throw new ArgumentNullException(nameof(statusEffect), "StatusEffect cannot be null");
+            
         _statusEffectManager.Remove(statusEffect);
     }
 
@@ -162,5 +200,10 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public override string ToString()
     {
         return UnitType.ToString();
+    }
+
+    public StatusEffect[] GetAppliedEffects()
+    {
+        throw new NotImplementedException();
     }
 }

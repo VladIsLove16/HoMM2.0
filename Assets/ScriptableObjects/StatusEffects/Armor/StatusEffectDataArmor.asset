@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectName: Armor
   sprite: {fileID: 21300000, guid: 5d812fcac8d5216449d2d792eeecd63a, type: 3}
+  type: 5
   ExpirationConditions:
   - {fileID: 11400000, guid: ef4002c3809aed04296b63fa64629c1c, type: 2}
   OnApply: []
   OnTurnStart: []
+  OnTurnEnd: []
   OnInDamage:
   - {fileID: 11400000, guid: 010471d5233a1e24488b3e516371ea81, type: 2}
   OnOutDamage: []

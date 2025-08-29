@@ -1,11 +1,14 @@
 ﻿public enum StatusEffectType
 {
-    Poison,
-    Stun,
+    NotImp,
+    NotImp2,
     Bleeding,
     Burning,
-    Frozen,
-    Shielded,
-    Hasted,
-    Slowed
+    NotImp3,
+    Armored,
+    Accelerated,
+    Slowed,
+    OutgoingDamageIncreased,
+    IncomingDamageIncreased,
+    Vampirism,
 }

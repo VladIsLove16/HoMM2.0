@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectName: Burning
   sprite: {fileID: 21300000, guid: 43c5aad02d7ea584fb01d64492e4e151, type: 3}
+  type: 3
   ExpirationConditions:
   - {fileID: 11400000, guid: 386372ff8d64291418548ac14b9ba058, type: 2}
   OnApply: []
   OnTurnStart:
   - {fileID: 11400000, guid: 3f19a76c559108640a46beeeaa592acd, type: 2}
+  OnTurnEnd: []
   OnInDamage: []
   OnOutDamage: []
   OnRemove: []

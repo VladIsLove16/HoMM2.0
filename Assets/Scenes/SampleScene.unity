@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 47613579}
   - component: {fileID: 47613582}
   - component: {fileID: 47613581}
-  - component: {fileID: 47613580}
+  - component: {fileID: 47613583}
   m_Layer: 0
   m_Name: AttackActionPanel
   m_TagString: Untagged
@@ -158,20 +158,6 @@ RectTransform:
   m_AnchoredPosition: {x: 549, y: 0}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &47613580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 47613578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d5a5d03a0dc7c44682a64c30ee499da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  damageText: {fileID: 1657121288}
-  panelRoot: {fileID: 47613578}
 --- !u!114 &47613581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,6 +196,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 47613578}
   m_CullTransparentMesh: 1
+--- !u!114 &47613583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 47613578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36fe3905bdf31674ba1551ae444f1017, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageText: {fileID: 1657121288}
+  panelRoot: {fileID: 47613578}
 --- !u!1 &82560149
 GameObject:
   m_ObjectHideFlags: 0
@@ -257,11 +257,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 82560149}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c602cde3c81fd4744bdc0b2018b43362, type: 3}
+  m_Script: {fileID: 11500000, guid: 117aeff2990c3324ba88e11478be2f0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitIconpf: {fileID: 2646441836253441731, guid: ca2b279a69345354a8b18a854dc5e743, type: 3}
-  parent: {fileID: 281657728}
+  unitIconpf: {fileID: 1960635804455149540, guid: ca2b279a69345354a8b18a854dc5e743, type: 3}
+  parent: {fileID: 82560149}
   ActiveCharacterController: {fileID: 668943037}
   unitDatas:
   - {fileID: 11400000, guid: 9fe34ad6450668f4e964ff2cc8b5d411, type: 2}
@@ -2004,17 +2004,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6022493044106470090, guid: 8d1df18e862384c4bae582d5d6bd7642, type: 3}
   m_PrefabInstance: {fileID: 7930533256047435779}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &582903474 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2175549802049555667, guid: 8d1df18e862384c4bae582d5d6bd7642, type: 3}
-  m_PrefabInstance: {fileID: 7930533256047435779}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef051dbeceaf4ea449b67f1beb88a0a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &668943035
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2131,13 +2120,13 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &668943037 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2646441836253441731, guid: ca2b279a69345354a8b18a854dc5e743, type: 3}
+  m_CorrespondingSourceObject: {fileID: 1960635804455149540, guid: ca2b279a69345354a8b18a854dc5e743, type: 3}
   m_PrefabInstance: {fileID: 668943035}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c095079908614eb49857704f9ff9c4b4, type: 3}
+  m_Script: {fileID: 11500000, guid: af6e5ed467ac42848985b2bb2bbcd0f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &719784622
@@ -2408,10 +2397,10 @@ MonoBehaviour:
   _gameController: {fileID: 985392989}
   _gameInputHandler3D: {fileID: 1492948230}
   _gameView3D: {fileID: 1712596801}
-  _attackActionPanel: {fileID: 47613580}
-  _MVVMUnitTurnPanel: {fileID: 82560151}
-  _inGameUI: {fileID: 1375104873}
-  _unitStatsPanel: {fileID: 582903474}
+  _attackActionPanel: {fileID: 0}
+  _MVVMUnitTurnPanel: {fileID: 0}
+  _inGameUI: {fileID: 0}
+  _unitStatsPanel: {fileID: 0}
   _gridView: {fileID: 407876099}
   cellPrefab: {fileID: 6718948771117235691, guid: 03f33b930472f244bae4ae4f515dd136, type: 3}
   singleGridPrefab: {fileID: 1404112009169814697, guid: 03f33b930472f244bae4ae4f515dd136, type: 3}
@@ -3029,7 +3018,7 @@ GameObject:
   - component: {fileID: 1375104871}
   - component: {fileID: 1375104870}
   - component: {fileID: 1375104869}
-  - component: {fileID: 1375104873}
+  - component: {fileID: 1375104872}
   m_Layer: 0
   m_Name: InGameUI
   m_TagString: Untagged
@@ -3121,7 +3110,7 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &1375104873
+--- !u!114 &1375104872
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3130,10 +3119,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375104866}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33dc9cfb59bdb4a4988e799a4875e5b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cf2862b6da13474e9bac704e5d91466, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentActionText: {fileID: 1803977036}
+  currentActionText: {fileID: 0}
   turnTextAnimator: {fileID: 1803977039}
 --- !u!1 &1492948228
 GameObject:
@@ -4031,7 +4020,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1803977034}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b48b5e8b0918ae143a2cb4db88a2c378, type: 3}
+  m_Script: {fileID: 11500000, guid: ff39d636c0767a942a7fa4b4cd950743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   turnNumber: {fileID: 1803977036}

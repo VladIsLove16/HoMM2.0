@@ -1,7 +1,7 @@
-using NaughtyAttributes;
 using System;
 using UnityEngine;
 using Zenject;
+using NaughtyAttributes;
 
 public class GameController : MonoBehaviour
 {
@@ -12,7 +12,6 @@ public class GameController : MonoBehaviour
     private GameModel _gameModel;
     private TurnSystem _combatSystem;
 
-    // Текущая выбранная клетка и флаг
     private Vector2Int? selectedCellCoords;
     private bool isCellSelected;
 

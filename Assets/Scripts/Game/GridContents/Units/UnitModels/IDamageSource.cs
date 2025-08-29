@@ -1,5 +1,5 @@
 ﻿public interface IDamageSource
 {
-    public DamageContext SendDamage(AttackContext ctx);
-    public DamageContext SimulateSendDamage(AttackContext ctx);
+    DamageContext SendDamage(AttackContext ctx);
+    DamageContext SimulateSendDamage(AttackContext ctx);
 }

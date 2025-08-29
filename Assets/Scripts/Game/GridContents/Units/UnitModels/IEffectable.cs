@@ -1,6 +1,6 @@
 ﻿public interface IEffectable : IDamagable
 {
-    public void ApplyStatusEffect(StatusEffect statusEffect);
-    public UnitStats ModifiedStats { get; set; }    
-    public void RemoveEffect(StatusEffect statusEffect);
+    void ApplyEffect(StatusEffect statusEffect);
+    void RemoveEffect(StatusEffect statusEffect);
+    UnitStats ModifiedStats { get; set; }
 }

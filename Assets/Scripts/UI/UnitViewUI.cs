@@ -11,7 +11,7 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     private UnitViewModel _unitViewModel;
     private CompositeDisposable _disposables = new();
 
-    public void Init(UnitViewModel vm)
+    public virtual void Init(UnitViewModel vm)
     {
         _unitViewModel = vm;
 

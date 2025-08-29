@@ -28,7 +28,7 @@ public class SpellCasterService
             foreach (var seData in data.StatusEffects)
             {
                 StatusEffect statusEffect = new(seData, target, source);
-                target.ApplyStatusEffect(statusEffect);
+                target.ApplyEffect(statusEffect);
             }
         }
     }

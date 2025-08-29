@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectName: Vampirism
   sprite: {fileID: 21300000, guid: 94bf2d7f1f4d5f2418edc0831b425bdc, type: 3}
+  type: 10
   ExpirationConditions:
   - {fileID: 11400000, guid: a545c60d2eb6c1a4a90bae29a62f9dfc, type: 2}
   OnApply: []
   OnTurnStart: []
+  OnTurnEnd: []
   OnInDamage: []
   OnOutDamage:
   - {fileID: 11400000, guid: 6e6e9aad4bdb1e742b828405b3b84bd4, type: 2}

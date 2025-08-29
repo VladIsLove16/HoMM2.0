@@ -25,20 +25,20 @@ public class UnitViewModel : IViewModel
     private Subject<Unit> _onHealthChanged = new();
 
     [Inject]  private IWorldToCellProvider _worldToCellProvider;
-    public UnitViewModel(UnitModel model, UnitViewModelMaterialsInfo definition)
+    public UnitViewModel(UnitModel model, IMaterialProvider definition)
     {
         Model = model;
 
         // В зависимости от команды выбираем нужные материалы
         if (model.IsBlueTeam.Value)
         {
-            TeamMaterial = definition.BlueTeamMaterial;
-            HoveredTeamMaterial = definition.HoveredBlueTeamMaterial;
+            TeamMaterial = definition.GetBlueTeamMaterial();
+            HoveredTeamMaterial = definition.GetHoveredBlueTeamMaterial();
         }
         else
         {
-            TeamMaterial = definition.RedTeamMaterial;
-            HoveredTeamMaterial = definition.HoveredRedTeamMaterial;
+            TeamMaterial = definition.GetRedTeamMaterial();
+            HoveredTeamMaterial = definition.GetHoveredRedTeamMaterial();
         }
 
         SubscribeToModel();

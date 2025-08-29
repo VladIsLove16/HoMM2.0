@@ -1,8 +1,4 @@
-﻿using UnityEditor.Experimental.GraphView;
-using static Unity.VisualScripting.Member;
-using static UnityEngine.GraphicsBuffer;
-
-/// <summary>
+﻿/// <summary>
 /// Перехватывает и модифицирует урон перед применением.
 /// </summary>
 public class EffectReactionContext
