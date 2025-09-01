@@ -273,8 +273,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UnitIcon: {fileID: 8517083001973014317}
   UnitTeamBorder: {fileID: 5605026903991808459}
-  BlueTeamColor: {r: 0.09525072, g: 0, b: 0.8773585, a: 0}
-  RedTeamColor: {r: 0.6415094, g: 0.14597477, b: 0.057493754, a: 0}
+  BlueTeamColor: {r: 0.09525072, g: 0, b: 0.8773585, a: 1}
+  RedTeamColor: {r: 0.6415094, g: 0.14597477, b: 0.057493754, a: 1}
   unitType: 0
   turnText: {fileID: 5019072153130777414}
 --- !u!1 &7905713205495046859

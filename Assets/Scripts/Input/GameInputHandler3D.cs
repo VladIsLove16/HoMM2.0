@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
+using UnityEngine.EventSystems; // Добавляем для проверки UI
 using Zenject;
 
 public class GameInputHandler3D : MonoBehaviour
@@ -16,6 +17,7 @@ public class GameInputHandler3D : MonoBehaviour
     public Action ActionCanceled;
     public ReactiveProperty<Collider> HoveredCollider;
     public ReactiveProperty<Vector3> WorldMousePosition;
+    
     private void OnEnable()
     {
         if(_inputActions == null)
@@ -49,27 +51,58 @@ public class GameInputHandler3D : MonoBehaviour
             }
         }
     }
+    
     private bool GetHit(out RaycastHit raycastHit, out Ray ray)
     {
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         return Physics.Raycast(ray, out raycastHit, 999f, mouseColliderLayerMask);
     }
+    
     private void OnSelectPerformed(InputAction.CallbackContext ctx)
     {
+        // Сначала проверяем, не кликнули ли по UI
+        if (IsPointerOverUI())
+            return; // Если кликнули по UI - игнорируем игровую логику
+
         if(GetHit(out var raycastHit,out var ray))
         {
             if (_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
                 SelectedCell.SetValueAndForceNotify(coords);
         }
     }
+    
     private void OnActionPerformed(InputAction.CallbackContext ctx)
     {
-        if (GetHit(out var raycastHit, out var ray))
+        // Сначала проверяем, не кликнули ли по UI
+        if (IsPointerOverUI())
+            return; // Если кликнули по UI - игнорируем игровую логику
+
+        if(GetHit(out var raycastHit, out var ray))
         {
             if (_renderer.ToGrid(raycastHit.point, out Vector2Int coords))
                 ActionPerformed.SetValueAndForceNotify(coords);
         }
         else
             ActionCanceled?.Invoke();
+    }
+
+    // Метод для проверки, находится ли указатель над UI элементом
+    private bool IsPointerOverUI()
+    {
+        // Проверяем EventSystem
+        if (EventSystem.current == null)
+            return false;
+        
+        // Используем GraphicRaycaster для надежной проверки UI
+        var eventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+        
+        var results = new System.Collections.Generic.List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        
+        // Если есть UI элементы под курсором - блокируем игровые действия
+        return results.Count > 0;
     }
 }

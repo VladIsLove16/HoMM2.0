@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Units/new BaseUnitStats")]
 public class UnitStats : ScriptableObject
 {
-    public int Health =0;
+    public int Health = 0;
     public int MaxHealth = 0;
     public int Damage = 0;
     public int SpellPower = 0;

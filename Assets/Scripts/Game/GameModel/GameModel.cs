@@ -51,7 +51,7 @@ public class GameModel
         var unit = _unitFactory.Create(spawnParams);
         cell.AddContent(unit);
 
-        unit.Died += ()=> UnitRemoved?.Invoke(new ContentRemovedParams(unit));
+        unit.Died += () => UnitRemoved?.Invoke(new ContentRemovedParams(unit));
         UnitSpawned?.Invoke(new UnitModelCreatedParams(unit));
         return new(true);
     }

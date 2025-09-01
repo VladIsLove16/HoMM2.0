@@ -254,6 +254,269 @@ namespace Tests.PlayMode.GridContents.Units
             UnityEngine.Object.DestroyImmediate(redTeamStats);
         }
 
+        [UnityTest]
+        public IEnumerator UnitView3D_Attack_DoesNotDeactivateGameObject()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null); // Урон меньше здоровья
+            var initialAmount = _unitModel.Amount.Value;
+            var gameObjectActiveBefore = _unitView.gameObject.activeSelf;
+
+            // Act - Атакуем юнита, но не убиваем его полностью
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(2f); // Ждем завершения анимации
+
+            // Assert - GameObject должен остаться активным
+            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+                "GameObject should remain active after attack that doesn't kill the unit");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount), 
+                "Unit amount should remain the same after non-lethal damage");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitView3D_Death_DeactivatesGameObject()
+        {
+            // Arrange
+            var damageContext = new DamageContext(1000, DamageType.physical, null); // Смертельный урон
+            var gameObjectActiveBefore = _unitView.gameObject.activeSelf;
+
+            // Act - Убиваем юнита полностью
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(2f); // Ждем завершения анимации смерти
+
+            // Assert - GameObject должен быть деактивирован
+            Assert.That(_unitView.gameObject.activeSelf, Is.False, 
+                "GameObject should be deactivated after unit death");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), 
+                "Unit amount should be 0 after lethal damage");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitView3D_PartialDamage_HandlesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(150, DamageType.physical, null); // Урон больше здоровья одного юнита
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Атакуем юнита, убиваем одного, но не весь стэк
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(2f);
+
+            // Assert - GameObject должен остаться активным, количество уменьшилось
+            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+                "GameObject should remain active after partial stack death");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+                "Remaining unit should have full health");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitView3D_Events_TriggerCorrectly()
+        {
+            // Arrange
+            var onDeathInvoked = false;
+            var onHitInvoked = false;
+            
+            _unitViewModel.OnDeath.Subscribe(_ => onDeathInvoked = true);
+            _unitViewModel.OnHit.Subscribe(_ => onHitInvoked = true);
+
+            // Act - Атакуем юнита, но не убиваем
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - OnHit должен вызваться, OnDeath - нет
+            Assert.That(onHitInvoked, Is.True, "OnHit should be invoked");
+            Assert.That(onDeathInvoked, Is.False, "OnDeath should not be invoked for non-lethal damage");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitView3D_Animations_PlayCorrectly()
+        {
+            // Arrange
+            var animator = _unitView.GetComponent<Animator>();
+            var initialAnimatorState = animator.GetCurrentAnimatorStateInfo(0);
+
+            // Act - Атакуем юнита
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Анимация Hit должна играться
+            var currentAnimatorState = animator.GetCurrentAnimatorStateInfo(0);
+            Assert.That(currentAnimatorState.IsName("Hit") || currentAnimatorState.IsName("Base Layer"), 
+                "Hit animation should play or return to base state");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitView3D_DeathAnimation_PlaysBeforeDeactivation()
+        {
+            // Arrange
+            var damageContext = new DamageContext(1000, DamageType.physical, null); // Смертельный урон
+            var animator = _unitView.GetComponent<Animator>();
+
+            // Act - Убиваем юнита полностью
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.5f); // Ждем начала анимации смерти
+
+            // Assert - GameObject еще активен, анимация смерти играется
+            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+                "GameObject should still be active during death animation");
+            
+            var currentAnimatorState = animator.GetCurrentAnimatorStateInfo(0);
+            Assert.That(currentAnimatorState.IsName("Die"), 
+                "Death animation should be playing");
+
+            yield return new WaitForSeconds(2f); // Ждем завершения анимации
+
+            // Assert - Теперь GameObject деактивирован
+            Assert.That(_unitView.gameObject.activeSelf, Is.False, 
+                "GameObject should be deactivated after death animation");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_HealthRatio_UpdatesCorrectlyAfterDamage()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+            var maxHealth = _unitModel.ModifiedStats.MaxHealth;
+            var expectedRatio = (float)(initialHealth - 50) / maxHealth;
+
+            // Act - Наносим урон
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Ratio должен обновиться
+            var actualRatio = _unitViewModel.HealthRatio;
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be updated correctly after damage");
+            Assert.That(actualRatio, Is.EqualTo(0.5f), 
+                "Health ratio should be 0.5 (50%) after 50 damage to 100 health");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_UnitAmount_UpdatesCorrectlyAfterDamage()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем одного юнита
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Количество юнитов должно уменьшиться
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1 after lethal damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+                "Remaining unit should have full health");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_HealthRatio_WithMultipleUnitDeaths_UpdatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(250, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем 2 юнита (100 + 100 = 200) и повреждаем третьего на 50
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Количество и здоровье должны обновиться
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 2), 
+                "Unit amount should decrease by 2 after killing 2 units");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
+                "Remaining unit should have 50 health (100 - 50)");
+            
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = 0.5f; // 50/100
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be 0.5 (50%) after multiple unit deaths");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_HealthRatio_WithPartialDamage_UpdatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(30, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+            var maxHealth = _unitModel.ModifiedStats.MaxHealth;
+
+            // Act - Наносим небольшой урон
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Ratio должен обновиться, количество не изменится
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = (float)(initialHealth - 30) / maxHealth;
+            
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be updated correctly after partial damage");
+            Assert.That(actualRatio, Is.EqualTo(0.7f), 
+                "Health ratio should be 0.7 (70%) after 30 damage to 100 health");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(TestAmount), 
+                "Unit amount should remain the same after non-lethal damage");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_HealthRatio_WithExactKill_UpdatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем точно одного юнита
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Количество уменьшится на 1, здоровье восстановится
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1 after exact kill");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+                "Remaining unit should have full health");
+            
+            var actualRatio = _unitViewModel.HealthRatio;
+            Assert.That(actualRatio, Is.EqualTo(1.0f), 
+                "Health ratio should be 1.0 (100%) after next unit gets full health");
+        }
+
+        [UnityTest]
+        public IEnumerator UnitViewUI_HealthRatio_WithOverkill_UpdatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем всех юнитов
+            _unitModel.RecieveDamage(damageContext);
+
+            yield return new WaitForSeconds(0.1f);
+
+            // Assert - Все юниты должны умереть
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), 
+                "Unit amount should be 0 after overkill damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(0), 
+                "Unit health should be 0 after overkill damage");
+            
+            var actualRatio = _unitViewModel.HealthRatio;
+            Assert.That(actualRatio, Is.EqualTo(0f), 
+                "Health ratio should be 0 when all units are dead");
+        }
+
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {

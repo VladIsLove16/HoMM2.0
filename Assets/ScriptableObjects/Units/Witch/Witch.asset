@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Witch
   m_EditorClassIdentifier: 
   UnitType: 1
-  UnitViewPrefab: {fileID: 7157924015712183769, guid: cf703134070eed3459f210e7cbdc6039, type: 3}
+  UnitViewPrefab: {fileID: 7117780627728513641, guid: b1602265030631b47a823cf8a07bad16, type: 3}
   UnitIcon: {fileID: 21300000, guid: 2c55d3bf7f48d1040878060c86494ffe, type: 3}
   Name: Witch
-  BlueTeamMaterial: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
-  HoveredBlueTeamMaterial: {fileID: 2100000, guid: 33898210659debf4cab578d2673590ac, type: 2}
-  RedTeamMaterial: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
-  HoveredRedTeamMaterial: {fileID: 2100000, guid: f08efeeaf720620419d10802d99114e1, type: 2}
+  _materialProvider:
+    _blueTeamMaterial: {fileID: 0}
+    _hoveredBlueTeamMaterial: {fileID: 0}
+    _redTeamMaterial: {fileID: 0}
+    _hoveredRedTeamMaterial: {fileID: 0}
   Stats: {fileID: 11400000, guid: bf37802ac300b134d9d32b7dee178e9d, type: 2}
   startingEffects:
   - {fileID: 11400000, guid: 3d9aa456805570549b796206c2d71cbb, type: 2}

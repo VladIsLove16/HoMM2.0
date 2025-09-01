@@ -17,6 +17,8 @@ public class UnitViewModel : IViewModel
     public IObservable<Unit> OnTurnStarted => _onTurnStarted;
     public IObservable<Unit> OnHealthChanged => _onHealthChanged;
 
+    public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0;
+
     private Subject<List<Vector3>> _onMoved = new();
     private Subject<Unit> _onAttacked = new();
     private Subject<Unit> _onHit = new();

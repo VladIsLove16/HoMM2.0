@@ -5,12 +5,12 @@ using UniRx;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-public class UnitView3D : MonoBehaviour, IDisposable, global::IHoverable
+public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
 {
     private CompositeDisposable _disposables = new();
     private Animator _animator;
 
-    [SerializeField] private global::UnitViewUI unitViewUI;
+    [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
 
@@ -43,7 +43,16 @@ public class UnitView3D : MonoBehaviour, IDisposable, global::IHoverable
         vm.OnDeath.Subscribe(_ => 
         {
             LogDebugEvent("Unit Death");
-            EnqueueAction(HandleDeath());
+            // Проверяем, действительно ли юнит полностью мертв
+            if (vm.Model.Amount.Value <= 0)
+            {
+                EnqueueAction(HandleDeath());
+            }
+            else
+            {
+                LogDebugEvent("Unit not fully dead, just playing hit animation");
+                EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
+            }
         }).AddTo(_disposables);
         vm.OnTurnStarted.Subscribe(_ => 
         {

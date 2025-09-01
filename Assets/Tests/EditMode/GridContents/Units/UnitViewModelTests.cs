@@ -287,6 +287,268 @@ namespace Tests.EditMode.GridContents.Units
             Assert.That(_unitViewModel.HoveredTeamMaterial, Is.Not.Null);
         }
 
+        [Test]
+        public void OnDeath_WhenModelPartiallyDamaged_DoesNotEmitEvent()
+        {
+            // Arrange
+            var eventReceived = false;
+            _unitViewModel.OnDeath.Subscribe(_ => eventReceived = true);
+
+            // Act - Урон меньше здоровья, не убивает юнита
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(eventReceived, Is.False, "OnDeath should not be emitted for non-lethal damage");
+        }
+
+        [Test]
+        public void OnDeath_WhenModelFullyKilled_EmitsEvent()
+        {
+            // Arrange
+            var eventReceived = false;
+            _unitViewModel.OnDeath.Subscribe(_ => eventReceived = true);
+
+            // Act - Смертельный урон
+            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(eventReceived, Is.True, "OnDeath should be emitted for lethal damage");
+        }
+
+        [Test]
+        public void OnHit_WhenModelDamaged_AlwaysEmitsEvent()
+        {
+            // Arrange
+            var eventReceived = false;
+            _unitViewModel.OnHit.Subscribe(_ => eventReceived = true);
+
+            // Act - Любой урон
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(eventReceived, Is.True, "OnHit should always be emitted when damage is received");
+        }
+
+        [Test]
+        public void OnHealthChanged_WhenModelDamaged_AlwaysEmitsEvent()
+        {
+            // Arrange
+            var eventReceived = false;
+            _unitViewModel.OnHealthChanged.Subscribe(_ => eventReceived = true);
+
+            // Act - Любой урон
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(eventReceived, Is.True, "OnHealthChanged should always be emitted when health changes");
+        }
+
+        [Test]
+        public void EventSequence_WhenModelDamaged_EmitsInCorrectOrder()
+        {
+            // Arrange
+            var eventSequence = new List<string>();
+            
+            _unitViewModel.OnHealthChanged.Subscribe(_ => eventSequence.Add("OnHealthChanged"));
+            _unitViewModel.OnHit.Subscribe(_ => eventSequence.Add("OnHit"));
+            _unitViewModel.OnDeath.Subscribe(_ => eventSequence.Add("OnDeath"));
+
+            // Act - Урон меньше здоровья
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert - События должны вызываться в правильном порядке
+            Assert.That(eventSequence.Count, Is.EqualTo(2), "Should emit 2 events for non-lethal damage");
+            Assert.That(eventSequence[0], Is.EqualTo("OnHealthChanged"), "OnHealthChanged should be first");
+            Assert.That(eventSequence[1], Is.EqualTo("OnHit"), "OnHit should be second");
+        }
+
+        [Test]
+        public void EventSequence_WhenModelKilled_EmitsInCorrectOrder()
+        {
+            // Arrange
+            var eventSequence = new List<string>();
+            
+            _unitViewModel.OnHealthChanged.Subscribe(_ => eventSequence.Add("OnHealthChanged"));
+            _unitViewModel.OnHit.Subscribe(_ => eventSequence.Add("OnHit"));
+            _unitViewModel.OnDeath.Subscribe(_ => eventSequence.Add("OnDeath"));
+
+            // Act - Смертельный урон
+            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert - События должны вызываться в правильном порядке
+            Assert.That(eventSequence.Count, Is.EqualTo(3), "Should emit 3 events for lethal damage");
+            Assert.That(eventSequence[0], Is.EqualTo("OnHealthChanged"), "OnHealthChanged should be first");
+            Assert.That(eventSequence[1], Is.EqualTo("OnHit"), "OnHit should be second");
+            Assert.That(eventSequence[2], Is.EqualTo("OnDeath"), "OnDeath should be last");
+        }
+
+        [Test]
+        public void HealthRatio_WhenModelDamaged_CalculatesCorrectly()
+        {
+            // Arrange
+            var initialHealth = _unitModel.ModifiedStats.Health;
+            var maxHealth = _unitModel.ModifiedStats.MaxHealth;
+            var expectedRatio = (float)initialHealth / maxHealth;
+
+            // Act
+            var actualRatio = _unitViewModel.HealthRatio;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be calculated correctly");
+            Assert.That(actualRatio, Is.EqualTo(1.0f), 
+                "Initial health ratio should be 1.0 (100%)");
+        }
+
+        [Test]
+        public void HealthRatio_AfterPartialDamage_CalculatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = (float)_unitModel.ModifiedStats.Health / _unitModel.ModifiedStats.MaxHealth;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be calculated correctly after damage");
+            Assert.That(actualRatio, Is.EqualTo(0.5f), 
+                "Health ratio should be 0.5 (50%) after 50 damage to 100 health");
+        }
+
+        [Test]
+        public void HealthRatio_AfterUnitDeath_CalculatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = (float)_unitModel.ModifiedStats.Health / _unitModel.ModifiedStats.MaxHealth;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be calculated correctly after unit death");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+                "Remaining unit should have full health");
+        }
+
+        [Test]
+        public void HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(150, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем одного юнита и повреждаем второго
+            _unitModel.RecieveDamage(damageContext);
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = (float)_unitModel.ModifiedStats.Health / _unitModel.ModifiedStats.MaxHealth;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be calculated correctly after multiple unit deaths");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
+                "Remaining unit should have 50 health (100 - 50)");
+        }
+
+        [Test]
+        public void HealthRatio_WithZeroMaxHealth_HandlesCorrectly()
+        {
+            // Arrange
+            _unitModel.ModifiedStats.MaxHealth = 0;
+
+            // Act
+            var actualRatio = _unitViewModel.HealthRatio;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(0f), 
+                "Health ratio should be 0 when max health is 0");
+        }
+
+        [Test]
+        public void UnitAmount_WhenModelDamaged_UpdatesCorrectly()
+        {
+            // Arrange
+            var initialAmount = _unitModel.Amount.Value;
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1 after lethal damage");
+        }
+
+        [Test]
+        public void UnitAmount_WithMultipleDeaths_UpdatesCorrectly()
+        {
+            // Arrange
+            var initialAmount = _unitModel.Amount.Value;
+            var damageContext = new DamageContext(250, DamageType.physical, null);
+
+            // Act - Убиваем 2 юнита (100 + 100 = 200) и повреждаем третьего на 50
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 2), 
+                "Unit amount should decrease by 2 after killing 2 units");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
+                "Remaining unit should have 50 health (100 - 50)");
+        }
+
+        [Test]
+        public void HealthRatio_WithStatusEffects_CalculatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+            var actualRatio = _unitViewModel.HealthRatio;
+            var expectedRatio = (float)_unitModel.ModifiedStats.Health / _unitModel.ModifiedStats.MaxHealth;
+
+            // Assert
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+                "Health ratio should be calculated correctly with status effects");
+            Assert.That(actualRatio, Is.EqualTo(0.5f), 
+                "Health ratio should be 0.5 (50%) after 50 damage");
+        }
+
+        [Test]
+        public void HealthRatio_WithHealing_CalculatesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            _unitModel.RecieveDamage(damageContext);
+            var ratioAfterDamage = _unitViewModel.HealthRatio;
+
+            // Act - Восстанавливаем здоровье (это происходит автоматически при смерти юнита в стэке)
+            var ratioAfterHealing = _unitViewModel.HealthRatio;
+
+            // Assert
+            Assert.That(ratioAfterDamage, Is.EqualTo(0.5f), 
+                "Health ratio should be 0.5 after damage");
+            Assert.That(ratioAfterHealing, Is.EqualTo(1.0f), 
+                "Health ratio should be 1.0 after healing (when next unit in stack gets full health)");
+        }
+
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {

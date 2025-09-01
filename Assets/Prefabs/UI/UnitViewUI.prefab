@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 612182195583346774}
   - component: {fileID: 8496297044732733049}
   - component: {fileID: 3149599652242995527}
-  - component: {fileID: 4805711555531500729}
+  - component: {fileID: 8756758233443477388}
   m_Layer: 5
   m_Name: HealthBar
   m_TagString: Untagged
@@ -77,7 +77,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4805711555531500729
+--- !u!114 &8756758233443477388
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -86,10 +86,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 721276633390807590}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 139c836c473613d42a8974ef712bf578, type: 3}
+  m_Script: {fileID: 11500000, guid: 70010ae2c5774de44bbec1820341a6d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HealthText: {fileID: 0}
+  HealthText: {fileID: 2765759853331752386}
   HealthImage: {fileID: 3149599652242995527}
   HideOnFullHP: 0
 --- !u!1 &5369487525753609957
@@ -376,7 +376,7 @@ GameObject:
   - component: {fileID: 807891832239024436}
   - component: {fileID: 5747227902412815696}
   - component: {fileID: 5271545898514403269}
-  - component: {fileID: 3812734579938919237}
+  - component: {fileID: 4844896234355424088}
   m_Layer: 5
   m_Name: UnitViewUI
   m_TagString: Untagged
@@ -468,7 +468,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &3812734579938919237
+--- !u!114 &4844896234355424088
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -477,8 +477,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8504360353631629215}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 878035ad48ab29e469e1c10fc679bcf2, type: 3}
+  m_Script: {fileID: 11500000, guid: 691c02999e2d0e046bace3814c8ece82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthBar: {fileID: 4805711555531500729}
+  healthBar: {fileID: 8756758233443477388}
   amountText: {fileID: 2765759853331752386}
+  healthAmountText: {fileID: 8411989273149192596}

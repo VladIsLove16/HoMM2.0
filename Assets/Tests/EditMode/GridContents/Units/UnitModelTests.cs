@@ -326,6 +326,233 @@ namespace Tests.EditMode.GridContents.Units
             Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
         }
 
+        [Test]
+        public void RecieveDamage_WithDamageLessThanHealth_DoesNotTriggerDeath()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var deathEventInvoked = false;
+            _unitModel.Died += () => deathEventInvoked = true;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(deathEventInvoked, Is.False, "Death event should not be invoked for non-lethal damage");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(TestAmount), "Unit amount should remain the same");
+        }
+
+        [Test]
+        public void RecieveDamage_WithDamageEqualToHealth_TriggersDeath()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var deathEventInvoked = false;
+            _unitModel.Died += () => deathEventInvoked = true;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(deathEventInvoked, Is.True, "Death event should be invoked for lethal damage");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), "Unit amount should be 0");
+        }
+
+        [Test]
+        public void RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath()
+        {
+            // Arrange
+            var damageContext = new DamageContext(150, DamageType.physical, null); // Урон больше здоровья одного юнита
+            var deathEventInvoked = false;
+            _unitModel.Died += () => deathEventInvoked = true;
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(deathEventInvoked, Is.False, "Death event should not be invoked for partial stack death");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), "Unit amount should decrease by 1");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), "Remaining unit should have full health");
+        }
+
+        [Test]
+        public void RecieveDamage_WithExactHealthKill_TriggersDeath()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null); // Точно здоровье одного юнита
+            var deathEventInvoked = false;
+            _unitModel.Died += () => deathEventInvoked = true;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(deathEventInvoked, Is.True, "Death event should be invoked for exact health kill");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), "Unit amount should be 0");
+        }
+
+        [Test]
+        public void RecieveDamage_WithOverkill_TriggersDeath()
+        {
+            // Arrange
+            var damageContext = new DamageContext(1000, DamageType.physical, null); // Урон намного больше здоровья
+            var deathEventInvoked = false;
+            _unitModel.Died += () => deathEventInvoked = true;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(deathEventInvoked, Is.True, "Death event should be invoked for overkill damage");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), "Unit amount should be 0");
+        }
+
+        [Test]
+        public void RecieveDamage_WithPartialDamage_UpdatesHealthCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(initialHealth - 50), 
+                "Health should be reduced by damage amount");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount), 
+                "Unit amount should remain the same for non-lethal damage");
+        }
+
+        [Test]
+        public void RecieveDamage_WithExactHealthDamage_KillsOneUnit()
+        {
+            // Arrange
+            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1 for exact health damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+                "Next unit in stack should have full health");
+            Assert.That(damageContext.DieAmount, Is.EqualTo(1), 
+                "DieAmount should be 1 for one unit killed");
+        }
+
+        [Test]
+        public void RecieveDamage_WithOverkillDamage_KillsMultipleUnits()
+        {
+            // Arrange
+            var damageContext = new DamageContext(250, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Убиваем 2 юнита (100 + 100 = 200) и повреждаем третьего на 50
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 2), 
+                "Unit amount should decrease by 2 for overkill damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
+                "Remaining unit should have 50 health (100 - 50)");
+            Assert.That(damageContext.DieAmount, Is.EqualTo(2), 
+                "DieAmount should be 2 for two units killed");
+        }
+
+        [Test]
+        public void RecieveDamage_WithMassiveDamage_KillsAllUnits()
+        {
+            // Arrange
+            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), 
+                "Unit amount should be 0 for massive damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(0), 
+                "Unit health should be 0 when all units are dead");
+            Assert.That(damageContext.DieAmount, Is.EqualTo(initialAmount), 
+                "DieAmount should equal initial amount for complete destruction");
+        }
+
+        [Test]
+        public void RecieveDamage_WithZeroDamage_DoesNothing()
+        {
+            // Arrange
+            var damageContext = new DamageContext(0, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(initialHealth), 
+                "Health should remain unchanged for zero damage");
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount), 
+                "Unit amount should remain unchanged for zero damage");
+            Assert.That(damageContext.DieAmount, Is.EqualTo(0), 
+                "DieAmount should be 0 for zero damage");
+        }
+
+        [Test]
+        public void RecieveDamage_WithNegativeDamage_ThrowsException()
+        {
+            // Arrange
+            var damageContext = new DamageContext(-50, DamageType.physical, null);
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() => 
+                _unitModel.RecieveDamage(damageContext));
+            Assert.That(exception.Message, Does.Contain("Damage amount cannot be negative"), 
+                "Exception message should mention negative damage");
+        }
+
+        [Test]
+        public void RecieveDamage_WithStatusEffects_AppliesCorrectly()
+        {
+            // Arrange
+            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var initialHealth = _unitModel.ModifiedStats.Health;
+
+            // Act
+            _unitModel.RecieveDamage(damageContext);
+
+            // Assert
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(initialHealth - 50), 
+                "Health should be reduced correctly with status effects");
+            // Дополнительные проверки статус-эффектов можно добавить здесь
+        }
+
+        [Test]
+        public void RecieveDamage_WithMultipleSmallDamages_AccumulatesCorrectly()
+        {
+            // Arrange
+            var damage1 = new DamageContext(30, DamageType.physical, null);
+            var damage2 = new DamageContext(40, DamageType.physical, null);
+            var damage3 = new DamageContext(50, DamageType.physical, null);
+            var initialAmount = _unitModel.Amount.Value;
+
+            // Act - Наносим несколько небольших уронов
+            _unitModel.RecieveDamage(damage1); // 100 - 30 = 70
+            _unitModel.RecieveDamage(damage2); // 70 - 40 = 30
+            _unitModel.RecieveDamage(damage3); // 30 - 50 = -20, убиваем юнита
+
+            // Assert
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+                "Unit amount should decrease by 1 after accumulated damage");
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(80), 
+                "Next unit should have 80 health (100 - 20)");
+        }
+
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {

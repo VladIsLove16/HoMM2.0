@@ -7,6 +7,7 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 {
     [SerializeField] private UnitHealthBar healthBar;
     [SerializeField] private TextMeshProUGUI amountText;
+    [SerializeField] private TextMeshProUGUI healthAmountText;
 
     private UnitViewModel _unitViewModel;
     private CompositeDisposable _disposables = new();
@@ -17,6 +18,10 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
         _unitViewModel.OnHealthChanged
             .Subscribe(_ => UpdateHealth())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnHealthChanged
+            .Subscribe(_ => UpdateAmount())
             .AddTo(_disposables);
 
         _unitViewModel.OnDeath
@@ -37,12 +42,14 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
     private void UpdateHealth()
     {
-        // ��������� �������� �������� � ��������
         var health = _unitViewModel.Model.ModifiedStats.Health;
         var maxHealth = _unitViewModel.Model.ModifiedStats.MaxHealth;
 
+        healthAmountText.text = health.ToString();
+
         float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
         healthBar.SetRatio(ratio);
+
     }
 
     private void UpdateAmount()
