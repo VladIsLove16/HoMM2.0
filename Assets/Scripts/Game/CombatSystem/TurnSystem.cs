@@ -12,45 +12,65 @@ public class TurnSystem
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
     private BattleState BattleState = BattleState.none;
+
     public virtual void AddCombatUnit(ICombatObject unit)
     {
+        if (unit == null) return;
+        if (CombatUnits.Contains(unit)) return;
         CombatUnits.Add(unit);
     }
-    internal void RemoveCombatUnit(ICombatObject unit)
+    public void RemoveCombatUnit(ICombatObject unit)
     {
+        if (unit == null) return;
         CombatUnits.Remove(unit);
+        RemoveFromTurnDict(unit);
+        // Если удалили активного — сразу перейти к следующему
+        if (ActiveObject.Value == unit)
+        {
+            EndTurn();
+        }
     }
-    internal void ClearUnits()
+    public void ClearUnits()
     {
         CombatUnits.Clear();
+        turnDict.Clear();
+        TurnNumber.Value = 0;
+        ActiveObject.Value = null;
     }
     public void RunBattle()
     {
         BattleState = BattleState.inProgress;
+        turnDict.Clear();
+        TurnNumber.Value = 0;
+        ActiveObject.Value = null;
         AddFirstUnits();
         TakeTurn();
     }
     public BattleState UpdateBattleState()
     {
-        bool team1;
-        team1 = CombatUnits[TurnNumber.Value].IsBlueTeam;
-        for (int i = 1; i < CombatUnits.Count; i++)
+        // Победитель определяется по оставшимся в CombatUnits командам
+        var aliveTeams = CombatUnits.Select(u => u.IsBlueTeam).Distinct().ToList();
+        if (aliveTeams.Count <= 1)
         {
-            if (CombatUnits[i].IsBlueTeam != team1)
-            {
-                return BattleState.inProgress;
-            }
+            BattleState = aliveTeams.Count == 1 && aliveTeams[0] ? BattleState.blueTeamWins : BattleState.redTeamWins;
+            return BattleState;
         }
-        BattleState = team1 == true ? BattleState.blueTeamWins : BattleState.redTeamWins;
+        BattleState = BattleState.inProgress;
         return BattleState;
     }
     protected virtual ICombatObject GetFirstObject()
     {
+        EnsureCurrentTurnListIsValid();
         return turnDict[TurnNumber.Value][0];
     }
     public void TakeTurn()
     {
-       
+        // Найти первого живого юнита в актуальном слайсе; если пусто — перелистнуть
+        if (!EnsureCurrentTurnListIsValid())
+        {
+            // если после очистки нет доступных юнитов — бой может быть закончен
+            return;
+        }
         ICombatObject combatObject = GetFirstObject();
         if (ActiveObject.Value == combatObject)
         {
@@ -62,11 +82,13 @@ public class TurnSystem
     }
     public void EndTurn()
     {
-        ActiveObject.Value.EndTurn();
-        ICombatObject nextUnit = DequeueUnit();
+        if (ActiveObject.Value != null)
+        {
+            ActiveObject.Value.EndTurn();
+        }
+        DequeueUnit();
         TakeTurn();
     }
-    
 
     private void AddFirstUnits()
     {
@@ -77,7 +99,7 @@ public class TurnSystem
         }
         AddUnitsUntil(turnTowards);
     }
-    
+
     private void AddUnitsUntil(int turn)
     {
         for (int i = turnDict.Count; i < turn; i++)
@@ -96,20 +118,40 @@ public class TurnSystem
         {
             turnDict[turn] = new();
         }
-        turnDict[turn].Add(unit);
+        if (unit != null)
+            turnDict[turn].Add(unit);
         CombatUnitsAdded?.Invoke(new UnitTurnInfo(unit, turn));
     }
 
     protected virtual ICombatObject DequeueUnit()
     {
+        if (!turnDict.ContainsKey(TurnNumber.Value))
+        {
+            OnNoTurnUnitsLeft();
+        }
+        EnsureCurrentTurnListIsValid();
+        if (!turnDict.ContainsKey(TurnNumber.Value))
+        {
+            return null;
+        }
         if (turnDict[TurnNumber.Value].Count == 0)
         {
             OnNoTurnUnitsLeft();
         }
+        if (!turnDict.ContainsKey(TurnNumber.Value) || turnDict[TurnNumber.Value].Count == 0)
+        {
+            return null;
+        }
+        // Удаляем текущего активного из очереди
         turnDict[TurnNumber.Value].Remove(ActiveObject.Value);
         if (turnDict[TurnNumber.Value].Count == 0)
         {
             OnNoTurnUnitsLeft();
+        }
+        EnsureCurrentTurnListIsValid();
+        if (!turnDict.ContainsKey(TurnNumber.Value) || turnDict[TurnNumber.Value].Count == 0)
+        {
+            return null;
         }
         ICombatObject combatUnit = turnDict[TurnNumber.Value][0];
         return combatUnit;
@@ -117,11 +159,66 @@ public class TurnSystem
 
     private void OnNoTurnUnitsLeft()
     {
-        turnDict.Remove(TurnNumber.Value);
+        if (turnDict.ContainsKey(TurnNumber.Value))
+        {
+            turnDict.Remove(TurnNumber.Value);
+        }
         TurnNumber.SetValueAndForceNotify(TurnNumber.Value + 1);
         if (turnDict.Count <= TurnNumber.Value + turnTowards)
         {
             AddUnitsUntil(TurnNumber.Value + turnTowards);
+        }
+    }
+
+    private void RemoveFromTurnDict(ICombatObject unit)
+    {
+        if (unit == null) return;
+        foreach (var kv in turnDict.ToList())
+        {
+            var list = kv.Value;
+            if (list == null) continue;
+            list.RemoveAll(u => u == null || u.Equals(unit));
+            if (list.Count == 0)
+            {
+                turnDict.Remove(kv.Key);
+            }
+        }
+        // Если удалили все текущие — перейти на следующий срез
+        if (!turnDict.ContainsKey(TurnNumber.Value))
+        {
+            // сдвиг вперёд до ближайшего непустого ключа
+            while (!turnDict.ContainsKey(TurnNumber.Value) && turnDict.Count > 0)
+            {
+                // подобрать минимальный существующий ключ >= текущего
+                int nextKey = turnDict.Keys.OrderBy(x => x).FirstOrDefault(x => x >= TurnNumber.Value);
+                if (nextKey == 0 && !turnDict.ContainsKey(nextKey)) break;
+                TurnNumber.Value = nextKey;
+            }
+        }
+    }
+
+    private bool EnsureCurrentTurnListIsValid()
+    {
+        // найти ближайший ключ с непустым листом
+        while (true)
+        {
+            if (!turnDict.ContainsKey(TurnNumber.Value))
+            {
+                if (turnDict.Count == 0) return false;
+                int nextKey = turnDict.Keys.OrderBy(x => x).First();
+                TurnNumber.Value = nextKey;
+            }
+            if (!turnDict.ContainsKey(TurnNumber.Value)) return false;
+            var list = turnDict[TurnNumber.Value];
+            // удалить из текущего среза всех, кого нет в CombatUnits (мертвые/удалённые)
+            list.RemoveAll(u => u == null || !CombatUnits.Contains(u));
+            if (list.Count == 0)
+            {
+                OnNoTurnUnitsLeft();
+                // и продолжаем цикл, чтобы найти следующий валидный
+                continue;
+            }
+            return true;
         }
     }
 }
@@ -144,7 +241,7 @@ public class TurnSystemDebugger : TurnSystem
     {
         ICombatObject @object =  base.DequeueUnit();
         string a = string.Empty;
-        foreach (var b in turnDict[TurnNumber.Value])
+        foreach (var b in turnDict.ContainsKey(TurnNumber.Value) ? turnDict[TurnNumber.Value] : new List<ICombatObject>())
         {
             a += b.ToString();
         }

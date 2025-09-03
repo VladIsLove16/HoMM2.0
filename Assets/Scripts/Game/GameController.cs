@@ -20,9 +20,8 @@ public class GameController : MonoBehaviour
     {
         _gameModel = model;
         _combatSystem = combatSystem;
-
-        
     }
+
     private void Start()
     {
         Setup(Width, Height);
@@ -30,35 +29,35 @@ public class GameController : MonoBehaviour
         CreateGridContent();
         RunBattle();
     }
+
     private void InitCombatSystem()
     {
+        // Синхронизируем текущих юнитов
         _combatSystem.ClearUnits();
-
         foreach (var unit in _gameModel.GetUnits())
         {
-            Action onDied = null;
-            onDied = () =>
-            {
-                OnCombatUnitDied(unit);
-                unit.Died -= onDied;
-            };
-            unit.Died += onDied;
-
             _combatSystem.AddCombatUnit(unit);
         }
 
-        _gameModel.UnitSpawned += OnGameModel_CellContentAdded;
+        // Единые подписки на поток событий модели
+        _gameModel.UnitSpawned += OnGameModel_UnitSpawned;
+        _gameModel.UnitRemoved += OnGameModel_UnitRemoved;
     }
 
-    private void OnCombatUnitDied(UnitModel unit)
+    private void OnGameModel_UnitRemoved(ContentRemovedParams @params)
     {
-        _combatSystem.RemoveCombatUnit(unit);
+        if (@params?.UnitModel != null)
+        {
+            _combatSystem.RemoveCombatUnit(@params.UnitModel);
+        }
     }
 
-    private void OnGameModel_CellContentAdded(UnitModelCreatedParams @params)
+    private void OnGameModel_UnitSpawned(UnitModelCreatedParams @params)
     {
-        ICombatObject combatUnit = @params.UnitModel;
-        _combatSystem.AddCombatUnit(combatUnit);
+        if (@params?.UnitModel != null)
+        {
+            _combatSystem.AddCombatUnit(@params.UnitModel);
+        }
     }
 
     [Button]
@@ -73,6 +72,7 @@ public class GameController : MonoBehaviour
         Debug.Log("Run battle");
         _combatSystem.RunBattle();
     }
+
     [Button]
     public void CreateGridContent()
     {
@@ -87,6 +87,7 @@ public class GameController : MonoBehaviour
             _gameModel.SpawnUnit(unitSpawnParams);
         }
     }
+
     public void Setup(int width, int height)
     {
         _gameModel.InitializeGrid(width, height);

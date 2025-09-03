@@ -51,6 +51,7 @@ public class GameModel
         var unit = _unitFactory.Create(spawnParams);
         cell.AddContent(unit);
 
+        // Транслируем смерть модели в событие удаления
         unit.Died += () => UnitRemoved?.Invoke(new ContentRemovedParams(unit));
         UnitSpawned?.Invoke(new UnitModelCreatedParams(unit));
         return new(true);
@@ -78,16 +79,17 @@ public class GameModel
 
     public void ClearGrid()
     {
-        for(int i =0; i<_grid.GetHeight();i++)
-            for (int j = 0; i < _grid.GetWidth(); j++)
+        for(int i = 0; i < _grid.GetHeight(); i++)
+            for (int j = 0; j < _grid.GetWidth(); j++)
             {
-                var cell = _grid.GetGridObject(i,j);
+                var cell = _grid.GetGridObject(i, j);
                 cell.Clear();
             }
     }
 
     public List<UnitModel> GetUnits()
     {
+        // Собираем всех юнитов с поля
         return GetAllCells().OfType<UnitModel>().ToList();
     }
 }
