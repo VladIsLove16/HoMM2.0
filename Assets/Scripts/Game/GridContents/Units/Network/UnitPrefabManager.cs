@@ -7,49 +7,19 @@ using Zenject;
 /// </summary>
 public class UnitPrefabManager : MonoBehaviour
 {
-    [System.Serializable]
-    public class UnitPrefabVariant
-    {
-        public UnitType UnitType;
-        public GameObject LocalVariant;
-        public GameObject NetworkVariant;
-        
-        public GameObject GetVariant(GameMode gameMode)
-        {
-            return gameMode switch
-            {
-                GameMode.Singleplayer => LocalVariant,
-                GameMode.Multiplayer => NetworkVariant,
-                _ => LocalVariant
-            };
-        }
-        
-        public bool IsValid()
-        {
-            return LocalVariant != null && NetworkVariant != null;
-        }
-    }
-    
-    [Header("Unit Prefab Variants")]
-    [SerializeField] private List<UnitPrefabVariant> _prefabVariants = new();
-    
-    private Dictionary<UnitType, UnitPrefabVariant> _prefabMap;
+    [Header("Configuration")]
+    [SerializeField] private UnitPrefabManagerConfig _config;
     
     [Inject]
     private void Construct()
     {
-        _prefabMap = new Dictionary<UnitType, UnitPrefabVariant>();
-        foreach (var variant in _prefabVariants)
+        if (_config == null)
         {
-            if (variant.IsValid())
-            {
-                _prefabMap[variant.UnitType] = variant;
-            }
-            else
-            {
-                Debug.LogWarning($"[UnitPrefabManager] Invalid prefab variant for unit type: {variant.UnitType}");
-            }
+            Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
+            return;
         }
+        
+        _config.ValidateAllPrefabs();
     }
     
     /// <summary>
@@ -57,13 +27,13 @@ public class UnitPrefabManager : MonoBehaviour
     /// </summary>
     public GameObject GetPrefab(UnitType unitType, GameMode gameMode)
     {
-        if (_prefabMap.TryGetValue(unitType, out var variant))
+        if (_config == null)
         {
-            return variant.GetVariant(gameMode);
+            Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
+            return null;
         }
         
-        Debug.LogError($"[UnitPrefabManager] Prefab variant not found for unit type: {unitType}");
-        return null;
+        return _config.GetPrefab(unitType, gameMode);
     }
     
     /// <summary>
@@ -71,7 +41,13 @@ public class UnitPrefabManager : MonoBehaviour
     /// </summary>
     public bool HasPrefab(UnitType unitType)
     {
-        return _prefabMap.ContainsKey(unitType);
+        if (_config == null)
+        {
+            Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
+            return false;
+        }
+        
+        return _config.HasPrefab(unitType);
     }
     
     /// <summary>
@@ -79,21 +55,12 @@ public class UnitPrefabManager : MonoBehaviour
     /// </summary>
     public IEnumerable<UnitType> GetAvailableUnitTypes()
     {
-        return _prefabMap.Keys;
-    }
-    
-    /// <summary>
-    /// Валидирует все префабы
-    /// </summary>
-    [ContextMenu("Validate All Prefabs")]
-    public void ValidateAllPrefabs()
-    {
-        foreach (var variant in _prefabVariants)
+        if (_config == null)
         {
-            if (!variant.IsValid())
-            {
-                Debug.LogError($"[UnitPrefabManager] Invalid prefab variant: {variant.UnitType}");
-            }
+            Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
+            return new List<UnitType>();
         }
+        
+        return _config.GetAvailableUnitTypes();
     }
 }
