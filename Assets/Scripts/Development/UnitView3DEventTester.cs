@@ -116,7 +116,7 @@ namespace Development
                 transform.position + Vector3.forward * 6f
             };
             
-            unitView.MoveByRoute(route);
+            unitView.RequestMove(route);
         }
         
         private void TestHover()

@@ -35,7 +35,7 @@ public class UnitTurnPanelView : MonoBehaviour
 #if UNITY_EDITOR
             DestroyImmediate(parent.transform.GetChild(i).gameObject);
 #else
-            Destroy(icon.gameObject);
+            Destroy(parent.transform.GetChild(i).gameObject);
 #endif
         }
         unitModels.Clear();
@@ -116,7 +116,7 @@ public class UnitTurnPanelView : MonoBehaviour
 #if UNITY_EDITOR
             DestroyImmediate(unitIconController.gameObject);
 #else
-            Destroy(icon.gameObject);
+            Destroy(unitIconController.gameObject);
 #endif
         }
     }

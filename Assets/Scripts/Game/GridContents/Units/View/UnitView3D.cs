@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using Game.Network;
 
 [RequireComponent(typeof(Animator))]
 public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
@@ -19,6 +20,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     public UnitModel Model { get; private set; }
     private Dictionary<bool, Material> _teamMaterials;
     private UnitViewModel _vm;
+    private IUnitCommandExecutor _commandExecutor;
+    
+    private void Awake()
+    {
+        // Исполнитель команд будет установлен через GameModeManager
+        _commandExecutor = GetComponent<IUnitCommandExecutor>();
+    }
     /// <summary>
     /// UnitView does not change UnitModel at all
     /// </summary>
@@ -61,12 +69,50 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         }).AddTo(_disposables);
 
         unitViewUI.Init(vm);
+        
+        // Подписываемся на команды
+        if (_commandExecutor != null)
+        {
+            _commandExecutor.OnMoveCommandReceived += HandleMoveCommand;
+            _commandExecutor.OnAttackCommandReceived += HandleAttackCommand;
+        }
     }
-
-    public void MoveByRoute(List<Vector3> route)
+    
+    /// <summary>
+    /// Публичный метод для запроса перемещения (может быть вызван извне)
+    /// </summary>
+    public void RequestMove(List<Vector3> route)
+    {
+        if (_commandExecutor != null && _commandExecutor.CanExecuteCommands)
+        {
+            _commandExecutor.ExecuteMoveCommand(route);
+        }
+        else
+        {
+            // Fallback для случаев, когда нет исполнителя команд
+            ExecuteMove(route);
+        }
+    }
+    
+    /// <summary>
+    /// Внутренний метод для выполнения перемещения (вызывается из сетевых команд)
+    /// </summary>
+    private void ExecuteMove(List<Vector3> route)
     {
         LogDebugEvent($"Unit Moving by Route: {route.Count} points");
         EnqueueAction(MoveAlongRoute(route));
+    }
+    
+    private void HandleMoveCommand(List<Vector3> route)
+    {
+        ExecuteMove(route);
+    }
+    
+    private void HandleAttackCommand(ulong targetUnitId)
+    {
+        // Здесь будет логика атаки
+        LogDebugEvent($"Unit attacking target: {targetUnitId}");
+        // TODO: Implement attack logic
     }
 
     private void SetMaterial(Material material)
@@ -173,6 +219,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
 
     public void Dispose()
     {
+        // Отписываемся от событий команд
+        if (_commandExecutor != null)
+        {
+            _commandExecutor.OnMoveCommandReceived -= HandleMoveCommand;
+            _commandExecutor.OnAttackCommandReceived -= HandleAttackCommand;
+        }
+        
         _disposables.Dispose();
         StopAllCoroutines();
         actionQueue.Clear();

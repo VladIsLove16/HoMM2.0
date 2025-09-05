@@ -37,9 +37,12 @@ public class UnitDefinitionSO : ScriptableObject
     public UnitType UnitType;
     
     /// <summary>
-    /// view
+    /// Основной префаб юнита (для обратной совместимости)
     /// </summary>
+    [Header("Unit Prefab")]
     public GameObject UnitViewPrefab;
+    
+    [Header("Unit Appearance")]
     public Sprite UnitIcon;
     public string Name;
     
@@ -68,5 +71,14 @@ public class UnitDefinitionSO : ScriptableObject
         {
             _materialProvider = materialProvider;
         }
+    }
+    
+    /// <summary>
+    /// Валидирует конфигурацию юнита
+    /// </summary>
+    /// <returns>True, если конфигурация корректна</returns>
+    public bool IsValid()
+    {
+        return UnitViewPrefab != null && Stats != null && !string.IsNullOrEmpty(Name);
     }
 }

@@ -6,54 +6,54 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-using static UnityEditor.Profiling.HierarchyFrameDataView;
+using Game.Network;
+
 public enum UnitType
 {
     Archer,
     Witch,
     Warrok
 }
+
+/// <summary>
+/// Фабрика для создания юнитов в зависимости от режима игры
+/// </summary>
 public class UnitViewFactory
 {
     readonly DiContainer _container;
     [Inject] IReadOnlyDictionary<UnitType, UnitDefinitionSO> _dataMap;
     readonly Transform _unitsParent;
     readonly IWorldToCellProvider _worldToCellProvider;
+    readonly GameModeManager _gameModeManager;
+    readonly NetworkUnitViewFactory _networkFactory;
+    
     public UnitViewFactory(
         DiContainer container,
         IWorldToCellProvider worldToCellProvider,
+        GameModeManager gameModeManager,
+        NetworkUnitViewFactory networkFactory,
         [Inject(Id = "UnitsParent")] Transform unitsParent)
     {
         _container = container;
         _unitsParent = unitsParent;
         _worldToCellProvider = worldToCellProvider;
+        _gameModeManager = gameModeManager;
+        _networkFactory = networkFactory;
+    }
+
+    public UnitViewFactory(DiContainer container, IWorldToCellProvider worldToCellProvider, Transform unitsParent)
+    {
+        _container = container;
+        _worldToCellProvider = worldToCellProvider;
+        _unitsParent = unitsParent;
     }
 
     /// <summary>
-    /// СоздаётUnitView3D (префаб) на позиции (x,y).
+    /// Создаёт UnitView3D в зависимости от режима игры
     /// </summary>
     public virtual UnitView3D Create(IViewModel viewModel)
     {
-        var unitViewModel = viewModel as UnitViewModel;
-        UnitType unitType = unitViewModel.Model.UnitType.Value;
-        UnitModel model = unitViewModel.Model;
-        if (!_dataMap.TryGetValue(unitType, out var data))
-        {
-            Debug.LogError($"Нет UnitDefinitionSO для типа {unitType}");
-            return null;
-        }
-
-        Vector3 worldPos = _worldToCellProvider.ToWorld(model.Position.Value.x, model.Position.Value.y);
-
-        var view = _container
-            .InstantiatePrefabForComponent<UnitView3D>(
-                data.UnitViewPrefab,
-                worldPos,
-                Quaternion.identity,
-                _unitsParent
-            );
-        view.Init(unitViewModel);
-        return view;
+        return _networkFactory.CreateUnit(viewModel);
     }
 }
 

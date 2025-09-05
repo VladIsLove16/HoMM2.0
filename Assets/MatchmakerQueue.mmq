@@ -1,0 +1,41 @@
+{
+  "$schema": "https://ugs-config-schemas.unity3d.com/v1/matchmaker/matchmaker-queue.schema.json",
+  "name": "default-queue",
+  "enabled": true,
+  "maxPlayersPerTicket": 2,
+  "defaultPool": {
+    "variants": [],
+    "name": "default-pool",
+    "enabled": true,
+    "timeoutSeconds": 90,
+    "matchLogic": {
+      "matchDefinition": {
+        "teams": [
+          {
+            "name": "Team",
+            "teamCount": {
+              "min": 2,
+              "max": 2,
+              "relaxations": []
+            },
+            "playerCount": {
+              "min": 1,
+              "max": 2,
+              "relaxations": []
+            },
+            "teamRules": []
+          }
+        ],
+        "matchRules": []
+      },
+      "name": "Rules"
+    },
+    "matchHosting": {
+      "type": "Multiplay",
+      "fleetName": "my fleet",
+      "buildConfigurationName": "my build configuration",
+      "defaultQoSRegionName": "North America"
+    }
+  },
+  "filteredPools": []
+}

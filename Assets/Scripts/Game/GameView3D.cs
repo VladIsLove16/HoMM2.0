@@ -30,7 +30,7 @@ public class GameView3D : MonoBehaviour
     private void OnUnitMovedByRoute(IViewModel viewModel, List<Vector3> route)
     {
         var view = _views[viewModel];
-        view.MoveByRoute(route);
+        view.RequestMove(route);
     }
 
     public virtual void OnUnitSpawned(IViewModel viewModel)

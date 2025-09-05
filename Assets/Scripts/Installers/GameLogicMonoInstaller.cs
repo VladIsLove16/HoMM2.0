@@ -1,10 +1,10 @@
+using Game.Network;
 using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Zenject;
-using static PlayerInputHandler;
 public enum GridRenderStrategy { PerCell, Single }
 
 public class GameLogicMonoInstaller : MonoInstaller
@@ -23,6 +23,9 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private List<CellMaterials> _materials;
     [SerializeField] private List<StatusEffectData> statusEffectDatas;
     [SerializeField] private MaterialProvider materialProvider;
+    [SerializeField] private GameModeManager gameModeManager;
+    [SerializeField] private UnitNetworkService unitNetworkService;
+    [SerializeField] private UnitPrefabManager unitPrefabManager;
 
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
@@ -88,6 +91,14 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
+
+        // Network services
+        Container.Bind<GameModeManager>().FromInstance(gameModeManager).AsSingle();
+        Container.Bind<UnitNetworkService>().FromInstance(unitNetworkService).AsSingle();
+        Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
+        Container.Bind<IUnitCommandExecutorFactory>().To<UnitCommandExecutorFactory>().AsSingle();
+        Container.Bind<UnitCommandExecutorService>().AsSingle();
+        Container.Bind<NetworkUnitViewFactory>().AsSingle();
 
         Container.BindFactory<ICombatObject, MoveActionHandler, MoveActionHandlerFactory>();
         Container.BindFactory<ICombatObject, RangedAttackHandler, RangedAttackHandlerFactory>();
