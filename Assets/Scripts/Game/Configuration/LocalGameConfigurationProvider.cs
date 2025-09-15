@@ -5,12 +5,12 @@ using Zenject;
 /// Локальный провайдер конфигурации игры
 /// Используется для локального тестирования без сети
 /// </summary>
-public class LocalGameConfigurationProvider : IGameConfigurationProvider, IInitializable
+public class LocalGameConfigurationProvider : IBattleEntryProvider, IInitializable
 {
     private readonly GridContentEntrySO[] _availableConfigs;
     private int _selectedIndex = 0;
 
-    bool IGameConfigurationProvider.AcceptStartingBattleWithoutClients { get
+    bool IBattleEntryProvider.AcceptStartingBattleWithoutClients { get
         {
             return true;
         } }

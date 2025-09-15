@@ -12,169 +12,56 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class GameController : NetworkBehaviour, IInitializable
 {
     [Header("Grid Settings")]
-    [SerializeField] private int Height = 8;
-    [SerializeField] private int Width = 8;
-    
-    [Header("Fallback Configuration")]
-    [SerializeField] private GridContentEntrySO gridContentEntrySO;
-    [SerializeField] private GameNetworkCommandGateway _gateway;
+    [SerializeField] GameConfigurationProviderSO gameConfigurationProvider;
 
     private GameModel _gameModel;
     private TurnSystem _turnSystem;
-    private IGameConfigurationProvider _configurationProvider;
+    private IBattleEntryProvider _battleEntryProvider;
     private IGameStartupFlow _startupFlow;
     private IUnitSpawner _unitSpawner;
     private IBattleRunner _battleRunner;
 
     [Inject]
     public void Construct(
-        GameViewModel viewModel, 
-        GridView view, 
-        GameModel model, 
+        GameModel model,
         TurnSystem combatSystem,
-        IGameConfigurationProvider configurationProvider,
+        IBattleEntryProvider configurationProvider,
         IGameStartupFlow startupFlow,
-         IUnitSpawner unitSpawner,
+        IUnitSpawner unitSpawner,
         IBattleRunner battleRunner)
     {
         _gameModel = model;
         _turnSystem = combatSystem;
-        _configurationProvider = configurationProvider;
+        _battleEntryProvider = configurationProvider;
         _startupFlow = startupFlow;
         _unitSpawner = unitSpawner;
-        _battleRunner = battleRunner; 
+        _battleRunner = battleRunner;
     }
-    
+
     public void Initialize()
     {
         Debug.Log("[GameController] Initialized with configuration provider");
     }
 
-    public override void OnNetworkSpawn()
-    {
-        Debug.Log("[GameController] OnNetworkSpawn called");
-        Debug.Log($"[GameController] NetworkObjectId: {NetworkObjectId}, IsHost: {IsHost}, IsClient: {IsClient}");
-        _startupFlow.Run();
-    }
-    
     private void Start()
     {
         Debug.Log("[GameController] Start called");
+        _startupFlow.Run(); // теперь запускается напрямую
     }
 
-    public void InitCombatSystem()
-    {
-        // Синхронизируем текущих юнитов
-        _turnSystem.ClearUnits();
-        foreach (var unit in _gameModel.GetUnits())
-        {
-            _turnSystem.AddCombatUnit(unit);
-        }
-
-        _gameModel.UnitSpawned += OnGameModel_UnitSpawned;
-        _gameModel.UnitDied += OnGameModel_UnitDied;
-    }
-
-    private void OnGameModel_UnitDied(ContentDiedParams @params)
-    {
-        if (@params?.UnitModel != null)
-        {
-            _turnSystem.RemoveCombatUnit(@params.UnitModel);
-           var state =  _turnSystem.BattleState;
-            if(state == BattleState.blueTeamWins)
-            {
-                
-            }
-            else if(state == BattleState.redTeamWins)
-            {
-
-            }
-        }
-    }
-
-    private void OnGameModel_UnitSpawned(UnitModelCreatedParams @params)
-    {
-        if (@params?.UnitModel != null)
-        {
-            _turnSystem.AddCombatUnit(@params.UnitModel);
-        }
-    }
-
-    [Button]
     public void Setup()
     {
-        Setup(Width, Height);
+        Setup(gameConfigurationProvider.Width, gameConfigurationProvider.Height);
     }
+        
     public void Setup(int width, int height)
     {
         _gameModel.InitializeGrid(width, height);
     }
-    [Button]
-    public void RunBattle()
-    {
-        _battleRunner.RunBattle();
-    }
-
-    [Button]
     public void CreateGridContent()
     {
-        CreateGridContent(gridContentEntrySO);
+        CreateGridContent(gameConfigurationProvider.gridContentEntrySO);
     }
-
-    public void CreateGridContentFromConfiguration()
-    {
-        Debug.Log("[GameController] CreateGridContentFromConfiguration called");
-        
-        if (_configurationProvider == null)
-        {
-            Debug.LogError("[GameController] Configuration provider is null!");
-            CreateFallbackGridContent();
-            return;
-        }
-        
-        Debug.Log($"[GameController] Configuration provider found: {_configurationProvider.GetType().Name}");
-        
-        // Получаем выбранную конфигурацию через DI
-        var selectedConfig = _configurationProvider.GetSelectedConfiguration();
-        if (selectedConfig != null)
-        {
-            Debug.Log($"[GameController] Creating grid content from configuration: {selectedConfig.name}");
-            CreateGridContent(selectedConfig);
-        }
-        else
-        {
-            Debug.LogWarning("[GameController] No configuration selected, using fallback");
-            CreateFallbackGridContent();
-        }
-    }
-    
-    /// <summary>
-    /// Проверить, готова ли конфигурация для создания юнитов
-    /// </summary>
-    public bool IsConfigurationReady()
-    {
-        if (_configurationProvider == null)
-        {
-            return false;
-        }
-        
-        var selectedConfig = _configurationProvider.GetSelectedConfiguration();
-        return selectedConfig != null;
-    }
-    
-    private void CreateFallbackGridContent()
-    {
-        if (gridContentEntrySO != null)
-        {
-            Debug.Log("[GameController] Using fallback configuration");
-            CreateGridContent(gridContentEntrySO);
-        }
-        else
-        {
-            Debug.LogError("[GameController] No fallback configuration available!");
-        }
-    }
-
     public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
     {
         foreach (var content in unitContentEntrySO.contents)
@@ -184,8 +71,43 @@ public class GameController : NetworkBehaviour, IInitializable
         }
     }
 
+    public void CreateGridContentFromConfiguration()
+    {
+        var selectedConfig = _battleEntryProvider?.GetSelectedConfiguration();
+        if (selectedConfig != null)
+        {
+            Debug.Log($"[GameController] Creating grid content from config: {selectedConfig.name}");
+            CreateGridContent(selectedConfig);
+        }
+        else if (gameConfigurationProvider.gridContentEntrySO != null)
+        {
+            Debug.Log("[GameController] Using fallback config");
+            CreateGridContent(gameConfigurationProvider.gridContentEntrySO);
+        }
+    }
 
+    public void InitTurnSystem()
+    {
+        Debug.Log("[GameController] InitTurnSystem");
+        _turnSystem.ClearUnits();
+        foreach (var unit in _gameModel.GetUnits())
+            _turnSystem.AddCombatUnit(unit);
+
+        _gameModel.UnitSpawned += p => _turnSystem.AddCombatUnit(p.UnitModel);
+        _gameModel.UnitDied += p => _turnSystem.RemoveCombatUnit(p.UnitModel);
+    }
+
+    public void RunBattle()
+    {
+        _battleRunner.RunBattle();
+    }
+
+    internal bool IsConfigurationReady()
+    {
+        throw new NotImplementedException();
+    }
 }
+
 public class LocalUnitSpawner : IUnitSpawner
 {
     private readonly GameModel _gameModel;
@@ -236,9 +158,9 @@ public class NetworkUnitSpawner : IUnitSpawner
 public class NetworkBattleRunner : IBattleRunner
 {
     private readonly TurnSystem _combatSystem;
-    private readonly IGameConfigurationProvider _config;
+    private readonly IBattleEntryProvider _config;
 
-    public NetworkBattleRunner(TurnSystem combatSystem, IGameConfigurationProvider config)
+    public NetworkBattleRunner(TurnSystem combatSystem, IBattleEntryProvider config)
     {
         _combatSystem = combatSystem;
         _config = config;

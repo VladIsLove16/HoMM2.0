@@ -4,7 +4,7 @@ using UnityEngine;
 /// Интерфейс для получения конфигурации игры
 /// Абстракция для получения настроек матча из различных источников
 /// </summary>
-public interface IGameConfigurationProvider
+public interface IBattleEntryProvider
 {
     /// <summary>
     /// Получить выбранную конфигурацию юнитов
