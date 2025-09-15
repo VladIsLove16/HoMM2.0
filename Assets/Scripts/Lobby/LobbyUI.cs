@@ -192,14 +192,7 @@ public class LobbyUI : MonoBehaviour
     private void OnStartGameClicked() => _lobbyManager?.StartGame();
     private void OnStartSinglePlayerClicked()
     {
-        // Устанавливаем режим Singleplayer и запускаем игру локально (без сети)
-        var gmm = FindObjectOfType<GameModeManager>();
-        if (gmm != null)
-        {
-            gmm.SwitchToSingleplayer();
-        }
-        // Загрузку игровой сцены выполняем напрямую, минуя сетевой менеджер
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        _lobbyManager?.StartSinglePlayer();
     }
 
     private void OnConfigToggleChanged(bool isOn) => _lobbyManager?.OnConfigToggleChanged(isOn);

@@ -13,6 +13,7 @@ public class LobbyManager : NetworkBehaviour
 {
     [Header("Game Configuration")]
     [SerializeField] private GridContentEntrySO[] _availableConfigs;
+    [SerializeField] private GameMode GameMode;
     
     private NetworkList<LobbyPlayerData> _lobbyPlayers;
     private NetworkVariable<int> _selectedConfigIndex = new NetworkVariable<int>(0);
@@ -57,14 +58,20 @@ public class LobbyManager : NetworkBehaviour
     // Публичные методы для UI
     public void StartHost()
     {
+        SetGameModeMode(GameMode.Multiplayer);
         NetworkManager.Singleton.StartHost();
     }
-    
     public void StartClient()
     {
+        SetGameModeMode(GameMode.Multiplayer);
         NetworkManager.Singleton.StartClient();
     }
-    
+    public void StartSinglePlayer()
+    {
+        SetGameModeMode(GameMode.Singleplayer);
+        // Загрузку игровой сцены выполняем напрямую, минуя сетевой менеджер
+        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
     private void AddPlayerToLobby()
     {
         var playerData = new LobbyPlayerData
@@ -206,6 +213,12 @@ public class LobbyManager : NetworkBehaviour
         }
         return null;
     }
+
+    internal void SetGameModeMode(GameMode gameMode)
+    {
+        SceneTransitionDataService.Instance.SetGameMode(gameMode);
+    }
+
 }
 
 /// <summary>

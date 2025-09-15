@@ -1,8 +1,9 @@
+using NaughtyAttributes;
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using Zenject;
-using NaughtyAttributes;
-using Unity.Netcode;
+using static UnityEngine.EventSystems.EventTrigger;
 
 /// <summary>
 /// Основной контроллер игры
@@ -16,14 +17,14 @@ public class GameController : NetworkBehaviour, IInitializable
     
     [Header("Fallback Configuration")]
     [SerializeField] private GridContentEntrySO gridContentEntrySO;
+    [SerializeField] private GameNetworkCommandGateway _gateway;
 
     private GameModel _gameModel;
-    private TurnSystem _combatSystem;
+    private TurnSystem _turnSystem;
     private IGameConfigurationProvider _configurationProvider;
-
-    private Vector2Int? selectedCellCoords;
-    private bool isCellSelected;
-    [SerializeField] private GameNetworkCommandGateway _gateway;
+    private IGameStartupFlow _startupFlow;
+    private IUnitSpawner _unitSpawner;
+    private IBattleRunner _battleRunner;
 
     [Inject]
     public void Construct(
@@ -31,11 +32,17 @@ public class GameController : NetworkBehaviour, IInitializable
         GridView view, 
         GameModel model, 
         TurnSystem combatSystem,
-        IGameConfigurationProvider configurationProvider)
+        IGameConfigurationProvider configurationProvider,
+        IGameStartupFlow startupFlow,
+         IUnitSpawner unitSpawner,
+        IBattleRunner battleRunner)
     {
         _gameModel = model;
-        _combatSystem = combatSystem;
+        _turnSystem = combatSystem;
         _configurationProvider = configurationProvider;
+        _startupFlow = startupFlow;
+        _unitSpawner = unitSpawner;
+        _battleRunner = battleRunner; 
     }
     
     public void Initialize()
@@ -47,51 +54,21 @@ public class GameController : NetworkBehaviour, IInitializable
     {
         Debug.Log("[GameController] OnNetworkSpawn called");
         Debug.Log($"[GameController] NetworkObjectId: {NetworkObjectId}, IsHost: {IsHost}, IsClient: {IsClient}");
-        
-        Setup(Width, Height);
-        
-        // Всегда готовим систему ходов до возможных спавнов, чтобы подписки были активны
-        InitCombatSystem();
-        
-        if (IsHost)
-        {
-            Debug.Log("[GameController] IsHost - creating grid content");
-            // Дождаться спауна сетевого шлюза и только затем слать RPC
-            StartCoroutine(WaitForGatewayAndStart());
-        }
-        else
-        {
-            Debug.Log("[GameController] IsClient - waiting for host to create units");
-        }
+        _startupFlow.Run();
     }
     
     private void Start()
     {
         Debug.Log("[GameController] Start called");
-        
-        // Локальный режим (без сети) — только если нет NetworkManager вообще
-        if (NetworkManager.Singleton == null)
-        {
-            Debug.Log("[GameController] No NetworkManager - running in local mode");
-            Setup(Width, Height);
-            InitCombatSystem();
-            CreateGridContentFromConfiguration();
-            RunBattle();
-        }
-        else
-        {
-            // Сетевой режим: инициализация производится в OnNetworkSpawn
-            Debug.Log("[GameController] Network mode detected, waiting for OnNetworkSpawn");
-        }
     }
 
-    private void InitCombatSystem()
+    public void InitCombatSystem()
     {
         // Синхронизируем текущих юнитов
-        _combatSystem.ClearUnits();
+        _turnSystem.ClearUnits();
         foreach (var unit in _gameModel.GetUnits())
         {
-            _combatSystem.AddCombatUnit(unit);
+            _turnSystem.AddCombatUnit(unit);
         }
 
         _gameModel.UnitSpawned += OnGameModel_UnitSpawned;
@@ -102,7 +79,16 @@ public class GameController : NetworkBehaviour, IInitializable
     {
         if (@params?.UnitModel != null)
         {
-            _combatSystem.RemoveCombatUnit(@params.UnitModel);
+            _turnSystem.RemoveCombatUnit(@params.UnitModel);
+           var state =  _turnSystem.BattleState;
+            if(state == BattleState.blueTeamWins)
+            {
+                
+            }
+            else if(state == BattleState.redTeamWins)
+            {
+
+            }
         }
     }
 
@@ -110,7 +96,7 @@ public class GameController : NetworkBehaviour, IInitializable
     {
         if (@params?.UnitModel != null)
         {
-            _combatSystem.AddCombatUnit(@params.UnitModel);
+            _turnSystem.AddCombatUnit(@params.UnitModel);
         }
     }
 
@@ -119,29 +105,14 @@ public class GameController : NetworkBehaviour, IInitializable
     {
         Setup(Width, Height);
     }
-
+    public void Setup(int width, int height)
+    {
+        _gameModel.InitializeGrid(width, height);
+    }
     [Button]
     public void RunBattle()
     {
-        if(NetworkManager.Singleton== null ) 
-        {
-            _combatSystem.RunBattle();
-
-        }
-        else if(NetworkManager.Singleton.ConnectedClientsIds.Count < 2 && _configurationProvider.AcceptStartingBattleWithoutClients )
-        {
-            _combatSystem.RunBattle();
-        }
-        else if(NetworkManager.Singleton.ConnectedClientsIds.Count >= 2 )
-        {
-            _combatSystem.RunBattle();
-        }
-        else
-        {
-            Debug.Log("wait for clients connect battle");
-            return;
-        }
-            Debug.Log("Run battle");
+        _battleRunner.RunBattle();
     }
 
     [Button]
@@ -150,7 +121,7 @@ public class GameController : NetworkBehaviour, IInitializable
         CreateGridContent(gridContentEntrySO);
     }
 
-    private void CreateGridContentFromConfiguration()
+    public void CreateGridContentFromConfiguration()
     {
         Debug.Log("[GameController] CreateGridContentFromConfiguration called");
         
@@ -206,61 +177,92 @@ public class GameController : NetworkBehaviour, IInitializable
 
     public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
     {
-        if (unitContentEntrySO == null)
-        {
-            Debug.LogError("[GameController] GridContentEntrySO is null!");
-            return;
-        }
-        
-        // В сетевом режиме контент создаёт только хост
-        if (NetworkManager.Singleton != null && !IsHost)
-        {
-            throw new InvalidOperationException("CreateGridContent can be called only by Host in network mode. Clients must wait for SpawnAcknowledgeClientRpc.");
-        }
-        if(_gateway == null)
-            throw new InvalidOperationException("GameNetworkCommandGateway is null"); 
-        Debug.Log($"[GameController] Creating grid content from config: {unitContentEntrySO.name}");
-        
         foreach (var content in unitContentEntrySO.contents)
         {
-            UnitSpawnParams unitSpawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, content.isPlayer);
-            if (NetworkManager.Singleton != null)
-            {
-                if (!_gateway.TrySendSpawnUnit(unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.UnitType, unitSpawnParams.Amount, unitSpawnParams.IsPlayer))
-                {
-                    Debug.LogWarning("[GameController] Gateway not spawned yet, deferring spawn to next frame");
-                    // Можно поставить флаг и повторить попытку позже, пока просто логируем
-                }
-            }
-            else
-            {
-                SpawnLocally(unitSpawnParams);
-            }
+            var spawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, content.isPlayer);
+            _unitSpawner.SpawnUnit(spawnParams);
         }
     }
 
-    private void SpawnLocally(UnitSpawnParams unitSpawnParams)
+
+}
+public class LocalUnitSpawner : IUnitSpawner
+{
+    private readonly GameModel _gameModel;
+
+    public LocalUnitSpawner(GameModel gameModel)
     {
-        _gameModel.SpawnUnit(unitSpawnParams);
+        _gameModel = gameModel;
     }
 
-    public void Setup(int width, int height)
+    public void SpawnUnit(UnitSpawnParams spawnParams)
     {
-        _gameModel.InitializeGrid(width, height);
+        _gameModel.SpawnUnit(spawnParams);
+    }
+}
+
+public class LocalBattleRunner : IBattleRunner
+{
+    private readonly TurnSystem _combatSystem;
+
+    public LocalBattleRunner(TurnSystem combatSystem)
+    {
+        _combatSystem = combatSystem;
     }
 
-    private System.Collections.IEnumerator WaitForGatewayAndStart()
+    public void RunBattle()
     {
-        int safetyFrames = 120; // ~2 секунды при 60 FPS
-        while ((_gateway == null || !_gateway.IsSpawned) && safetyFrames-- > 0)
+        _combatSystem.RunBattle();
+    }
+}
+public class NetworkUnitSpawner : IUnitSpawner
+{
+    private readonly GameNetworkCommandGateway _gateway;
+
+    public NetworkUnitSpawner(GameNetworkCommandGateway gateway)
+    {
+        _gateway = gateway;
+    }
+
+    public void SpawnUnit(UnitSpawnParams spawnParams)
+    {
+        if (!_gateway.TrySendSpawnUnit(spawnParams.X, spawnParams.Y, spawnParams.UnitType, spawnParams.Amount, spawnParams.IsPlayer))
         {
-            yield return null;
+            Debug.LogWarning("[NetworkUnitSpawner] Gateway not ready, deferring spawn");
         }
-        if (_gateway == null || !_gateway.IsSpawned)
-        {
-            throw new InvalidOperationException("GameNetworkCommandGateway is not spawned in time");
-        }
-        CreateGridContentFromConfiguration();
-        RunBattle();
     }
+}
+
+public class NetworkBattleRunner : IBattleRunner
+{
+    private readonly TurnSystem _combatSystem;
+    private readonly IGameConfigurationProvider _config;
+
+    public NetworkBattleRunner(TurnSystem combatSystem, IGameConfigurationProvider config)
+    {
+        _combatSystem = combatSystem;
+        _config = config;
+    }
+
+    public void RunBattle()
+    {
+        if (NetworkManager.Singleton.ConnectedClientsIds.Count >= 2
+            || _config.AcceptStartingBattleWithoutClients)
+        {
+            _combatSystem.RunBattle();
+        }
+        else
+        {
+            Debug.Log("Wait for clients...");
+        }
+    }
+}
+public interface IUnitSpawner
+{
+    void SpawnUnit(UnitSpawnParams spawnParams);
+}
+
+public interface IBattleRunner
+{
+    void RunBattle();
 }

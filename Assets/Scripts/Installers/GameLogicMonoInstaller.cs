@@ -27,12 +27,12 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private MaterialProvider materialProvider;
     [SerializeField] private UnitNetworkService unitNetworkService;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
-    [SerializeField] private SceneTransitionDataService sceneTransitionDataService;
 
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
     public override void InstallBindings()
     {
+        BindStartup();
         BindServices();
         BindConfigurationProviders();
         BindGridRenderer();
@@ -110,21 +110,38 @@ public class GameLogicMonoInstaller : MonoInstaller
                  .FromInstance(_gameController.transform);
     }
 
+    private void BindStartup()
+    {
+        Container.Bind<ISessionRoleProvider>().To<NetcodeSessionRoleProvider>().AsSingle().NonLazy();
+
+        // Выбор стратегии старта по роли/режиму в рантайме
+        var roleProvider = Container.Instantiate<NetcodeSessionRoleProvider>();
+        Container.Bind<IGameModeProvider>().To<GameModeProvider>().AsSingle();
+        switch (roleProvider.CurrentRole)
+        {
+            case SessionRole.Local:
+                Container.Bind<IGameStartupFlow>().To<SinglePlayerGameStartupFlow>().AsSingle();
+                Container.Bind<IUnitSpawner>().To<LocalUnitSpawner>().AsSingle();
+                Container.Bind<IBattleRunner>().To<LocalBattleRunner>().AsSingle();
+                break;
+            case SessionRole.Host:
+                Container.Bind<IGameStartupFlow>().To<HostGameStartupFlow>().AsSingle();
+                Container.Bind<IUnitSpawner>().To<NetworkUnitSpawner>().AsSingle();
+                Container.Bind<IBattleRunner>().To<NetworkBattleRunner>().AsSingle();
+                break;
+            case SessionRole.Client:
+                Container.Bind<IGameStartupFlow>().To<ClientGameStartupFlow>().AsSingle();
+                Container.Bind<IUnitSpawner>().To<NetworkUnitSpawner>().AsSingle();
+                Container.Bind<IBattleRunner>().To<NetworkBattleRunner>().AsSingle();
+                break;
+        }
+
+    }
+
     private void BindConfigurationProviders()
     {
-        // Привязываем сервис передачи данных между сценами
-        if (sceneTransitionDataService != null)
-        {
-            Container.Bind<SceneTransitionDataService>().FromInstance(sceneTransitionDataService).AsSingle();
-        }
-        else
-        {
-            // Fallback - создаем через синглтон
-            Container.Bind<SceneTransitionDataService>().FromMethod(_ => SceneTransitionDataService.Instance).AsSingle();
-        }
-        
-        // Привязываем провайдер конфигурации для игровой сцены
-        Container.Bind<IGameConfigurationProvider>().To<GameSceneConfigurationProvider>().AsSingle().NonLazy();
+        Container.Bind<SceneTransitionDataService>().FromMethod(_ => SceneTransitionDataService.Instance).AsSingle();
+        Container.Bind<IGameConfigurationProvider>().To<GameSceneConfigurationProvider>().AsSingle();
     }
 
     private void BindGridRenderer()

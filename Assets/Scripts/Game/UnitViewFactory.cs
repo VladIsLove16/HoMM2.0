@@ -24,21 +24,18 @@ public class UnitViewFactory
     [Inject] IReadOnlyDictionary<UnitType, UnitDefinitionSO> _dataMap;
     readonly Transform _unitsParent;
     readonly IWorldToCellProvider _worldToCellProvider;
-    readonly GameModeManager _gameModeManager;
     readonly UnitPrefabManager _prefabManager;
     
     [Inject]
     public UnitViewFactory(
         DiContainer container,
         IWorldToCellProvider worldToCellProvider,
-        GameModeManager gameModeManager,
         UnitPrefabManager prefabManager,
         [Inject(Id = "UnitsParent")] Transform unitsParent)
     {
         _container = container;
         _unitsParent = unitsParent;
         _worldToCellProvider = worldToCellProvider;
-        _gameModeManager = gameModeManager;
         _prefabManager = prefabManager;
     }
 
@@ -57,7 +54,7 @@ public class UnitViewFactory
         var unitType = model.UnitType.Value;
 
         // Берём префаб по типу и текущему режиму (может быть один и тот же префаб для обоих режимов)
-        var prefab = _prefabManager.GetPrefab(unitType, _gameModeManager.CurrentGameMode);
+        var prefab = _prefabManager.GetPrefab(unitType);
         if (prefab == null)
         {
             Debug.LogError($"[UnitViewFactory] Prefab not found for unit type: {unitType}");

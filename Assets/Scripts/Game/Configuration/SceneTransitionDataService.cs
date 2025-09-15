@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// Реализует паттерн Singleton для глобального доступа
 /// Не уничтожается при смене сцен
 /// </summary>
-public class SceneTransitionDataService : MonoBehaviour
+public class SceneTransitionDataService : MonoBehaviour, IGameModeProvider
 {
     private static SceneTransitionDataService _instance;
     public static SceneTransitionDataService Instance => _instance;
@@ -16,6 +16,7 @@ public class SceneTransitionDataService : MonoBehaviour
     [SerializeField] private GridContentEntrySO[] _availableConfigs = new GridContentEntrySO[0];
     [SerializeField] private bool acceptStartingGameWithoutClients;
     public bool AcceptStartingGameWithoutClients => acceptStartingGameWithoutClients;
+    public GameMode CurrentGameMode { get; private set; }
     
     private int _selectedConfigIndex = 0;
     private Dictionary<string, object> _transitionData = new Dictionary<string, object>();
@@ -71,7 +72,10 @@ public class SceneTransitionDataService : MonoBehaviour
             Debug.LogWarning($"[SceneTransitionDataService] Invalid config index: {configIndex}");
         }
     }
-    
+    public void SetGameMode(GameMode gameMode)
+    {
+        CurrentGameMode = gameMode;
+    }
     /// <summary>
     /// Получить выбранную конфигурацию
     /// </summary>

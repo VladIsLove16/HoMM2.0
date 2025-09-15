@@ -14,23 +14,7 @@ public class UnitPrefabManagerConfig : ScriptableObject
         public UnitType UnitType;
         
         [Header("Prefab Variants")]
-        public GameObject LocalVariant;
-        public GameObject NetworkVariant;
-        
-        public GameObject GetVariant(GameMode gameMode)
-        {
-            return gameMode switch
-            {
-                GameMode.Singleplayer => LocalVariant,
-                GameMode.Multiplayer => NetworkVariant,
-                _ => LocalVariant
-            };
-        }
-        
-        public bool IsValid()
-        {
-            return LocalVariant != null && NetworkVariant != null;
-        }
+        public UnitView3D prefab;
     }
     
     [Header("Unit Prefab Variants")]
@@ -41,13 +25,13 @@ public class UnitPrefabManagerConfig : ScriptableObject
     /// <summary>
     /// Получает префаб для указанного типа юнита и режима игры
     /// </summary>
-    public GameObject GetPrefab(UnitType unitType, GameMode gameMode)
+    public UnitView3D GetPrefab(UnitType unitType)
     {
         foreach (var variant in _prefabVariants)
         {
             if (variant.UnitType == unitType)
             {
-                return variant.GetVariant(gameMode);
+                return variant.prefab;
             }
         }
         
@@ -81,19 +65,16 @@ public class UnitPrefabManagerConfig : ScriptableObject
         }
     }
     
-    /// <summary>
-    /// Валидирует все префабы
-    /// </summary>
-    [ContextMenu("Validate All Prefabs")]
-    public void ValidateAllPrefabs()
-    {
-        foreach (var variant in _prefabVariants)
-        {
-            if (!variant.IsValid())
-            {
-                Debug.LogError($"[UnitPrefabManagerConfig] Invalid prefab variant: {variant.UnitType}");
-            }
-        }
-    }
+    ///// <summary>
+    ///// Валидирует все префабы
+    ///// </summary>
+    //[ContextMenu("Validate All Prefabs")]
+    //public void ValidateAllPrefabs()
+    //{
+    //    foreach (var variant in _prefabVariants)
+    //    {
+            
+    //    }
+    //}
 }
 

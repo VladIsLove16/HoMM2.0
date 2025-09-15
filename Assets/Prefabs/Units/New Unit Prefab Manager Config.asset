@@ -14,11 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prefabVariants:
   - UnitType: 0
-    LocalVariant: {fileID: 4902409752770258832, guid: 254ae3127c1f2d347a45cd446a8c4a76, type: 3}
-    NetworkVariant: {fileID: 5862347717971479332, guid: ff09c2e0840e79c4f824446d0029afd0, type: 3}
+    prefab: {fileID: 989505003340703680, guid: 7895d8bfdb3487541afce12685f878e6, type: 3}
   - UnitType: 2
-    LocalVariant: {fileID: 8504360353631629215, guid: 82af6f0b9488c6b449ece125530f7e72, type: 3}
-    NetworkVariant: {fileID: 5683192495737746524, guid: e96c01876314f7b4a9f605a75db2dccf, type: 3}
+    prefab: {fileID: 5640353169115779475, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
   - UnitType: 1
-    LocalVariant: {fileID: 7117780627728513641, guid: b1602265030631b47a823cf8a07bad16, type: 3}
-    NetworkVariant: {fileID: 4491877083570072238, guid: f01e56e4bbb10214fa55c2303c97335f, type: 3}
+    prefab: {fileID: 7901827279851771999, guid: cf703134070eed3459f210e7cbdc6039, type: 3}

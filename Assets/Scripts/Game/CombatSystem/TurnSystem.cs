@@ -11,12 +11,44 @@ public class TurnSystem
     int turnTowards = 3;
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
-    private BattleState BattleState = BattleState.none;
-
+    public event Action<BattleState> OnBattleStateChanged;
+    private BattleState _lastNotifiedBattleState = BattleState.inProgress;
+    public BattleState BattleState
+    {
+        get
+        {
+            var aliveTeams = CombatUnits.Select(u => u.IsBlueTeam).Distinct().ToList();
+            if (aliveTeams.Count <= 1)
+            {
+                var state = aliveTeams.Count == 1 && aliveTeams[0] ? BattleState.blueTeamWins : BattleState.redTeamWins;
+                return state;
+            }
+            return BattleState.inProgress;
+        }
+    }
+    private void UpdateBattleStateAndNotifyIfNeeded()
+    {
+        var current = BattleState;
+        if (current != _lastNotifiedBattleState)
+        {
+            // Если состояние перешло в финальное — оповещаем
+            if (current == BattleState.blueTeamWins || current == BattleState.redTeamWins)
+            {
+                _lastNotifiedBattleState = current;
+                OnBattleStateChanged?.Invoke(current);
+            }
+            else
+            {
+                // Если вернулись в inProgress (редкий кейс) — обновляем tracking
+                _lastNotifiedBattleState = current;
+            }
+        }
+    }
     public virtual void AddCombatUnit(ICombatObject unit)
     {
         if (unit == null) return;
         if (CombatUnits.Contains(unit)) return;
+        UpdateBattleStateAndNotifyIfNeeded();
         CombatUnits.Add(unit);
     }
     public void RemoveCombatUnit(ICombatObject unit)
@@ -29,6 +61,7 @@ public class TurnSystem
         {
             EndTurn();
         }
+        UpdateBattleStateAndNotifyIfNeeded();
     }
     public void ClearUnits()
     {
@@ -39,24 +72,12 @@ public class TurnSystem
     }
     public void RunBattle()
     {
-        BattleState = BattleState.inProgress;
         turnDict.Clear();
         TurnNumber.Value = 0;
         ActiveObject.Value = null;
         AddFirstUnits();
+        UpdateBattleStateAndNotifyIfNeeded();
         TakeTurn();
-    }
-    public BattleState UpdateBattleState()
-    {
-        // Победитель определяется по оставшимся в CombatUnits командам
-        var aliveTeams = CombatUnits.Select(u => u.IsBlueTeam).Distinct().ToList();
-        if (aliveTeams.Count <= 1)
-        {
-            BattleState = aliveTeams.Count == 1 && aliveTeams[0] ? BattleState.blueTeamWins : BattleState.redTeamWins;
-            return BattleState;
-        }
-        BattleState = BattleState.inProgress;
-        return BattleState;
     }
     protected virtual ICombatObject GetFirstObject()
     {

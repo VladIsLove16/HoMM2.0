@@ -50,6 +50,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         // Все события теперь обрабатываются через GameView3D
         // Подписки на события ViewModel удалены для единообразного подхода
 
+        if(unitViewUI == null)
+        {
+            Debug.LogWarning("unitViewUI null ref");
+            return;
+        }
         unitViewUI.Init(vm);
         
         // Реакция на смену команды/материалов

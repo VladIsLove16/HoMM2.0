@@ -18,14 +18,12 @@ public class UnitPrefabManager : MonoBehaviour
             Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
             return;
         }
-        
-        _config.ValidateAllPrefabs();
     }
     
     /// <summary>
     /// Получает префаб для указанного типа юнита и режима игры
     /// </summary>
-    public GameObject GetPrefab(UnitType unitType, GameMode gameMode)
+    public UnitView3D GetPrefab(UnitType unitType)
     {
         if (_config == null)
         {
@@ -33,7 +31,7 @@ public class UnitPrefabManager : MonoBehaviour
             return null;
         }
         
-        return _config.GetPrefab(unitType, gameMode);
+        return _config.GetPrefab(unitType );
     }
     
     /// <summary>
