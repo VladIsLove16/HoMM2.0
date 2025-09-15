@@ -258,7 +258,7 @@ namespace Tests.EditMode.GridContents.Units
             // Arrange
             var currentPosition = _unitModel.Position.Value;
             var eventInvoked = false;
-            _unitModel.Moved += (route) => eventInvoked = true;
+            _unitModel.MovedByRoute += (route) => eventInvoked = true;
 
             // Act
             _unitModel.Position.Value = currentPosition;

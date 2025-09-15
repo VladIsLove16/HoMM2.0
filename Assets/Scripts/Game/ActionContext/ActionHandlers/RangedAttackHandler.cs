@@ -28,6 +28,7 @@ public class RangedAttackHandler : IActionHandler
     [Inject] IAttackActionPanel _attackPanel;
     [Inject] IGridCellRenderer _renderer;
     [Inject] ICursorService _cursorService;
+    [Inject] NetworkUnitCommandService _commandService;
     private Dictionary<CellState, List<Vector2Int>> _preview = new();
     public ICombatObject _activeUnit;
     public RangedAttackHandler(ICombatObject unitModel)
@@ -52,9 +53,9 @@ public class RangedAttackHandler : IActionHandler
 
     public void Execute(ActionContext ctx)
     {
-        if(_activeUnit is IDamageSource source)
+        if(_activeUnit is UnitModel attacker && ctx.TargetObject is IDamagable)
         {
-            source.SendDamage(new(ctx.TargetObject));
+            _commandService.SendAttack(attacker, ctx.TargetCell);
         }
     }
 

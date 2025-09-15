@@ -10,10 +10,10 @@ public class UnitNetworkController : NetworkBehaviour, IUnitNetworkController, I
 {
     [Header("Network Settings")]
     [SerializeField] private float maxMoveDistance = 10f;
-    [SerializeField] private float moveValidationTolerance = 0.1f;
-    
-    public bool IsOwner => NetworkObject.IsOwner;
     public bool CanExecuteCommands => IsOwner;
+    // DI: доменная модель и провайдер координат
+    [Zenject.Inject] private GameModel _gameModel;
+    [Zenject.Inject] private IWorldToCellProvider _worldToCellProvider;
     
     public System.Action<List<Vector3>> OnMoveCommandReceived { get; set; }
     public System.Action<ulong> OnAttackCommandReceived { get; set; }
@@ -40,6 +40,7 @@ public class UnitNetworkController : NetworkBehaviour, IUnitNetworkController, I
     
     public void ExecuteMoveCommand(List<Vector3> route)
     {
+        Debug.Log("ExecuteMoveCommand");
         if (!CanExecuteCommands)
         {
             Debug.LogWarning($"[UnitNetworkController] Cannot execute commands for {gameObject.name}");
@@ -81,6 +82,7 @@ public class UnitNetworkController : NetworkBehaviour, IUnitNetworkController, I
     [ServerRpc]
     private void MoveRequestServerRpc(Vector3[] route, ServerRpcParams rpcParams = default)
     {
+        Debug.Log("MoveRequestServerRpc");
         // Серверная валидация
         if (!ValidateRouteOnServer(route, rpcParams.Receive.SenderClientId))
         {
@@ -88,7 +90,42 @@ public class UnitNetworkController : NetworkBehaviour, IUnitNetworkController, I
             return;
         }
         
-        // Рассылаем команду всем клиентам
+        try
+        {
+            var unitView = GetComponent<UnitView3D>();
+            if (unitView == null || unitView.Model == null)
+            {
+                Debug.LogError("[UnitNetworkController] UnitView3D/Model is null on server");
+                return;
+            }
+            
+            if (_gameModel == null || _worldToCellProvider == null)
+            {
+                Debug.LogError("[UnitNetworkController] _gameModel or _worldToCellProvider not injected on server");
+                return;
+            }
+            
+            // Конвертируем маршрут в координаты сетки
+            var gridRoute = new List<UnityEngine.Vector2Int>(route.Length);
+            foreach (var wp in route)
+            {
+                if (_worldToCellProvider.ToGrid(wp, out var cell))
+                {
+                    gridRoute.Add(new UnityEngine.Vector2Int(cell.x, cell.y));
+                }
+            }
+            
+            // Обновляем модель на сервере
+            _gameModel.MoveObject(unitView.Model, gridRoute);
+            Debug.Log($"[UnitNetworkController] Server moved unit {unitView.Model.UnitType} to {gridRoute[gridRoute.Count - 1]}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogException(ex);
+            return;
+        }
+
+        // Рассылаем команду всем клиентам для синхронизации анимации
         MoveCommandClientRpc(route);
     }
     
@@ -108,7 +145,15 @@ public class UnitNetworkController : NetworkBehaviour, IUnitNetworkController, I
     [ClientRpc]
     private void MoveCommandClientRpc(Vector3[] route)
     {
+        // Проверяем, что это не владелец объекта (он уже выполнил команду локально)
+        if (IsOwner)
+        {
+            Debug.Log($"[UnitNetworkController] Skipping move command for owner");
+            return;
+        }
+        
         var routeList = new List<Vector3>(route);
+        Debug.Log($"[UnitNetworkController] Received move command for non-owner, route points: {routeList.Count}");
         OnMoveCommandReceived?.Invoke(routeList);
     }
     

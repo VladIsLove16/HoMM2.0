@@ -92,7 +92,7 @@ namespace Tests.EditMode.GridContents.Units
             // Arrange
             var route = new List<Vector2Int> { new Vector2Int(1, 1), new Vector2Int(2, 2), new Vector2Int(3, 3) };
             var movedEventInvoked = false;
-            _unitModel.Moved += (movedRoute) => 
+            _unitModel.MovedByRoute += (movedRoute) => 
             {
                 movedEventInvoked = true;
                 Assert.That(movedRoute, Is.EqualTo(route));

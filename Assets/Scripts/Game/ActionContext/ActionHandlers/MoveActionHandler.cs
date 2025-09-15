@@ -35,6 +35,7 @@ public class MoveActionHandler : IActionHandler
     [Inject] protected GameModel _gm;
     [Inject] IAttackActionPanel _attackPanel;
     [Inject] ICursorService CursorService;
+    [Inject] private NetworkUnitCommandService _commandService;
     private List<Vector2Int> lastSavedRoute = new();
     private Vector2Int lastSavedpoint;
     private List<Vector2Int> reachableCells;
@@ -53,6 +54,17 @@ public class MoveActionHandler : IActionHandler
     public void Execute(ActionContext ctx)
     {
         List<Vector2Int> moveRoute = GetMoveRoute(ctx);
+        if (moveRoute == null || moveRoute.Count == 0)
+            return;
+
+        // Отправляем команду через сервис приложений (сетевой/локальный)
+        if (_activeUnit is UnitModel unitModel)
+        {
+            _commandService.SendMove(unitModel, moveRoute);
+            return;
+        }
+
+        // Fallback: если тип не UnitModel, но можно двигать как IMoveable (редкий случай)
         if (_activeUnit is IMoveable moveable)
         {
             _gm.MoveObject(moveable, moveRoute);

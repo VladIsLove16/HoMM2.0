@@ -9,7 +9,8 @@
         "Unity.Services.Authentication",
         "Unity.Services.Multiplayer",
         "Unity.Netcode.Runtime",
-        "Unity.Netcode.Editor"
+        "Unity.Netcode.Editor",
+        "Shared"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

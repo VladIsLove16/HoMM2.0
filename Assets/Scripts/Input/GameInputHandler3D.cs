@@ -17,6 +17,18 @@ public class GameInputHandler3D : MonoBehaviour
     public Action ActionCanceled;
     public ReactiveProperty<Collider> HoveredCollider;
     public ReactiveProperty<Vector3> WorldMousePosition;
+
+    // Перераспользуем список результатов UI Raycast, чтобы снизить аллокации
+    private readonly System.Collections.Generic.List<RaycastResult> _uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
+    
+    private void Awake()
+    {
+        HoveredCell ??= new ReactiveProperty<Vector2Int>();
+        SelectedCell ??= new ReactiveProperty<Vector2Int>();
+        ActionPerformed ??= new ReactiveProperty<Vector2Int>();
+        HoveredCollider ??= new ReactiveProperty<Collider>();
+        WorldMousePosition ??= new ReactiveProperty<Vector3>();
+    }
     
     private void OnEnable()
     {
@@ -99,10 +111,10 @@ public class GameInputHandler3D : MonoBehaviour
             position = Input.mousePosition
         };
         
-        var results = new System.Collections.Generic.List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
+        _uiRaycastResults.Clear();
+        EventSystem.current.RaycastAll(eventData, _uiRaycastResults);
         
         // Если есть UI элементы под курсором - блокируем игровые действия
-        return results.Count > 0;
+        return _uiRaycastResults.Count > 0;
     }
 }

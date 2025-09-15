@@ -16,11 +16,12 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     {
         _unitViewModel = vm;
 
+        // Подписываемся на события ViewModel (MVVM)
         _unitViewModel.OnHealthChanged
             .Subscribe(_ => UpdateHealth())
             .AddTo(_disposables);
 
-        _unitViewModel.OnHealthChanged
+        _unitViewModel.OnAmountChanged
             .Subscribe(_ => UpdateAmount())
             .AddTo(_disposables);
 
@@ -54,7 +55,7 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
     private void UpdateAmount()
     {
-        amountText.text = _unitViewModel.Model.Amount.ToString();
+        amountText.text = _unitViewModel.Model.Amount.Value.ToString();
     }
 
     private void OnDeath()

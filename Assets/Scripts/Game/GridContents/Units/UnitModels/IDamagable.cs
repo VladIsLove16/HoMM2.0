@@ -3,6 +3,6 @@
 public interface IDamagable : IGridContent
 {
     bool IsBlueTeam { get; }
-    void RecieveDamage(DamageContext context);
-    void SimulateRecieveDamage(DamageContext context);
+   public void RecieveDamage(DamageContext context);
+    public void SimulateRecieveDamage(DamageContext context);
 }

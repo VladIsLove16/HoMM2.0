@@ -1,7 +1,7 @@
-﻿public class ContentRemovedParams
+﻿public class ContentDiedParams
 {
     public UnitModel UnitModel { get; set; }
-    public ContentRemovedParams (UnitModel unitModel)
+    public ContentDiedParams (UnitModel unitModel)
     {
         this.UnitModel = unitModel; 
     }

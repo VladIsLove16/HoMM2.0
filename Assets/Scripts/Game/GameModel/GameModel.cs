@@ -9,7 +9,7 @@ using Zenject;
 public class GameModel
 {
     public event Action<UnitModelCreatedParams> UnitSpawned;
-    public event Action<ContentRemovedParams> UnitRemoved;
+    public event Action<ContentDiedParams> UnitDied;
     public event Action<IGridContent, List<Vector2Int>> UnitMovedByRoute;
     public event Action<GridXZ<GameCell>> GridInitialized;
     private readonly UnitModelFactory _unitFactory;
@@ -52,8 +52,9 @@ public class GameModel
         cell.AddContent(unit);
 
         // Транслируем смерть модели в событие удаления
-        unit.Died += () => UnitRemoved?.Invoke(new ContentRemovedParams(unit));
-        UnitSpawned?.Invoke(new UnitModelCreatedParams(unit));
+        unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
+            var unitModelCreatedParams = new UnitModelCreatedParams(unit);
+        UnitSpawned?.Invoke(unitModelCreatedParams);
         return new(true);
     }
 

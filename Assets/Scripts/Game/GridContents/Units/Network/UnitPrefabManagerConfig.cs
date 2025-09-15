@@ -96,3 +96,4 @@ public class UnitPrefabManagerConfig : ScriptableObject
         }
     }
 }
+

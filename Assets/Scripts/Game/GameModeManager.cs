@@ -13,12 +13,6 @@ public class GameModeManager : MonoBehaviour
     
     public GameMode CurrentGameMode => currentGameMode;
     
-    [Inject]
-    private void Construct()
-    {
-        // DI контейнер автоматически создаст экземпляр
-    }
-    
     /// <summary>
     /// Устанавливает режим игры и настраивает все юниты
     /// </summary>
@@ -29,37 +23,8 @@ public class GameModeManager : MonoBehaviour
         Debug.Log($"[GameModeManager] Switching from {currentGameMode} to {gameMode}");
         
         currentGameMode = gameMode;
-        
-        if (autoSetupUnits)
-        {
-            SetupAllUnits();
-        }
-        
+
         OnGameModeChanged?.Invoke(gameMode);
-    }
-    
-    private UnitCommandExecutorService _executorService;
-    
-    [Inject]
-    private void Construct(UnitCommandExecutorService executorService)
-    {
-        _executorService = executorService;
-    }
-    
-    /// <summary>
-    /// Настраивает исполнителя команд для конкретного юнита
-    /// </summary>
-    public void SetupUnit(GameObject unitObject)
-    {
-        _executorService.SetupUnit(unitObject);
-    }
-    
-    /// <summary>
-    /// Настраивает всех юнитов на сцене
-    /// </summary>
-    public void SetupAllUnits()
-    {
-        _executorService.SetupAllUnits();
     }
     
     /// <summary>

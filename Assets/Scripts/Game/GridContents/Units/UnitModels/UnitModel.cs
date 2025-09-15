@@ -1,10 +1,6 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UniRx;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
-using UnityEditor;
 using UnityEngine;
 public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable, IMoveable
 {
@@ -42,6 +38,8 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public ReactiveProperty<bool> CanMove { get; } = new(true);
     public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
     public List<StatusEffectType> InvulnerableEffects;
+    public IReadOnlyList<StatusEffect> AppliedEffects => _appliedEffects;
+    private List<StatusEffect> _appliedEffects = new();
     public Action StatusEffectsChanged;
     public Action<List<Vector2Int>> MovedByRoute;
     public IReadOnlyList<StatusEffect> ActiveEffects => _statusEffectManager.ActiveEffects;
@@ -67,7 +65,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public Action<DamageContext> Attacked;
     public Action TurnStarted;
     public Action HealthChanged;
-    public Action<List<Vector2Int>> Moved;
     public Action StatsChanged;
 
     public void MoveByRoute(List<Vector2Int> route)
@@ -79,7 +76,8 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             return; // Не меняем позицию если маршрут пустой
             
         Position.SetValueAndForceNotify(route[route.Count-1]);
-        Moved?.Invoke(route);
+        // Emit both events to maintain backward compatibility
+        MovedByRoute?.Invoke(route);
     }
     
     public void ApplyEffect(StatusEffect effect)
@@ -103,6 +101,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             
         DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
         _statusEffectManager.HandleOutDamage(damageContext);
+        _appliedEffects.AddRange(damageContext.AppliedEffects);
         ctx.Target.RecieveDamage(damageContext);
         Attacked?.Invoke(damageContext);
         return damageContext;
@@ -122,6 +121,9 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         return damageContext;
     }
 
+    /// <summary>
+    /// Applies incoming damage to this unit and raises domain events.
+    /// </summary>
     public void RecieveDamage(DamageContext ctx)
     {
         if (ctx == null)
@@ -165,6 +167,9 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         }
     }
     
+    /// <summary>
+    /// Simulates receiving damage without mutating persistent state (used for previews/AI).
+    /// </summary>
     public void SimulateRecieveDamage(DamageContext ctx)
     {
         if (ctx == null)
@@ -202,8 +207,8 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         return UnitType.ToString();
     }
 
-    public StatusEffect[] GetAppliedEffects()
+    public IReadOnlyList<StatusEffect> GetAppliedEffects()
     {
-        throw new NotImplementedException();
+        return AppliedEffects;
     }
 }

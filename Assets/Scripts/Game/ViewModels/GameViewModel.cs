@@ -8,27 +8,32 @@ using Zenject;
 
 public class GameViewModel : IDisposable
 {
-    private readonly GameModel _model;
+    private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
 
     private Vector2Int? _selectedCell;
 
     public event Action<int, int> GridInitialized;
-    public event Action<IViewModel> UnitSpawned;
-    public event Action<IViewModel> UnitRemoved;
-    public event Action<IViewModel, List<Vector3>> UnitMovedByRoute;
+    public event Action<IViewModel> UnitSpawned;                        // глобальные широковещательные события
+    public event Action<IViewModel, List<Vector3>> UnitMovedByRoute;    // глобальные широковещательные события
+    public event Action<IViewModel, DamageContext> UnitAttacked;        // глобальные широковещательные события
+    public event Action<IViewModel, DamageContext> UnitHit;             // глобальные широковещательные события
+    public event Action<IViewModel> UnitDied;                           // глобальные широковещательные события
+    public event Action<IViewModel> UnitTurnStarted;                    // глобальные широковещательные события
+    [Obsolete("Для UI конкретного юнита используйте UnitViewModel.OnHealthChanged. Это событие предназначено для глобальных слушателей.")]
+    public event Action<IViewModel> UnitHealthChanged;                  // глобальные; не использовать в Unit View/UI
     private Dictionary<IGridContent, IViewModel> _uvms = new Dictionary<IGridContent, IViewModel>();
     [Inject] private UnitViewModelFactory _unitViewModelsFactory;
     [Inject] IWorldToCellProvider _worldToCellProvider;
     public GameViewModel(GameModel model, MovementSystem movementSystem)
     {
-        _model = model;
+        _gameModel = model;
         _movementSystem = movementSystem;
 
-        _model.UnitSpawned += OnUnitSpawned;
-        _model.UnitRemoved += OnUnitRemoved;
-        _model.UnitMovedByRoute += OnUnitMovedByRoute; 
-        _model.GridInitialized += g => GridInitialized?.Invoke(g.GetWidth(), g.GetHeight());
+        _gameModel.UnitSpawned += OnUnitSpawned;
+        _gameModel.UnitDied += OnUnitDied;
+        _gameModel.UnitMovedByRoute += OnUnitMovedByRoute; 
+        _gameModel.GridInitialized += g => GridInitialized?.Invoke(g.GetWidth(), g.GetHeight());
     }
 
     private void OnUnitMovedByRoute(IGridContent content, List<Vector2Int> list)
@@ -38,24 +43,68 @@ public class GameViewModel : IDisposable
         UnitMovedByRoute?.Invoke(vm, worldRoute);
     }
 
-    private void OnUnitRemoved(ContentRemovedParams @params)
+    private void OnUnitDied(ContentDiedParams @params)
     {
         IViewModel uvm = _uvms[@params.UnitModel];
         _uvms.Remove(@params.UnitModel);
-        UnitRemoved?.Invoke(uvm);
+        UnitDied?.Invoke(uvm);
     }
 
     protected virtual void OnUnitSpawned(UnitModelCreatedParams @params)
     {
         UnitViewModel uvm = _unitViewModelsFactory.Create(@params.UnitModel);
         _uvms[@params.UnitModel] = uvm;
+        
+        // Подписываемся на события модели для единообразной обработки
+        @params.UnitModel.Attacked += (context) => OnUnitAttacked(@params.UnitModel, context);
+        @params.UnitModel.Hitted += (context) => OnUnitHit(@params.UnitModel, context);
+        @params.UnitModel.Died += () => OnUnitDied(@params.UnitModel);
+        @params.UnitModel.TurnStarted += () => OnUnitTurnStarted(@params.UnitModel);
+        // Здоровье ретранслируется только для глобальных слушателей.
+        // Для UI юнита следует подписываться на UnitViewModel.OnHealthChanged
+        @params.UnitModel.HealthChanged += () => OnUnitHealthChanged(@params.UnitModel);
+        
         UnitSpawned?.Invoke(uvm);
     }
-
-    public void SpawnRandomUnit()
+    
+    private void OnUnitAttacked(UnitModel model, DamageContext context)
     {
-        var (x, y) = _model.GetRandomEmpty();
-        _model.SpawnUnit(new UnitSpawnParams(x, y));
+        if (_uvms.TryGetValue(model, out var vm))
+        {
+            UnitAttacked?.Invoke(vm, context);
+        }
+    }
+    
+    private void OnUnitHit(UnitModel model, DamageContext context)
+    {
+        if (_uvms.TryGetValue(model, out var vm))
+        {
+            UnitHit?.Invoke(vm, context);
+        }
+    }
+    
+    private void OnUnitDied(UnitModel model)
+    {
+        if (_uvms.TryGetValue(model, out var vm))
+        {
+            UnitDied?.Invoke(vm);
+        }
+    }
+    
+    private void OnUnitTurnStarted(UnitModel model)
+    {
+        if (_uvms.TryGetValue(model, out var vm))
+        {
+            UnitTurnStarted?.Invoke(vm);
+        }
+    }
+    
+    private void OnUnitHealthChanged(UnitModel model)
+    {
+        if (_uvms.TryGetValue(model, out var vm))
+        {
+            UnitHealthChanged?.Invoke(vm);
+        }
     }
 
     // Управление выбранной клеткой
@@ -69,29 +118,26 @@ public class GameViewModel : IDisposable
         return _selectedCell;
     }
 
-    // Метод для создания юнитов на основе данных (делегируем модели)
-    public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
-    {
-        _model.ClearGrid();
-        foreach (var content in unitContentEntrySO.contents)
-        {
-            UnitSpawnParams unitSpawnParams = new UnitSpawnParams(
-                content.X,
-                content.Y,
-                content.unitType,
-                content.Amount,
-                content.isPlayer
-            );
-            _model.SpawnUnit(unitSpawnParams);
-        }
-    }
 
     public void Dispose()
     {
         // Отписка от событий модели
-        _model.UnitSpawned -= OnUnitSpawned;
-        _model.UnitRemoved -= OnUnitRemoved;
-        //Model.UnitMovedByRoute -= (unit, path) => UnitMovedByRoute?.Invoke(unit, path);
+        _gameModel.UnitSpawned -= OnUnitSpawned;
+        _gameModel.UnitDied -= OnUnitDied;
+        _gameModel.UnitMovedByRoute -= OnUnitMovedByRoute;
+        
+        // Отписка от событий всех юнитов
+        foreach (var kvp in _uvms)
+        {
+            if (kvp.Key is UnitModel unitModel)
+            {
+                unitModel.Attacked -= (context) => OnUnitAttacked(unitModel, context);
+                unitModel.Hitted -= (context) => OnUnitHit(unitModel, context);
+                unitModel.Died -= () => OnUnitDied(unitModel);
+                unitModel.TurnStarted -= () => OnUnitTurnStarted(unitModel);
+                unitModel.HealthChanged -= () => OnUnitHealthChanged(unitModel);
+            }
+        }
     }
 }
 public class GameViewModelDebugger : GameViewModel

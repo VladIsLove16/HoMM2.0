@@ -25,27 +25,21 @@ public class UnitViewFactory
     readonly Transform _unitsParent;
     readonly IWorldToCellProvider _worldToCellProvider;
     readonly GameModeManager _gameModeManager;
-    readonly NetworkUnitViewFactory _networkFactory;
+    readonly UnitPrefabManager _prefabManager;
     
+    [Inject]
     public UnitViewFactory(
         DiContainer container,
         IWorldToCellProvider worldToCellProvider,
         GameModeManager gameModeManager,
-        NetworkUnitViewFactory networkFactory,
+        UnitPrefabManager prefabManager,
         [Inject(Id = "UnitsParent")] Transform unitsParent)
     {
         _container = container;
         _unitsParent = unitsParent;
         _worldToCellProvider = worldToCellProvider;
         _gameModeManager = gameModeManager;
-        _networkFactory = networkFactory;
-    }
-
-    public UnitViewFactory(DiContainer container, IWorldToCellProvider worldToCellProvider, Transform unitsParent)
-    {
-        _container = container;
-        _worldToCellProvider = worldToCellProvider;
-        _unitsParent = unitsParent;
+        _prefabManager = prefabManager;
     }
 
     /// <summary>
@@ -53,22 +47,49 @@ public class UnitViewFactory
     /// </summary>
     public virtual UnitView3D Create(IViewModel viewModel)
     {
-        return _networkFactory.CreateUnit(viewModel);
+        var unitVM = viewModel as UnitViewModel;
+        if (unitVM == null)
+        {
+            Debug.LogError("[UnitViewFactory] ViewModel is not UnitViewModel");
+            return null;
+        }
+        var model = unitVM.Model;
+        var unitType = model.UnitType.Value;
+
+        // Берём префаб по типу и текущему режиму (может быть один и тот же префаб для обоих режимов)
+        var prefab = _prefabManager.GetPrefab(unitType, _gameModeManager.CurrentGameMode);
+        if (prefab == null)
+        {
+            Debug.LogError($"[UnitViewFactory] Prefab not found for unit type: {unitType}");
+            return null;
+        }
+
+        Vector3 worldPos = _worldToCellProvider.ToWorld(model.Position.Value.x, model.Position.Value.y);
+        var view = _container
+            .InstantiatePrefabForComponent<UnitView3D>(
+                prefab,
+                worldPos,
+                Quaternion.identity,
+                _unitsParent
+            );
+
+        view.Init(unitVM);
+        return view;
     }
 }
 
-public class UnitViewFactoryDebugger : UnitViewFactory
-{
-    public UnitViewFactoryDebugger(DiContainer container, Dictionary<UnitType, UnitDefinitionSO> allUnitDatas, IWorldToCellProvider worldToCellProvider, [Inject(Id = "UnitsParent")] Transform unitsParent) : base(container , worldToCellProvider, unitsParent)
-    {
-        Debug.Log("UnitViewFactory is ready");
-    }
+//public class UnitViewFactoryDebugger : UnitViewFactory
+//{
+//    public UnitViewFactoryDebugger(DiContainer container, Dictionary<UnitType, UnitDefinitionSO> allUnitDatas, IWorldToCellProvider worldToCellProvider, [Inject(Id = "UnitsParent")] Transform unitsParent) : base(container , worldToCellProvider, unitsParent)
+//    {
+//        Debug.Log("UnitViewFactory is ready");
+//    }
 
-    public override UnitView3D Create(IViewModel viewModel)
-    {
-        var unitViewModel = viewModel as UnitViewModel;
-        UnitModel model = unitViewModel.Model;
-        Debug.Log($"UnitView3D {model.UnitType} creating in  {model.Position.Value.x} {model.Position.Value.y}");
-        return base.Create(unitViewModel);
-    }
-}
+//    public override UnitView3D Create(IViewModel viewModel)
+//    {
+//        var unitViewModel = viewModel as UnitViewModel;
+//        UnitModel model = unitViewModel.Model;
+//        Debug.Log($"UnitView3D {model.UnitType} creating in  {model.Position.Value.x} {model.Position.Value.y}");
+//        return base.Create(unitViewModel);
+//    }
+//}

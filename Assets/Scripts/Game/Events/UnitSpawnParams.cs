@@ -17,4 +17,9 @@
         UnitType= unitType;
         IsPlayer = isPlayer;
     }
+
+    public override string ToString()
+    {
+        return $"UnitSpawnParams(X={X}, Y={Y}, UnitType={UnitType}, Amount={Amount}, IsPlayer={IsPlayer})";
+    }
 }

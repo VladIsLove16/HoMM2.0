@@ -24,8 +24,12 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     
     private void Awake()
     {
-        // Исполнитель команд будет установлен через GameModeManager
-        _commandExecutor = GetComponent<IUnitCommandExecutor>();
+        // Исполнитель команд назначается позже (через фабрику/вариант префаба) до Init()
+        // Безопасная авто-инициализация мешей, если не назначены в инспекторе
+        if (meshes == null || meshes.Length == 0)
+        {
+            meshes = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        }
     }
     /// <summary>
     /// UnitView does not change UnitModel at all
@@ -35,42 +39,23 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     {
         Model = vm.Model;
         _vm = vm;
+        // Резолвим исполнитель команд после того, как фабрика/вариант префаба добавил компонент
+        if (_commandExecutor == null)
+           if(! TryGetComponent(out _commandExecutor))
+            {
+                Debug.LogWarning("no command executer");
+            }
         SetMaterial(vm.TeamMaterial);
         _animator = GetComponent<Animator>();
-        vm.OnAttacked.Subscribe(_ => 
-        {
-            LogDebugEvent("Unit Attacked");
-            EnqueueAction(PlayAnimation(UnitAnimationState.Attack));
-        }).AddTo(_disposables);
-        //vm.OnMoved.Subscribe(route => EnqueueAction(MoveAlongRoute(route))).AddTo(_disposables);
-        vm.OnHit.Subscribe(_ => 
-        {
-            LogDebugEvent("Unit Hit");
-            EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
-        }).AddTo(_disposables);
-        vm.OnDeath.Subscribe(_ => 
-        {
-            LogDebugEvent("Unit Death");
-            // Проверяем, действительно ли юнит полностью мертв
-            if (vm.Model.Amount.Value <= 0)
-            {
-                EnqueueAction(HandleDeath());
-            }
-            else
-            {
-                LogDebugEvent("Unit not fully dead, just playing hit animation");
-                EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
-            }
-        }).AddTo(_disposables);
-        vm.OnTurnStarted.Subscribe(_ => 
-        {
-            LogDebugEvent("Unit Turn Started");
-            EnqueueAction(PlayAnimation(UnitAnimationState.Idle));
-        }).AddTo(_disposables);
+        // Все события теперь обрабатываются через GameView3D
+        // Подписки на события ViewModel удалены для единообразного подхода
 
         unitViewUI.Init(vm);
         
-        // Подписываемся на команды
+        // Реакция на смену команды/материалов
+        _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_vm.TeamMaterial)).AddTo(_disposables);
+
+        // Подписываемся на команды от сетевого слоя, чтобы проигрывать анимации по приходу
         if (_commandExecutor != null)
         {
             _commandExecutor.OnMoveCommandReceived += HandleMoveCommand;
@@ -79,19 +64,12 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     }
     
     /// <summary>
-    /// Публичный метод для запроса перемещения (может быть вызван извне)
+    /// Публичный метод для проигрывания перемещения (вызов из GameView3D или сетевого слоя)
     /// </summary>
     public void RequestMove(List<Vector3> route)
     {
-        if (_commandExecutor != null && _commandExecutor.CanExecuteCommands)
-        {
-            _commandExecutor.ExecuteMoveCommand(route);
-        }
-        else
-        {
-            // Fallback для случаев, когда нет исполнителя команд
-            ExecuteMove(route);
-        }
+        // Больше не отправляем команду из View: только анимация
+        ExecuteMove(route);
     }
     
     /// <summary>
@@ -99,7 +77,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     /// </summary>
     private void ExecuteMove(List<Vector3> route)
     {
-        LogDebugEvent($"Unit Moving by Route: {route.Count} points");
+        LogDebugEvent($"Unit Moving by Route Manually: {route.Count} points");
         EnqueueAction(MoveAlongRoute(route));
     }
     
@@ -117,6 +95,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
 
     private void SetMaterial(Material material)
     {
+        if (meshes == null || meshes.Length == 0)
+        {
+            Debug.LogWarning("[UnitView3D] 'meshes' not assigned and no SkinnedMeshRenderer found. Skipping material set.");
+            return;
+        }
         string oldMaterialName = meshes.Length > 0 ? meshes[0].material?.name ?? "null" : "null";
         string newMaterialName = material?.name ?? "null";
         
@@ -186,14 +169,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         yield return null;
     }
 
-    private IEnumerator HandleDeath()
+    private IEnumerator HandleDeathAction()
     {
         LogDebugEvent("Handling Death Animation");
         Play(UnitAnimationState.Die);
-        yield return new WaitForSeconds(1.5f); // подождать перед уничтожением
+        yield return new WaitForSeconds(1.5f);
         LogDebugEvent("Unit Deactivated");
         gameObject.SetActive(false);
-        //Destroy(gameObject);
     }
 
     public void Play(UnitAnimationState state)
@@ -231,6 +213,43 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         actionQueue.Clear();
         isExecuting = false;
     }
+    
+    public void HandleAttack(DamageContext context)
+    {
+        LogDebugEvent("Unit Attacked");
+        EnqueueAction(PlayAnimation(UnitAnimationState.Attack));
+    }
+    
+    public void HandleHit(DamageContext context)
+    {
+        LogDebugEvent("Unit Hit");
+        EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
+    }
+    
+    public void HandleDeath()
+    {
+        LogDebugEvent("Unit Death");
+        if (_vm.Model.Amount.Value <= 0)
+        {
+            EnqueueAction(HandleDeathAction());
+        }
+        else
+        {
+            LogDebugEvent("Unit not fully dead, just playing hit animation");
+            EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
+        }
+    }
+    
+    public void HandleTurnStarted()
+    {
+        LogDebugEvent("Unit Turn Started");
+        EnqueueAction(PlayAnimation(UnitAnimationState.Idle));
+    }
+    
+    public void HandleHealthChanged()
+    {
+        LogDebugEvent("Unit Health Changed");
+    }
 
     public void Hover()
     {
@@ -246,18 +265,10 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     
     private void LogDebugEvent(string eventMessage)
     {
-        // Логируем в консоль
         Debug.Log($"[UnitView3D Debug] {eventMessage}");
-        
-        // Отправляем событие в дебаггеры
-        // var componentDebugger = GetComponent<UnitView3DComponentDebugger>();
-        // componentDebugger?.LogCustomEvent(eventMessage);
-        
-        // // Также можно добавить логирование в Editor дебаггер
-        // #if UNITY_EDITOR
-        // var editorDebugger = UnityEditor.Editor.CreateEditor(this) as Development.Editor.UnitView3DEditorDebugger;
-        // editorDebugger?.AddEventToHistory(eventMessage);
-        // #endif
     }
+
+    
+
 }
  

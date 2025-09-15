@@ -1,22 +1,22 @@
-﻿public class DamageContext
+﻿using System.Collections.Generic;
+
+public class DamageContext
 {
     public int DamageAmount;
     public DamageType Type;
     public IDamageSource Source;
     public int DieAmount;
+    public IReadOnlyList<StatusEffect> AppliedEffects => _appliedEffects;
+    private List<StatusEffect> _appliedEffects = new();
     public DamageContext(int damageAmount, DamageType damageType, IDamageSource damageSource)
     {
         DamageAmount = damageAmount;
         this.Type = damageType;
         this.Source = damageSource;
     }
-}
-public class AttackContext
-{
-    public IDamagable Target;
-    public AttackContext(IDamagable target)
+    public void AddDamageEffect(StatusEffect effect)
     {
-        Target = target;
+        _appliedEffects.Add(effect);
     }
 }
 

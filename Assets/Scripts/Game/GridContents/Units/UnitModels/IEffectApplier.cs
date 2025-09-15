@@ -1,5 +1,7 @@
-﻿public interface IEffectApplier : IDamageSource
+﻿using System.Collections.Generic;
+
+public interface IEffectApplier : IDamageSource
 {
-    StatusEffect[] GetAppliedEffects();
+    IReadOnlyList<StatusEffect> GetAppliedEffects();
 }
 

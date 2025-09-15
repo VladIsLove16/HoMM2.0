@@ -70,11 +70,6 @@ namespace Tests.EditMode.GridContents.Units
     }
         internal class MockEffectApplier : IEffectApplier
         {
-            public StatusEffect[] GetAppliedEffects()
-            {
-                throw new NotImplementedException();
-            }
-
             public void RecieveDamage(DamageContext ctx)
             {
             }
@@ -90,6 +85,11 @@ namespace Tests.EditMode.GridContents.Units
             {
                 throw new NotImplementedException();
             }
+
+            IReadOnlyList<StatusEffect> IEffectApplier.GetAppliedEffects()
+            {
+                throw new NotImplementedException();
+        }
         }
     }
 

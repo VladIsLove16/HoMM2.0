@@ -96,8 +96,9 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
     public void Show()
     {
-        gameObject.SetActive(true);
-        Vector3 worldPos = _gameView.GetView(_vm.Model).transform.position;
+        gameObject.SetActive(true); 
+        _gameView.TryGetView(_vm.Model, out var view);
+        Vector3 worldPos = view.transform.position;
         Show(worldPos);
     }
     [ContextMenu("Hide")]

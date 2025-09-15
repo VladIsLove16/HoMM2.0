@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Warrok
   m_EditorClassIdentifier: 
   UnitType: 2
-  UnitViewPrefab: {fileID: 3526539887079370884, guid: 82af6f0b9488c6b449ece125530f7e72, type: 3}
+  UnitViewPrefab: {fileID: 8504360353631629215, guid: 82af6f0b9488c6b449ece125530f7e72, type: 3}
   UnitIcon: {fileID: 21300000, guid: d155d370bcbcb264b955d5b3a6db08ec, type: 3}
   Name: Warrok
   _materialProvider:

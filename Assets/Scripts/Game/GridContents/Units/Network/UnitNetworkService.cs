@@ -12,13 +12,6 @@ public class UnitNetworkService : MonoBehaviour
     [SerializeField] private bool enableNetworkValidation = true;
     [SerializeField] private float maxMoveDistance = 10f;
     
-    private IUnitCommandExecutorFactory _executorFactory;
-    
-    [Inject]
-    private void Construct(IUnitCommandExecutorFactory executorFactory)
-    {
-        _executorFactory = executorFactory;
-    }
     
     /// <summary>
     /// Получает сетевой контроллер для юнита
