@@ -141,7 +141,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     private void BindConfigurationProviders()
     {
         Container.Bind<SceneTransitionDataService>().FromMethod(_ => SceneTransitionDataService.Instance).AsSingle();
-        Container.Bind<IGameConfigurationProvider>().To<GameSceneConfigurationProvider>().AsSingle();
+        Container.Bind<IBattleEntryProvider>().To<GameSceneConfigurationProvider>().AsSingle();
     }
 
     private void BindGridRenderer()

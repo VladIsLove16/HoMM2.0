@@ -23,7 +23,7 @@ public class HostGameStartupFlow : IGameStartupFlow
 
     private System.Collections.IEnumerator WaitAndStart()
     {
-        _controller.InitCombatSystem();
+        _controller.CreateGridContentFromConfiguration();
         int safetyFrames = 120;
         while ((_gateway == null || !_gateway.IsSpawned) && safetyFrames-- > 0)
         {
@@ -33,8 +33,39 @@ public class HostGameStartupFlow : IGameStartupFlow
         {
             throw new System.InvalidOperationException("GameNetworkCommandGateway is not spawned in time");
         }
+        _controller.InitTurnSystemClientRpc();
+        _controller.RunBattleClientRpc();
+    }
+}
+
+
+public class ClientGameStartupFlow : IGameStartupFlow
+{
+    private readonly GameController _controller;
+    public ClientGameStartupFlow(GameController controller)
+    {
+        _controller = controller;
+    }
+    public void Run()
+    {
+        _controller.Setup();
+    }
+}
+
+
+public class SinglePlayerGameStartupFlow : IGameStartupFlow
+{
+    private readonly GameController _controller;
+    public SinglePlayerGameStartupFlow(GameController controller)
+    {
+        _controller = controller;
+    }
+    public void Run()
+    {
+        _controller.Setup(8, 8);
         _controller.CreateGridContentFromConfiguration();
-        _controller.RunBattle();
+        _controller.InitTurnSystemClientRpc();
+        _controller.RunBattleClientRpc();
     }
 }
 

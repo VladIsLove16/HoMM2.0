@@ -6,11 +6,11 @@ using Zenject;
 /// Получает данные из SceneTransitionDataService
 /// Не зависит от объектов из других сцен
 /// </summary>
-public class GameSceneConfigurationProvider : IGameConfigurationProvider, IInitializable
+public class GameSceneConfigurationProvider : IBattleEntryProvider, IInitializable
 {
     private readonly SceneTransitionDataService _dataService;
 
-    bool IGameConfigurationProvider.AcceptStartingBattleWithoutClients => throw new System.NotImplementedException();
+    bool IBattleEntryProvider.AcceptStartingBattleWithoutClients => throw new System.NotImplementedException();
 
     [Inject]
     public GameSceneConfigurationProvider(SceneTransitionDataService dataService)

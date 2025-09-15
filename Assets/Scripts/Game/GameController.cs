@@ -12,34 +12,32 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class GameController : NetworkBehaviour, IInitializable
 {
     [Header("Grid Settings")]
-    [SerializeField] private int Height = 8;
-    [SerializeField] private int Width = 8;
-    
-    [Header("Fallback Configuration")]
-    [SerializeField] private GridContentEntrySO gridContentEntrySO;
-    [SerializeField] private GameNetworkCommandGateway _gateway;
+    [SerializeField] GameConfigurationProviderSO gameConfigurationProvider;
 
+    private GameNetworkCommandGateway _gateway;
     private GameModel _gameModel;
     private TurnSystem _turnSystem;
-    private IGameConfigurationProvider _configurationProvider;
+    private IBattleEntryProvider _battleEntryProvider;
     private IGameStartupFlow _startupFlow;
     private IUnitSpawner _unitSpawner;
     private IBattleRunner _battleRunner;
 
     [Inject]
     public void Construct(
+        GameNetworkCommandGateway gateway, 
         GameViewModel viewModel, 
         GridView view, 
         GameModel model, 
         TurnSystem combatSystem,
-        IGameConfigurationProvider configurationProvider,
+        IBattleEntryProvider configurationProvider,
         IGameStartupFlow startupFlow,
-         IUnitSpawner unitSpawner,
+        IUnitSpawner unitSpawner,
         IBattleRunner battleRunner)
     {
+        _gateway = gateway;
         _gameModel = model;
         _turnSystem = combatSystem;
-        _configurationProvider = configurationProvider;
+        _battleEntryProvider = configurationProvider;
         _startupFlow = startupFlow;
         _unitSpawner = unitSpawner;
         _battleRunner = battleRunner; 
@@ -61,10 +59,11 @@ public class GameController : NetworkBehaviour, IInitializable
     {
         Debug.Log("[GameController] Start called");
     }
-
-    public void InitCombatSystem()
+    [ClientRpc]
+    public void InitTurnSystemClientRpc()
     {
         // Синхронизируем текущих юнитов
+        Debug.Log("InitTurnSystemClientRpc");
         _turnSystem.ClearUnits();
         foreach (var unit in _gameModel.GetUnits())
         {
@@ -77,40 +76,31 @@ public class GameController : NetworkBehaviour, IInitializable
 
     private void OnGameModel_UnitDied(ContentDiedParams @params)
     {
-        if (@params?.UnitModel != null)
-        {
-            _turnSystem.RemoveCombatUnit(@params.UnitModel);
-           var state =  _turnSystem.BattleState;
-            if(state == BattleState.blueTeamWins)
-            {
-                
-            }
-            else if(state == BattleState.redTeamWins)
-            {
+        if (@params?.UnitModel == null)
+            throw new ArgumentException("@params?.UnitModel == null");
 
-            }
-        }
+        _turnSystem.RemoveCombatUnit(@params.UnitModel);
     }
 
     private void OnGameModel_UnitSpawned(UnitModelCreatedParams @params)
     {
-        if (@params?.UnitModel != null)
-        {
-            _turnSystem.AddCombatUnit(@params.UnitModel);
-        }
+        if (@params?.UnitModel == null)
+            throw new ArgumentException("@params?.UnitModel == null");
+        _turnSystem.AddCombatUnit(@params.UnitModel);
     }
 
     [Button]
     public void Setup()
     {
-        Setup(Width, Height);
+        Setup(gameConfigurationProvider.Width, gameConfigurationProvider. Height);
     }
     public void Setup(int width, int height)
     {
         _gameModel.InitializeGrid(width, height);
     }
     [Button]
-    public void RunBattle()
+    [ClientRpc]
+    public void RunBattleClientRpc()
     {
         _battleRunner.RunBattle();
     }
@@ -118,24 +108,24 @@ public class GameController : NetworkBehaviour, IInitializable
     [Button]
     public void CreateGridContent()
     {
-        CreateGridContent(gridContentEntrySO);
+        CreateGridContent(gameConfigurationProvider.gridContentEntrySO);
     }
 
     public void CreateGridContentFromConfiguration()
     {
         Debug.Log("[GameController] CreateGridContentFromConfiguration called");
         
-        if (_configurationProvider == null)
+        if (_battleEntryProvider == null)
         {
             Debug.LogError("[GameController] Configuration provider is null!");
             CreateFallbackGridContent();
             return;
         }
         
-        Debug.Log($"[GameController] Configuration provider found: {_configurationProvider.GetType().Name}");
+        Debug.Log($"[GameController] Configuration provider found: {_battleEntryProvider.GetType().Name}");
         
         // Получаем выбранную конфигурацию через DI
-        var selectedConfig = _configurationProvider.GetSelectedConfiguration();
+        var selectedConfig = _battleEntryProvider.GetSelectedConfiguration();
         if (selectedConfig != null)
         {
             Debug.Log($"[GameController] Creating grid content from configuration: {selectedConfig.name}");
@@ -153,21 +143,21 @@ public class GameController : NetworkBehaviour, IInitializable
     /// </summary>
     public bool IsConfigurationReady()
     {
-        if (_configurationProvider == null)
+        if (_battleEntryProvider == null)
         {
             return false;
         }
         
-        var selectedConfig = _configurationProvider.GetSelectedConfiguration();
+        var selectedConfig = _battleEntryProvider.GetSelectedConfiguration();
         return selectedConfig != null;
     }
     
     private void CreateFallbackGridContent()
     {
-        if (gridContentEntrySO != null)
+        if (gameConfigurationProvider.gridContentEntrySO != null)
         {
             Debug.Log("[GameController] Using fallback configuration");
-            CreateGridContent(gridContentEntrySO);
+            CreateGridContent(gameConfigurationProvider.gridContentEntrySO);
         }
         else
         {
@@ -236,9 +226,9 @@ public class NetworkUnitSpawner : IUnitSpawner
 public class NetworkBattleRunner : IBattleRunner
 {
     private readonly TurnSystem _combatSystem;
-    private readonly IGameConfigurationProvider _config;
+    private readonly IBattleEntryProvider _config;
 
-    public NetworkBattleRunner(TurnSystem combatSystem, IGameConfigurationProvider config)
+    public NetworkBattleRunner(TurnSystem combatSystem, IBattleEntryProvider config)
     {
         _combatSystem = combatSystem;
         _config = config;
