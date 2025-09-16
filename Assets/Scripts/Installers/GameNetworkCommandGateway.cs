@@ -40,6 +40,38 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     [Inject] private ClientGameRpcService _clientService;
     private readonly HashSet<UnitModel> _dirtyUnits = new HashSet<UnitModel>();
     private int _stateVersion;
+    private readonly Queue<UnitSpawnParams> _pendingSpawns = new Queue<UnitSpawnParams>();
+
+    private void FlushPendingSpawns()
+    {
+        if (_gameModel == null) return;
+        while (_pendingSpawns.Count > 0 && _gameModel.IsGridInitialized)
+        {
+            var spawnParams = _pendingSpawns.Dequeue();
+            SafeSpawn(spawnParams);
+        }
+    }
+
+    private void SafeSpawn(UnitSpawnParams spawnParams)
+    {
+        if (_gameModel == null)
+        {
+            _pendingSpawns.Enqueue(spawnParams);
+            return;
+        }
+        if (!_gameModel.IsGridInitialized)
+        {
+            _pendingSpawns.Enqueue(spawnParams);
+            return;
+        }
+        var pos = new Vector2Int(spawnParams.X, spawnParams.Y);
+        if (!_gameModel.IsInBounds(pos))
+        {
+            Debug.LogWarning($"[GameNetworkCommandGateway] Spawn out of bounds {pos} for {spawnParams.UnitType}");
+            return;
+        }
+        _gameModel.SpawnUnit(spawnParams);
+    }
 
     private void OnEnable()
     {
@@ -51,6 +83,21 @@ public class GameNetworkCommandGateway : NetworkBehaviour
 
         if (_serverService != null)
             _serverService.SetMarkDirtyCallback(MarkDirty);
+
+        // Подписка на инициализацию сетки для отложенных спавнов
+        if (_gameModel != null)
+        {
+            _gameModel.GridInitialized += _ => FlushPendingSpawns();
+            if (_gameModel.IsGridInitialized) FlushPendingSpawns();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_gameModel != null)
+        {
+            _gameModel.GridInitialized -= _ => FlushPendingSpawns();
+        }
     }
 
     public bool TrySendMoveRequest(Vector2Int startCell, List<Vector2Int> gridRoute)
@@ -174,7 +221,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         var unitSpawnParams = new UnitSpawnParams(x, y, unitType, amount, isPlayer);
         Debug.Log("Start Spawning unit with " + unitSpawnParams.ToString());
-        _gameModel.SpawnUnit(unitSpawnParams);
+        SafeSpawn(unitSpawnParams);
     }
 
     
