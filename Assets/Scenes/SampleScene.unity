@@ -2804,10 +2804,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  Height: 10
-  Width: 10
-  gridContentEntrySO: {fileID: 11400000, guid: 439c7162533bc6e4981605a051622295, type: 2}
-  _gateway: {fileID: 1271283385}
+  gameConfigurationProvider: {fileID: 11400000, guid: 214f6500a3409cc4880c7a323b63ba6a, type: 2}
 --- !u!114 &985392990
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -22,7 +22,7 @@ public static class LobbyUICreator
         Color32 viewportColor = new Color32(0, 0, 0, 51);
 
         // Canvas
-        Canvas canvas = Object.FindObjectOfType<Canvas>();
+        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
         if (canvas == null)
         {
             GameObject canvasGO = new GameObject("Canvas");
@@ -31,7 +31,7 @@ public static class LobbyUICreator
             var scaler = canvasGO.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasGO.AddComponent<GraphicRaycaster>();
-            if (Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (Object.FindAnyObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 GameObject es = new GameObject("EventSystem");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();

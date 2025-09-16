@@ -47,7 +47,7 @@ public class GameGridUIPanelView : MonoBehaviour
         this.gameController = gameController;
 
         Create.onClick.AddListener(() => gameController.CreateGridContent());
-        RunBattle.onClick.AddListener(()=> gameController.RunBattleClientRpc());
+        RunBattle.onClick.AddListener(()=> gameController.RunBattle());
         btnSpawnRandom.onClick.AddListener(OnBtnSpawnRandom_Clicked);
         //btnSpawnAt.onClick.AddListener(() => viewModel.SpawnUnitAt(xText.text, yText.text));
         btnSelectCell.onClick.AddListener(BtnSelectCell_onClick);

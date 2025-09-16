@@ -31,7 +31,7 @@ namespace Tests.PlayMode
             }
             
             // Ищем GameController
-            var gameController = Object.FindObjectOfType<GameController>();
+            var gameController = Object.FindAnyObjectByType<GameController>();
             if (gameController == null)
             {
                 Debug.LogError("❌ GameController not found in scene!");
@@ -39,7 +39,7 @@ namespace Tests.PlayMode
             }
             
             Debug.Log($"✅ GameController found");
-            
+
             // Проверяем NetworkObject
             var networkObject = gameController.GetComponent<NetworkObject>();
             if (networkObject == null)
@@ -67,7 +67,7 @@ namespace Tests.PlayMode
         {
             Debug.Log("=== GameController Initialization Test Started ===");
             
-            var gameController = Object.FindObjectOfType<GameController>();
+            var gameController = Object.FindAnyObjectByType<GameController>();
             if (gameController == null)
             {
                 Debug.LogError("❌ GameController not found in scene!");

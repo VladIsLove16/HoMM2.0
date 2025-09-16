@@ -32,8 +32,6 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
         _gameVM.UnitAttacked += OnUnitAttacked;
         _gameVM.UnitHit += OnUnitHit;
         _gameVM.UnitDied += OnUnitDied;
-        _gameVM.UnitTurnStarted += OnUnitTurnStarted;
-        _gameVM.UnitHealthChanged += OnUnitHealthChanged;
     }
 
     private void OnUnitMovedByRoute(IViewModel viewModel, List<Vector3> route)
@@ -85,6 +83,4 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
             }
         }
     }
-        private void OnUnitTurnStarted(IViewModel viewModel) { }
-    private void OnUnitHealthChanged(IViewModel viewModel) { }
 }

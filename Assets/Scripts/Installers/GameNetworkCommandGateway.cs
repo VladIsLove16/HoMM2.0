@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Unity.Netcode;
@@ -33,6 +34,8 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     }
 
     [Inject] private GameModel _gameModel;
+    [Inject] private TurnSystem _turnSystem;
+    [Inject] private GameController _gameController;
     [Inject] private ServerGameRpcService _serverService;
     [Inject] private ClientGameRpcService _clientService;
     private readonly HashSet<UnitModel> _dirtyUnits = new HashSet<UnitModel>();
@@ -225,6 +228,18 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         _dirtyUnits.Add(unit);
     }
 
+    [ClientRpc]
+    public void InitClientTurnSystemClientRpc()
+    {
+        foreach (var unit in _gameModel.GetUnits())
+            _turnSystem.AddCombatUnit(unit);
+    }
+
+    [ClientRpc]
+    public void StartBattleClientRpc()
+    {
+        _gameController.RunBattle();
+    }
     private UnitState ToState(UnitModel unit)
     {
         return new UnitState
