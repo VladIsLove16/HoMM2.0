@@ -1,4 +1,4 @@
-﻿// GameModel.cs
+// GameModel.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +37,7 @@ public class GameModel
     {
         return  _grid.GetGridArray();
     }
+    public bool IsGridInitialized => _grid != null;
     public bool IsInBounds(Vector2Int pos) => _grid.IsInBounds(pos.x, pos.y);
 
     public virtual OperationResult SpawnUnit(UnitSpawnParams spawnParams)
