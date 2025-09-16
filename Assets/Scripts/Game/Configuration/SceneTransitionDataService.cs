@@ -15,6 +15,30 @@ public class SceneTransitionDataService : MonoBehaviour, IGameModeProvider
     [Header("Game Configuration")]
     [SerializeField] private GridContentEntrySO[] _availableConfigs = new GridContentEntrySO[0];
     [SerializeField] private bool acceptStartingGameWithoutClients;
+    [SerializeField] private int width;
+    [SerializeField] private int height;
+    public int Width
+    {
+        get
+        {
+            return width;
+        }
+        set
+        {
+            width = value;
+        }
+    }
+    public int Height
+    {
+        get
+        {
+            return height;
+        }
+        set
+        {
+            height = value;
+        }
+    }
     public bool AcceptStartingGameWithoutClients => acceptStartingGameWithoutClients;
     public GameMode CurrentGameMode { get; private set; }
     

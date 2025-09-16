@@ -55,6 +55,7 @@ public class GameModel
         unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
             var unitModelCreatedParams = new UnitModelCreatedParams(unit);
         UnitSpawned?.Invoke(unitModelCreatedParams);
+        Debug.Log("unit spawned " + new Vector2Int(spawnParams.X, spawnParams.Y));
         return new(true);
     }
 
@@ -90,8 +91,15 @@ public class GameModel
 
     public List<UnitModel> GetUnits()
     {
-        // Собираем всех юнитов с поля
-        return GetAllCells().OfType<UnitModel>().ToList();
+        var units = new List<UnitModel>();
+        foreach (var cellInterface in GetAllCells())
+        {
+            var cell = cellInterface as GameCell;
+            if (cell == null) continue;
+            if (cell.Unit is UnitModel unit)
+                units.Add(unit);
+        }
+        return units;
     }
 }
 public class GameModelDebugger : GameModel

@@ -2720,7 +2720,7 @@ MonoBehaviour:
   _gameView3D: {fileID: 1712596801}
   _attackActionPanel: {fileID: 47613583}
   _MVVMUnitTurnPanel: {fileID: 82560151}
-  _inGameUI: {fileID: 0}
+  _inGameUI: {fileID: 1375104872}
   _unitStatsPanel: {fileID: 370274122}
   _gridView: {fileID: 407876099}
   cellPrefab: {fileID: 6718948771117235691, guid: 03f33b930472f244bae4ae4f515dd136, type: 3}
@@ -2757,6 +2757,7 @@ MonoBehaviour:
     _hoveredRedTeamMaterial: {fileID: 2100000, guid: f08efeeaf720620419d10802d99114e1, type: 2}
   unitNetworkService: {fileID: 723665459}
   unitPrefabManager: {fileID: 51146517}
+  sceneLoadWatcher: {fileID: 1391039215}
   strategy: 0
 --- !u!1 &985392986
 GameObject:
@@ -3682,13 +3683,57 @@ MonoBehaviour:
   m_GameObject: {fileID: 1375104866}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff39d636c0767a942a7fa4b4cd950743, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cf2862b6da13474e9bac704e5d91466, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   turnNumber: {fileID: 1803977036}
   turnNumberAnimator: {fileID: 1803977038}
   battleStateAnimator: {fileID: 30659807}
   battleState: {fileID: 30659805}
+--- !u!1 &1391039213
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1391039214}
+  - component: {fileID: 1391039215}
+  m_Layer: 0
+  m_Name: SceneLoadWatcher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1391039214
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1391039213}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1945048467}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1391039215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1391039213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df985235828bd404ab48554906168439, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1492948228
 GameObject:
   m_ObjectHideFlags: 0
@@ -5078,6 +5123,7 @@ Transform:
   - {fileID: 1492948229}
   - {fileID: 723665458}
   - {fileID: 388377868}
+  - {fileID: 1391039214}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2028474664

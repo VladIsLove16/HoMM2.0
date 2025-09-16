@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using Zenject;
 
 public class HostGameStartupFlow : IGameStartupFlow
@@ -17,30 +17,15 @@ public class HostGameStartupFlow : IGameStartupFlow
 
     public void Run()
     {
+        //отправляем клиентам данные о сетке
+        _gateway.TrySendBattleSetup();
+
         _controller.Setup(); // создаем сетку
-        var mb = _controller as MonoBehaviour;
-        if (mb != null)
-            mb.StartCoroutine(WaitAndStart());
-    }
-
-    private IEnumerator WaitAndStart()
-    {
-        int safetyFrames = 120;
-        while ((_gateway == null || !_gateway.IsSpawned) && safetyFrames-- > 0)
-            yield return null;
-
-        if (_gateway == null || !_gateway.IsSpawned)
-            throw new System.InvalidOperationException("GameNetworkCommandGateway не готов к RPC");
-
-        // 1️⃣ Создание юнитов на хосте (через IUnitSpawner -> SpawnUnitServerRpc)
         _controller.CreateGridContentFromConfiguration();
-
+        // Инициализируем локальный TurnSystem
         _controller.InitTurnSystem();
-        // 2️⃣ Передача клиентам информации о юнитах для TurnSystem
-        _gateway.InitClientTurnSystemClientRpc();
+        // Старт боя локально на хосте
         _controller.RunBattle();
-        // 3️⃣ Старт боя
-        _gateway.StartBattleClientRpc();
     }
 }
 
@@ -48,17 +33,22 @@ public class HostGameStartupFlow : IGameStartupFlow
 public class ClientGameStartupFlow : IGameStartupFlow
 {
     private readonly GameController _controller;
-    public ClientGameStartupFlow(GameController controller)
+    private readonly GameNetworkCommandGateway _gateway;
+    private SceneLoadWatcher _sceneLoadWatcher;
+
+    public ClientGameStartupFlow(GameController controller, GameNetworkCommandGateway gateway, SceneLoadWatcher sceneLoadWatcher)
     {
         _controller = controller;
+        _gateway = gateway;
+        _sceneLoadWatcher = sceneLoadWatcher;
     }
 
     public void Run()
     {
-        // Создаём сетку локально
-        _controller.Setup();
-        // Юниты будут созданы через InitClientTurnSystemRpc
-        // Бой начнётся через StartBattleRpc
+        _sceneLoadWatcher.OnSceneReady += () => {
+            Debug.Log("client scene ready!") ;
+            _gateway.ClientSceneLoadedServerRpc();
+        };
     }
 }
 
@@ -70,6 +60,7 @@ public class SinglePlayerGameStartupFlow : IGameStartupFlow
 
     public void Run()
     {
+        Debug.Log("running singleplayerFlow");
         _controller.Setup();
         _controller.CreateGridContentFromConfiguration();
         _controller.InitTurnSystem();

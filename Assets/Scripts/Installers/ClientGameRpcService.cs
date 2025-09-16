@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
@@ -19,21 +21,17 @@ public class ClientGameRpcService
         attacker.SendDamage(new AttackContext(target));
     }
 
-    public void ApplyUnitState(GameNetworkCommandGateway.UnitState s)
+    public void ApplyClientMove(Vector2Int startCell, Vector2Int[] gridRoute)
     {
-        var unit = _gameModel.GetCell(new Vector2Int(s.CellX, s.CellY)).Unit;
-        if (unit == null) return;
-        bool statsChanged = false;
-        bool amountChanged = unit.Amount.Value != s.Amount;
-        unit.Amount.SetValueAndForceNotify(s.Amount);
-        unit.IsBlueTeam.SetValueAndForceNotify(s.IsBlueTeam);
-        if (unit.ModifiedStats != null)
-        {
-            if (unit.ModifiedStats.Health != s.Health) { unit.ModifiedStats.Health = s.Health; statsChanged = true; }
-            if (unit.ModifiedStats.MaxHealth != s.MaxHealth) { unit.ModifiedStats.MaxHealth = s.MaxHealth; statsChanged = true; }
-        }
-        if (statsChanged) unit.HealthChanged?.Invoke();
-        if (statsChanged) unit.StatsChanged?.Invoke();
+        var unit = _gameModel.GetCell(startCell).Unit;
+        if (unit == null || gridRoute == null || gridRoute.Length == 0) return;
+        _gameModel.MoveObject(unit, new List<Vector2Int>(gridRoute));
+    }
+
+    public void ApplySpawn(UnitSpawnParams unitSpawnParams)
+    {
+        Debug.Log("Start Spawning unit with " + unitSpawnParams.ToString());
+        _gameModel.SpawnUnit(unitSpawnParams);
     }
 }
 

@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Unity.Netcode;
@@ -8,99 +10,133 @@ using Zenject;
 [RequireComponent(typeof(NetworkObject))]
 public class GameNetworkCommandGateway : NetworkBehaviour
 {
-    public struct UnitState : Unity.Netcode.INetworkSerializable
+    public enum ClientStage
     {
-        public int CellX;
-        public int CellY;
-        public bool IsBlueTeam;
-        public int Amount;
-        public int Health;
-        public int MaxHealth;
-        public UnitType UnitType;
-        public int Version;
-        public void NetworkSerialize<T>(Unity.Netcode.BufferSerializer<T> serializer) where T : Unity.Netcode.IReaderWriter
-        {
-            serializer.SerializeValue(ref CellX);
-            serializer.SerializeValue(ref CellY);
-            serializer.SerializeValue(ref IsBlueTeam);
-            serializer.SerializeValue(ref Amount);
-            serializer.SerializeValue(ref Health);
-            serializer.SerializeValue(ref MaxHealth);
-            var unitTypeInt = (int)UnitType;
-            serializer.SerializeValue(ref unitTypeInt);
-            UnitType = (UnitType)unitTypeInt;
-            serializer.SerializeValue(ref Version);
-        }
+        Disconnected,
+        WaitingInitGrid,
+        GridReady,
+        SpawningUnits,
+        UnitsReady,
+        BattleStarted
     }
+    public enum ServerStage
+    {
+        Idle,
+        WaitingClientsGridReady,
+        SendingUnits,
+        WaitingClientsUnitsReady,
+        BattleStarted,
+        WaitingClientsSceneReady
+    }
+    // Синхронизация состояний удалена — только командная модель
 
     [Inject] private GameModel _gameModel;
     [Inject] private TurnSystem _turnSystem;
     [Inject] private GameController _gameController;
+    [Inject] private SceneTransitionDataService _sceneTransitionDataService;
     [Inject] private ServerGameRpcService _serverService;
     [Inject] private ClientGameRpcService _clientService;
+    public event System.Action<ClientStage> ClientStageChanged;
+    public event System.Action<ServerStage, int, int> ServerStageChanged; // (stage, readyCount, total)
+    public event System.Action<ulong> TurnOwnerChanged; // UI/клиентам
+    private ClientStage _clientStage;
+    private ServerStage _serverStage;
     private readonly HashSet<UnitModel> _dirtyUnits = new HashSet<UnitModel>();
+    private readonly HashSet<ulong> _clientsGridReady = new HashSet<ulong>();
+    private readonly HashSet<ulong> _clientsUnitsReady = new HashSet<ulong>();
+    private readonly HashSet<ulong> _clientsSceneReady = new HashSet<ulong>();
+    private int _pendingWidth;
+    private int _pendingHeight;
+    private SpawnUnitMsg[] _pendingUnits;
     private int _stateVersion;
+    private bool battleSettuped = false;
+    private bool battleSettupSended = false;
+    private ulong _currentTurnOwnerClientId;
 
     private void OnEnable()
     {
         // Fail-safe: если DI не проставил сервисы, создаём их из _gameModel
         if (_serverService == null && _gameModel != null)
+        {
+            Debug.LogAssertion(" DI не проставил _serverService, создаём их из _gameModel");
             _serverService = new ServerGameRpcService(_gameModel);
+        }
         if (_clientService == null && _gameModel != null)
+        {
+            Debug.LogAssertion(" DI не проставил _clientService, создаём их из _gameModel");
             _clientService = new ClientGameRpcService(_gameModel);
+        }
 
-        if (_serverService != null)
-            _serverService.SetMarkDirtyCallback(MarkDirty);
+        _serverStage = ServerStage.Idle;
+        _clientStage = NetworkManager != null && NetworkManager.IsServer ? ClientStage.BattleStarted : ClientStage.WaitingInitGrid;
+        ClientStageChanged?.Invoke(_clientStage);
+        ServerStageChanged += OnServerStageChanged;
+        ClientStageChanged += OnClientStageChanged;
     }
 
-    public bool TrySendMoveRequest(Vector2Int startCell, List<Vector2Int> gridRoute)
+    private void OnClientStageChanged(ClientStage stage)
     {
-        if (gridRoute == null || gridRoute.Count == 0) return false;
-        if (NetworkManager.Singleton == null) return false;
+        Debug.Log("new client stage : " + stage);
+    }
+
+    private void OnServerStageChanged(ServerStage stage, int arg2, int arg3)
+    {
+        Debug.Log("new server stage : " + stage);
+    }
+
+    public OperationResult TrySendMoveRequest(Vector2Int startCell, List<Vector2Int> gridRoute)
+    {
+        if (gridRoute == null || gridRoute.Count == 0) return new OperationResult(false, "gridRoute == null || gridRoute.Count == 0");
+        if (NetworkManager.Singleton == null) return new OperationResult(false, "NetworkManager.Singleton == null");
+        // Ходить может только владелец текущего хода
+        if (_currentTurnOwnerClientId != NetworkManager.LocalClientId && !IsServer)
+            return new OperationResult(false, "Not your turn");
 
         // На хосте можно применить напрямую без RPC
         if (NetworkManager.Singleton.IsServer)
         {
             _serverService.ApplyServerMove(startCell, gridRoute);
             MoveAcknowledgeClientRpc(startCell, gridRoute.ToArray());
-            return true;
+            AdvanceTurnOnServer();
+            return new OperationResult(true, ""); ;
         }
 
         if (!IsSpawned)
         {
-            Debug.LogWarning("[GameNetworkCommandGateway] NetworkObject is not spawned yet. Skipping send.");
-            return false;
+            return new OperationResult(false, "[GameNetworkCommandGateway] NetworkObject is not spawned yet. Skipping send."); ;
         }
-
         MoveRequestServerRpc(startCell, gridRoute.ToArray());
-        return true;
+        return new OperationResult(true, "");
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void MoveRequestServerRpc(Vector2Int startCell, Vector2Int[] gridRoute, ServerRpcParams rpcParams = default)
     {
         if (gridRoute == null || gridRoute.Length == 0) return;
+        // Проверяем право хода на сервере
+        if (_currentTurnOwnerClientId != rpcParams.Receive.SenderClientId) return;
         _serverService.ApplyServerMove(startCell, new List<Vector2Int>(gridRoute));
         MoveAcknowledgeClientRpc(startCell, gridRoute);
+        AdvanceTurnOnServer();
     }
 
     [ClientRpc]
     private void MoveAcknowledgeClientRpc(Vector2Int startCell, Vector2Int[] gridRoute)
     {
-        var unit = _gameModel.GetCell(startCell).Unit;
-        if (unit == null || gridRoute == null || gridRoute.Length == 0) return;
-        _gameModel.MoveObject(unit, new List<Vector2Int>(gridRoute));
+        _clientService.ApplyClientMove(startCell, gridRoute);
     }
 
 
     public bool TrySendAttackRequest(Vector2Int attackerCell, Vector2Int targetCell)
     {
         if (NetworkManager.Singleton == null) return false;
+        if (_currentTurnOwnerClientId != NetworkManager.LocalClientId && !IsServer) return false;
 
         if (NetworkManager.Singleton.IsServer)
         {
             _serverService.ApplyServerAttack(attackerCell, targetCell);
             AttackAcknowledgeClientRpc(attackerCell, targetCell);
+            AdvanceTurnOnServer();
             return true;
         }
 
@@ -114,11 +150,13 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         return true;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void AttackRequestServerRpc(Vector2Int attackerCell, Vector2Int targetCell, ServerRpcParams rpcParams = default)
     {
+        if (_currentTurnOwnerClientId != rpcParams.Receive.SenderClientId) return;
         _serverService.ApplyServerAttack(attackerCell, targetCell);
         AttackAcknowledgeClientRpc(attackerCell, targetCell);
+        AdvanceTurnOnServer();
     }
 
     [ClientRpc]
@@ -128,7 +166,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     }
 
 
-    // ==== SPAWN SYNC ====
+    // ==== SPAWN SYNC (только при начальном сетапе через батч) ====
     public bool TrySendSpawnUnit(int x, int y, UnitType unitType, int amount, bool isPlayer)
     {
         
@@ -162,7 +200,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         return true;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void SpawnUnitServerRpc(int x, int y, UnitType unitType, int amount, bool isPlayer, ServerRpcParams rpcParams = default)
     {
         _serverService.ApplyServerSpawn(x, y, unitType, amount, isPlayer);
@@ -173,66 +211,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     private void SpawnAcknowledgeClientRpc(int x, int y, UnitType unitType, int amount, bool isPlayer)
     {
         var unitSpawnParams = new UnitSpawnParams(x, y, unitType, amount, isPlayer);
-        Debug.Log("Start Spawning unit with " + unitSpawnParams.ToString());
-        _gameModel.SpawnUnit(unitSpawnParams);
-    }
-
-    
-
-    // ==== REMOVE SYNC ====
-    public bool TrySendRemoveUnit(Vector2Int cell)
-    {
-        if (NetworkManager.Singleton == null)
-        {
-            _serverService.ApplyServerRemove(cell);
-            return true;
-        }
-        if (NetworkManager.Singleton.IsServer)
-        {
-            _serverService.ApplyServerRemove(cell);
-            RemoveAcknowledgeClientRpc(cell);
-            return true;
-        }
-        if (!IsSpawned)
-        {
-            Debug.LogWarning("[GameNetworkCommandGateway] Not spawned, skip remove send.");
-            return false;
-        }
-        RemoveUnitServerRpc(cell);
-        return true;
-    }
-
-    [ServerRpc]
-    private void RemoveUnitServerRpc(Vector2Int cell, ServerRpcParams rpcParams = default)
-    {
-        _serverService.ApplyServerRemove(cell);
-        RemoveAcknowledgeClientRpc(cell);
-    }
-
-    [ClientRpc]
-    private void RemoveAcknowledgeClientRpc(Vector2Int cell)
-    {
-        ApplyClientRemove(cell);
-    }
-
-    private void ApplyClientRemove(Vector2Int cell)
-    {
-        var unit = _gameModel.GetCell(cell).Unit;
-        if (unit == null) return;
-        unit.Died?.Invoke();
-    }
-
-    private void MarkDirty(UnitModel unit)
-    {
-        if (unit == null) return;
-        _dirtyUnits.Add(unit);
-    }
-
-    [ClientRpc]
-    public void InitClientTurnSystemClientRpc()
-    {
-        foreach (var unit in _gameModel.GetUnits())
-            _turnSystem.AddCombatUnit(unit);
+        _clientService.ApplySpawn(unitSpawnParams);
     }
 
     [ClientRpc]
@@ -240,41 +219,272 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         _gameController.RunBattle();
     }
-    private UnitState ToState(UnitModel unit)
+
+    private void SetupBattleForClients()
     {
-        return new UnitState
-        {
-            CellX = unit.Position.Value.x,
-            CellY = unit.Position.Value.y,
-            IsBlueTeam = unit.IsBlueTeam.Value,
-            Amount = unit.Amount.Value,
-            Health = unit.ModifiedStats.Health,
-            MaxHealth = unit.ModifiedStats.MaxHealth,
-            UnitType = unit.UnitType.Value,
-            Version = ++_stateVersion
-        };
+        if (battleSettuped)
+            return;
+        if (!IsServer || NetworkManager == null) return;
+        List<SpawnUnitMsg> list = GetLobbyConfiguration();
+        _pendingUnits = list.ToArray();
+        _pendingWidth = _sceneTransitionDataService.Width;
+        _pendingHeight = _sceneTransitionDataService.Height;
+
+        _clientsGridReady.Clear();
+        _clientsUnitsReady.Clear();
+        Debug.Log("battle settuped");
+        battleSettuped = true;
     }
 
-    private void LateUpdate()
+    private List<SpawnUnitMsg> GetLobbyConfiguration()
     {
-        if (!IsServer || _dirtyUnits.Count == 0) return;
-        var list = new List<UnitState>(_dirtyUnits.Count);
-        foreach (var u in _dirtyUnits)
-            list.Add(ToState(u));
-        _dirtyUnits.Clear();
-        SyncUnitsStateClientRpc(list.ToArray());
+        var gce = _sceneTransitionDataService.GetSelectedConfiguration();
+        var list = new List<SpawnUnitMsg>();
+        foreach (var u in gce.contents)
+        {
+            list.Add(new SpawnUnitMsg
+            {
+                X = u.X,
+                Y = u.Y,
+                Amount = u.Amount,
+                IsPlayer = u.isPlayer,
+                UnitType = u.unitType
+            });
+        }
+        return list;
+    }
+    private List<SpawnUnitMsg> GetCurrentConfiguration()
+    {
+        var units = _gameModel.GetUnits();
+        var list = new List<SpawnUnitMsg>(units.Count);
+        foreach (var u in units)
+        {
+            list.Add(new SpawnUnitMsg
+            {
+                X = u.Position.Value.x,
+                Y = u.Position.Value.y,
+                Amount = u.Amount.Value,
+                IsPlayer = u.IsBlueTeam.Value,
+                UnitType = u.UnitType.Value
+            });
+        }
+
+        return list;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ClientSceneLoadedServerRpc(ServerRpcParams rpcParams = default)
+    {
+        Debug.Log("ClientSceneLoadedServerRpc");
+        var sender = rpcParams.Receive.SenderClientId;
+        _clientsSceneReady.Add(sender);
+
+        //создаём данные для отправки клиентам.
+        SetupBattleForClients();
+
+        //отправляем всем клиентам данные об игре.
+        SendBattleSetupClientRpc(_pendingWidth, _pendingHeight, _pendingUnits);
+    }
+
+    public void TrySendBattleSetup()
+    {
+        //если куратина уже идет, ничего не делаем
+        if (_serverStage == ServerStage.WaitingClientsSceneReady)
+            return;
+        //создаём данные для отправки клиентам.
+        SetupBattleForClients();
+        if (!IsServer || NetworkManager == null) return;
+        //ожидаем готовности сцены у всех клиентов
+        StartCoroutine(WaitingClientsSceneReadyCoroutine());
+    }
+    private IEnumerator WaitingClientsSceneReadyCoroutine()
+    {
+        //колво клиентов завычетом хоста
+        var total = NetworkManager.ConnectedClientsIds.Count - 1;
+        _serverStage = ServerStage.WaitingClientsSceneReady;
+        ServerStageChanged?.Invoke(_serverStage, _clientsGridReady.Count, total);
+        while (true)
+        {
+            Debug.Log("WaitingClientsSceneReady ");
+            Debug.Log("_clientsSceneReady " + _clientsSceneReady.Count + " NetworkManager.ConnectedClientsIds.Count " + NetworkManager.ConnectedClientsIds.Count + " _pendingUnits + " + _pendingUnits.Length); ;
+            if (_clientsSceneReady.Count >= total && _pendingUnits != null)
+            {
+                _serverStage = ServerStage.SendingUnits;
+                ServerStageChanged?.Invoke(_serverStage, _clientsGridReady.Count, total);
+                SendBattleSetupClientRpc(_pendingWidth, _pendingHeight, _pendingUnits);
+                _serverStage = ServerStage.WaitingClientsUnitsReady;
+                ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, total);
+                break;
+            }
+            yield return new WaitForSeconds(1f);
+        }
+    }
+    [ClientRpc]
+    private void SendBattleSetupClientRpc(int width, int height, SpawnUnitMsg[] units)
+    {
+        // Хост не должен применять клиентский сетап
+        if (IsServer) return;
+        if (battleSettupSended)
+            return;
+        battleSettupSended = true;
+        // 1) сетка
+        _clientStage = ClientStage.WaitingInitGrid;
+        ClientStageChanged?.Invoke(_clientStage);
+        _gameController.Setup(width, height);
+        _clientStage = ClientStage.GridReady;
+        ClientStageChanged?.Invoke(_clientStage);
+        //ClientGridReadyServerRpc();
+
+        // 2) юниты
+        _clientStage = ClientStage.SpawningUnits;
+        ClientStageChanged?.Invoke(_clientStage);
+        if (units != null)
+        {
+            foreach (var s in units)
+            {
+                var p = new UnitSpawnParams(s.X, s.Y, s.UnitType, s.Amount, s.IsPlayer);
+                _clientService.ApplySpawn(p);
+            }
+        }
+        _gameController.InitTurnSystem();
+        _clientStage = ClientStage.UnitsReady;
+        ClientStageChanged?.Invoke(_clientStage);
+        ClientUnitsReadyServerRpc();
+    }
+
+    //[ServerRpc]
+    //private void ClientGridReadyServerRpc(ServerRpcParams rpcParams = default)
+    //{
+    //    var sender = rpcParams.Receive.SenderClientId;
+    //    _clientsGridReady.Add(sender);
+    //    ServerStageChanged?.Invoke(_serverStage, _clientsGridReady.Count, NetworkManager.ConnectedClientsIds.Count);
+    //    if (_clientsGridReady.Count >= NetworkManager.ConnectedClientsIds.Count)
+    //    {
+    //        _serverStage = ServerStage.SendingUnits;
+    //        ServerStageChanged?.Invoke(_serverStage, _clientsGridReady.Count, NetworkManager.ConnectedClientsIds.Count);
+    //        SendUnitsBatchToClients();
+    //    }
+    //}
+
+    public struct SpawnUnitMsg : Unity.Netcode.INetworkSerializable
+    {
+        public int X;
+        public int Y;
+        public int Amount;
+        public bool IsPlayer;
+        public UnitType UnitType;
+        public void NetworkSerialize<T>(Unity.Netcode.BufferSerializer<T> serializer) where T : Unity.Netcode.IReaderWriter
+        {
+            serializer.SerializeValue(ref X);
+            serializer.SerializeValue(ref Y);
+            serializer.SerializeValue(ref Amount);
+            serializer.SerializeValue(ref IsPlayer);
+            var t = (int)UnitType;
+            serializer.SerializeValue(ref t);
+            UnitType = (UnitType)t;
+        }
+    }
+
+    //private void SendUnitsBatchToClients()
+    //{
+    //    var units = _gameModel.GetUnits();
+    //    var list = new List<SpawnUnitMsg>(units.Count);
+    //    foreach (var u in units)
+    //    {
+    //        list.Add(new SpawnUnitMsg
+    //        {
+    //            X = u.Position.Value.x,
+    //            Y = u.Position.Value.y,
+    //            Amount = u.Amount.Value,
+    //            IsPlayer = u.IsBlueTeam.Value,
+    //            UnitType = u.UnitType.Value
+    //        });
+    //    }
+    //    SendUnitsBatchClientRpc(list.ToArray());
+    //    _serverStage = ServerStage.WaitingClientsUnitsReady;
+    //    ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
+    //}
+
+    [ClientRpc]
+    private void SendUnitsBatchClientRpc(SpawnUnitMsg[] units)
+    {
+        _clientStage = ClientStage.SpawningUnits;
+        ClientStageChanged?.Invoke(_clientStage);
+        if (units != null)
+        {
+            foreach (var s in units)
+            {
+                var p = new UnitSpawnParams(s.X, s.Y, s.UnitType, s.Amount, s.IsPlayer);
+                _gameModel.SpawnUnit(p);
+            }
+        }
+        // Инициализируем локальный TurnSystem на клиенте
+        _gameController.InitTurnSystem();
+        _clientStage = ClientStage.UnitsReady;
+        ClientStageChanged?.Invoke(_clientStage);
+        ClientUnitsReadyServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ClientUnitsReadyServerRpc(ServerRpcParams rpcParams = default)
+    {
+        var sender = rpcParams.Receive.SenderClientId;
+        _clientsUnitsReady.Add(sender);
+        ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
+        if (_clientsUnitsReady.Count >= NetworkManager.ConnectedClientsIds.Count)
+        {
+            _serverStage = ServerStage.BattleStarted;
+            ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
+            StartBattleForAll();
+        }
+    }
+
+    public void StartBattleForAll()
+    {
+        // Старт боя на сервере/хосте
+        _gameController.RunBattle();
+        // И на клиентах
+        StartBattleClientRpc();
+        // Инициализируем первый ход: хост
+        if (IsServer && NetworkManager != null)
+        {
+            _currentTurnOwnerClientId = NetworkManager.ServerClientId;
+            BroadcastTurnOwner();
+        }
+    }
+
+    private void BroadcastTurnOwner()
+    {
+        SetTurnOwnerClientRpc(_currentTurnOwnerClientId);
+        TurnOwnerChanged?.Invoke(_currentTurnOwnerClientId);
     }
 
     [ClientRpc]
-    private void SyncUnitsStateClientRpc(UnitState[] states)
+    private void SetTurnOwnerClientRpc(ulong ownerClientId)
     {
-        if (states == null || states.Length == 0) return;
-        foreach (var s in states)
-        {
-            _clientService.ApplyUnitState(s);
-            // позиция уже синхронизируется Move, но при необходимости можно форсировать
-        }
+        _currentTurnOwnerClientId = ownerClientId;
+        TurnOwnerChanged?.Invoke(ownerClientId);
     }
+
+    private void AdvanceTurnOnServer()
+    {
+        if (!IsServer || NetworkManager == null) return;
+        // Простой переключатель между хостом и первым клиентом (2 игрока)
+        ulong hostId = NetworkManager.ServerClientId;
+        ulong nextId = hostId;
+        foreach (var id in NetworkManager.ConnectedClientsIds)
+        {
+            if (id != hostId)
+            {
+                nextId = (_currentTurnOwnerClientId == hostId) ? id : hostId;
+                break;
+            }
+        }
+        _currentTurnOwnerClientId = nextId;
+        BroadcastTurnOwner();
+    }
+    // Удалено: периодическая синхронизация состояний. Работаем только командами.
 }
+
 
 

@@ -10,7 +10,7 @@ public class GameSceneConfigurationProvider : IBattleEntryProvider, IInitializab
 {
     private readonly SceneTransitionDataService _dataService;
 
-    bool IBattleEntryProvider.AcceptStartingBattleWithoutClients => throw new System.NotImplementedException();
+    bool IBattleEntryProvider.AcceptStartingBattleWithoutClients => _dataService.AcceptStartingGameWithoutClients;
 
     [Inject]
     public GameSceneConfigurationProvider(SceneTransitionDataService dataService)

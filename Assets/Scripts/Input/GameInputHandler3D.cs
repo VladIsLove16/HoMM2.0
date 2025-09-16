@@ -17,6 +17,8 @@ public class GameInputHandler3D : MonoBehaviour
     public Action ActionCanceled;
     public ReactiveProperty<Collider> HoveredCollider;
     public ReactiveProperty<Vector3> WorldMousePosition;
+    [Inject] private GameNetworkCommandGateway _gateway;
+    private bool _isMyTurn = true;
 
     // Перераспользуем список результатов UI Raycast, чтобы снизить аллокации
     private readonly System.Collections.Generic.List<RaycastResult> _uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
@@ -38,6 +40,8 @@ public class GameInputHandler3D : MonoBehaviour
         _inputActions.Grid.MousePosition.performed += OnMouseMoved;
         _inputActions.Grid.Select.performed += OnSelectPerformed;
         _inputActions.Grid.Action.performed += OnActionPerformed;
+        if (_gateway != null)
+            _gateway.TurnOwnerChanged += OnTurnOwnerChanged;
     }
 
     private void OnDisable()
@@ -46,10 +50,19 @@ public class GameInputHandler3D : MonoBehaviour
         _inputActions.Grid.Select.performed -= OnSelectPerformed;
         _inputActions.Grid.Action.performed -= OnActionPerformed;
         _inputActions.Disable();
+        if (_gateway != null)
+            _gateway.TurnOwnerChanged -= OnTurnOwnerChanged;
+    }
+
+    private void OnTurnOwnerChanged(ulong ownerClientId)
+    {
+        var myId = Unity.Netcode.NetworkManager.Singleton != null ? Unity.Netcode.NetworkManager.Singleton.LocalClientId : 0UL;
+        _isMyTurn = (ownerClientId == myId) || (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsServer);
     }
 
     private void OnMouseMoved(InputAction.CallbackContext ctx)
     {
+        if (!_isMyTurn) return;
         if (GetHit(out RaycastHit raycastHit,out Ray ray))
         {
             if(raycastHit.collider != HoveredCollider.Value)
@@ -72,6 +85,7 @@ public class GameInputHandler3D : MonoBehaviour
     
     private void OnSelectPerformed(InputAction.CallbackContext ctx)
     {
+        if (!_isMyTurn) return;
         // Сначала проверяем, не кликнули ли по UI
         if (IsPointerOverUI())
             return; // Если кликнули по UI - игнорируем игровую логику
@@ -85,6 +99,7 @@ public class GameInputHandler3D : MonoBehaviour
     
     private void OnActionPerformed(InputAction.CallbackContext ctx)
     {
+        if (!_isMyTurn) return;
         // Сначала проверяем, не кликнули ли по UI
         if (IsPointerOverUI())
             return; // Если кликнули по UI - игнорируем игровую логику

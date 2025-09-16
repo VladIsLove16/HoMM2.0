@@ -18,9 +18,10 @@ public class NetworkUnitCommandService
         if (unit == null || gridRoute == null || gridRoute.Count == 0)
             return;
 
-        if (!_gateway.TrySendMoveRequest(unit.Position.Value, new List<Vector2Int>(gridRoute)))
+        var or = _gateway.TrySendMoveRequest(unit.Position.Value, new List<Vector2Int>(gridRoute));
+        if(!or.IsSuccess)
         {
-            Debug.LogWarning("[NetworkUnitCommandService] Failed to send move request: gateway not ready or not spawned yet.");
+            Debug.LogWarning("[NetworkUnitCommandService] Failed to send move request: " + or.Message);
         }
     }
 

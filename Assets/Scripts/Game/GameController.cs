@@ -45,7 +45,7 @@ public class GameController : NetworkBehaviour, IInitializable
 
     private void Start()
     {
-        Debug.Log("[GameController] Start called");
+        Debug.Log("[GameController] Start called. Flow: " + _startupFlow.ToString());
         _startupFlow.Run(); // теперь запускается напрямую
     }
 
@@ -67,7 +67,7 @@ public class GameController : NetworkBehaviour, IInitializable
         foreach (var content in unitContentEntrySO.contents)
         {
             var spawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, content.isPlayer);
-            _unitSpawner.SpawnUnit(spawnParams);
+            _gameModel.SpawnUnit(spawnParams);
         }
     }
 
@@ -88,7 +88,7 @@ public class GameController : NetworkBehaviour, IInitializable
 
     public void InitTurnSystem()
     {
-        Debug.Log("[GameController] InitTurnSystem");
+        Debug.Log("[GameController] InitTurnSystem with units count in model: " + _gameModel.GetUnits().Count);
         _turnSystem.ClearUnits();
         foreach (var unit in _gameModel.GetUnits())
             _turnSystem.AddCombatUnit(unit);

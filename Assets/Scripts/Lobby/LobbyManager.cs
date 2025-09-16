@@ -14,15 +14,20 @@ public class LobbyManager : NetworkBehaviour
     [Header("Game Configuration")]
     [SerializeField] private GridContentEntrySO[] _availableConfigs;
     [SerializeField] private GameMode GameMode;
+    [SerializeField] private int _gridWidth = 10;
+    [SerializeField] private int _gridHeight = 10;
     
     private NetworkList<LobbyPlayerData> _lobbyPlayers;
     private NetworkVariable<int> _selectedConfigIndex = new NetworkVariable<int>(0);
+    private NetworkVariable<int> _selectedGridWidth = new NetworkVariable<int>(10);
+    private NetworkVariable<int> _selectedGridHeight = new NetworkVariable<int>(10);
     private NetworkVariable<bool> _gameStarted = new NetworkVariable<bool>(false);
     
     // События для UI
     public System.Action<LobbyPlayerData[]> OnPlayersListChanged;
     public System.Action<int> OnConfigChanged;
     public System.Action<bool> OnGameStarted;
+    public System.Action<int,int> OnGridSizeChanged;
     public System.Action OnHostStarted;
     public System.Action OnClientStarted;
     
@@ -36,6 +41,8 @@ public class LobbyManager : NetworkBehaviour
         // Подписываемся на изменения
         _lobbyPlayers.OnListChanged += OnNetworkPlayersListChanged;
         _selectedConfigIndex.OnValueChanged += OnNetworkConfigChanged;
+        _selectedGridWidth.OnValueChanged += (prev, cur) => OnGridSizeChanged?.Invoke(_selectedGridWidth.Value, _selectedGridHeight.Value);
+        _selectedGridHeight.OnValueChanged += (prev, cur) => OnGridSizeChanged?.Invoke(_selectedGridWidth.Value, _selectedGridHeight.Value);
         _gameStarted.OnValueChanged += OnNetworkGameStartedChanged;
         
         // Добавляем текущего игрока в лобби
@@ -128,6 +135,16 @@ public class LobbyManager : NetworkBehaviour
             }
         }
     }
+
+    public void SetGridSize(int width, int height)
+    {
+        if (IsHost)
+        {
+            _gridWidth = Mathf.Max(2, width);
+            _gridHeight = Mathf.Max(2, height);
+            ChangeGridSizeServerRpc(_gridWidth, _gridHeight);
+        }
+    }
     
     [ServerRpc(RequireOwnership = false)]
     private void ChangeConfigServerRpc(int configIndex)
@@ -135,6 +152,16 @@ public class LobbyManager : NetworkBehaviour
         if (IsHost && configIndex >= 0 && configIndex < _availableConfigs.Length)
         {
             _selectedConfigIndex.Value = configIndex;
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeGridSizeServerRpc(int width, int height)
+    {
+        if (IsHost)
+        {
+            _selectedGridWidth.Value = Mathf.Max(2, width);
+            _selectedGridHeight.Value = Mathf.Max(2, height);
         }
     }
     
@@ -176,10 +203,25 @@ public class LobbyManager : NetworkBehaviour
         if (SceneTransitionDataService.Instance != null)
         {
             SceneTransitionDataService.Instance.SetSelectedConfiguration(_selectedConfigIndex.Value);
+            SceneTransitionDataService.Instance.Width = _selectedGridWidth.Value;
+            SceneTransitionDataService.Instance.Height = _selectedGridHeight.Value;
+            // TODO: SceneTransitionDataService should expose SetGridSize. For now, rely on NetworkVariables.
         }
         
         // Загружаем игровую сцену
         NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+        // Доп. сценарий: отправка сетки и юнитов ещё при переходе на сцену
+        // Хост, зная настройки лобби, может инициировать ранний сетап, чтобы клиенты вошли уже с данными
+        TrySendEarlyBattleSetup();
+    }
+
+    private void TrySendEarlyBattleSetup()
+    {
+        if (!IsHost) return;
+        var gateway = FindObjectOfType<GameNetworkCommandGateway>();
+        if (gateway == null) return;
+        gateway.TrySendBattleSetup();
     }
     
     public override void OnNetworkDespawn()
@@ -200,6 +242,11 @@ public class LobbyManager : NetworkBehaviour
             return _availableConfigs[_selectedConfigIndex.Value];
         }
         return null;
+    }
+
+    public (int width, int height) GetSelectedGridSize()
+    {
+        return (_selectedGridWidth.Value, _selectedGridHeight.Value);
     }
     
     /// <summary>
