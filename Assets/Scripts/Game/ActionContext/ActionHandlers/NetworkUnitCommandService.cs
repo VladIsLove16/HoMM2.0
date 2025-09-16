@@ -23,12 +23,23 @@ public class NetworkUnitCommandService
         {
             Debug.LogWarning("[NetworkUnitCommandService] Failed to send move request: " + or.Message);
         }
+
+        var or2 = _gateway.TrySendEndTurnRequest();
+        if(!or.IsSuccess)
+        {
+            Debug.LogWarning("[NetworkUnitCommandService] Failed to send move request: " + or.Message);
+        }
     }
 
     public void SendAttack(UnitModel attacker, Vector2Int targetCell)
     {
         if (attacker == null) return;
         if (!_gateway.TrySendAttackRequest(attacker.Position.Value, targetCell))
+        {
+            Debug.LogWarning("[NetworkUnitCommandService] Failed to send attack request: gateway not ready or not spawned yet.");
+        }
+        var or2 = _gateway.TrySendEndTurnRequest();
+        if(!or2.IsSuccess)
         {
             Debug.LogWarning("[NetworkUnitCommandService] Failed to send attack request: gateway not ready or not spawned yet.");
         }

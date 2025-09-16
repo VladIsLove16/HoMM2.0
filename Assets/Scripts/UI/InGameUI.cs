@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
@@ -10,6 +11,8 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private Animator turnNumberAnimator;
     [SerializeField] private Animator battleStateAnimator;
     [SerializeField] private TextMeshProUGUI battleState;
+    [SerializeField] private TextMeshProUGUI isMyTurnText;
+    [Inject] private GameNetworkCommandGateway gameNetworkCommandGateway;
     private int currentTurn;
     private bool _subscribed = false;
     [Inject]
@@ -17,6 +20,12 @@ public class InGameUI : MonoBehaviour
     {
         _turnSystem.OnBattleStateChanged += HandleBattleStateChanged;
         _subscribed = true;
+        _turnSystem.ActiveObject.Subscribe(OngameNetworkCommandGateway_TurnOwnerChanged);
+    }
+    private void OngameNetworkCommandGateway_TurnOwnerChanged(ICombatObject combatObject)
+    {
+        isMyTurnText.text = _turnSystem.IsMyTurn ? "Your Turn" : "Wait for player to move";
+        return;
     }
 
     private void HandleBattleStateChanged(BattleState state)

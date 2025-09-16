@@ -38,7 +38,6 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     [Inject] private ClientGameRpcService _clientService;
     public event System.Action<ClientStage> ClientStageChanged;
     public event System.Action<ServerStage, int, int> ServerStageChanged; // (stage, readyCount, total)
-    public event System.Action<ulong> TurnOwnerChanged; // UI/клиентам
     private ClientStage _clientStage;
     private ServerStage _serverStage;
     private readonly HashSet<UnitModel> _dirtyUnits = new HashSet<UnitModel>();
@@ -51,7 +50,6 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     private int _stateVersion;
     private bool battleSettuped = false;
     private bool battleSettupSended = false;
-    private ulong _currentTurnOwnerClientId;
 
     private void OnEnable()
     {
@@ -72,8 +70,11 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         ClientStageChanged?.Invoke(_clientStage);
         ServerStageChanged += OnServerStageChanged;
         ClientStageChanged += OnClientStageChanged;
+        // Передаём флаг роли в контроллер
+        bool isHost = NetworkManager != null && NetworkManager.IsServer;
+        _gameController.SetIsHostFlag(isHost);
+        Debug.Log(" this is " + ( isHost ? " " : "not") + " host");
     }
-
     private void OnClientStageChanged(ClientStage stage)
     {
         Debug.Log("new client stage : " + stage);
@@ -88,8 +89,10 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         if (gridRoute == null || gridRoute.Count == 0) return new OperationResult(false, "gridRoute == null || gridRoute.Count == 0");
         if (NetworkManager.Singleton == null) return new OperationResult(false, "NetworkManager.Singleton == null");
-        // Ходить может только владелец текущего хода
-        if (_currentTurnOwnerClientId != NetworkManager.LocalClientId && !IsServer)
+        // Проверка права хода по цвету активного юнита (синий == хост)
+        var active = _turnSystem.ActiveObject.Value;
+        bool isHostLocal = NetworkManager.Singleton.IsServer || NetworkManager.LocalClientId == NetworkManager.ServerClientId;
+        if (active != null && active.IsBlueTeam != isHostLocal)
             return new OperationResult(false, "Not your turn");
 
         // На хосте можно применить напрямую без RPC
@@ -97,7 +100,6 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         {
             _serverService.ApplyServerMove(startCell, gridRoute);
             MoveAcknowledgeClientRpc(startCell, gridRoute.ToArray());
-            AdvanceTurnOnServer();
             return new OperationResult(true, ""); ;
         }
 
@@ -113,11 +115,15 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     private void MoveRequestServerRpc(Vector2Int startCell, Vector2Int[] gridRoute, ServerRpcParams rpcParams = default)
     {
         if (gridRoute == null || gridRoute.Length == 0) return;
-        // Проверяем право хода на сервере
-        if (_currentTurnOwnerClientId != rpcParams.Receive.SenderClientId) return;
+        // Проверяем право хода на сервере по цвету активного юнита
+        var active = _turnSystem.ActiveObject.Value;
+        if (active != null)
+        {
+            bool senderIsHost = rpcParams.Receive.SenderClientId == NetworkManager.ServerClientId;
+            if (active.IsBlueTeam != senderIsHost) return;
+        }
         _serverService.ApplyServerMove(startCell, new List<Vector2Int>(gridRoute));
         MoveAcknowledgeClientRpc(startCell, gridRoute);
-        AdvanceTurnOnServer();
     }
 
     [ClientRpc]
@@ -130,13 +136,14 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     public bool TrySendAttackRequest(Vector2Int attackerCell, Vector2Int targetCell)
     {
         if (NetworkManager.Singleton == null) return false;
-        if (_currentTurnOwnerClientId != NetworkManager.LocalClientId && !IsServer) return false;
+        var active = _turnSystem.ActiveObject.Value;
+        bool isHostLocal = NetworkManager.Singleton.IsServer || NetworkManager.LocalClientId == NetworkManager.ServerClientId;
+        if (active != null && active.IsBlueTeam != isHostLocal) return false;
 
         if (NetworkManager.Singleton.IsServer)
         {
             _serverService.ApplyServerAttack(attackerCell, targetCell);
             AttackAcknowledgeClientRpc(attackerCell, targetCell);
-            AdvanceTurnOnServer();
             return true;
         }
 
@@ -153,10 +160,14 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void AttackRequestServerRpc(Vector2Int attackerCell, Vector2Int targetCell, ServerRpcParams rpcParams = default)
     {
-        if (_currentTurnOwnerClientId != rpcParams.Receive.SenderClientId) return;
+        var active = _turnSystem.ActiveObject.Value;
+        if (active != null)
+        {
+            bool senderIsHost = rpcParams.Receive.SenderClientId == NetworkManager.ServerClientId;
+            if (active.IsBlueTeam != senderIsHost) return;
+        }
         _serverService.ApplyServerAttack(attackerCell, targetCell);
         AttackAcknowledgeClientRpc(attackerCell, targetCell);
-        AdvanceTurnOnServer();
     }
 
     [ClientRpc]
@@ -232,6 +243,8 @@ public class GameNetworkCommandGateway : NetworkBehaviour
 
         _clientsGridReady.Clear();
         _clientsUnitsReady.Clear();
+
+
         Debug.Log("battle settuped");
         battleSettuped = true;
     }
@@ -281,7 +294,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
 
         //создаём данные для отправки клиентам.
         SetupBattleForClients();
-
+        // Хост/клиент id не требуются для логики ходов
         //отправляем всем клиентам данные об игре.
         SendBattleSetupClientRpc(_pendingWidth, _pendingHeight, _pendingUnits);
     }
@@ -430,13 +443,14 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         var sender = rpcParams.Receive.SenderClientId;
         _clientsUnitsReady.Add(sender);
-        ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
-        if (_clientsUnitsReady.Count >= NetworkManager.ConnectedClientsIds.Count)
-        {
-            _serverStage = ServerStage.BattleStarted;
-            ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
-            StartBattleForAll();
-        }
+        StartBattleForAll();
+        //ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
+        //if (_clientsUnitsReady.Count >= NetworkManager.ConnectedClientsIds.Count)
+        //{
+        //    _serverStage = ServerStage.BattleStarted;
+        //    ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
+        //    StartBattleForAll();
+        //}
     }
 
     public void StartBattleForAll()
@@ -445,45 +459,29 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         _gameController.RunBattle();
         // И на клиентах
         StartBattleClientRpc();
-        // Инициализируем первый ход: хост
-        if (IsServer && NetworkManager != null)
-        {
-            _currentTurnOwnerClientId = NetworkManager.ServerClientId;
-            BroadcastTurnOwner();
-        }
+        // Ход определяется локально по цвету активного юнита (синий == хост)
     }
 
-    private void BroadcastTurnOwner()
+    public OperationResult TrySendEndTurnRequest()
     {
-        SetTurnOwnerClientRpc(_currentTurnOwnerClientId);
-        TurnOwnerChanged?.Invoke(_currentTurnOwnerClientId);
-    }
+        if (NetworkManager == null) return new OperationResult(false, "NetworkManager == null");
+        EndTurnServerRpc();
+        return new OperationResult(true);
 
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void EndTurnServerRpc()
+    {
+        _turnSystem.EndTurn();
+        EndTurnClientRpc();
+    }
     [ClientRpc]
-    private void SetTurnOwnerClientRpc(ulong ownerClientId)
+    private void EndTurnClientRpc()
     {
-        _currentTurnOwnerClientId = ownerClientId;
-        TurnOwnerChanged?.Invoke(ownerClientId);
+        // На хосте ход уже завершён на сервере
+        if (IsServer) return;
+        _turnSystem.EndTurn();
     }
-
-    private void AdvanceTurnOnServer()
-    {
-        if (!IsServer || NetworkManager == null) return;
-        // Простой переключатель между хостом и первым клиентом (2 игрока)
-        ulong hostId = NetworkManager.ServerClientId;
-        ulong nextId = hostId;
-        foreach (var id in NetworkManager.ConnectedClientsIds)
-        {
-            if (id != hostId)
-            {
-                nextId = (_currentTurnOwnerClientId == hostId) ? id : hostId;
-                break;
-            }
-        }
-        _currentTurnOwnerClientId = nextId;
-        BroadcastTurnOwner();
-    }
-    // Удалено: периодическая синхронизация состояний. Работаем только командами.
 }
 
 

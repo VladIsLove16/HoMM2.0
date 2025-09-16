@@ -8,6 +8,18 @@ public class TurnSystem
     public List<ICombatObject> CombatUnits { get; } = new List<ICombatObject>();
     public ReactiveProperty<int> TurnNumber = new(0);
     public ReactiveProperty<ICombatObject> ActiveObject = new();
+    // Локальная сторона: синий == хост. Используется для определения "мой ход"
+    public bool MyIsBlueTeam { get; private set; }
+    public Material MyTeamMaterial { get; private set; }
+    public bool IsMyTurn
+    {
+        get
+        {
+            var active = ActiveObject != null ? ActiveObject.Value : null;
+            if (active == null) return false;
+            return active.IsBlueTeam == MyIsBlueTeam;
+        }
+    }
     int turnTowards = 3;
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
@@ -43,6 +55,11 @@ public class TurnSystem
                 _lastNotifiedBattleState = current;
             }
         }
+    }
+    public void ConfigureLocalSide(bool isHostBlueTeam, Material myTeamMaterial = null)
+    {
+        MyIsBlueTeam = isHostBlueTeam;
+        MyTeamMaterial = myTeamMaterial;
     }
     public virtual void AddCombatUnit(ICombatObject unit)
     {

@@ -20,6 +20,8 @@ public class GameController : NetworkBehaviour, IInitializable
     private IGameStartupFlow _startupFlow;
     private IUnitSpawner _unitSpawner;
     private IBattleRunner _battleRunner;
+    private bool _isHost;
+    [SerializeField] private Material _hostBlueTeamMaterial;
 
     [Inject]
     public void Construct(
@@ -41,6 +43,11 @@ public class GameController : NetworkBehaviour, IInitializable
     public void Initialize()
     {
         Debug.Log("[GameController] Initialized with configuration provider");
+    }
+
+    public void SetIsHostFlag(bool isHost)
+    {
+        _isHost = isHost;
     }
 
     private void Start()
@@ -95,6 +102,9 @@ public class GameController : NetworkBehaviour, IInitializable
 
         _gameModel.UnitSpawned += p => _turnSystem.AddCombatUnit(p.UnitModel);
         _gameModel.UnitDied += p => _turnSystem.RemoveCombatUnit(p.UnitModel);
+
+        // Синий цвет закреплён за хостом
+        _turnSystem.ConfigureLocalSide(isHostBlueTeam: _isHost, myTeamMaterial: _hostBlueTeamMaterial);
     }
 
     public void RunBattle()
@@ -171,6 +181,7 @@ public class NetworkBattleRunner : IBattleRunner
         if (NetworkManager.Singleton.ConnectedClientsIds.Count >= 2
             || _config.AcceptStartingBattleWithoutClients)
         {
+            Debug.Log("_combatSystem.RunBattle");
             _combatSystem.RunBattle();
         }
         else

@@ -98,6 +98,14 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
             RemoveState(c, state);
         }
     }
+    public void ClearAllStates()
+    {
+        var keys = _cellStates.Keys.ToList();
+        foreach (var k in keys)
+        {
+            RemoveStates(k);
+        }
+    }
     public void AddState(Vector2Int coords, CellState state)
     {
         if (TryGetCellView(coords, out CellView cellView))

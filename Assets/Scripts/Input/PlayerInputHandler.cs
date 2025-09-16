@@ -86,13 +86,11 @@ public partial class PlayerInputHandler
             //if (_movementSystem.HasLineOfSight(activeObject.Position, cell))
             //{
             _rangedAttackHandler.Execute(context);
-            _turnSystem.EndTurn();
             //}
         }
         else
         {
             _moveActionHandler.Execute(context);
-            _turnSystem.EndTurn();
         }
             
     }

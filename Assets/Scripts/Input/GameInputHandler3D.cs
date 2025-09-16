@@ -19,6 +19,8 @@ public class GameInputHandler3D : MonoBehaviour
     public ReactiveProperty<Vector3> WorldMousePosition;
     [Inject] private GameNetworkCommandGateway _gateway;
     private bool _isMyTurn = true;
+    [Inject] private TurnSystem _turnSystem;
+    [Inject(Optional = true)] private PerCellGridRenderer _gridRenderer;
 
     // Перераспользуем список результатов UI Raycast, чтобы снизить аллокации
     private readonly System.Collections.Generic.List<RaycastResult> _uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
@@ -40,8 +42,8 @@ public class GameInputHandler3D : MonoBehaviour
         _inputActions.Grid.MousePosition.performed += OnMouseMoved;
         _inputActions.Grid.Select.performed += OnSelectPerformed;
         _inputActions.Grid.Action.performed += OnActionPerformed;
-        if (_gateway != null)
-            _gateway.TurnOwnerChanged += OnTurnOwnerChanged;
+        if (_turnSystem != null)
+            _turnSystem.ActiveObject.Subscribe(_ => RefreshTurn()).AddTo(this);
     }
 
     private void OnDisable()
@@ -50,14 +52,16 @@ public class GameInputHandler3D : MonoBehaviour
         _inputActions.Grid.Select.performed -= OnSelectPerformed;
         _inputActions.Grid.Action.performed -= OnActionPerformed;
         _inputActions.Disable();
-        if (_gateway != null)
-            _gateway.TurnOwnerChanged -= OnTurnOwnerChanged;
+        // Reactive subscription disposed by AddTo(this)
     }
 
-    private void OnTurnOwnerChanged(ulong ownerClientId)
+    private void RefreshTurn()
     {
-        var myId = Unity.Netcode.NetworkManager.Singleton != null ? Unity.Netcode.NetworkManager.Singleton.LocalClientId : 0UL;
-        _isMyTurn = (ownerClientId == myId) || (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsServer);
+        _isMyTurn = _turnSystem.IsMyTurn;
+        if (!_isMyTurn && _gridRenderer != null)
+        {
+            _gridRenderer.ClearAllStates();
+        }
     }
 
     private void OnMouseMoved(InputAction.CallbackContext ctx)

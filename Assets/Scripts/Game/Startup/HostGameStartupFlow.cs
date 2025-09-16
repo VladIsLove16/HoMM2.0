@@ -24,8 +24,6 @@ public class HostGameStartupFlow : IGameStartupFlow
         _controller.CreateGridContentFromConfiguration();
         // Инициализируем локальный TurnSystem
         _controller.InitTurnSystem();
-        // Старт боя локально на хосте
-        _controller.RunBattle();
     }
 }
 
