@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using TMPro;
 using UniRx;
+using UnityEngine.UI;
 
 namespace Tests.PlayMode.UI
 {

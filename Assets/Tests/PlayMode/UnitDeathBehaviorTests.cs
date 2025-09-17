@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using UniRx;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Zenject;
@@ -150,7 +151,7 @@ namespace Tests.PlayMode
             // Arrange
             var onDeathInvoked = false;
             var onHitInvoked = false;
-            
+
             _unitViewModel.OnDeath.Subscribe(_ => onDeathInvoked = true);
             _unitViewModel.OnHit.Subscribe(_ => onHitInvoked = true);
 

@@ -43,7 +43,14 @@ public class UnitDefinitionSO : ScriptableObject
     public GameObject UnitViewPrefab;
     
     [Header("Unit Appearance")]
+    [Tooltip("Иконка по умолчанию (обычное представление)")]
     public Sprite UnitIcon;
+    [Tooltip("Иконка при наведении (обычное представление)")]
+    public Sprite UnitIconHovered;
+    [Tooltip("Иконка в хуманизированном представлении")]
+    public Sprite HumanizedIcon;
+    [Tooltip("Иконка в хуманизированном представлении при наведении")]
+    public Sprite HumanizedIconHovered;
     public string Name;
     
     [SerializeField] private MaterialProvider _materialProvider = new MaterialProvider();
@@ -52,11 +59,25 @@ public class UnitDefinitionSO : ScriptableObject
     /// model
     /// </summary>
     public UnitStats Stats;
+    
+    [Header("Unit Data for Book")]
+    [TextArea(2, 6)]
+    [SerializeField] private string description;
+    
+    [System.Serializable]
+    public class Characteristic
+    {
+        public string Key;
+        public string Value;
+    }
+    [SerializeField] private List<Characteristic> characteristics = new List<Characteristic>();
     [SerializeField] private List<StatusEffectData> startingEffects = new List<StatusEffectData>();
     [SerializeField] private List<StatusEffectData> invulnerableEffects = new List<StatusEffectData>();
     
     public IReadOnlyList<StatusEffectData> StartingEffects => startingEffects;
     public IReadOnlyList<StatusEffectData> InvulnerableEffects => invulnerableEffects;
+    public string Description => description;
+    public IReadOnlyList<Characteristic> Characteristics => characteristics;
     
     // Методы для получения материалов (для тестирования)
     public Material GetBlueTeamMaterial() => _materialProvider.GetBlueTeamMaterial();

@@ -1,10 +1,9 @@
-﻿// GameModel.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
-using UnityEngine;
 using Zenject;
+using Vector2Int = UnityEngine.Vector2Int;
+using Debug = UnityEngine.Debug;
 
 public class GameModel
 {

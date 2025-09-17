@@ -18,6 +18,11 @@ namespace Tests.PlayMode.GridContents.Units
         private UnitStats _baseStats;
         private MaterialProvider _materialProvider;
 
+        private int baseX = 5;
+
+        private int baseY = 3;
+        private int baseAmount = 3;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
@@ -35,7 +40,7 @@ namespace Tests.PlayMode.GridContents.Units
             _baseStats.InvulnerableEffects = new List<StatusEffectType>();
 
             // Создаем модель юнита
-            _unitModel = new UnitModel(_baseStats, UnitType.Archer, 5, 3, 10, true);
+            _unitModel = new UnitModel(_baseStats, UnitType.Archer, baseX, baseY, baseAmount, true);
 
             
             // Создаем ViewModel
@@ -143,7 +148,7 @@ namespace Tests.PlayMode.GridContents.Units
             var route = new List<Vector2Int> { new Vector2Int(1, 1), new Vector2Int(2, 2), new Vector2Int(3, 3) };
             var movedEventInvoked = false;
 
-            _unitModel.Moved += (movedRoute) => 
+            _unitModel.MovedByRoute += (movedRoute) => 
             {
                 movedEventInvoked = true;
                 Assert.That(movedRoute, Is.EqualTo(route));
@@ -467,7 +472,7 @@ namespace Tests.PlayMode.GridContents.Units
                 "Health ratio should be updated correctly after partial damage");
             Assert.That(actualRatio, Is.EqualTo(0.7f), 
                 "Health ratio should be 0.7 (70%) after 30 damage to 100 health");
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(TestAmount), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(baseAmount), 
                 "Unit amount should remain the same after non-lethal damage");
         }
 
@@ -475,7 +480,7 @@ namespace Tests.PlayMode.GridContents.Units
         public IEnumerator UnitViewUI_HealthRatio_WithExactKill_UpdatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var damageContext = new DamageContext(_unitModel.ModifiedStats.MaxHealth , DamageType.physical, null);
             var initialAmount = _unitModel.Amount.Value;
 
             // Act - Убиваем точно одного юнита

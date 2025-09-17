@@ -120,6 +120,7 @@ namespace Tests.PlayMode
             var healthImage = _healthBar.GetComponent<Image>();
             Assert.That(healthImage.fillAmount, Is.EqualTo(1.0f), 
                 "Health bar should show full health initially");
+            yield return new WaitForSeconds(0.1f);
         }
 
         [UnityTest]
@@ -165,6 +166,7 @@ namespace Tests.PlayMode
             // Assert - Текст количества должен показывать правильное количество
             Assert.That(_amountText.text, Is.EqualTo(_unitModel.Amount.Value.ToString()), 
                 "Amount text should show correct initial amount");
+            yield return new WaitForSeconds(0.1f);
         }
 
         [UnityTest]

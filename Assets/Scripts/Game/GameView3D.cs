@@ -17,14 +17,12 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private Dictionary<UnitModel, UnitView3D> _models = new();
     private GameViewModel _gameVM;
-    IGridCellRenderer _renderer;
     [Inject]
-    public void Construct(GameViewModel gameVM, IGridCellRenderer renderer, UnitViewFactory unitViewFactory)
+    public void Construct(GameViewModel gameVM, UnitViewFactory unitViewFactory)
     {
         Debug.Log("GameView3D inject");
 
         _gameVM = gameVM;
-        _renderer = renderer;
         _factory = unitViewFactory;
 
         _gameVM.UnitSpawned += OnUnitSpawned;

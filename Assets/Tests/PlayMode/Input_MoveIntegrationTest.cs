@@ -31,8 +31,8 @@ public class Input_MoveIntegrationTest : ZenjectIntegrationTestFixture
 
         var unitStats = ScriptableObject.CreateInstance<UnitStats>();
         unitStats.MoveSpeed = 3;
-        var spawn = new UnitSpawnParams(UnitType.Archer, 1, 1, 1, true);
-        Assert.True(_model.SpawnUnit(spawn).Success);
+        var spawn = new UnitSpawnParams( 1, 1, UnitType.Archer, 1, true);
+        Assert.True(_model.SpawnUnit(spawn).IsSuccess);
 
         yield return null;
     }

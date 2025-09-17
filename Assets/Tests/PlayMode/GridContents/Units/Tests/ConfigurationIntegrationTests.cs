@@ -13,7 +13,7 @@ namespace Tests.PlayMode
     {
         private SceneTransitionDataService _dataService;
         private GameController _gameController;
-        private IGameConfigurationProvider _configProvider;
+        private GameSceneConfigurationProvider _configProvider;
         
         [SetUp]
         public void Setup()
@@ -95,7 +95,6 @@ namespace Tests.PlayMode
             // Act
             yield return new WaitForEndOfFrame();
             
-            // Simulate grid content creation
             if (_gameController != null)
             {
                 // Use reflection to call private method for testing
@@ -115,7 +114,7 @@ namespace Tests.PlayMode
             // Создаем SceneTransitionDataService
             var dataServiceGO = new GameObject("TestDataService");
             _dataService = dataServiceGO.AddComponent<SceneTransitionDataService>();
-            
+                
             // Создаем GameController
             var gameControllerGO = new GameObject("TestGameController");
             _gameController = gameControllerGO.AddComponent<GameController>();
