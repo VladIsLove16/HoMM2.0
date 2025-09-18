@@ -10,6 +10,7 @@ public class GameViewModel : IDisposable
 {
     private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
+    private readonly CommandService _commandService;
 
     private Vector2Int? _selectedCell;
 
@@ -32,10 +33,11 @@ public class GameViewModel : IDisposable
     [Inject] private UnitViewModelFactory _unitViewModelsFactory;
     [Inject] IWorldToCellProvider _worldToCellProvider;
     [Inject] private IOverlayFacade _overlay;
-    public GameViewModel(GameModel model, MovementSystem movementSystem)
+    public GameViewModel(GameModel model, MovementSystem movementSystem, CommandService commandService)
     {
         _gameModel = model;
         _movementSystem = movementSystem;
+        _commandService = commandService;
 
         _gameModel.UnitSpawned += OnUnitSpawned;
         _gameModel.UnitDied += OnUnitDied;
@@ -141,20 +143,20 @@ public class GameViewModel : IDisposable
         }
     }
 
-    // Command execution methods - единственное место для выполнения команд из View
+    // Command execution methods - View -> ViewModel -> CommandService
     public void ExecuteMoveCommand(ulong unitId, List<Vector2Int> route)
     {
-        _gameModel.ExecuteMoveCommand(unitId, route);
+        _commandService.ExecuteMoveCommand(unitId, route);
     }
 
     public void ExecuteAttackCommand(ulong unitId, Vector2Int targetPosition)
     {
-        _gameModel.ExecuteAttackCommand(unitId, targetPosition);
+        _commandService.ExecuteAttackCommand(unitId, targetPosition);
     }
 
     public void ExecuteMoveThenAttackCommand(ulong unitId, List<Vector2Int> route, Vector2Int targetPosition)
     {
-        _gameModel.ExecuteMoveThenAttackCommand(unitId, route, targetPosition);
+        _commandService.ExecuteMoveThenAttackCommand(unitId, route, targetPosition);
     }
 
     public void OnGameViewObjectSelected(IGameViewObject gameViewObject)
@@ -228,7 +230,7 @@ public class GameViewModel : IDisposable
 }
 public class GameViewModelDebugger : GameViewModel
 {
-    GameViewModelDebugger(GameModel model, MovementSystem movementSystem) : base(model, movementSystem) {
+    GameViewModelDebugger(GameModel model, MovementSystem movementSystem, CommandService commandService) : base(model, movementSystem,commandService) {
         Debug.Log("GameViewModel is ready");
     }
     protected override void OnUnitSpawned(UnitModelCreatedParams @params)

@@ -9,7 +9,6 @@ public class Input_MoveIntegrationTest : ZenjectIntegrationTestFixture
 {
     private GameModel _model;
     private MovementSystem _movement;
-    private NetworkUnitCommandService _commandService;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -19,13 +18,11 @@ public class Input_MoveIntegrationTest : ZenjectIntegrationTestFixture
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<UnitModelFactory>().AsSingle();
         Container.Bind<GameModel>().AsSingle();
-        Container.Bind<NetworkUnitCommandService>().AsSingle();
 
         PostInstall();
 
         _movement = Container.Resolve<MovementSystem>();
         _model = Container.Resolve<GameModel>();
-        _commandService = Container.Resolve<NetworkUnitCommandService>();
 
         _model.InitializeGrid(5, 5);
 

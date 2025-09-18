@@ -14,19 +14,17 @@ public class GameModel
     private readonly UnitModelFactory _unitFactory;
     private readonly MovementSystem _movement;
     private readonly ActionHandlerFactory _actionHandlerFactory;
-    private readonly CommandService _commandService;
     protected GridXZ<GameCell> _grid;
     private UnitModelFactory unitModelFactory;
     private MovementSystem movementSystem;
     private ActionHandlerFactory actionHandlerFactory;
 
     [Inject]
-    public GameModel(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory, CommandService commandService)
+    public GameModel(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory)
     {
         _movement = movement;
         _unitFactory = factory;
         _actionHandlerFactory = actionHandlerFactory;
-        _commandService = commandService;
     }
 
     public virtual void InitializeGrid(int width, int height)
@@ -179,26 +177,11 @@ public class GameModel
         return _actionHandlerFactory.CreateMoveThenAttackHandler(unit);
     }
 
-    // Command execution methods - единственное место для выполнения команд
-    public void ExecuteMoveCommand(ulong unitId, List<Vector2Int> route)
-    {
-        _commandService.ExecuteMoveCommand(unitId, route);
-    }
-
-    public void ExecuteAttackCommand(ulong unitId, Vector2Int targetPosition)
-    {
-        _commandService.ExecuteAttackCommand(unitId, targetPosition);
-    }
-
-    public void ExecuteMoveThenAttackCommand(ulong unitId, List<Vector2Int> route, Vector2Int targetPosition)
-    {
-        _commandService.ExecuteMoveThenAttackCommand(unitId, route, targetPosition);
-    }
 }
 public class GameModelDebugger : GameModel
 {
-    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory, CommandService commandService) 
-        : base(factory, movement, actionHandlerFactory, commandService)
+    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory) 
+        : base(factory, movement, actionHandlerFactory)
     {
         Debug.Log("GameModel is ready");
     }

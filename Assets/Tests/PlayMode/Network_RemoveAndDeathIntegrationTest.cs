@@ -10,7 +10,7 @@ public class Network_RemoveAndDeathIntegrationTest
     {
         var go = new GameObject("TestRoot");
         GameNetworkCommandGateway gameNetworkCommandGateway = new();
-        var model = new GameModel(new UnitModelFactory(), new MovementSystem(), new ActionHandlerFactory(),new CommandService(new NetworkCommandExecutor(gameNetworkCommandGateway)));
+        var model = new GameModel(new UnitModelFactory(), new MovementSystem(), new ActionHandlerFactory());
         var turn = new TurnSystem();
 
         // init grid

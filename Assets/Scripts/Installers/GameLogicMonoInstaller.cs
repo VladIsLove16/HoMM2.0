@@ -2,9 +2,10 @@ using Game.Network;
 using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 using Zenject;
 public enum GridRenderStrategy { PerCell, Single }
 
@@ -97,7 +98,6 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<ClientGameRpcService>().AsSingle();
         Container.Bind<ServerGameRpcService>().AsSingle();
-        Container.Bind<NetworkUnitCommandService>().AsSingle();
         Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
         
         // Network services
@@ -120,7 +120,6 @@ public class GameLogicMonoInstaller : MonoInstaller
 
         // Выбор стратегии старта по роли/режиму в рантайме
         var roleProvider = Container.Instantiate<NetcodeSessionRoleProvider>();
-        Container.Bind<IGameModeProvider>().To<GameModeProvider>().AsSingle();
         switch (roleProvider.CurrentRole)
         {
             case SessionRole.Local:
@@ -145,7 +144,16 @@ public class GameLogicMonoInstaller : MonoInstaller
     private void BindConfigurationProviders()
     {
         Container.Bind<SceneTransitionDataService>().FromMethod(_ => SceneTransitionDataService.Instance).AsSingle();
+        Container.Bind<IGameModeProvider>().FromResolve().AsSingle();
         Container.Bind<IBattleEntryProvider>().To<GameSceneConfigurationProvider>().AsSingle();
+
+        // Configure command execution services based on current game mode
+        var mode = SceneTransitionDataService.Instance.CurrentGameMode;
+        if (mode == GameMode.SinglePlayer)
+            Container.Bind<ICommandExecutor>().To<LocalCommandExecutor>().AsSingle();
+        else
+            Container.Bind<ICommandExecutor>().To<NetworkCommandExecutor>().AsSingle();
+        Container.Bind<CommandService>().AsSingle();
     }
 
     private void BindGridRenderer()
