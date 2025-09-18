@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Tests.PlayMode
 {
-    public class UnitDeathBehaviorTests : ZenjectIntegrationTestFixture
+    public class UnitDeathBehaviorTests
     {
         private UnitModel _unitModel;
         private UnitViewModel _unitViewModel;

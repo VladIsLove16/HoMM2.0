@@ -9,7 +9,8 @@ public class Network_RemoveAndDeathIntegrationTest
     public IEnumerator Unit_Death_Removes_View_And_TurnSystem_Entry()
     {
         var go = new GameObject("TestRoot");
-        var model = new GameModel(new UnitModelFactory(), new MovementSystem());
+        GameNetworkCommandGateway gameNetworkCommandGateway = new();
+        var model = new GameModel(new UnitModelFactory(), new MovementSystem(), new ActionHandlerFactory(),new CommandService(new NetworkCommandExecutor(gameNetworkCommandGateway)));
         var turn = new TurnSystem();
 
         // init grid

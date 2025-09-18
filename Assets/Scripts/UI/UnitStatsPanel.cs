@@ -21,18 +21,26 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     [SerializeField] Vector3 showOffset;
     [SerializeField] Vector3 screenEdgeOffset;
 
-    [Inject] GameView3D _gameView;
+    // Removed direct GameView3D dependency - should work through GameViewModel events
     private UnitStatsViewModel _vm;
     private readonly List<Image> _statusEffectIcons = new();
     private CompositeDisposable _disposables = new();
     [Inject] private List<StatusEffectData> statusEffectDatas;
+    [Inject] private GameViewModel _gameViewModel;
     private Dictionary<string, StatusEffectData> _statusEffectDict;
     private List<StatusEffectViewModel> _statusEffectViewModels;
 
     private void Start()
     {
         _statusEffectDict = statusEffectDatas.ToDictionary(se => se.name, se => se);
+        _gameViewModel.UnitStatsRequested += OnUnitStatsRequested;
         Hide();
+    }
+    
+    private void OnUnitStatsRequested(UnitModel unit)
+    {
+        var vm = new UnitStatsViewModel(unit);
+        Init(vm);
     }
 
     public void Init(UnitStatsViewModel vm)
@@ -82,11 +90,11 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     {
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition) + showOffset;
 
-        // Получение размеров панели
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         RectTransform panelRect = GetComponent<RectTransform>();
         Vector2 panelSize = panelRect.sizeDelta * canvas.scaleFactor;
 
-        // Ограничение позиции в пределах экрана
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         float clampedX = Mathf.Clamp(screenPos.x, panelSize.x / 2 + screenEdgeOffset.x, Screen.width - panelSize.x / 2 - screenEdgeOffset.x);
         float clampedY = Mathf.Clamp(screenPos.y, panelSize.y / 2 + screenEdgeOffset.y, Screen.height - panelSize.y / 2 - screenEdgeOffset.y);
 
@@ -97,9 +105,8 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     public void Show()
     {
         gameObject.SetActive(true); 
-        _gameView.TryGetView(_vm.Model, out var view);
-        Vector3 worldPos = view.transform.position;
-        Show(worldPos);
+        // Position should be set by the caller or through GameViewModel events
+        Show(Vector3.zero); // Default position
     }
     [ContextMenu("Hide")]
     public void Hide()
@@ -111,6 +118,10 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
     public void Dispose()
     {
+        if (_gameViewModel != null)
+        {
+            _gameViewModel.UnitStatsRequested -= OnUnitStatsRequested;
+        }
         _vm?.Dispose();
         _disposables.Dispose();
     }

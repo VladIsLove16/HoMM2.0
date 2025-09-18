@@ -17,6 +17,7 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private Dictionary<UnitModel, UnitView3D> _models = new();
     private GameViewModel _gameVM;
+    
     [Inject]
     public void Construct(GameViewModel gameVM, UnitViewFactory unitViewFactory)
     {
@@ -30,6 +31,8 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
         _gameVM.UnitAttacked += OnUnitAttacked;
         _gameVM.UnitHit += OnUnitHit;
         _gameVM.UnitDied += OnUnitDied;
+        _gameVM.ActionPreviewChanged += OnActionPreviewChanged;
+        _gameVM.CellHovered += OnCellHovered;
     }
 
     private void OnUnitMovedByRoute(IViewModel viewModel, List<Vector3> route)
@@ -79,6 +82,58 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
             {
                 view.HandleDeath();
             }
+        }
+    }
+
+    // MVVM input handling methods - работа только с коллайдерами и координатами
+    public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
+    {
+        // Подсвечиваем объект при наведении, если нужно
+        if (gameViewObject is IHoverable hoverable)
+        {
+            hoverable.Hover();
+        }
+        
+        // Передаем координаты в ViewModel для обработки
+        _gameVM?.OnGameViewObjectHovered(gameViewObject);
+    }
+
+    public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
+    {
+        // Передаем координаты в ViewModel для обработки
+        _gameVM?.OnGameViewObjectSelected(gameViewObject);
+    }
+
+    public void HandleActionPerformed(IGameViewObject gameViewObject)
+    {
+        // Передаем координаты в ViewModel для обработки
+        _gameVM?.OnActionPerformed(gameViewObject);
+    }
+
+    private void OnActionPreviewChanged(ActionPreview preview)
+    {
+        // View only handles visual representation, not overlay logic
+        // Overlay logic is now handled by GameViewModel
+    }
+
+    private void OnCellHovered(Vector2Int cellCoords)
+    {
+        // Handle cell hover logic if needed
+        // This could trigger additional visual feedback
+    }
+
+
+    private void OnDestroy()
+    {
+        if (_gameVM != null)
+        {
+            _gameVM.UnitSpawned -= OnUnitSpawned;
+            _gameVM.UnitMovedByRoute -= OnUnitMovedByRoute;
+            _gameVM.UnitAttacked -= OnUnitAttacked;
+            _gameVM.UnitHit -= OnUnitHit;
+            _gameVM.UnitDied -= OnUnitDied;
+            _gameVM.ActionPreviewChanged -= OnActionPreviewChanged;
+            _gameVM.CellHovered -= OnCellHovered;
         }
     }
 }

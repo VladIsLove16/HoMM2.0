@@ -53,17 +53,25 @@ public class SpellActionHandler : IActionHandler
         return true;
     }
 
-    public void ShowAvaiableTargetCells()
+    public List<Vector2Int> GetAvailableTargetCells()
     {
-        throw new System.NotImplementedException();
+        // TODO: Implement spell target cells logic
+        return new List<Vector2Int>();
     }
 
-    public void ShowPreview(ActionContext ctx)
+    public ActionPreview? GetPreview(ActionContext ctx)
     {
-        throw new System.NotImplementedException();
+        // TODO: Implement spell preview logic
+        return null;
     }
 
     void IActionHandler.Execute(ActionContext ctx)
+    {
+        // TODO: Implement spell execution logic
+        throw new System.NotImplementedException();
+    }
+
+    ActionPreview IActionHandler.GetPreview(ActionContext ctx)
     {
         throw new System.NotImplementedException();
     }

@@ -5,15 +5,37 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
 {
     [SerializeField] private TMPro.TextMeshProUGUI damageText;
     [SerializeField] private GameObject panelRoot;
-    public void Show(AttackPreviewInfo info)
+    private GameViewModel _gameViewModel;
+
+    [Inject]
+    public void Construct(GameViewModel gameViewModel)
+    {
+        _gameViewModel = gameViewModel;
+        _gameViewModel.ActionPreviewChanged += OnActionPreviewChanged;
+    }
+
+    private void OnActionPreviewChanged(ActionPreview preview)
+    {
+            Show(preview);
+    }
+
+    private void Show(ActionPreview info)
     {
         panelRoot.SetActive(true);
-        damageText.text = $"Damage: {info.DamageContext.DamageAmount } \nDied: {info.DamageContext.DieAmount}";
+        damageText.text = $"Damage: {info.Damage.DamageAmount} \nDied: {info.Damage.DieAmount}";
         // Можно добавить отображение статуса, дебаффов и т.п.
     }
 
-    public void Hide()
+    private void Hide()
     {
         panelRoot.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (_gameViewModel != null)
+        {
+            _gameViewModel.ActionPreviewChanged -= OnActionPreviewChanged;
+        }
     }
 }

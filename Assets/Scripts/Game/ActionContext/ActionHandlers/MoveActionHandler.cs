@@ -31,15 +31,8 @@ public class MoveActionHandler : IActionHandler
 {
     private ICombatObject _activeUnit;
     [Inject] protected MovementSystem _movementSystem;
-    [Inject] protected IGridCellRenderer _renderer;
     [Inject] protected GameModel _gm;
-    [Inject] IAttackActionPanel _attackPanel;
-    [Inject] ICursorService CursorService;
-    [Inject] private NetworkUnitCommandService _commandService;
-    private List<Vector2Int> lastSavedRoute = new();
-    private Vector2Int lastSavedpoint;
     private List<Vector2Int> reachableCells;
-    private Dictionary<CellState, List<Vector2Int>> _preview = new();
     public MoveActionHandler(ICombatObject model, MovementSystem movementSystem)
     {
         _activeUnit = model;
@@ -53,60 +46,36 @@ public class MoveActionHandler : IActionHandler
 
     public void Execute(ActionContext ctx)
     {
+        // ActionHandler теперь только определяет логику, выполнение через GameModel
         List<Vector2Int> moveRoute = GetMoveRoute(ctx);
         if (moveRoute == null || moveRoute.Count == 0)
             return;
 
-        // Отправляем команду через сервис приложений (сетевой/локальный)
-        if (_activeUnit is UnitModel unitModel)
-        {
-            _commandService.SendMove(unitModel, moveRoute);
-            return;
-        }
-
-        // Fallback: если тип не UnitModel, но можно двигать как IMoveable (редкий случай)
+        // Выполняем движение через GameModel
         if (_activeUnit is IMoveable moveable)
         {
             _gm.MoveObject(moveable, moveRoute);
         }
     }
 
-    public void ShowPreview(ActionContext ctx)
+    public ActionPreview GetPreview(ActionContext ctx)
     {
         var route = GetRoute(ctx);
         var moveRoute = GetMoveRoute(ctx);
         var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-        AddPreview(moveRoute, CellState.accessibleRoutePoint);
-        AddPreview(inaccessRoute, CellState.inaccessibleRoutePoint);
-        AddPreview(reachableCells, CellState.moveAvailable);
-        if(inaccessRoute.Count == 0)
-            CursorService.SetCursorState(CursorState.ActionAvailable);
-        else
-            CursorService.SetCursorState(CursorState.ActionNotAvailable);
-    }
-
-    private void AddPreview(List<Vector2Int> cells, CellState state)
-    {
-        _preview[state] = cells.ToList();
-        _renderer.SetStates(cells, state);
-    }
-
-    public void HidePreview()
-    {
-        foreach (var state in _preview)
+        
+        return new ActionPreview
         {
-            _renderer.RemoveStates(state.Key);
-        }
-        _preview.Clear();
-        _attackPanel.Hide();
+            MoveRoute = moveRoute,
+            InaccessibleRoute = inaccessRoute,
+            ReachableCells = reachableCells,
+            IsActionAvailable = inaccessRoute.Count == 0,
+            Damage = null
+        };
     }
-    public void ShowAvaiableTargetCells()
+    public List<Vector2Int> GetAvailableTargetCells()
     {
-        var pos = _activeUnit.Position;
-        var stats = _activeUnit.Stats;
-        var speed = stats.MoveSpeed;
-        var movaAvailableCells = _movementSystem.GetReachableCells(pos,speed);
-        AddPreview(movaAvailableCells, CellState.moveAvailable);
+        return reachableCells;
     }
 
     private static List<Vector2Int> GetInaccessibleRoute(List<Vector2Int> route, List<Vector2Int> moveRoute)

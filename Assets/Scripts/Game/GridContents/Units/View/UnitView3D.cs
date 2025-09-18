@@ -6,7 +6,7 @@ using UnityEngine;
 using Game.Network;
 
 [RequireComponent(typeof(Animator))]
-public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
+public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObject
 {
     private CompositeDisposable _disposables = new();
     private Animator _animator;
@@ -18,10 +18,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
     public UnitModel Model { get; private set; }
+
+    public bool IsHoverable => true;
+
+    public bool IsSelectable => true;
+
     private Dictionary<bool, Material> _teamMaterials;
     private UnitViewModel _vm;
-    private IUnitCommandExecutor _commandExecutor;
-    
     private void Awake()
     {
         // Исполнитель команд назначается позже (через фабрику/вариант префаба) до Init()
@@ -40,11 +43,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         Model = vm.Model;
         _vm = vm;
         // Резолвим исполнитель команд после того, как фабрика/вариант префаба добавил компонент
-        if (_commandExecutor == null)
-           if(! TryGetComponent(out _commandExecutor))
-            {
-                Debug.LogWarning("no command executer");
-            }
         SetMaterial(vm.TeamMaterial);
         _animator = GetComponent<Animator>();
         // Все события теперь обрабатываются через GameView3D
@@ -59,13 +57,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         
         // Реакция на смену команды/материалов
         _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_vm.TeamMaterial)).AddTo(_disposables);
-
-        // Подписываемся на команды от сетевого слоя, чтобы проигрывать анимации по приходу
-        if (_commandExecutor != null)
-        {
-            _commandExecutor.OnMoveCommandReceived += HandleMoveCommand;
-            _commandExecutor.OnAttackCommandReceived += HandleAttackCommand;
-        }
     }
     
     /// <summary>
@@ -84,11 +75,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
     {
         LogDebugEvent($"Unit Moving by Route Manually: {route.Count} points");
         EnqueueAction(MoveAlongRoute(route));
-    }
-    
-    private void HandleMoveCommand(List<Vector3> route)
-    {
-        ExecuteMove(route);
     }
     
     private void HandleAttackCommand(ulong targetUnitId)
@@ -206,13 +192,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
 
     public void Dispose()
     {
-        // Отписываемся от событий команд
-        if (_commandExecutor != null)
-        {
-            _commandExecutor.OnMoveCommandReceived -= HandleMoveCommand;
-            _commandExecutor.OnAttackCommandReceived -= HandleAttackCommand;
-        }
-        
         _disposables.Dispose();
         StopAllCoroutines();
         actionQueue.Clear();
@@ -262,7 +241,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable
         SetMaterial(_vm.HoveredTeamMaterial);
     }
 
-    public void UnHover()
+    public void Unhover()
     {
         LogDebugEvent("Unit Unhovered");
         SetMaterial(_vm.TeamMaterial);

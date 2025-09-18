@@ -4,6 +4,7 @@ using UnityEditor.Experimental.SceneManagement;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Unity.Netcode;
+using System;
 
 public static class PrefabCommandExecutorFixer
 {
@@ -47,12 +48,13 @@ public static class PrefabCommandExecutorFixer
 
             if (isNetworkVariant)
             {
+                throw new NotImplementedException();
                 // Ensure UnitNetworkController
-                if (root.GetComponent<UnitNetworkController>() == null)
-                {
-                    root.AddComponent<UnitNetworkController>();
-                    changed = true;
-                }
+                //if (root.GetComponent<UnitNetworkController>() == null)
+                //{
+                //    root.AddComponent<UnitNetworkController>();
+                //    changed = true;
+                //}
                 // Ensure NetworkTransform (useful for transform sync)
                 if (root.GetComponent<Unity.Netcode.Components.NetworkTransform>() == null)
                 {

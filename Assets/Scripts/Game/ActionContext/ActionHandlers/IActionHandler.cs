@@ -1,9 +1,9 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public interface IActionHandler
 {
     void Execute(ActionContext ctx);
-    void ShowPreview(ActionContext ctx);
-    void ShowAvaiableTargetCells();
-    void HidePreview();
+    ActionPreview GetPreview(ActionContext ctx);
 }

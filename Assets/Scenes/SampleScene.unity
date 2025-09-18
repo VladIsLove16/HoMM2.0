@@ -2718,7 +2718,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gameController: {fileID: 985392989}
   _gameNetworkCommandGateway: {fileID: 1271283385}
-  _gameInputHandler3D: {fileID: 1492948230}
   _gameView3D: {fileID: 1712596801}
   _attackActionPanel: {fileID: 47613583}
   _MVVMUnitTurnPanel: {fileID: 82560151}
@@ -3748,10 +3747,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1492948229}
-  - component: {fileID: 1492948230}
   - component: {fileID: 1492948231}
   m_Layer: 0
-  m_Name: GameInputHandler
+  m_Name: PlayerInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3772,31 +3770,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1945048467}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1492948230
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1492948228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f177724757d36e409c92a62fbeb8598, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mouseColliderLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  HoveredCell:
-    value: {x: 0, y: 0}
-  SelectedCell:
-    value: {x: 0, y: 0}
-  ActionPerformed:
-    value: {x: 0, y: 0}
-  HoveredCollider:
-    value: {fileID: 0}
-  WorldMousePosition:
-    value: {x: 0, y: 0, z: 0}
 --- !u!114 &1492948231
 MonoBehaviour:
   m_ObjectHideFlags: 0

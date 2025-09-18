@@ -43,30 +43,28 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
     private void UpdateHealth()
     {
-        var health = _unitViewModel.Model.ModifiedStats.Health;
-        var maxHealth = _unitViewModel.Model.ModifiedStats.MaxHealth;
+        // Use ViewModel properties instead of direct model access
+        var health = _unitViewModel.Health;
+        var maxHealth = _unitViewModel.MaxHealth;
 
         healthAmountText.text = health.ToString();
 
         float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
         healthBar.SetRatio(ratio);
-
     }
 
     private void UpdateAmount()
     {
-        amountText.text = _unitViewModel.Model.Amount.Value.ToString();
+        amountText.text = _unitViewModel.Amount.ToString();
     }
 
     private void OnDeath()
     {
         amountText.color = Color.black;
-        // ����� �������� ������ ������������, ��� ������ ��������
     }
 
     private void OnTurnStart()
     {
-        // ����� �������� ���������� �����, �������� UI ���������� � �.�.
     }
 
     public void Dispose()

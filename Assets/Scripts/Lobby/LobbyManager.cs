@@ -75,7 +75,7 @@ public class LobbyManager : NetworkBehaviour
     }
     public void StartSinglePlayer()
     {
-        SetGameModeMode(GameMode.Singleplayer);
+        SetGameModeMode(GameMode.SinglePlayer);
         // Загрузку игровой сцены выполняем напрямую, минуя сетевой менеджер
         UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
@@ -219,7 +219,7 @@ public class LobbyManager : NetworkBehaviour
     private void TrySendEarlyBattleSetup()
     {
         if (!IsHost) return;
-        var gateway = FindObjectOfType<GameNetworkCommandGateway>();
+        var gateway = FindAnyObjectByType<GameNetworkCommandGateway>();
         if (gateway == null) return;
         gateway.TrySendBattleSetup();
     }

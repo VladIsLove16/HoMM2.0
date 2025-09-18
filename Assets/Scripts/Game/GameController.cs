@@ -112,7 +112,7 @@ public class GameController : NetworkBehaviour, IInitializable
         _battleRunner.RunBattle();
     }
 
-    internal bool IsConfigurationReady()
+    public bool IsConfigurationReady()
     {
         throw new NotImplementedException();
     }

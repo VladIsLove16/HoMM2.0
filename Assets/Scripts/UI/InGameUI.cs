@@ -6,44 +6,34 @@ using Zenject;
 
 public class InGameUI : MonoBehaviour
 {
-    [Inject] private  TurnSystem _turnSystem;
+    [Inject] private GameViewModel _gameViewModel;
     [SerializeField] private TextMeshProUGUI turnNumber;
     [SerializeField] private Animator turnNumberAnimator;
     [SerializeField] private Animator battleStateAnimator;
     [SerializeField] private TextMeshProUGUI battleState;
     [SerializeField] private TextMeshProUGUI isMyTurnText;
-    [Inject] private GameNetworkCommandGateway gameNetworkCommandGateway;
     private int currentTurn;
     private bool _subscribed = false;
+    
     [Inject]
     private void Init()
     {
-        _turnSystem.OnBattleStateChanged += HandleBattleStateChanged;
+        // Subscribe to GameViewModel events instead of direct domain access
+        _gameViewModel.UnitTurnStarted += OnUnitTurnStarted;
         _subscribed = true;
-        _turnSystem.ActiveObject.Subscribe(OngameNetworkCommandGateway_TurnOwnerChanged);
     }
-    private void OngameNetworkCommandGateway_TurnOwnerChanged(ICombatObject combatObject)
+    private void OnUnitTurnStarted(IViewModel unitViewModel)
     {
-        isMyTurnText.text = _turnSystem.IsMyTurn ? "Your Turn" : "Wait for player to move";
-        return;
+        // Update UI based on turn changes
+        isMyTurnText.text = "Your Turn"; // This should be determined by GameViewModel
     }
 
-    private void HandleBattleStateChanged(BattleState state)
+    private void OnDestroy()
     {
-        switch(state)
+        if (_gameViewModel != null)
         {
-            case BattleState.blueTeamWins:
-                battleStateAnimator.SetTrigger("blueTeamWins");
-                
-                break;
-            case BattleState.redTeamWins:
-                battleStateAnimator.SetTrigger("redTeamWins");
-                break;
-            case BattleState.inProgress:
-                battleStateAnimator.SetTrigger("inProgress");
-                break;
+            _gameViewModel.UnitTurnStarted -= OnUnitTurnStarted;
         }
-        battleState.text = state.ToString();
     }
 
     public void OnTurnNumberChanged(int turn)
@@ -59,7 +49,6 @@ public class InGameUI : MonoBehaviour
     {
         if (_subscribed)
         {
-            _turnSystem.OnBattleStateChanged -= HandleBattleStateChanged;
             _subscribed = false;
         }
     }

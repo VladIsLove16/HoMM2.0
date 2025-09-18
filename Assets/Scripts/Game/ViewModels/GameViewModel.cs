@@ -22,9 +22,16 @@ public class GameViewModel : IDisposable
     public event Action<IViewModel> UnitTurnStarted;                    // глобальные широковещательные события
     [Obsolete("Для UI конкретного юнита используйте UnitViewModel.OnHealthChanged. Это событие предназначено для глобальных слушателей.")]
     public event Action<IViewModel> UnitHealthChanged;                  // глобальные; не использовать в Unit View/UI
+    
+    // Presentation layer events
+    public event Action<ActionPreview> ActionPreviewChanged;           // For IAttackActionPanel, ICursorService
+    public event Action<UnitModel> UnitStatsRequested;                 // For UnitStatsPanel
+    public event Action<Vector2Int> CellHovered;                       // For overlay updates
+    public event Action<Vector2Int> CellSelected;                      // For action execution
     private Dictionary<IGridContent, IViewModel> _uvms = new Dictionary<IGridContent, IViewModel>();
     [Inject] private UnitViewModelFactory _unitViewModelsFactory;
     [Inject] IWorldToCellProvider _worldToCellProvider;
+    [Inject] private IOverlayFacade _overlay;
     public GameViewModel(GameModel model, MovementSystem movementSystem)
     {
         _gameModel = model;
@@ -118,6 +125,85 @@ public class GameViewModel : IDisposable
         return _selectedCell;
     }
 
+
+    // MVVM input handling methods - работа только с координатами
+    public void OnGameViewObjectHovered(IGameViewObject gameViewObject)
+    {
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var gridCoords);
+        CellHovered?.Invoke(gridCoords);
+        
+        // Determine action preview based on current context
+        var preview = DetermineActionPreview(gridCoords);
+        if (preview.HasValue)
+        {
+            ActionPreviewChanged?.Invoke(preview.Value);
+            UpdateOverlay(preview.Value);
+        }
+    }
+
+    // Command execution methods - единственное место для выполнения команд из View
+    public void ExecuteMoveCommand(ulong unitId, List<Vector2Int> route)
+    {
+        _gameModel.ExecuteMoveCommand(unitId, route);
+    }
+
+    public void ExecuteAttackCommand(ulong unitId, Vector2Int targetPosition)
+    {
+        _gameModel.ExecuteAttackCommand(unitId, targetPosition);
+    }
+
+    public void ExecuteMoveThenAttackCommand(ulong unitId, List<Vector2Int> route, Vector2Int targetPosition)
+    {
+        _gameModel.ExecuteMoveThenAttackCommand(unitId, route, targetPosition);
+    }
+
+    public void OnGameViewObjectSelected(IGameViewObject gameViewObject)
+    {
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var gridCoords);
+        CellSelected?.Invoke(gridCoords);
+        _gameModel.OnGameModelObjectSelected(gridCoords);
+    }
+
+    public void OnActionPerformed(IGameViewObject gameViewObject)
+    {
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var gridCoords);
+        var cell = _gameModel.GetCell(gridCoords);
+        if (cell?.Unit is UnitModel unit)
+        {
+            UnitStatsRequested?.Invoke(unit);
+        }
+    }
+
+    private ActionPreview? DetermineActionPreview(Vector2Int cellCoords)
+    {
+        // This would determine what action is available at the given cell
+        // For now, return null - this should be implemented based on your game logic
+        return null;
+    }
+
+    private void UpdateOverlay(ActionPreview preview)
+    {
+        // Clear previous preview
+        _overlay.ClearPreview();
+        
+        // Show move route
+        if (preview.MoveRoute != null && preview.MoveRoute.Count > 0)
+        {
+            _overlay.SetStates(preview.MoveRoute, CellState.accessibleRoutePoint);
+        }
+        
+        // Show inaccessible route
+        if (preview.InaccessibleRoute != null && preview.InaccessibleRoute.Count > 0)
+        {
+            _overlay.SetStates(preview.InaccessibleRoute, CellState.inaccessibleRoutePoint);
+        }
+        
+        // Show reachable cells
+        if (preview.ReachableCells != null && preview.ReachableCells.Count > 0)
+        {
+            _overlay.SetStates(preview.ReachableCells, CellState.moveAvailable);
+        }
+    }
 
     public void Dispose()
     {

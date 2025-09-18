@@ -13,14 +13,22 @@ public class GameModel
     public event Action<GridXZ<GameCell>> GridInitialized;
     private readonly UnitModelFactory _unitFactory;
     private readonly MovementSystem _movement;
+    private readonly ActionHandlerFactory _actionHandlerFactory;
+    private readonly CommandService _commandService;
     protected GridXZ<GameCell> _grid;
+    private UnitModelFactory unitModelFactory;
+    private MovementSystem movementSystem;
+    private ActionHandlerFactory actionHandlerFactory;
 
     [Inject]
-    public GameModel(UnitModelFactory factory, MovementSystem movement)
+    public GameModel(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory, CommandService commandService)
     {
         _movement = movement;
         _unitFactory = factory;
+        _actionHandlerFactory = actionHandlerFactory;
+        _commandService = commandService;
     }
+
     public virtual void InitializeGrid(int width, int height)
     {
         _grid = new GridXZ<GameCell>(width, height, CreateEmptyGameGridObject);
@@ -100,10 +108,97 @@ public class GameModel
         }
         return units;
     }
+
+    // MVVM input handling - called by GameViewModel
+    public void OnGameModelObjectSelected(Vector2Int cellCoords)
+    {
+        // Process cell selection in the domain model
+        // This could trigger action resolution, validation, etc.
+        var cell = GetCell(cellCoords);
+        if (cell != null)
+        {
+            // Handle cell selection logic here
+            // Could determine available actions, validate moves, etc.
+        }
+    }
+
+    // Action execution methods - единственное место для выполнения действий
+    public void ExecuteMoveAction(UnitModel unit, List<Vector2Int> moveRoute)
+    {
+        if (unit == null || moveRoute == null || moveRoute.Count == 0)
+            return;
+
+        // Выполняем движение через доменную логику
+        MoveObject(unit, moveRoute);
+    }
+
+    public void ExecuteAttackAction(UnitModel attacker, Vector2Int targetCell)
+    {
+        if (attacker == null)
+            return;
+
+        var targetCellObj = GetCell(targetCell);
+        if (targetCellObj?.Unit is IDamagable target)
+        {
+            // Выполняем атаку через доменную логику
+            if (attacker is IDamageSource source)
+            {
+                source.SendDamage(new(target));
+            }
+        }
+    }
+
+    public void ExecuteMoveThenAttackAction(UnitModel unit, List<Vector2Int> moveRoute, Vector2Int targetCell)
+    {
+        if (unit == null)
+            return;
+
+        // Сначала движение
+        if (moveRoute != null && moveRoute.Count > 0)
+        {
+            MoveObject(unit, moveRoute);
+        }
+
+        // Затем атака
+        ExecuteAttackAction(unit, targetCell);
+    }
+
+    // ActionHandler factory methods
+    public IActionHandler GetMoveActionHandler(UnitModel unit)
+    {
+        return _actionHandlerFactory.CreateMoveHandler(unit);
+    }
+
+    public IActionHandler GetRangedAttackHandler(UnitModel unit)
+    {
+        return _actionHandlerFactory.CreateRangedAttackHandler(unit);
+    }
+
+    public IActionHandler GetMoveThenAttackHandler(UnitModel unit)
+    {
+        return _actionHandlerFactory.CreateMoveThenAttackHandler(unit);
+    }
+
+    // Command execution methods - единственное место для выполнения команд
+    public void ExecuteMoveCommand(ulong unitId, List<Vector2Int> route)
+    {
+        _commandService.ExecuteMoveCommand(unitId, route);
+    }
+
+    public void ExecuteAttackCommand(ulong unitId, Vector2Int targetPosition)
+    {
+        _commandService.ExecuteAttackCommand(unitId, targetPosition);
+    }
+
+    public void ExecuteMoveThenAttackCommand(ulong unitId, List<Vector2Int> route, Vector2Int targetPosition)
+    {
+        _commandService.ExecuteMoveThenAttackCommand(unitId, route, targetPosition);
+    }
 }
 public class GameModelDebugger : GameModel
 {
-    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement) : base(factory, movement)
+    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory, CommandService commandService) 
+        : base(factory, movement, actionHandlerFactory, commandService)
     {
         Debug.Log("GameModel is ready");
     }

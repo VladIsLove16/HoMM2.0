@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 /// <summary>
 /// Реализация сервиса работы с курсором
 /// </summary>
@@ -9,10 +10,25 @@ public class CursorService : ICursorService
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
+    private GameViewModel _gameViewModel;
+    
     public CursorService(List<CursorStateTexture> cursorStateTextures)
     {
         _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state,y=> y.texture);
         SetDefaultCursor();
+    }
+    
+    [Inject]
+    public void Construct(GameViewModel gameViewModel)
+    {
+        _gameViewModel = gameViewModel;
+        _gameViewModel.ActionPreviewChanged += OnActionPreviewChanged;
+    }
+    
+    private void OnActionPreviewChanged(ActionPreview preview)
+    {
+        SetCursorState(preview.IsActionAvailable ? 
+            CursorState.ActionAvailable : CursorState.ActionNotAvailable);
     }
 
     /// <summary>
@@ -54,6 +70,14 @@ public class CursorService : ICursorService
     public void SetCursorState(CursorState state)
     {
         SetCursor(_cursorTextrures[state]);
+    }
+    
+    public void Dispose()
+    {
+        if (_gameViewModel != null)
+        {
+            _gameViewModel.ActionPreviewChanged -= OnActionPreviewChanged;
+        }
     }
 
 }

@@ -4,13 +4,16 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 
-public class CellView : MonoBehaviour
+public class CellView : MonoBehaviour, IGameViewObject
 {
     private Renderer _renderer;
     [SerializeField] private MeshRenderer _hoverRenderer;
     [SerializeField] private MeshRenderer _routePointRenderer;
     private IReadOnlyDictionary<CellState, CellMaterials> _materials;
     [SerializeField] private List<CellState> cellStates = new();
+
+    public bool IsHoverable => true;
+    public bool IsSelectable => true;
 
     private void Awake()
     {

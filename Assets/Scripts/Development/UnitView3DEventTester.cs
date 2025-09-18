@@ -133,7 +133,7 @@ namespace Development
         private System.Collections.IEnumerator UnhoverAfterDelay()
         {
             yield return new WaitForSeconds(2f);
-            unitView.UnHover();
+            unitView.Unhover();
         }
         
         private UnitViewModel GetViewModel()

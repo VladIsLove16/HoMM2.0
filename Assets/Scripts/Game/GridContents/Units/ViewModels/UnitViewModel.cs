@@ -21,6 +21,12 @@ public class UnitViewModel : IViewModel
 
     public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0;
 
+    public int Health => Model.ModifiedStats.Health;
+
+    public int MaxHealth => Model.ModifiedStats.MaxHealth;
+
+    public int Amount => Model.Amount.Value;
+
     private Subject<List<Vector3>> _onMoved = new();
     private Subject<Unit> _onAttacked = new();
     private Subject<Unit> _onHit = new();
@@ -29,8 +35,6 @@ public class UnitViewModel : IViewModel
     private Subject<Unit> _onHealthChanged = new();
     private Subject<Unit> _onTeamChanged = new();
     private Subject<int> _onAmountChanged = new();
-
-    [Inject]  private IWorldToCellProvider _worldToCellProvider;
     private readonly IMaterialProvider _materialProvider;
     public UnitViewModel(UnitModel model, IMaterialProvider definition)
     {

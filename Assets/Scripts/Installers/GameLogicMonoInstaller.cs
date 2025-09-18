@@ -12,7 +12,6 @@ public class GameLogicMonoInstaller : MonoInstaller
 {
     [SerializeField] private GameController _gameController;
     [SerializeField] private GameNetworkCommandGateway _gameNetworkCommandGateway;
-    [SerializeField] private GameInputHandler3D _gameInputHandler3D;
     [SerializeField] private GameView3D _gameView3D;
     [SerializeField] private AttackActionPanel _attackActionPanel;
     [SerializeField] private UnitTurnPanelView _MVVMUnitTurnPanel;
@@ -45,8 +44,8 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindInputHandlers()
     {
-        Container.Bind<GameInputHandler3D>().FromInstance(_gameInputHandler3D);
-        Container.Bind<PlayerInputHandler>().To<PlayerInputHandler>().AsSingle().NonLazy();
+        Container.Bind<CellInputHandler>().AsSingle();
+        // PlayerInputHandler removed - input now handled by GameViewModel events
     }
 
     private void BindModels()
@@ -66,6 +65,7 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<TurnSystem>().To<TurnSystem>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
+        Container.Bind<ActionHandlerFactory>().AsSingle();
     }
 
     private void BindViewModels()
@@ -84,6 +84,8 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<UnitStatsPanel>().FromInstance(_unitStatsPanel).AsSingle();
         Container.Bind<InGameUI>().FromInstance(_inGameUI).AsSingle();
         Container.Bind<IAttackActionPanel>().FromInstance(_attackActionPanel).AsSingle();
+
+        // Presentation services removed - views now subscribe directly to GameViewModel
 
         // View factories
         Container.Bind<UnitViewFactory>().AsSingle();

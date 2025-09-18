@@ -23,11 +23,8 @@ public class MoveThenAttackHandler : IActionHandler
 { 
     [Inject] private MovementSystem _movementSystem;
     [Inject] private GameModel _gameModel;
-    [Inject] private IGridCellRenderer _renderer;
-    [Inject] private IAttackActionPanel _attackPanel;
 
     private ICombatObject _activeUnit;
-    private List<Vector2Int> savedRoute = new();
     public MoveThenAttackHandler(ICombatObject unitModel)
     {
         _activeUnit = unitModel;    
@@ -52,6 +49,7 @@ public class MoveThenAttackHandler : IActionHandler
     }
     public void Execute(ActionContext ctx)
     {
+        // ActionHandler теперь только определяет логику, выполнение через GameModel
         var moveRoute = GetMoveRoute(ctx);
         if(_activeUnit is IMoveable moveable)
         {
@@ -60,32 +58,28 @@ public class MoveThenAttackHandler : IActionHandler
         if (_activeUnit is IDamageSource source)
             source.SendDamage(new(ctx.TargetObject));
     }
-    public void ShowPreview(ActionContext ctx)
+    public ActionPreview GetPreview(ActionContext ctx)
     {
-        int moveSpeed = _activeUnit. Stats.MoveSpeed;
+        int moveSpeed = _activeUnit.Stats.MoveSpeed;
         var route = GetRoute(ctx);
         var moveRoute = GetMoveRoute(ctx);
         var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
+        var reachableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
 
-        _renderer.RemoveStates(CellState.accessibleRoutePoint);
-        _renderer.RemoveStates(CellState.inaccessibleRoutePoint);
-        _renderer.AddStates(moveRoute, CellState.accessibleRoutePoint);
-        _renderer.AddStates(moveRoute, CellState.inaccessibleRoutePoint);
-
-        var movaAvailableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-        _renderer.AddStates(movaAvailableCells, CellState.moveAvailable);
-
+        DamageContext damage = null;
         if(_activeUnit is IDamageSource source)
         {
-            DamageContext damageContext = source.SimulateSendDamage(new(ctx.TargetObject));
-            var info = new AttackPreviewInfo
-            {
-                TargetPosition = ctx.TargetCell,
-                DamageContext = damageContext,
-                Description = damageContext.DamageAmount.ToString(),
-            };
-            _attackPanel.Show(info);
+            damage = source.SimulateSendDamage(new(ctx.TargetObject));
         }
+
+        return new ActionPreview
+        {
+            MoveRoute = moveRoute,
+            InaccessibleRoute = inaccessRoute,
+            ReachableCells = reachableCells,
+            IsActionAvailable = CanHandle(ctx),
+            Damage = damage
+        };
     }
     private List<Vector2Int> GetRoute(ActionContext ctx)
     {
@@ -116,28 +110,21 @@ public class MoveThenAttackHandler : IActionHandler
         return moveRoute;
     }
 
-    public void ShowAvaiableTargetCells()
-    {
-        var units = _gameModel.GetUnits();
-        List<Vector2Int> unitPositions = units.Select(x=>x.Position.Value).ToList();
-        foreach(var unit in units)
-        {
-            ActionContext ctx = new ActionContext() { TargetCell = unit.Position.Value, TargetObject = unit,AbilityUsed = null }; 
-            if(!CanHandle(ctx))
-            {
-                unitPositions.Remove(unit.Position.Value);
-            }
-        }
-        _renderer.AddStates(unitPositions,CellState.moveAvailable);
-    }
-
-    public void Cancel()
-    {
+    //public List<Vector2Int> GetAvailableTargetCells()
+    //{
+    //    var units = _gameModel.GetUnits();
+    //    var availableTargets = new List<Vector2Int>();
         
-    }
-
-    public void HidePreview()
-    {
-        _attackPanel.Hide();
-    }
+    //    foreach (var unit in units)
+    //    {
+    //        ActionContext ctx = new ActionContext { TargetCell = unit.Position, TargetObject = unit, AbilityUsed = null };
+    //        if (CanHandle(ctx))
+    //        {
+    //            availableTargets.Add(unit.Position);
+    //        }
+    //    }
+        
+    //    return availableTargets;
+    //}
 }
+

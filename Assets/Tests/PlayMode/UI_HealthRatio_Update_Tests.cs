@@ -9,7 +9,7 @@ using Zenject;
 
 namespace Tests.PlayMode
 {
-    public class UI_HealthRatio_Update_Tests : ZenjectIntegrationTestFixture
+    public class UI_HealthRatio_Update_Tests
     {
         private UnitModel _unitModel;
         private UnitViewModel _unitViewModel;
@@ -91,7 +91,7 @@ namespace Tests.PlayMode
         }
 
         [UnityTearDown]
-        public IEnumerator TearDown()
+        public  IEnumerator TearDown()
         {
             if (_unitModel?.BaseUnitStats != null)
             {

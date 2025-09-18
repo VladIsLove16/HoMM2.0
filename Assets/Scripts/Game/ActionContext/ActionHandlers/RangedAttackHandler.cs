@@ -25,10 +25,6 @@ public class RangedAttackHandler : IActionHandler
 {
     [Inject] MovementSystem _movementSystem;
     [Inject] GameModel _gameModel;
-    [Inject] IAttackActionPanel _attackPanel;
-    [Inject] IGridCellRenderer _renderer;
-    [Inject] ICursorService _cursorService;
-    [Inject] NetworkUnitCommandService _commandService;
     private Dictionary<CellState, List<Vector2Int>> _preview = new();
     public ICombatObject _activeUnit;
     public RangedAttackHandler(ICombatObject unitModel)
@@ -53,67 +49,45 @@ public class RangedAttackHandler : IActionHandler
 
     public void Execute(ActionContext ctx)
     {
-        if(_activeUnit is UnitModel attacker && ctx.TargetObject is IDamagable)
+        // ActionHandler теперь только определяет логику, выполнение через GameModel
+        if(_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target)
         {
-            _commandService.SendAttack(attacker, ctx.TargetCell);
+            source.SendDamage(new(target));
         }
     }
 
-    public void ShowPreview(ActionContext ctx)
+    public ActionPreview GetPreview(ActionContext ctx)
     {
-        if (!IsSameTeam(ctx.TargetObject))
-        {
-            _cursorService.SetCursorState(CursorState.Default);
-        }
+        DamageContext damage = null;
         if (_activeUnit is IDamageSource source)
         {
-            AttackContext attackContext = new(ctx.TargetObject);
-            DamageContext damageContext = source.SimulateSendDamage(attackContext);
-            var info = new AttackPreviewInfo
-            {
-                TargetPosition = ctx.TargetCell,
-                DamageContext = damageContext,
-                Description = damageContext.DamageAmount.ToString(),
-            };
-            _attackPanel.Show(info);
-            if (IsSameTeam(ctx.TargetObject))
-                _cursorService.SetCursorState(CursorState.Default);
-            else
-                _cursorService.SetCursorState(CursorState.Attack);
+            damage = source.SimulateSendDamage(new(ctx.TargetObject));
         }
-        var movaAvailableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-        AddPreview(new(){_activeUnit .Position},CellState.accessibleRoutePoint);
-        AddPreview(movaAvailableCells,CellState.moveAvailable);
-    }
-
-    private void AddPreview(List<Vector2Int> cells,CellState state)
-    {
-        _preview[state] = cells.ToList();
-        _renderer.SetStates(cells, state);
-    }
-
-    public void HidePreview()
-    {
-        foreach(var state in _preview)
+        var reachable = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
+        return new ActionPreview
         {
-            _renderer.RemoveStates(state.Key);
-        }
-        _preview.Clear();
-        _attackPanel.Hide();
+            MoveRoute = new(){ _activeUnit.Position },
+            InaccessibleRoute = new(),
+            ReachableCells = reachable,
+            IsActionAvailable = !IsSameTeam(ctx.TargetObject),
+            Damage = damage
+        };
     }
-    public void ShowAvaiableTargetCells()
-    {
-        //var units = _gameModel.GetUnits();
-        //List<Vector2Int> unitPositions = units.Select(x => x.Position.Value).ToList();
-        //foreach (var unit in units)
-        //{
-        //    ActionContext ctx = new ActionContext() { TargetCell = unit.Position.Value, TargetObject = unit, AbilityUsed = null };
-        //    if (!CanHandle(ctx))
-        //    {
-        //        unitPositions.Remove(unit.Position.Value);
-        //    }
-        //}
-        //AddPreview(unitPositions, CellState.moveAvailable);
-    }
+
+    //public List<Vector2Int> GetAvailableTargetCells()
+    //{
+    //    var units = _gameModel.GetUnits();
+    //    var availableTargets = new List<Vector2Int>();
+        
+    //    foreach (var unit in units)
+    //    {
+    //        if (!IsSameTeam(unit) && IsInRange(new ActionContext { TargetCell = unit.Position, TargetObject = unit }))
+    //        {
+    //            availableTargets.Add(unit.Position);
+    //        }
+    //    }
+        
+    //    return availableTargets;
+    //}
 
 }
