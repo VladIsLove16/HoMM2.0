@@ -3,27 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
-public class SpellHandlerFactory : PlaceholderFactory<IEffectApplier, SpellActionHandler>
-{
-    [Inject] private DiContainer _container;
-
-    public override SpellActionHandler Create(IEffectApplier unit)
-    {
-        var handler = new SpellActionHandler(new SpellCasterService(new()));
-
-        _container.Inject(handler);
-
-        return handler;
-    }
-}
-
 public class SpellActionHandler : IActionHandler
 {
     private IEffectApplier caster;
     private SpellCasterService spellCasterService;
-    public SpellActionHandler(SpellCasterService spellCasterService)
+    public SpellActionHandler(MovementSystem movementSystem ,GameModel gameModel)
     {
-        this.spellCasterService = spellCasterService;
     }
     public void AddTarget(GameCell gameCell)
     {
@@ -86,13 +71,14 @@ public class SpellActionHandler : IActionHandler
         throw new System.NotImplementedException();
     }
 
-    ActionPreview IActionHandler.GetPreview(ActionContext ctx)
-    {
-        throw new System.NotImplementedException();
-    }
 
     internal bool CanExecute(ActionContext ctx)
     {
         throw new NotImplementedException();
+    }
+
+    bool IActionHandler.CanExecute(ActionContext ctx)
+    {
+        return CanExecute(ctx);
     }
 }

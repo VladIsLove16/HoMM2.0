@@ -6,57 +6,32 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-
-public class RangedAttackHandlerFactory : PlaceholderFactory<ICombatObject, RangedAttackHandler>
-{
-    [Inject] private DiContainer _container;
-    public override RangedAttackHandler Create(ICombatObject unit)
-    {
-        // Создаём нужный подтип
-        var handler = new RangedAttackHandler(unit);
-
-        // Внедряем зависимости, помеченные [Inject]
-        _container.Inject(handler);
-
-        return handler;
-    }
-}
-
 public class RangedAttackHandler : IActionHandler
 {
-    [Inject] MovementSystem _movementSystem;
-    [Inject] GameModel _gameModel;
-    private Dictionary<CellState, List<Vector2Int>> _preview = new();
-    public ICombatObject _activeUnit;
-    public RangedAttackHandler(ICombatObject unitModel)
+    MovementSystem _movementSystem;
+    GameModel _gameModel;
+    //private Dictionary<CellState, List<Vector2Int>> _preview = new();
+    //public ICombatObject _activeUnit;
+    public RangedAttackHandler(MovementSystem movementSystem, GameModel gameModel)
     {
-        _activeUnit = unitModel;
+        _movementSystem = movementSystem;
+        _gameModel = gameModel;
+    }
+    public void Execute(ActionContext ctx)
+    {
+        var attacker = _gameModel.GetCell(ctx.FromCell).Unit as IDamageSource;
+        var target = _gameModel.GetCell(ctx.TargetCell).Unit as IDamagable;
+        attacker.SendDamage(new(target, true));
+    }
+    public bool CanExecute(ActionContext ctx)
+    {
+       return true;
     }
     private bool CanShoot(Vector2Int from, Vector2Int to, int range)
     {
         _movementSystem.GetRouteIgnoringObstacles(from, to, out var route);
         var dist = _movementSystem.GetRouteCost(route);
         return dist <= range && _movementSystem.HasLineOfSight(from, to);
-    }
-
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        return ctx.TargetObject !=null;
-    }
-
-    public void Execute(ActionContext ctx)
-    {
-        if (_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target)
-        {
-            source.SendDamage(new(target, true));
-        }
-        else
-            throw new UnityException("_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target not true");
-    }
-
-    internal bool CanExecute(ActionContext ctx)
-    {
-        throw new NotImplementedException();
     }
 
     //public ActionPreview GetPreview(ActionContext ctx)

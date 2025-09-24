@@ -10,7 +10,7 @@ public class ObjectHighlighterService
     //{
     //    _gameInputHandler.HoveredCollider.Subscribe(OnColliderChanged);
     //    //_gameInputHandler.CellSelected += OnSelectPerformed;
-    //    //_gameInputHandler.CellActionPerformed += OnActionPerformed;
+    //    //_gameInputHandler.CellActionPerformed += HandleCellActionPerformed;
     //}
     //public void OnColliderChanged(_lastHoveredCollider collider)
     //{

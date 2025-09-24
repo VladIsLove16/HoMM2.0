@@ -9,46 +9,24 @@ using UnityEngine;
 using Zenject;
 public class ActionResolver
 {
-    [Inject] protected MoveActionHandlerFactory _moveFactory = new();
-    [Inject] protected RangedAttackHandlerFactory _rangedFactory = new();
-    [Inject] protected MoveThenAttackHandlerFactory _moveThenAttackFactory = new();
-    [Inject] protected SpellHandlerFactory _spellHandlerFactory = new();
-
-    public List<IActionHandler> _handlers = new();
-    public ReactiveProperty<IActionHandler> CurrentAction = new();
-    public ActionResolver()
+    private MoveThenAttackHandler MoveThenAttackHandler;
+    private MoveActionHandler MoveActionHandler;
+    private RangedAttackHandler RangedAttackHandler;
+    private AttackActionHandler AttackActionHandler;
+    private SpellActionHandler SpellActionHandler;
+    public ActionResolver(GameModel gameModel, MovementSystem movementSystem)
     {
+        MoveThenAttackHandler = new(movementSystem, gameModel);
+        MoveActionHandler = new(movementSystem, gameModel);
+        RangedAttackHandler = new(movementSystem, gameModel);
+        AttackActionHandler = new(movementSystem, gameModel);
+        SpellActionHandler = new(movementSystem, gameModel);
     }
-
-    /// <summary>
-    /// GetActionHandler for ctx
-    /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="handler"></param>
-    /// <returns></returns>
     public bool Resolve(ActionContext ctx, out IActionHandler handler)
     {
         var resolvedHandlers = new List<IActionHandler>();
-        var moveHandler = _moveFactory.Create(ctx);
-        var rangedAttackHandler = _rangedFactory.Create(ctx);
-        var moveThenAttackHandler = _moveThenAttackFactory.Create(ctx);
-        var spellHandlerHandler = _spellHandlerFactory.Create(ctx);
-        if (moveHandler.CanExecute(ctx))
-            resolvedHandlers.Add(moveHandler);
-        if (rangedAttackHandler.CanExecute(ctx))
-            resolvedHandlers.Add(rangedAttackHandler);
-        if (moveThenAttackHandler.CanExecute(ctx))
-            resolvedHandlers.Add(moveThenAttackHandler);
-        if (spellHandlerHandler.CanExecute(ctx))
-            resolvedHandlers.Add(spellHandlerHandler);
-        StringBuilder stringBuilder = new StringBuilder();
-        foreach (var resolvedHandler in resolvedHandlers)
-        {
-            stringBuilder.Append(resolvedHandler.ToString());
-        }
-        Debug.Log("resolved handlers: " + stringBuilder.ToString());
-        if (resolvedHandlers.Count > 1)
-            Debug.LogAssertion("resolved handlers count > 1");
+        DetermineResolvedHandlers(ctx, resolvedHandlers);
+        LogAssertions(resolvedHandlers);
         if (resolvedHandlers.Count > 0)
         {
             handler = resolvedHandlers[0];
@@ -58,18 +36,31 @@ public class ActionResolver
             handler = null;
         return false;
     }
-    protected bool CanHandle(IActionHandler handler, ActionContext ctx)
+
+    private void DetermineResolvedHandlers(ActionContext ctx, List<IActionHandler> resolvedHandlers)
     {
-        return handler.CanHandle(ctx);
+        if (MoveThenAttackHandler.CanExecute(ctx))
+            resolvedHandlers.Add(MoveThenAttackHandler);
+        if (MoveActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(MoveActionHandler);
+        if (RangedAttackHandler.CanExecute(ctx))
+            resolvedHandlers.Add(RangedAttackHandler);
+        if (AttackActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(AttackActionHandler);
+        if (SpellActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(SpellActionHandler);
     }
-    /// <summary>
-    /// Execute action forcly
-    /// </summary>
-    /// <param name="handler"></param>
-    /// <param name="ctx"></param>
-    private void Execute(IActionHandler handler, ActionContext ctx)
+
+    private void LogAssertions(List<IActionHandler> resolvedHandlers)
     {
-        handler.Execute(ctx);
+        StringBuilder stringBuilder = new StringBuilder();
+        foreach (var resolvedHandler in resolvedHandlers)
+        {
+            stringBuilder.Append(resolvedHandler.ToString());
+        }
+        Debug.Log("resolved handlers: " + stringBuilder.ToString());
+        if (resolvedHandlers.Count > 1)
+            Debug.LogAssertion("resolved handlers count > 1");
     }
 
 }

@@ -6,131 +6,59 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
 
-public class MoveThenAttackHandlerFactory : PlaceholderFactory<ICombatObject, MoveThenAttackHandler>
-{
-    [Inject] private DiContainer _container;
-
-    public override MoveThenAttackHandler Create(ICombatObject unit)
-    {
-        var handler = new MoveThenAttackHandler(unit);
-
-        _container.Inject(handler);
-
-        return handler;
-    }
-}
-
 public class MoveThenAttackHandler : IActionHandler
-{ 
-    [Inject] private MovementSystem _movementSystem;
-    [Inject] private GameModel _gameModel;
-
-    private ICombatObject _activeUnit;
-    public MoveThenAttackHandler(ICombatObject unitModel)
+{
+    private MovementSystem _movementSystem;
+    private GameModel _gameModel;
+    private MoveActionHandler _moveActionHandler;
+    private AttackActionHandler _attackActionHandler;
+    public MoveThenAttackHandler(MovementSystem movementSystem, GameModel gameModel)
     {
-        _activeUnit = unitModel;    
-    }
-    public bool CanHandle(ActionContext ctx)
-    {
-        if(ctx.TargetObject == null)
-            return false;
-        var route = GetMoveRoute(ctx);
-        var moveRoute = GetMoveRoute(ctx);
-        float fullRouteCost = _movementSystem.GetRouteCost(route);
-        float moveRouteCost = _movementSystem.GetRouteCost(moveRoute);
-        if(! _movementSystem.HasLineOfSight(_activeUnit.Position, ctx.TargetCell))
-            return false;
-        if (moveRouteCost + _activeUnit.Stats.AttackRange >= fullRouteCost)
-            return true;
-        return false;
-    }
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        return ctx.TargetObject != null;
+        _movementSystem = movementSystem;
+        _gameModel = gameModel;
+        _moveActionHandler = new(_movementSystem, gameModel);
+        _attackActionHandler = new(_movementSystem, gameModel);
     }
     public void Execute(ActionContext ctx)
     {
-        // ActionHandler теперь только определяет логику, выполнение через GameModel
-        var moveRoute = GetMoveRoute(ctx);
-        if(_activeUnit is IMoveable moveable)
-        {
-            _gameModel.MoveObject(moveable, moveRoute);
-        }
-        if (_activeUnit is IDamageSource source)
-            source.SendDamage(new(ctx.TargetObject));
+        //_moveActionHandler.Execute(ctx);
+        //ActionContext afterMover = new();
+        _attackActionHandler.Execute(ctx);
     }
-    public ActionPreview GetPreview(ActionContext ctx)
+    public bool CanExecute(ActionContext ctx)
     {
-        int moveSpeed = _activeUnit.Stats.MoveSpeed;
-        var route = GetRoute(ctx);
-        var moveRoute = GetMoveRoute(ctx);
-        var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-        var reachableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-
-        DamageContext damage = null;
-        if(_activeUnit is IDamageSource source)
-        {
-            damage = source.SimulateSendDamage(new(ctx.TargetObject));
-        }
-
-        return new ActionPreview
-        {
-            MoveRoute = moveRoute,
-            InaccessibleRoute = inaccessRoute,
-            ReachableCells = reachableCells,
-            IsActionAvailable = CanHandle(ctx),
-            Damage = damage
-        };
+        if (!_moveActionHandler.CanExecute(ctx))
+            return false;
+        if (!_attackActionHandler.CanExecute(ctx))
+            return false;
+        return true;
     }
-    private List<Vector2Int> GetRoute(ActionContext ctx)
-    {
-        var route = new List<Vector2Int>();
-        if (_activeUnit.Stats.CanFly)
-        {
-            _movementSystem.GetRouteIgnoringObstacles(_activeUnit.Position, ctx.TargetCell, out route);
-        }
-        else
-            _movementSystem.GetRoute(_activeUnit.Position, ctx.TargetCell, out route);
-        return route;
-    }
-    private static List<Vector2Int> GetInaccessibleRoute(List<Vector2Int> route, List<Vector2Int> moveRoute)
-    {
-        var inaccessRoute = route.ToList();
-        foreach (var movePoint in moveRoute)
-        {
-            inaccessRoute.Remove(movePoint);
-        }
-
-        return inaccessRoute;
-    }
-    private List<Vector2Int> GetMoveRoute(ActionContext ctx)
-    {
-        var route = GetRoute(ctx);
-        int moveSpeed = _activeUnit.Stats.MoveSpeed;
-        var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveSpeed);
-        return moveRoute;
-    }
-
-    internal bool CanExecute(ActionContext ctx)
-    {
-        throw new NotImplementedException();
-    }
-
-    //public List<Vector2Int> GetAvailableTargetCells()
+}
+    //public bool CanShowPreview(ActionContext ctx)
     //{
-    //    var units = _gameModel.GetUnits();
-    //    var availableTargets = new List<Vector2Int>();
+    //    return ctx.TargetObject != null;
+    //}
+   
+    //public ActionPreview GetPreview(ActionContext ctx)
+    //{
+    //    int moveSpeed = _activeUnit.Stats.MoveSpeed;
+    //    var route = GetRoute(ctx);
+    //    var moveRoute = GetMoveRoute(ctx);
+    //    var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
+    //    var reachableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
 
-    //    foreach (var unit in units)
+    //    DamageContext damage = null;
+    //    if(_activeUnit is IDamageSource source)
     //    {
-    //        ActionContext ctx = new ActionContext { TargetCell = unit.Position, TargetObject = unit, AbilityUsed = null };
-    //        if (CanHandle(ctx))
-    //        {
-    //            availableTargets.Add(unit.Position);
-    //        }
+    //        damage = source.SimulateSendDamage(new(ctx.TargetObject));
     //    }
 
-    //    return availableTargets;
-    //}
-}
+    //    return new ActionPreview
+    //    {
+    //        MoveRoute = moveRoute,
+    //        InaccessibleRoute = inaccessRoute,
+    //        ReachableCells = reachableCells,
+    //        IsActionAvailable = CanHandle(ctx),
+    //        Damage = damage
+    //    };
 

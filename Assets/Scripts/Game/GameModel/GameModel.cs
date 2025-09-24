@@ -13,16 +13,14 @@ public class GameModel
     public event Action<GridXZ<GameCell>> GridInitialized;
     private readonly UnitModelFactory _unitFactory;
     private readonly MovementSystem _movement;
-    private readonly ActionHandlerFactory _actionHandlerFactory;
     protected GridXZ<GameCell> _grid;
     private MovementSystem movementSystem;
         
     [Inject]
-    public GameModel(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory)
+    public GameModel(UnitModelFactory factory, MovementSystem movement)
     {
         _movement = movement;
         _unitFactory = factory;
-        _actionHandlerFactory = actionHandlerFactory;
     }
 
     public virtual void InitializeGrid(int width, int height)
@@ -104,91 +102,11 @@ public class GameModel
         }
         return units;
     }
-
-    // MVVM input handling - called by GameViewModel
-    public void OnGameModelObjectSelected(Vector2Int cellCoords)
-    {
-        // Process cell selection in the domain model
-        // This could trigger action resolution, validation, etc.
-        var cell = GetCell(cellCoords);
-        if (cell != null)
-        {
-            // Handle cell selection logic here
-            // Could determine available actions, validate moves, etc.
-        }
-    }
-
-    // Action execution methods - единственное место для выполнения действий
-    public void ExecuteMoveAction(UnitModel unit, List<Vector2Int> moveRoute)
-    {
-        if (unit == null || moveRoute == null || moveRoute.Count == 0)
-            return;
-
-        // Выполняем движение через доменную логику
-        MoveObject(unit, moveRoute);
-    }
-
-    public void ExecuteAttackAction(IDamageSource attacker, Vector2Int targetCell)
-    {
-        if (attacker == null)
-            return;
-
-        var targetCellObj = GetCell(targetCell);
-        if (targetCellObj?.Unit is IDamagable target)
-        {
-            // Выполняем атаку через доменную логику
-            if (attacker is IDamageSource source)
-            {
-                source.SendDamage(new(target));
-            }
-        }
-    }
-
-    public void ExecuteMoveThenAttackAction(IDamageSource unit, List<Vector2Int> moveRoute, Vector2Int targetCell)
-    {
-        if (unit == null)
-            return;
-
-        // Сначала движение
-        if (moveRoute != null && moveRoute.Count > 0)
-        {
-            MoveObject(unit as IMoveable, moveRoute);
-        }
-
-        // Затем атака
-        ExecuteAttackAction(unit, targetCell);
-    }
-
-    // ActionHandler factory methods
-    public IActionHandler GetMoveActionHandler(UnitModel unit)
-    {
-        return _actionHandlerFactory.CreateMoveHandler(unit);
-    }
-
-    public IActionHandler GetRangedAttackHandler(UnitModel unit)
-    {
-        return _actionHandlerFactory.CreateRangedAttackHandler(unit);
-    }
-
-    public IActionHandler GetMoveThenAttackHandler(UnitModel unit)
-    {
-        return _actionHandlerFactory.CreateMoveThenAttackHandler(unit);
-    }
-
-    internal bool CanRangeAttack(IDamageSource damageSource, UnitModel unitModel)
-    {
-      return  true;
-    }
-
-    internal bool CanMoveThenAttack(IDamageSource damageSource, UnitModel unitModel)
-    {
-        return true;
-    }
 }
 public class GameModelDebugger : GameModel
 {
-    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory) 
-        : base(factory, movement, actionHandlerFactory)
+    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement) 
+        : base(factory, movement )
     {
         Debug.Log("GameModel is ready");
     }

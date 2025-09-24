@@ -8,7 +8,6 @@ public class GridViewModel : IGridViewModel
 {
      private TurnSystem _turnSystem;
     private MovementSystem _movementSystem;
-    private GameViewModel _gameViewModel;
     private GameModel _gameModel;
     private IWorldToCellProvider worldToCellProvider;
     public Action<Dictionary<CellState, List<Vector2Int>>> PreviewChanged { get; set; }

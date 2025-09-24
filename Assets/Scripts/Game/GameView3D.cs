@@ -17,6 +17,7 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private Dictionary<UnitModel, UnitView3D> _models = new();
     private GameViewModel _gameVM;
+    private IWorldToCellProvider _worldToCellProvider;
     
     [Inject]
     public void Construct(GameViewModel gameVM, UnitViewFactory unitViewFactory)
@@ -94,21 +95,20 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
         {
             hoverable.Hover();
         }
-        
-        // Передаем координаты в ViewModel для обработки
-        _gameVM?.OnGameViewObjectHovered(gameViewObject);
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _gameVM?.HandleCellHovered(coords);
     }
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
-        // Передаем координаты в ViewModel для обработки
-        _gameVM?.OnGameViewObjectSelected(gameViewObject);
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _gameVM?.HandleCellSelected(coords);
     }
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
-        // Передаем координаты в ViewModel для обработки
-        _gameVM?.OnActionPerformed(gameViewObject);
+        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _gameVM?.HandleCellActionPerformed(coords);
     }
 
     private void OnActionPreviewChanged(ActionPreview preview)

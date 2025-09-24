@@ -72,7 +72,6 @@ public class CellInputHandler : MonoBehaviour
         if (TryGetHit(out var hit))
         {
             IGameViewObject gameViewObject = null;
-            // Определяем, что выбрано в зависимости от режима
             if (selectionMode == SelectionMode.UnitThenGrid)
             {
                 // Сначала пытаемся найти юнит
@@ -91,7 +90,6 @@ public class CellInputHandler : MonoBehaviour
             
             if (gameViewObject != null && gameViewObject.IsSelectable)
             {
-                // Notify GameView3D about selected object
                 _gameView3D?.HandleGameViewObjectSelected(gameViewObject);
             }
         }
