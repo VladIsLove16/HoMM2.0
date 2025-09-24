@@ -565,6 +565,14 @@ namespace Tests.PlayMode.GridContents.Units
                 coords = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
                 return true;
             }
+
+            public bool ToGridPair(Vector3 position, out KeyValuePair<Vector2Int, Vector2Int> coords)
+            {
+                var key = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
+                var value = new Vector2Int(Mathf.RoundToInt(position.x+1), Mathf.RoundToInt(position.z));
+                coords = new(key, value);
+                return true;
+            }
         }
     }
 }
