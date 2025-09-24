@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable, IMoveable
+public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable, IMoveable, IRangedAttacker, IAttacker
 {
     public UnitModel(UnitStats stats,UnitType unitType, int x, int y, int amount, bool isPlayer)
     {
@@ -35,6 +35,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public int Y => Position.Value.y;
     public ReactiveProperty<int> Amount { get; } = new();
     public ReactiveProperty<bool> CanAct { get; } = new(true);
+    public ReactiveProperty<bool> CanAttack { get; } = new(true);
     public ReactiveProperty<bool> CanMove { get; } = new(true);
     public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
     public List<StatusEffectType> InvulnerableEffects;
@@ -47,11 +48,11 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public ReactiveProperty<UnitType> UnitType=new();
     private StatusEffectManager _statusEffectManager = new();
 
-    bool ICombatObject.IsBlueTeam => IsBlueTeam.Value;
-    bool IDamagable.IsBlueTeam => IsBlueTeam.Value;
+    bool IGridContent.IsBlueTeam => IsBlueTeam.Value;
     UnitStats ICombatObject.Stats => ModifiedStats;
-
-
+    int IMoveable.MoveSpeed => ModifiedStats.MoveSpeed;
+    bool IAttacker.CanAttack => CanAttack.Value;
+    int IRangedAttacker.AttackRange => ModifiedStats.AttackRange;
     UnitType ICombatObject.UnitType => UnitType.Value;
 
     Vector2Int IGridContent.Position
@@ -211,4 +212,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     {
         return AppliedEffects;
     }
+
+   
 }

@@ -1,11 +1,14 @@
 ﻿public enum CellState
 {
-    moveAvailable,
+    reachableCell,
     accessibleRoutePoint,
     inaccessibleRoutePoint,
     selected,
     hovered,
     normal,
     None,
-    attackTarget
+    attackTarget,
+    hoveredMyTurn,
+    hoveredNotMyTurn,
+    enemyReachableCell
 }

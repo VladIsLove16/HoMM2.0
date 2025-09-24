@@ -105,4 +105,24 @@ public class SingleGridRenderer : IGridCellRenderer
     {
         throw new System.NotImplementedException();
     }
+
+    public void Bind(GameViewModel viewModel)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void Unbind(GameViewModel viewModel)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void Bind(IGridViewModel gameViewModel)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void Unbind(IGridViewModel gameViewModel)
+    {
+        throw new System.NotImplementedException();
+    }
 }

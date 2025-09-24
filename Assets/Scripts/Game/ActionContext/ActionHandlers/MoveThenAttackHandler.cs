@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -110,11 +111,16 @@ public class MoveThenAttackHandler : IActionHandler
         return moveRoute;
     }
 
+    internal bool CanExecute(ActionContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+
     //public List<Vector2Int> GetAvailableTargetCells()
     //{
     //    var units = _gameModel.GetUnits();
     //    var availableTargets = new List<Vector2Int>();
-        
+
     //    foreach (var unit in units)
     //    {
     //        ActionContext ctx = new ActionContext { TargetCell = unit.Position, TargetObject = unit, AbilityUsed = null };
@@ -123,7 +129,7 @@ public class MoveThenAttackHandler : IActionHandler
     //            availableTargets.Add(unit.Position);
     //        }
     //    }
-        
+
     //    return availableTargets;
     //}
 }

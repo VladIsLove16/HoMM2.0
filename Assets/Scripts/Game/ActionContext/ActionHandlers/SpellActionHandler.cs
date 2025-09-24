@@ -1,6 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
+public class SpellHandlerFactory : PlaceholderFactory<IEffectApplier, SpellActionHandler>
+{
+    [Inject] private DiContainer _container;
+
+    public override SpellActionHandler Create(IEffectApplier unit)
+    {
+        var handler = new SpellActionHandler(new SpellCasterService(new()));
+
+        _container.Inject(handler);
+
+        return handler;
+    }
+}
 
 public class SpellActionHandler : IActionHandler
 {
@@ -74,5 +89,10 @@ public class SpellActionHandler : IActionHandler
     ActionPreview IActionHandler.GetPreview(ActionContext ctx)
     {
         throw new System.NotImplementedException();
+    }
+
+    internal bool CanExecute(ActionContext ctx)
+    {
+        throw new NotImplementedException();
     }
 }

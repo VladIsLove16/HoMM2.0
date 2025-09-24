@@ -1,9 +1,11 @@
 ﻿public class AttackContext
 {
     public IDamagable Target;
-    public AttackContext(IDamagable target)
+    public bool IsRanged;
+    public AttackContext(IDamagable target, bool isRanged = false)
     {
         Target = target;
+        IsRanged = isRanged;
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -31,17 +32,13 @@ public class RangedAttackHandler : IActionHandler
     {
         _activeUnit = unitModel;
     }
-    private bool IsInRange(ActionContext ctx)
+    private bool CanShoot(Vector2Int from, Vector2Int to, int range)
     {
-        var from = _activeUnit.Position;
-        var to = ctx.TargetCell;
+        _movementSystem.GetRouteIgnoringObstacles(from, to, out var route);
+        var dist = _movementSystem.GetRouteCost(route);
+        return dist <= range && _movementSystem.HasLineOfSight(from, to);
+    }
 
-        return _movementSystem.HasLineOfSight(from, to);
-    }
-    private bool IsSameTeam(IDamagable damageable)
-    {
-        return _activeUnit.IsBlueTeam == damageable.IsBlueTeam;
-    }
     public bool CanShowPreview(ActionContext ctx)
     {
         return ctx.TargetObject !=null;
@@ -49,36 +46,42 @@ public class RangedAttackHandler : IActionHandler
 
     public void Execute(ActionContext ctx)
     {
-        // ActionHandler теперь только определяет логику, выполнение через GameModel
-        if(_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target)
+        if (_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target)
         {
-            source.SendDamage(new(target));
+            source.SendDamage(new(target, true));
         }
+        else
+            throw new UnityException("_activeUnit is IDamageSource source && ctx.TargetObject is IDamagable target not true");
     }
 
-    public ActionPreview GetPreview(ActionContext ctx)
+    internal bool CanExecute(ActionContext ctx)
     {
-        DamageContext damage = null;
-        if (_activeUnit is IDamageSource source)
-        {
-            damage = source.SimulateSendDamage(new(ctx.TargetObject));
-        }
-        var reachable = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-        return new ActionPreview
-        {
-            MoveRoute = new(){ _activeUnit.Position },
-            InaccessibleRoute = new(),
-            ReachableCells = reachable,
-            IsActionAvailable = !IsSameTeam(ctx.TargetObject),
-            Damage = damage
-        };
+        throw new NotImplementedException();
     }
+
+    //public ActionPreview GetPreview(ActionContext ctx)
+    //{
+    //    DamageContext damage = null;
+    //    if (_activeUnit is IDamageSource source)
+    //    {
+    //        damage = source.SimulateSendDamage(new(ctx.TargetObject));
+    //    }
+    //    var reachable = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
+    //    return new ActionPreview
+    //    {
+    //        MoveRoute = new(){ _activeUnit.Position },
+    //        InaccessibleRoute = new(),
+    //        ReachableCells = reachable,
+    //        IsActionAvailable = !IsSameTeam(ctx.TargetObject),
+    //        Damage = damage
+    //    };
+    //}
 
     //public List<Vector2Int> GetAvailableTargetCells()
     //{
     //    var units = _gameModel.GetUnits();
     //    var availableTargets = new List<Vector2Int>();
-        
+
     //    foreach (var unit in units)
     //    {
     //        if (!IsSameTeam(unit) && IsInRange(new ActionContext { TargetCell = unit.Position, TargetObject = unit }))
@@ -86,7 +89,7 @@ public class RangedAttackHandler : IActionHandler
     //            availableTargets.Add(unit.Position);
     //        }
     //    }
-        
+
     //    return availableTargets;
     //}
 

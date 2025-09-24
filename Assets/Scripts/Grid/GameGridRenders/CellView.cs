@@ -9,7 +9,7 @@ public class CellView : MonoBehaviour, IGameViewObject
     private Renderer _renderer;
     [SerializeField] private MeshRenderer _hoverRenderer;
     [SerializeField] private MeshRenderer _routePointRenderer;
-    private IReadOnlyDictionary<CellState, CellMaterials> _materials;
+    private IReadOnlyDictionary<CellState, CellMaterial> _materials;
     [SerializeField] private List<CellState> cellStates = new();
 
     public bool IsHoverable => true;
@@ -23,7 +23,7 @@ public class CellView : MonoBehaviour, IGameViewObject
     {
         UpdateView();
     }
-    internal void Init(IReadOnlyDictionary<CellState, CellMaterials> materials)
+    internal void Init(IReadOnlyDictionary<CellState, CellMaterial> materials)
     {
         _materials = materials;
     }
@@ -74,9 +74,9 @@ public class CellView : MonoBehaviour, IGameViewObject
         {
             SetMaterial(_materials[CellState.selected].Material);
         }
-        else if (cellStates.Contains(CellState.moveAvailable))
+        else if (cellStates.Contains(CellState.reachableCell))
         {
-            SetMaterial(_materials[CellState.moveAvailable].Material);
+            SetMaterial(_materials[CellState.reachableCell].Material);
         }
         else
             SetMaterial(_materials[CellState.normal].Material);

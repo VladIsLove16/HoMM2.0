@@ -5,20 +5,14 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-public class MoveActionHandlerFactory : PlaceholderFactory<ICombatObject, MoveActionHandler>
+public class MoveActionHandlerFactory : PlaceholderFactory<ActionContext, MoveActionHandler>
 {
     [Inject] private DiContainer _container;
 
-    public override MoveActionHandler Create(ICombatObject unit)
+    public override MoveActionHandler Create(ActionContext ctx)
     {
-        // Создаём нужный подтип
-        MovementSystem movementSystem = _container.Resolve<MovementSystem>();
-        movementSystem.HasLineOfSight(new Vector2Int(0,0), new Vector2Int(1,1));
-        var handler = new MoveActionHandlerDebugger(unit, movementSystem);
 
-        _container.Inject(handler);
-
-        return handler;
+        return new MoveActionHandler(ctx);
     }
 }
 
@@ -39,11 +33,6 @@ public class MoveActionHandler : IActionHandler
         _movementSystem = movementSystem;
         reachableCells = _movementSystem.GetReachableCells(model.Position, model.Stats.MoveSpeed);
     }
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        return ctx.TargetObject == null;
-    }
-
     public void Execute(ActionContext ctx)
     {
         // ActionHandler теперь только определяет логику, выполнение через GameModel
@@ -106,5 +95,10 @@ public class MoveActionHandler : IActionHandler
         int moveSpeed = _activeUnit.Stats.MoveSpeed;
         var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveSpeed);
         return moveRoute;
+    }
+
+    public bool CanExecute(ActionContext ctx)
+    {
+        throw new System.NotImplementedException();
     }
 }

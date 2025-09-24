@@ -16,7 +16,9 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
 
     private void OnActionPreviewChanged(ActionPreview preview)
     {
-            Show(preview);
+        if (preview .Damage == null)
+            return;
+        Show(preview);
     }
 
     private void Show(ActionPreview info)

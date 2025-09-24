@@ -14,6 +14,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private GameController _gameController;
     [SerializeField] private GameNetworkCommandGateway _gameNetworkCommandGateway;
     [SerializeField] private GameView3D _gameView3D;
+    [SerializeField] private CellInputHandler _cellInputHandler;
     [SerializeField] private AttackActionPanel _attackActionPanel;
     [SerializeField] private UnitTurnPanelView _MVVMUnitTurnPanel;
     [SerializeField] private InGameUI _inGameUI;
@@ -22,7 +23,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private CellView cellPrefab;
     [SerializeField] private GameObject singleGridPrefab;
     [SerializeField] private UnitDefinitionSO[] _unitDatas;
-    [SerializeField] private List<CellMaterials> _materials;
+    [SerializeField] private List<CellMaterial> _materials;
     [SerializeField] private List<StatusEffectData> statusEffectDatas;
     [SerializeField] private MaterialProvider materialProvider;
     [SerializeField] private UnitNetworkService unitNetworkService;
@@ -36,17 +37,16 @@ public class GameLogicMonoInstaller : MonoInstaller
         BindStartup();
         BindServices();
         BindConfigurationProviders();
-        BindGridRenderer();
         BindModels();
         BindViewModels();
+        BindGridRenderer();
         BindViews();
         BindInputHandlers();
     }
 
     private void BindInputHandlers()
     {
-        Container.Bind<CellInputHandler>().AsSingle();
-        // PlayerInputHandler removed - input now handled by GameViewModel events
+        Container.Bind<CellInputHandler>().FromInstance(_cellInputHandler).  AsSingle();
     }
 
     private void BindModels()
@@ -54,8 +54,8 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameModel>().To<GameModel>().AsSingle().NonLazy();
         Container.Bind<IMaterialProvider>().To<MaterialProvider>().FromInstance(materialProvider);
 
-        Dictionary<CellState, CellMaterials> cellMaterials = _materials.ToDictionary(x => x.CellState);
-        Container.Bind<IReadOnlyDictionary<CellState, CellMaterials>>().FromInstance(cellMaterials);
+        Dictionary<CellState, CellMaterial> cellMaterials = _materials.ToDictionary(x => x.CellState);
+        Container.Bind<IReadOnlyDictionary<CellState, CellMaterial>>().FromInstance(cellMaterials);
 
         Dictionary<UnitType, UnitDefinitionSO> unitDatas = _unitDatas.ToDictionary(x => x.UnitType);
         Container.Bind<IReadOnlyDictionary<UnitType, UnitDefinitionSO>>().FromInstance(unitDatas);
@@ -74,6 +74,7 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameViewModel>().To<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitViewModelFactory>().AsSingle();
+        Container.Bind<IGridViewModel>().To<GridViewModel>().AsSingle();
     }
 
     private void BindViews()
@@ -87,6 +88,8 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<IAttackActionPanel>().FromInstance(_attackActionPanel).AsSingle();
 
         // Presentation services removed - views now subscribe directly to GameViewModel
+
+        // Overlay VM + Facade removed in favor of direct VM->Renderer binding
 
         // View factories
         Container.Bind<UnitViewFactory>().AsSingle();
@@ -167,6 +170,9 @@ public class GameLogicMonoInstaller : MonoInstaller
                 BindPerCell();
                 break;
         }
+        var renderer = Container.Resolve<IGridCellRenderer>();
+        var vm = Container.Resolve<IGridViewModel>();
+        renderer.Bind(vm);
     }
 
     private void BindPerCell()

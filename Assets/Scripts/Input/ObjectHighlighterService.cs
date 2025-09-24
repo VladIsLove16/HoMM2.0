@@ -12,7 +12,7 @@ public class ObjectHighlighterService
     //    //_gameInputHandler.CellSelected += OnSelectPerformed;
     //    //_gameInputHandler.CellActionPerformed += OnActionPerformed;
     //}
-    //public void OnColliderChanged(Collider collider)
+    //public void OnColliderChanged(_lastHoveredCollider collider)
     //{
     //    IHoverable hoverable = collider.GetComponent<IHoverable>();
     //    if (hoverable != null)

@@ -152,6 +152,8 @@ public class MovementSystem
 
     public List<Vector2Int> GetAccessibleRoutePoints(List<Vector2Int> route,int moveSpeed)
     {
+        if (route.Count == 0)
+            return route;
         var tempRoute = route.ToList();
         var resultRoute = new List<Vector2Int>();
         float cost = 0;
@@ -177,7 +179,6 @@ public class MovementSystem
 
         foreach (var pos in line)
         {
-            // Пропускаем начальную и конечную точки
             if (pos == from || pos == to)
                 continue;
 

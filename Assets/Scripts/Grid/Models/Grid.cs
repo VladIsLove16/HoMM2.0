@@ -99,6 +99,10 @@ public class Grid<TGridObject> {
         GetXY(worldPosition, out x, out y);
         return new Vector2Int(x,y);
     }
+    public TGridObject[,] GetGridObjects()
+    {
+        return gridArray;
+    }
 
     internal bool IsInBounds(Vector2Int vector2Int)
     {

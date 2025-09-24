@@ -5,5 +5,5 @@ using UnityEngine;
 public interface IActionHandler
 {
     void Execute(ActionContext ctx);
-    ActionPreview GetPreview(ActionContext ctx);
+    bool CanExecute(ActionContext ctx);
 }

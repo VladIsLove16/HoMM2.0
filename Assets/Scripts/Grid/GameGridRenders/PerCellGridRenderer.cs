@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEngine.UI.Image;
 [Serializable]
-public class CellMaterials
+public class CellMaterial
 {
     public CellState CellState;
     public Material Material;
@@ -13,15 +13,15 @@ public class CellMaterials
 }
 public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
 {
-    List<CellView> instances = new List<CellView>();
-    CellView prefab;
-    GameObject parent;
-    float ySize = 1f;
-    Grid<CellView> grid;
-    private Dictionary<CellState,CellMaterials> materials = new ();
-    private Dictionary<CellState,List<Vector2Int>> _cellStates = new ();
-    private Dictionary<Vector2Int,CellState> previousStates = new ();
-    public PerCellGridRenderer(CellView prefab, GameObject parent, List<CellMaterials> materials)
+    private CellView prefab;
+    private GameObject parent;
+    private float ySize = 1f;
+
+    private Grid<CellView> grid;
+    private Dictionary<CellState, CellMaterial> materials = new();
+    private Dictionary<CellState, List<Vector2Int>> _cellStates = new();
+    private IGridViewModel _vm;
+    public PerCellGridRenderer(CellView prefab, GameObject parent, List<CellMaterial> materials)
     {
         this.parent = parent;
         this.prefab = prefab;
@@ -30,26 +30,48 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
 
     public void Clear()
     {
-        foreach (CellView child in instances)
+        if (grid == null)
+            return;
+        foreach (CellView child in grid.GetGridObjects())
         {
             GameObject.Destroy(child.gameObject);
         }
+        _cellStates.Clear();
     }
 
-    public void Render(int width, int height, float cellSize,Vector3 origin, float padding)
+    public void Render(int width, int height, float cellSize, Vector3 origin, float padding)
     {
         Clear();
         grid = new Grid<CellView>(width, height, cellSize, origin, padding, CreateCellView);
-        for(int i = 0; i< width; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                previousStates[new Vector2Int(i,j)] = CellState.normal;
-            }
-        }
         
+
     }
-  
+
+    public void Bind(IGridViewModel viewModel)
+    {
+        if (_vm != null) Unbind(_vm);
+        _vm = viewModel;
+        if (_vm == null) return;
+        _vm.PreviewChanged += OnreviewChanged;
+        Debug.Log("binded");
+    }
+
+    public void Unbind(IGridViewModel viewModel)
+    {
+        if (_vm == null) return;
+        _vm.PreviewChanged -= OnreviewChanged;
+        _vm = null;
+    }
+
+    private void OnreviewChanged(Dictionary<CellState, List<Vector2Int>> cells)
+    {
+        foreach(var stateCells in cells)
+        {
+            RemoveStates(stateCells.Key);
+            AddStates(stateCells.Value, stateCells.Key);
+        }
+    }
+
     public bool ToGrid(Vector3 position,out Vector2Int coords)
     {
         coords = grid.GetXY(position);
@@ -141,7 +163,6 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
         CellView cellView =  GameObject.Instantiate(prefab, grid.GetWorldPosition(x, y), Quaternion.identity, parent.transform);
         cellView.name += $"{x} {y}";
         cellView.transform.localScale = new Vector3(grid.GetCellSize(), ySize, grid.GetCellSize());
-        instances.Add(cellView);
         cellView.Init(materials);
         return cellView;
     }

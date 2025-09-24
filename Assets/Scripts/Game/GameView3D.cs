@@ -88,6 +88,7 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
     // MVVM input handling methods - работа только с коллайдерами и координатами
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
+        Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
         // Подсвечиваем объект при наведении, если нужно
         if (gameViewObject is IHoverable hoverable)
         {

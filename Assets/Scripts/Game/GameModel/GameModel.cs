@@ -15,10 +15,8 @@ public class GameModel
     private readonly MovementSystem _movement;
     private readonly ActionHandlerFactory _actionHandlerFactory;
     protected GridXZ<GameCell> _grid;
-    private UnitModelFactory unitModelFactory;
     private MovementSystem movementSystem;
-    private ActionHandlerFactory actionHandlerFactory;
-
+        
     [Inject]
     public GameModel(UnitModelFactory factory, MovementSystem movement, ActionHandlerFactory actionHandlerFactory)
     {
@@ -130,7 +128,7 @@ public class GameModel
         MoveObject(unit, moveRoute);
     }
 
-    public void ExecuteAttackAction(UnitModel attacker, Vector2Int targetCell)
+    public void ExecuteAttackAction(IDamageSource attacker, Vector2Int targetCell)
     {
         if (attacker == null)
             return;
@@ -146,7 +144,7 @@ public class GameModel
         }
     }
 
-    public void ExecuteMoveThenAttackAction(UnitModel unit, List<Vector2Int> moveRoute, Vector2Int targetCell)
+    public void ExecuteMoveThenAttackAction(IDamageSource unit, List<Vector2Int> moveRoute, Vector2Int targetCell)
     {
         if (unit == null)
             return;
@@ -154,7 +152,7 @@ public class GameModel
         // Сначала движение
         if (moveRoute != null && moveRoute.Count > 0)
         {
-            MoveObject(unit, moveRoute);
+            MoveObject(unit as IMoveable, moveRoute);
         }
 
         // Затем атака
@@ -177,6 +175,15 @@ public class GameModel
         return _actionHandlerFactory.CreateMoveThenAttackHandler(unit);
     }
 
+    internal bool CanRangeAttack(IDamageSource damageSource, UnitModel unitModel)
+    {
+      return  true;
+    }
+
+    internal bool CanMoveThenAttack(IDamageSource damageSource, UnitModel unitModel)
+    {
+        return true;
+    }
 }
 public class GameModelDebugger : GameModel
 {

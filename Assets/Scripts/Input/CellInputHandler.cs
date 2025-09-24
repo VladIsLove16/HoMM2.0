@@ -7,7 +7,7 @@ using Zenject;
 
 // Publishes high-level input signals (hover, select, action) in grid coordinates.
 // Knows nothing about turns, rendering, or game rules.
-public class CellInputHandler
+public class CellInputHandler : MonoBehaviour
 {
     [SerializeField] private LayerMask mouseColliderLayerMask;
     public enum SelectionMode { GridOnly, UnitThenGrid }
@@ -16,9 +16,9 @@ public class CellInputHandler
     private InputSystem_Actions inputActions;
 
     [SerializeField] private Camera mainCamera;
-    [Inject] private GameView3D _gameView3D;
+    [SerializeField] private GameView3D _gameView3D;
     private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
-
+    private Collider _lastHoveredCollider;
     public Action ActionCanceled; // optional external consumer
 
     private void Awake()
@@ -47,12 +47,21 @@ public class CellInputHandler
     {
         if (TryGetHit(out var hit))
         {
-            var gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
+            Debug.Log("hit " + hit.collider.gameObject.name);
+            if (_lastHoveredCollider == hit.collider)
+            {
+                Debug.Log("(_lastHoveredCollider == hit.collider)");
+                return;
+            }
+            var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
             if (gameViewObject != null && gameViewObject.IsHoverable)
             {
-                // Notify GameView3D about hovered object
+                Debug.Log(gameViewObject.transform.gameObject.name + " hovered");
                 _gameView3D?.HandleGameViewObjectHovered(gameViewObject);
             }
+            else
+                Debug.Log(hit.collider.gameObject.name + " is not IGameViewObject");
+            _lastHoveredCollider = hit.collider;
         }
     }
 
@@ -67,17 +76,17 @@ public class CellInputHandler
             if (selectionMode == SelectionMode.UnitThenGrid)
             {
                 // Сначала пытаемся найти юнит
-                gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
+                gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
                 if (gameViewObject == null)
                 {
                     // Если юнит не найден, ищем клетку
-                    gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
+                    gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
                 }
             }
             else if (selectionMode == SelectionMode.GridOnly)
             {
                 // Только клетки
-                gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
+                gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
             }
             
             if (gameViewObject != null && gameViewObject.IsSelectable)
@@ -128,7 +137,8 @@ public class CellInputHandler
     {
         var cam = mainCamera != null ? mainCamera : Camera.main;
         var ray = cam.ScreenPointToRay(Input.mousePosition);
-        return Physics.Raycast(ray, out hit, 999f, mouseColliderLayerMask);
+        Physics.Raycast(ray, out hit, 999f, mouseColliderLayerMask);
+        return hit.collider != null;
     }
 
     private bool IsPointerOverUI()
