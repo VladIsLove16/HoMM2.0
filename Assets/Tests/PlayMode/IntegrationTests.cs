@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor;
 using UniRx;
-using NUnit.Compatibility;
 
 namespace Tests.PlayMode.GridContents.Units
 {
@@ -550,7 +549,28 @@ namespace Tests.PlayMode.GridContents.Units
 
         private class MockStatusEffect : StatusEffect
         {
-            public MockStatusEffect(StatusEffectType type) : base(null, null, null) { }
+            public MockStatusEffect(StatusEffectType type)
+                : base(CreateData(type), CreateDummyTarget(), null) { }
+
+            private static StatusEffectData CreateData(StatusEffectType t)
+            {
+                var data = ScriptableObject.CreateInstance<StatusEffectData>();
+                var typeField = typeof(StatusEffectData).GetField("type", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                typeField?.SetValue(data, t);
+                return data;
+            }
+
+            private static IEffectable CreateDummyTarget()
+            {
+                return new DummyEffectable();
+            }
+
+            private class DummyEffectable : IEffectable
+            {
+                public void ApplyEffect(StatusEffect effect) { }
+                public void RemoveEffect(StatusEffect statusEffect) { }
+                public IReadOnlyList<StatusEffect> GetAppliedEffects() { return Array.Empty<StatusEffect>(); }
+            }
         }
 
         private class MockWorldToCellProvider : IWorldToCellProvider

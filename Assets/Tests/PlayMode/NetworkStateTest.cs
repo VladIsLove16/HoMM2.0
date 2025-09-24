@@ -11,7 +11,7 @@ namespace Tests.PlayMode
     /// </summary>
     public class NetworkStateTest
     {
-        [Test]
+        [UnityTest]
         public IEnumerator TestNetworkManagerState()
         {
             Debug.Log("=== Network State Test Started ===");
@@ -62,7 +62,7 @@ namespace Tests.PlayMode
             yield return null;
         }
         
-        [Test]
+        [UnityTest]
         public IEnumerator TestGameControllerInitialization()
         {
             Debug.Log("=== GameController Initialization Test Started ===");
