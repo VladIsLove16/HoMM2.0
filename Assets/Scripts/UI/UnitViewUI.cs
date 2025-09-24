@@ -38,7 +38,11 @@ public class UnitViewUI : MonoBehaviour, IDisposable
         UpdateHealth();
         UpdateAmount();
 
-        transform.rotation = new(Camera.main.transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+        var mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            transform.rotation = new(mainCam.transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+        }
     }
 
     private void UpdateHealth()

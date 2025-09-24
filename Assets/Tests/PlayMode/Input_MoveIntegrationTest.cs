@@ -41,7 +41,7 @@ public class Input_MoveIntegrationTest : ZenjectIntegrationTestFixture
         Assert.NotNull(unit);
 
         bool movedRaised = false;
-        _model.UnitMovedByRoute += (content, route) => { if (content == unit) movedRaised = true; };
+        unit.MovedByRoute += ( route) => {  movedRaised = true; };
 
         var route = new List<Vector2Int> { new Vector2Int(2,1), new Vector2Int(3,1) };
 

@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor;
 using UniRx;
-using NUnit.Compatibility;
 
 namespace Tests.PlayMode.GridContents.Units
 {
@@ -550,7 +549,46 @@ namespace Tests.PlayMode.GridContents.Units
 
         private class MockStatusEffect : StatusEffect
         {
-            public MockStatusEffect(StatusEffectType type) : base(null, null, null) { }
+            public MockStatusEffect(StatusEffectType type)
+                : base(CreateData(type), CreateDummyTarget(), null) { }
+
+            private static StatusEffectData CreateData(StatusEffectType t)
+            {
+                var data = ScriptableObject.CreateInstance<StatusEffectData>();
+                var typeField = typeof(StatusEffectData).GetField("type", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                typeField?.SetValue(data, t);
+                return data;
+            }
+
+            private static IEffectable CreateDummyTarget()
+            {
+                return new DummyEffectable();
+            }
+
+            private class DummyEffectable : IEffectable
+            {
+                public UnitStats ModifiedStats { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+                public bool IsBlueTeam => throw new System.NotImplementedException();
+
+                public Vector2Int Position { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+                public GridContentType GridContentType => throw new System.NotImplementedException();
+
+                public void ApplyEffect(StatusEffect effect) { }
+                public void RemoveEffect(StatusEffect statusEffect) { }
+                public IReadOnlyList<StatusEffect> GetAppliedEffects() { return new List<StatusEffect>(); }
+
+                public void RecieveDamage(DamageContext context)
+                {
+                    throw new System.NotImplementedException();
+                }
+
+                public void SimulateRecieveDamage(DamageContext context)
+                {
+                    throw new System.NotImplementedException();
+                }
+            }
         }
 
         private class MockWorldToCellProvider : IWorldToCellProvider

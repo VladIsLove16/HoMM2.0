@@ -1182,6 +1182,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 439c7162533bc6e4981605a051622295, type: 2}
   - {fileID: 11400000, guid: 86da8a9724ca2de4986c1a3fdb7a34fa, type: 2}
   GameMode: 1
+  _gridWidth: 10
+  _gridHeight: 10
 --- !u!4 &931324541
 Transform:
   m_ObjectHideFlags: 0
@@ -1573,6 +1575,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 439c7162533bc6e4981605a051622295, type: 2}
   - {fileID: 11400000, guid: 86da8a9724ca2de4986c1a3fdb7a34fa, type: 2}
   acceptStartingGameWithoutClients: 1
+  width: 0
+  height: 0
 --- !u!4 &1301063131
 Transform:
   m_ObjectHideFlags: 0
