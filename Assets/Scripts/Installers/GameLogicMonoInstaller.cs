@@ -151,7 +151,6 @@ public class GameLogicMonoInstaller : MonoInstaller
             Container.Bind<IActionExecutor>().To<LocalActionExecutor>().AsSingle();
         else
             Container.Bind<IActionExecutor>().To<NetworkActionExecutor>().AsSingle();
-        Container.Bind<CommandService>().AsSingle();
     }
 
     private void BindGridRenderer()

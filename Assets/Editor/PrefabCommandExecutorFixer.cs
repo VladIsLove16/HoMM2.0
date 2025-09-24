@@ -56,11 +56,11 @@ public static class PrefabCommandExecutorFixer
                 //    changed = true;
                 //}
                 // Ensure NetworkTransform (useful for transform sync)
-                if (root.GetComponent<Unity.Netcode.Components.NetworkTransform>() == null)
-                {
-                    root.AddComponent<Unity.Netcode.Components.NetworkTransform>();
-                    changed = true;
-                }
+                //if (root.GetComponent<Unity.Netcode.Components.NetworkTransform>() == null)
+                //{
+                //    root.AddComponent<Unity.Netcode.Components.NetworkTransform>();
+                //    changed = true;
+                //}
             }
             else
             {

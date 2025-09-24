@@ -567,6 +567,7 @@ namespace Tests.PlayMode.GridContents.Units
 
             private class DummyEffectable : IEffectable
             {
+<<<<<<< Current (Your changes)
                 public UnitStats ModifiedStats { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
                 public bool IsBlueTeam => throw new System.NotImplementedException();
@@ -588,6 +589,11 @@ namespace Tests.PlayMode.GridContents.Units
                 {
                     throw new System.NotImplementedException();
                 }
+=======
+                public void ApplyEffect(StatusEffect effect) { }
+                public void RemoveEffect(StatusEffect statusEffect) { }
+                public IReadOnlyList<StatusEffect> GetAppliedEffects() { return Array.Empty<StatusEffect>(); }
+>>>>>>> Incoming (Background Agent changes)
             }
         }
 
