@@ -8,6 +8,13 @@ using Zenject;
 
 public class MoveThenAttackHandler : IActionHandler
 {
+    public ActionType ActionType
+    {
+        get
+        {
+            return ActionType.MoveThenAttack;
+        }
+    }
     private MovementSystem _movementSystem;
     private GameModel _gameModel;
     private MoveActionHandler _moveActionHandler;
@@ -21,44 +28,44 @@ public class MoveThenAttackHandler : IActionHandler
     }
     public void Execute(ActionContext ctx)
     {
-        //_moveActionHandler.Execute(ctx);
-        //ActionContext afterMover = new();
-        _attackActionHandler.Execute(ctx);
+        GetContexts(ctx,out var moveActionContext,out var attackActionContext);
+        _moveActionHandler.Execute(moveActionContext);
+        _attackActionHandler.Execute(attackActionContext);
     }
     public bool CanExecute(ActionContext ctx)
     {
-        if (!_moveActionHandler.CanExecute(ctx))
+        GetContexts(ctx, out var moveActionContext, out var attackActionContext);
+        if (!_moveActionHandler.CanExecute(moveActionContext))
             return false;
-        if (!_attackActionHandler.CanExecute(ctx))
+        if (!_attackActionHandler.CanExecute(attackActionContext))
             return false;
         return true;
     }
+
+    public PreviewResult GetPreview(ActionContext actionContext)
+    {
+        PreviewResult previewResult = new();
+
+        GetPreviews(actionContext, out var movePreview, out var attackPreview);
+        previewResult.Add(movePreview.ToDictionary());
+        previewResult.Add(attackPreview.ToDictionary());
+        return previewResult;
+    }
+
+    private void GetPreviews(ActionContext actionContext, out PreviewResult movePreview, out PreviewResult attackPreview)
+    {
+        ActionContext moveActionContext, attackActionContext;
+        GetContexts(actionContext, out moveActionContext, out attackActionContext);
+
+        movePreview = _moveActionHandler.GetPreview(moveActionContext);
+        attackPreview = _attackActionHandler.GetPreview(attackActionContext);
+    }
+
+    private static void GetContexts(ActionContext actionContext, out ActionContext moveActionContext, out ActionContext attackActionContext)
+    {
+        moveActionContext = new(actionContext);
+        moveActionContext.TargetCell = actionContext.AttackFromCell;
+        attackActionContext = new(actionContext);
+        attackActionContext.FromCell = actionContext.AttackFromCell;
+    }
 }
-    //public bool CanShowPreview(ActionContext ctx)
-    //{
-    //    return ctx.TargetObject != null;
-    //}
-   
-    //public ActionPreview GetPreview(ActionContext ctx)
-    //{
-    //    int moveSpeed = _activeUnit.Stats.MoveSpeed;
-    //    var route = GetRoute(ctx);
-    //    var moveRoute = GetMoveRoute(ctx);
-    //    var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-    //    var reachableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-
-    //    DamageContext damage = null;
-    //    if(_activeUnit is IDamageSource source)
-    //    {
-    //        damage = source.SimulateSendDamage(new(ctx.TargetObject));
-    //    }
-
-    //    return new ActionPreview
-    //    {
-    //        MoveRoute = moveRoute,
-    //        InaccessibleRoute = inaccessRoute,
-    //        ReachableCells = reachableCells,
-    //        IsActionAvailable = CanHandle(ctx),
-    //        Damage = damage
-    //    };
-

@@ -100,8 +100,7 @@ public class GameController : NetworkBehaviour, IInitializable
         foreach (var unit in _gameModel.GetUnits())
             _turnSystem.AddCombatUnit(unit);
 
-        _gameModel.UnitSpawned += p => _turnSystem.AddCombatUnit(p.UnitModel);
-        _gameModel.UnitDied += p => _turnSystem.RemoveCombatUnit(p.UnitModel);
+        _gameModel.GameChange_UnitSpawned += p => _turnSystem.AddCombatUnit(p.UnitModel);
 
         // Синий цвет закреплён за хостом
         _turnSystem.ConfigureLocalSide(isHostBlueTeam: _isHost, myTeamMaterial: _hostBlueTeamMaterial);

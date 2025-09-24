@@ -7,15 +7,14 @@ using Debug = UnityEngine.Debug;
 
 public class GameModel
 {
-    public event Action<UnitModelCreatedParams> UnitSpawned;
-    public event Action<ContentDiedParams> UnitDied;
-    public event Action<IGridContent, List<Vector2Int>> UnitMovedByRoute;
-    public event Action<GridXZ<GameCell>> GridInitialized;
+    public event Action<GridXZ<GameCell>> GameChange_Initialized;
+    public Action<UnitModelCreatedParams> GameChange_UnitSpawned;
+
     private readonly UnitModelFactory _unitFactory;
     private readonly MovementSystem _movement;
     protected GridXZ<GameCell> _grid;
     private MovementSystem movementSystem;
-        
+
     [Inject]
     public GameModel(UnitModelFactory factory, MovementSystem movement)
     {
@@ -27,7 +26,7 @@ public class GameModel
     {
         _grid = new GridXZ<GameCell>(width, height, CreateEmptyGameGridObject);
         _movement.Init(_grid);
-        GridInitialized?.Invoke(_grid);
+        GameChange_Initialized?.Invoke(_grid);
     }
     protected virtual GameCell CreateEmptyGameGridObject(GridXZ<GameCell> grid, int x, int y)
     {
@@ -52,10 +51,9 @@ public class GameModel
         var unit = _unitFactory.Create(spawnParams);
         cell.AddContent(unit);
 
-        // Транслируем смерть модели в событие удаления
-        unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
-            var unitModelCreatedParams = new UnitModelCreatedParams(unit);
-        UnitSpawned?.Invoke(unitModelCreatedParams);
+        //unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
+        var unitModelCreatedParams = new UnitModelCreatedParams(unit);
+        GameChange_UnitSpawned?.Invoke(unitModelCreatedParams);
         Debug.Log("unit spawned " + new Vector2Int(spawnParams.X, spawnParams.Y));
         return new(true);
     }
@@ -68,7 +66,7 @@ public class GameModel
         var currentCell = _grid.GetGridObject(gridContent.Position.x, gridContent.Position.y);
         currentCell.RemoveContent(gridContent);
         gridContent.MoveByRoute(path);
-        UnitMovedByRoute?.Invoke(gridContent, path);
+        //UnitMovedByRoute?.Invoke(gridContent, path);
     }
 
     public (int, int) GetRandomEmpty()
@@ -102,6 +100,7 @@ public class GameModel
         }
         return units;
     }
+
 }
 public class GameModelDebugger : GameModel
 {

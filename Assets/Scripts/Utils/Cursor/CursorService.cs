@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Zenject;
@@ -10,7 +11,7 @@ public class CursorService : ICursorService
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
-    private GameViewModel _gameViewModel;
+    private ActionResolver _actionResolver;
     
     public CursorService(List<CursorStateTexture> cursorStateTextures)
     {
@@ -19,15 +20,15 @@ public class CursorService : ICursorService
     }
     
     [Inject]
-    public void Construct(GameViewModel gameViewModel)
+    public void Construct(ActionResolver actionResolver)
     {
-        _gameViewModel = gameViewModel;
-        _gameViewModel.ActionPreviewChanged += OnActionPreviewChanged;
+        _actionResolver = actionResolver;
+        actionResolver.ActionResolved += OnActionPreviewChanged;
     }
-    
-    private void OnActionPreviewChanged(ActionPreview preview)
+
+    private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
     {
-        SetCursorState(preview.IsActionAvailable ? 
+        SetCursorState(tuple.Item1.CanExecute(tuple.Item2) ?
             CursorState.ActionAvailable : CursorState.ActionNotAvailable);
     }
 
@@ -74,9 +75,9 @@ public class CursorService : ICursorService
     
     public void Dispose()
     {
-        if (_gameViewModel != null)
+        if (_actionResolver != null)
         {
-            _gameViewModel.ActionPreviewChanged -= OnActionPreviewChanged;
+            _actionResolver.ActionResolved-=OnActionPreviewChanged;
         }
     }
 

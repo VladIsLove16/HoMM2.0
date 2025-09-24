@@ -1,9 +1,9 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 public interface IActionHandler
 {
     void Execute(ActionContext ctx);
     bool CanExecute(ActionContext ctx);
+    PreviewResult GetPreview(ActionContext actionContext);
+    ActionType ActionType { get; }
 }

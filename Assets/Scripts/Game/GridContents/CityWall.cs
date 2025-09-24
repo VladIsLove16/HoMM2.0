@@ -8,5 +8,7 @@ public class CityWall : IGridContent, IBlockable, IBlocksLineOfSight
 
     public GridContentType GridContentType => throw new System.NotImplementedException();
 
+    public bool IsBlueTeam => throw new System.NotImplementedException();
+
     public bool CanMoveThrough() => false;
 }

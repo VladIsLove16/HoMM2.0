@@ -1,5 +1,4 @@
 using JetBrains.Annotations;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
@@ -31,6 +30,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     // Синхронизация состояний удалена — только командная модель
 
     [Inject] private GameModel _gameModel;
+    [Inject] private GameViewModel _gameViewModel;
     [Inject] private TurnSystem _turnSystem;
     [Inject] private GameController _gameController;
     [Inject] private SceneTransitionDataService _sceneTransitionDataService;
@@ -84,98 +84,6 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         Debug.Log("new server stage : " + stage);
     }
-
-    public OperationResult TrySendMoveRequest(Vector2Int startCell, List<Vector2Int> gridRoute)
-    {
-        if (gridRoute == null || gridRoute.Count == 0) return new OperationResult(false, "gridRoute == null || gridRoute.Count == 0");
-        if (NetworkManager.Singleton == null) return new OperationResult(false, "NetworkManager.Singleton == null");
-        // Проверка права хода по цвету активного юнита (синий == хост)
-        var active = _turnSystem.ActiveObject.Value;
-        bool isHostLocal = NetworkManager.Singleton.IsServer || NetworkManager.LocalClientId == NetworkManager.ServerClientId;
-        if (active != null && active.IsBlueTeam != isHostLocal)
-            return new OperationResult(false, "Not your turn");
-
-        // На хосте можно применить напрямую без RPC
-        if (NetworkManager.Singleton.IsServer)
-        {
-            _serverService.ApplyServerMove(startCell, gridRoute);
-            MoveAcknowledgeClientRpc(startCell, gridRoute.ToArray());
-            return new OperationResult(true, ""); ;
-        }
-
-        if (!IsSpawned)
-        {
-            return new OperationResult(false, "[GameNetworkCommandGateway] NetworkObject is not spawned yet. Skipping send."); ;
-        }
-        MoveRequestServerRpc(startCell, gridRoute.ToArray());
-        return new OperationResult(true, "");
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void MoveRequestServerRpc(Vector2Int startCell, Vector2Int[] gridRoute, ServerRpcParams rpcParams = default)
-    {
-        if (gridRoute == null || gridRoute.Length == 0) return;
-        // Проверяем право хода на сервере по цвету активного юнита
-        var active = _turnSystem.ActiveObject.Value;
-        if (active != null)
-        {
-            bool senderIsHost = rpcParams.Receive.SenderClientId == NetworkManager.ServerClientId;
-            if (active.IsBlueTeam != senderIsHost) return;
-        }
-        _serverService.ApplyServerMove(startCell, new List<Vector2Int>(gridRoute));
-        MoveAcknowledgeClientRpc(startCell, gridRoute);
-    }
-
-    [ClientRpc]
-    private void MoveAcknowledgeClientRpc(Vector2Int startCell, Vector2Int[] gridRoute)
-    {
-        _clientService.ApplyClientMove(startCell, gridRoute);
-    }
-
-
-    public bool TrySendAttackRequest(Vector2Int attackerCell, Vector2Int targetCell)
-    {
-        if (NetworkManager.Singleton == null) return false;
-        var active = _turnSystem.ActiveObject.Value;
-        bool isHostLocal = NetworkManager.Singleton.IsServer || NetworkManager.LocalClientId == NetworkManager.ServerClientId;
-        if (active != null && active.IsBlueTeam != isHostLocal) return false;
-
-        if (NetworkManager.Singleton.IsServer)
-        {
-            _serverService.ApplyServerAttack(attackerCell, targetCell);
-            AttackAcknowledgeClientRpc(attackerCell, targetCell);
-            return true;
-        }
-
-        if (!IsSpawned)
-        {
-            Debug.LogWarning("[GameNetworkCommandGateway] NetworkObject is not spawned yet. Skipping attack send.");
-            return false;
-        }
-
-        AttackRequestServerRpc(attackerCell, targetCell);
-        return true;
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void AttackRequestServerRpc(Vector2Int attackerCell, Vector2Int targetCell, ServerRpcParams rpcParams = default)
-    {
-        var active = _turnSystem.ActiveObject.Value;
-        if (active != null)
-        {
-            bool senderIsHost = rpcParams.Receive.SenderClientId == NetworkManager.ServerClientId;
-            if (active.IsBlueTeam != senderIsHost) return;
-        }
-        _serverService.ApplyServerAttack(attackerCell, targetCell);
-        AttackAcknowledgeClientRpc(attackerCell, targetCell);
-    }
-
-    [ClientRpc]
-    private void AttackAcknowledgeClientRpc(Vector2Int attackerCell, Vector2Int targetCell)
-    {
-        _clientService.ApplyClientAttack(attackerCell, targetCell);
-    }
-
 
     // ==== SPAWN SYNC (только при начальном сетапе через батч) ====
     public bool TrySendSpawnUnit(int x, int y, UnitType unitType, int amount, bool isPlayer)
@@ -482,7 +390,18 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         if (IsServer) return;
         _turnSystem.EndTurn();
     }
+    [ServerRpc(RequireOwnership = false)]
+    public void TrySendExecutionServerRpc(ActionType type, ActionContext actionContext)
+    {
+        if (_gameViewModel.CanExecute(type, actionContext))
+        {
+            _gameViewModel.Execute(type, actionContext);
+            ExecuteAcknowledgeClientRpc(type, actionContext);
+        }
+    }
+    [ClientRpc(RequireOwnership = false)]
+    public void ExecuteAcknowledgeClientRpc(ActionType type, ActionContext actionContext)
+    {
+        _gameViewModel.Execute(type, actionContext);
+    }
 }
-
-
-

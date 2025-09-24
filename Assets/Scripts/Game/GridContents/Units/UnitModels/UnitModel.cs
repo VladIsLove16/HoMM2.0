@@ -50,10 +50,23 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
 
     bool IGridContent.IsBlueTeam => IsBlueTeam.Value;
     UnitStats ICombatObject.Stats => ModifiedStats;
+    Action<ICombatObject> ICombatObject.Died
+    {
+        get
+        {
+            return CombatObjectDied;
+        }
+        set
+        {
+            CombatObjectDied = value;
+        }
+    }
+    UnitType ICombatObject.UnitType => UnitType.Value;
+
     int IMoveable.MoveSpeed => ModifiedStats.MoveSpeed;
+    bool IMoveable.CanFly => ModifiedStats.CanFly;
     bool IAttacker.CanAttack => CanAttack.Value;
     int IRangedAttacker.AttackRange => ModifiedStats.AttackRange;
-    UnitType ICombatObject.UnitType => UnitType.Value;
 
     Vector2Int IGridContent.Position
     {
@@ -62,6 +75,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     }
     public GridContentType GridContentType => GridContentType.unit;
     public Action Died;
+    public Action<ICombatObject> CombatObjectDied;
     public Action<DamageContext> Hitted;
     public Action<DamageContext> Attacked;
     public Action TurnStarted;
@@ -107,7 +121,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         Attacked?.Invoke(damageContext);
         return damageContext;
     }
-    
     public DamageContext SimulateSendDamage(AttackContext defender)
     {
         if (defender == null)
@@ -165,6 +178,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         if (Amount.Value <= 0)
         {
             Died?.Invoke();
+            CombatObjectDied?.Invoke(this);
         }
     }
     

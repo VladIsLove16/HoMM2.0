@@ -27,66 +27,8 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
         _gameVM = gameVM;
         _factory = unitViewFactory;
 
-        _gameVM.UnitSpawned += OnUnitSpawned;
-        _gameVM.UnitMovedByRoute += OnUnitMovedByRoute;
-        _gameVM.UnitAttacked += OnUnitAttacked;
-        _gameVM.UnitHit += OnUnitHit;
-        _gameVM.UnitDied += OnUnitDied;
-        _gameVM.ActionPreviewChanged += OnActionPreviewChanged;
-        _gameVM.CellHovered += OnCellHovered;
     }
 
-    private void OnUnitMovedByRoute(IViewModel viewModel, List<Vector3> route)
-    {
-        var view = _views[viewModel];
-        view.RequestMove(route);
-        Debug.Log("OnUnitMovedByRoute");
-    }
-
-    public virtual void OnUnitSpawned(IViewModel viewModel)
-    {
-        var view = _factory.Create(viewModel);
-        _views[viewModel] = view;
-        if(viewModel is UnitViewModel unitVM)
-        {
-            UnitModel unitModel = unitVM.Model;
-            _models[unitModel] = view;
-        }
-    }
-
-    // public void OnUnitRemoved(IViewModel viewModel)
-    // {
-    //     if (_views.TryGetValue(viewModel, out var view))
-    //     {
-    //         _views.Remove(viewModel);
-    //         if (view != null)
-    //         {
-    //             Destroy(view.gameObject);
-    //         }
-    //     }
-    // }
-
-    public bool TryGetView(UnitModel model, out UnitView3D view)
-    {
-        return _models.TryGetValue(model, out view);
-    }
-
-    // Placeholder handlers to satisfy subscriptions; real implementations likely exist elsewhere
-    private void OnUnitAttacked(IViewModel viewModel, DamageContext ctx) { }
-    private void OnUnitHit(IViewModel viewModel, DamageContext ctx) { }
-    private void OnUnitDied(IViewModel viewModel)
-    {
-        if (_views.TryGetValue(viewModel, out var view))
-        {
-            _views.Remove(viewModel);
-            if (view != null)
-            {
-                view.HandleDeath();
-            }
-        }
-    }
-
-    // MVVM input handling methods - работа только с коллайдерами и координатами
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
         Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
@@ -95,46 +37,34 @@ public class GameView3D : MonoBehaviour, IUnitViewResolver
         {
             hoverable.Hover();
         }
-        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         _gameVM?.HandleCellHovered(coords);
     }
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
-        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         _gameVM?.HandleCellSelected(coords);
     }
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
-        _worldToCellProvider.ToGrid(gameViewObject.transform.position, out var coords);
+        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         _gameVM?.HandleCellActionPerformed(coords);
     }
-
-    private void OnActionPreviewChanged(ActionPreview preview)
+    public bool TryGetView(UnitModel model, out UnitView3D view)
     {
-        // View only handles visual representation, not overlay logic
-        // Overlay logic is now handled by GameViewModel
+        if(_models.TryGetValue(model, out view))
+        return true;
+        return false;
     }
-
-    private void OnCellHovered(Vector2Int cellCoords)
-    {
-        // Handle cell hover logic if needed
-        // This could trigger additional visual feedback
-    }
-
 
     private void OnDestroy()
     {
         if (_gameVM != null)
         {
-            _gameVM.UnitSpawned -= OnUnitSpawned;
-            _gameVM.UnitMovedByRoute -= OnUnitMovedByRoute;
-            _gameVM.UnitAttacked -= OnUnitAttacked;
-            _gameVM.UnitHit -= OnUnitHit;
-            _gameVM.UnitDied -= OnUnitDied;
-            _gameVM.ActionPreviewChanged -= OnActionPreviewChanged;
-            _gameVM.CellHovered -= OnCellHovered;
         }
     }
+
+   
 }

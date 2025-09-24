@@ -5,6 +5,13 @@ using UnityEngine;
 using Zenject;
 public class SpellActionHandler : IActionHandler
 {
+    public ActionType ActionType
+    {
+        get
+        {
+            return ActionType.Spell;
+        }
+    }
     private IEffectApplier caster;
     private SpellCasterService spellCasterService;
     public SpellActionHandler(MovementSystem movementSystem ,GameModel gameModel)
@@ -80,5 +87,10 @@ public class SpellActionHandler : IActionHandler
     bool IActionHandler.CanExecute(ActionContext ctx)
     {
         return CanExecute(ctx);
+    }
+
+    PreviewResult IActionHandler.GetPreview(ActionContext actionContext)
+    {
+        throw new NotImplementedException();
     }
 }

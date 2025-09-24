@@ -23,8 +23,8 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
     // Removed direct GameView3D dependency - should work through GameViewModel events
     private UnitStatsViewModel _vm;
+    private CompositeDisposable _disposables  = new CompositeDisposable();
     private readonly List<Image> _statusEffectIcons = new();
-    private CompositeDisposable _disposables = new();
     [Inject] private List<StatusEffectData> statusEffectDatas;
     [Inject] private GameViewModel _gameViewModel;
     private Dictionary<string, StatusEffectData> _statusEffectDict;
@@ -33,13 +33,13 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     private void Start()
     {
         _statusEffectDict = statusEffectDatas.ToDictionary(se => se.name, se => se);
-        _gameViewModel.UnitStatsRequested += OnUnitStatsRequested;
+        _gameViewModel.UnitStatsRequested += OnGameViewModel_UnitStatsRequested;
         Hide();
     }
     
-    private void OnUnitStatsRequested(UnitModel unit)
+    private void OnGameViewModel_UnitStatsRequested(UnitViewModel unit)
     {
-        var vm = new UnitStatsViewModel(unit);
+        var vm = new UnitStatsViewModel(unit.Model);
         Init(vm);
     }
 
@@ -120,7 +120,7 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     {
         if (_gameViewModel != null)
         {
-            _gameViewModel.UnitStatsRequested -= OnUnitStatsRequested;
+            _gameViewModel.UnitStatsRequested -= OnGameViewModel_UnitStatsRequested;
         }
         _vm?.Dispose();
         _disposables.Dispose();

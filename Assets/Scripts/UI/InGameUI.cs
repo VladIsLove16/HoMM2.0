@@ -6,7 +6,7 @@ using Zenject;
 
 public class InGameUI : MonoBehaviour
 {
-    [Inject] private GameViewModel _gameViewModel;
+    [Inject] private TurnSystem _turnSystem;
     [SerializeField] private TextMeshProUGUI turnNumber;
     [SerializeField] private Animator turnNumberAnimator;
     [SerializeField] private Animator battleStateAnimator;
@@ -19,21 +19,20 @@ public class InGameUI : MonoBehaviour
     private void Init()
     {
         // Subscribe to GameViewModel events instead of direct domain access
-        _gameViewModel.UnitTurnStarted += OnUnitTurnStarted;
+        _turnSystem.ActiveObject.Subscribe(OnUnitTurnStarted);
         _subscribed = true;
     }
-    private void OnUnitTurnStarted(IViewModel unitViewModel)
+    private void OnUnitTurnStarted(ICombatObject combatObject)
     {
-        // Update UI based on turn changes
-        isMyTurnText.text = "Your Turn"; // This should be determined by GameViewModel
+        if(_turnSystem.IsMyTurn)
+            isMyTurnText.text = "Your Turn " + combatObject.ToString();
+        else
+            isMyTurnText.text = "Enemy Turn " + combatObject.ToString();
     }
 
     private void OnDestroy()
     {
-        if (_gameViewModel != null)
-        {
-            _gameViewModel.UnitTurnStarted -= OnUnitTurnStarted;
-        }
+        
     }
 
     public void OnTurnNumberChanged(int turn)

@@ -67,6 +67,7 @@ public class TurnSystem
         if (CombatUnits.Contains(unit)) return;
         UpdateBattleStateAndNotifyIfNeeded();
         CombatUnits.Add(unit);
+        unit.Died += RemoveCombatUnit;
     }
     public void RemoveCombatUnit(ICombatObject unit)
     {

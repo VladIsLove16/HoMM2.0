@@ -63,9 +63,10 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
         _vm = null;
     }
 
-    private void OnreviewChanged(Dictionary<CellState, List<Vector2Int>> cells)
+    private void OnreviewChanged(PreviewResult result)
     {
-        foreach(var stateCells in cells)
+        Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
+        foreach (var stateCells in cells)
         {
             RemoveStates(stateCells.Key);
             AddStates(stateCells.Value, stateCells.Key);
@@ -79,6 +80,19 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
             return true;
         else
             return false;
+    }
+
+    public bool ToGridPair(Vector3 position,out KeyValuePair<Vector2Int, Vector2Int> coordPair)
+    {
+        Vector2Int main = grid.GetXY(position);
+        if (!grid.IsInBounds(main))
+        {
+            coordPair = default;
+            return false;
+        }
+        Vector2Int mainClosestNeighbour = grid.GetClosestNeighbor(position,true);
+        coordPair = new(main, mainClosestNeighbour);
+        return true;
     }
 
     public Vector3 ToWorld(int x, int y)

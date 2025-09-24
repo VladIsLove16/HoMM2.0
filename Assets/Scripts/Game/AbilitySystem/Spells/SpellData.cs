@@ -6,10 +6,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Magic/Spell")]
 public class SpellData : ScriptableObject
 {
-    public string SpellName;
+    public SpellType SpellName;
     public int Damage;
     public DamageType DamageType;
     public List<StatusEffectData> StatusEffects;
     public SpellZoneType ZoneType;
 }
 public enum SpellZoneType { Cross, Quad, Circle, Target, Custom } 
+public enum SpellType { None,FireBall, MagicMissle}

@@ -69,13 +69,5 @@ public struct ActionPreview
         return "(" + cell.x + "," + cell.y + ")";
     }
 }
-public enum ActionType
-{
-    Attack,
-    RangedAttack,
-    Move,
-    NotReachableMove,
-    Default
-}
 
 

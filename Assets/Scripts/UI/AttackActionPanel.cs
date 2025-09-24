@@ -11,17 +11,17 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     public void Construct(GameViewModel gameViewModel)
     {
         _gameViewModel = gameViewModel;
-        _gameViewModel.ActionPreviewChanged += OnActionPreviewChanged;
+        _gameViewModel.DamageContextPreviewChanged += OnActionPreviewChanged;
     }
 
-    private void OnActionPreviewChanged(ActionPreview preview)
+    private void OnActionPreviewChanged(DamageContextPreview preview)
     {
-        if (preview .Damage == null)
+        if (preview.Damage == null)
             return;
         Show(preview);
     }
 
-    private void Show(ActionPreview info)
+    private void Show(DamageContextPreview info)
     {
         panelRoot.SetActive(true);
         damageText.text = $"Damage: {info.Damage.DamageAmount} \nDied: {info.Damage.DieAmount}";
@@ -37,7 +37,6 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     {
         if (_gameViewModel != null)
         {
-            _gameViewModel.ActionPreviewChanged -= OnActionPreviewChanged;
         }
     }
 }

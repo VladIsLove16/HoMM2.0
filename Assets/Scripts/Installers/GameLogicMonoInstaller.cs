@@ -63,10 +63,10 @@ public class GameLogicMonoInstaller : MonoInstaller
         // Domain/system-level services
         Container.Bind<UnitModelFactory>().AsSingle();
         Container.Bind<MovementSystem>().AsSingle();
+        Container.Bind<ActionResolver>().AsSingle();
         Container.Bind<TurnSystem>().To<TurnSystem>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
-        Container.Bind<ActionHandlerFactory>().AsSingle();
     }
 
     private void BindViewModels()
@@ -106,11 +106,6 @@ public class GameLogicMonoInstaller : MonoInstaller
         // Network services
         Container.Bind<UnitNetworkService>().FromInstance(unitNetworkService).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
-
-        // Action handler factories
-        Container.BindFactory<ICombatObject, MoveActionHandler, MoveActionHandlerFactory>();
-        Container.BindFactory<ICombatObject, RangedAttackHandler, RangedAttackHandlerFactory>();
-        Container.BindFactory<ICombatObject, MoveThenAttackHandler, MoveThenAttackHandlerFactory>();
 
         Container.Bind<Transform>()
                  .WithId("UnitsParent")
@@ -153,9 +148,9 @@ public class GameLogicMonoInstaller : MonoInstaller
         // Configure command execution services based on current game mode
         var mode = SceneTransitionDataService.Instance.CurrentGameMode;
         if (mode == GameMode.SinglePlayer)
-            Container.Bind<ICommandExecutor>().To<LocalCommandExecutor>().AsSingle();
+            Container.Bind<IActionExecutor>().To<LocalActionExecutor>().AsSingle();
         else
-            Container.Bind<ICommandExecutor>().To<NetworkCommandExecutor>().AsSingle();
+            Container.Bind<IActionExecutor>().To<NetworkActionExecutor>().AsSingle();
         Container.Bind<CommandService>().AsSingle();
     }
 

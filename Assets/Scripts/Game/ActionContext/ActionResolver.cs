@@ -1,19 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UniRx;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
 public class ActionResolver
 {
+    public event Action<(IActionHandler,ActionContext)> ActionResolved;
+
+
     private MoveThenAttackHandler MoveThenAttackHandler;
     private MoveActionHandler MoveActionHandler;
     private RangedAttackHandler RangedAttackHandler;
     private AttackActionHandler AttackActionHandler;
     private SpellActionHandler SpellActionHandler;
+
+    private Dictionary<ActionType, IActionHandler> commandDict = new();
     public ActionResolver(GameModel gameModel, MovementSystem movementSystem)
     {
         MoveThenAttackHandler = new(movementSystem, gameModel);
@@ -21,6 +28,15 @@ public class ActionResolver
         RangedAttackHandler = new(movementSystem, gameModel);
         AttackActionHandler = new(movementSystem, gameModel);
         SpellActionHandler = new(movementSystem, gameModel);
+        commandDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
+        commandDict.Add(ActionType.Attack, AttackActionHandler);
+        commandDict.Add(ActionType.Move, MoveActionHandler);
+        commandDict.Add(ActionType.RangedAttack, RangedAttackHandler);
+        commandDict.Add(ActionType.Spell, SpellActionHandler);
+    }
+    public IActionHandler Resolve(ActionType type, ActionContext actionContext)
+    {
+        return commandDict[type];
     }
     public bool Resolve(ActionContext ctx, out IActionHandler handler)
     {
@@ -30,6 +46,7 @@ public class ActionResolver
         if (resolvedHandlers.Count > 0)
         {
             handler = resolvedHandlers[0];
+            ActionResolved?.Invoke((handler,ctx));
             return true;
         }
         else

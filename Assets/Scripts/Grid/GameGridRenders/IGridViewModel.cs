@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IGridViewModel
 {
-   Action<Dictionary<CellState, List<Vector2Int>>> PreviewChanged { get; set; }
+   Action<PreviewResult> PreviewChanged { get; set; }
 }

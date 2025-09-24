@@ -14,7 +14,6 @@ public class UnitStatsViewModel : IDisposable
     public ReactiveCollection<StatusEffectViewModel> StatusEffects { get; }
 
     public readonly UnitModel Model;
-
     public UnitStatsViewModel(UnitModel model)
     {
         if (model == null)

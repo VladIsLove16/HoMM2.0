@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 public interface ICombatObject : IGridContent
@@ -7,4 +8,5 @@ public interface ICombatObject : IGridContent
     void EndTurn();
     UnitType UnitType { get; }
     UnitStats Stats { get; }
+    public Action<ICombatObject> Died { get; set; }
 }
