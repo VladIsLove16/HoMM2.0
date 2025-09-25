@@ -111,25 +111,8 @@ public class StatusEffect
 
     public void HandleRemove()
     {
-        try
-        {
-            var ctx = new EffectReactionContext(_target, _source);
-            ProcessTurnReactions(ctx, _data.OnRemove);
-            _target.RemoveEffect(this);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Error during StatusEffect removal: {ex.Message}");
-            // Fallback: принудительно удаляем эффект
-            try
-            {
-                _target.RemoveEffect(this);
-            }
-            catch
-            {
-                Debug.LogError("Failed to remove StatusEffect even with fallback");
-            }
-        }
+        var ctx = new EffectReactionContext(_target, _source);
+        ProcessTurnReactions(ctx, _data.OnRemove);
     }
 
     /// <summary>

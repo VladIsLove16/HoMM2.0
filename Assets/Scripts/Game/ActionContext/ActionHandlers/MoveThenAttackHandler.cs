@@ -69,3 +69,5 @@ public class MoveThenAttackHandler : IActionHandler
         attackActionContext.FromCell = actionContext.AttackFromCell;
     }
 }
+
+

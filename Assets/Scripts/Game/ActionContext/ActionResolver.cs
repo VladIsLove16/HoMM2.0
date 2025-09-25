@@ -20,7 +20,7 @@ public class ActionResolver
     private AttackActionHandler AttackActionHandler;
     private SpellActionHandler SpellActionHandler;
 
-    private Dictionary<ActionType, IActionHandler> commandDict = new();
+    private Dictionary<ActionType, IActionHandler> actionDict = new();
     public ActionResolver(GameModel gameModel, MovementSystem movementSystem)
     {
         MoveThenAttackHandler = new(movementSystem, gameModel);
@@ -28,15 +28,15 @@ public class ActionResolver
         RangedAttackHandler = new(movementSystem, gameModel);
         AttackActionHandler = new(movementSystem, gameModel);
         SpellActionHandler = new(movementSystem, gameModel);
-        commandDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
-        commandDict.Add(ActionType.Attack, AttackActionHandler);
-        commandDict.Add(ActionType.Move, MoveActionHandler);
-        commandDict.Add(ActionType.RangedAttack, RangedAttackHandler);
-        commandDict.Add(ActionType.Spell, SpellActionHandler);
+        actionDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
+        actionDict.Add(ActionType.Attack, AttackActionHandler);
+        actionDict.Add(ActionType.Move, MoveActionHandler);
+        actionDict.Add(ActionType.RangedAttack, RangedAttackHandler);
+        actionDict.Add(ActionType.Spell, SpellActionHandler);
     }
     public IActionHandler Resolve(ActionType type, ActionContext actionContext)
     {
-        return commandDict[type];
+        return actionDict[type];
     }
     public bool Resolve(ActionContext ctx, out IActionHandler handler)
     {

@@ -11,6 +11,10 @@ public class StatusEffectData : ScriptableObject
     [SerializeField] private Sprite sprite;
     [SerializeField] private StatusEffectType type;
     public StatusEffectType Type => type;
+    public void SetType(StatusEffectType type)
+    {
+        this.type = type;
+    }
     public Sprite Sprite => sprite;
 
 

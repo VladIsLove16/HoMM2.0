@@ -4,7 +4,62 @@ using UniRx;
 using UnityEngine;
 public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource, ICombatObject, IGridContent, IBlockable, IMoveable, IRangedAttacker, IAttacker
 {
-    public UnitModel(UnitStats stats,UnitType unitType, int x, int y, int amount, bool isPlayer)
+    public Action StatusEffectsChanged;
+    public Action<List<Vector2Int>> MovedByRoute;
+    Action<ICombatObject> ICombatObject.Died
+    {
+        get
+        {
+            return CombatObjectDied;
+        }
+        set
+        {
+            CombatObjectDied = value;
+        }
+    }
+   
+    public GridContentType GridContentType => GridContentType.unit;
+    public Action Died;
+    public Action<ICombatObject> CombatObjectDied;
+    public Action<DamageContext> Hitted;
+    public Action<DamageContext> Attacked;
+    public Action TurnStarted;
+    public Action HealthChanged;
+    public Action StatsChanged;
+    Vector2Int IGridContent.Position
+    {
+        get { return Position.Value; }
+        set { Position.SetValueAndForceNotify(value); }
+    }
+    public UnitStats BaseUnitStats { get; }
+    public UnitStats ModifiedStats { get; set; }
+    public ReactiveProperty<Vector2Int> Position { get; private set; } = new();
+    public int X => Position.Value.x;
+    public int Y => Position.Value.y;
+    public ReactiveProperty<int> Amount { get; } = new();
+    public ReactiveProperty<bool> CanAct { get; } = new(true);
+    public ReactiveProperty<bool> CanAttack { get; } = new(true);
+    public ReactiveProperty<bool> CanMove { get; } = new(true);
+    public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
+    public List<StatusEffectType> InvulnerableEffects;
+    public IReadOnlyList<StatusEffect> AppliedEffects => _appliedEffects;
+    public IReadOnlyList<StatusEffect> ActiveEffects => _statusEffectManager.ActiveEffects;
+
+    public ReactiveProperty<UnitType> UnitType=new();
+    private StatusEffectManager _statusEffectManager = new();
+    private List<StatusEffect> _appliedEffects = new();
+
+    bool IGridContent.IsBlueTeam => IsBlueTeam.Value;
+    UnitStats ICombatObject.Stats => ModifiedStats;
+   
+    UnitType ICombatObject.UnitType => UnitType.Value;
+
+    int IMoveable.MoveSpeed => ModifiedStats.MoveSpeed;
+    bool IMoveable.CanFly => ModifiedStats.CanFly;
+    bool IAttacker.CanAttack => CanAttack.Value;
+    int IRangedAttacker.AttackRange => ModifiedStats.AttackRange;
+
+    public UnitModel(UnitStats stats, UnitType unitType, int x, int y, int amount, bool isPlayer)
     {
         Position.Value = new Vector2Int(x, y);
         Amount.Value = amount;
@@ -28,60 +83,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         //}
         //;
     }
-    public UnitStats BaseUnitStats { get; }
-    public UnitStats ModifiedStats { get; set; }
-    public ReactiveProperty<Vector2Int> Position { get; private set; } = new();
-    public int X => Position.Value.x;
-    public int Y => Position.Value.y;
-    public ReactiveProperty<int> Amount { get; } = new();
-    public ReactiveProperty<bool> CanAct { get; } = new(true);
-    public ReactiveProperty<bool> CanAttack { get; } = new(true);
-    public ReactiveProperty<bool> CanMove { get; } = new(true);
-    public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
-    public List<StatusEffectType> InvulnerableEffects;
-    public IReadOnlyList<StatusEffect> AppliedEffects => _appliedEffects;
-    private List<StatusEffect> _appliedEffects = new();
-    public Action StatusEffectsChanged;
-    public Action<List<Vector2Int>> MovedByRoute;
-    public IReadOnlyList<StatusEffect> ActiveEffects => _statusEffectManager.ActiveEffects;
-
-    public ReactiveProperty<UnitType> UnitType=new();
-    private StatusEffectManager _statusEffectManager = new();
-
-    bool IGridContent.IsBlueTeam => IsBlueTeam.Value;
-    UnitStats ICombatObject.Stats => ModifiedStats;
-    Action<ICombatObject> ICombatObject.Died
-    {
-        get
-        {
-            return CombatObjectDied;
-        }
-        set
-        {
-            CombatObjectDied = value;
-        }
-    }
-    UnitType ICombatObject.UnitType => UnitType.Value;
-
-    int IMoveable.MoveSpeed => ModifiedStats.MoveSpeed;
-    bool IMoveable.CanFly => ModifiedStats.CanFly;
-    bool IAttacker.CanAttack => CanAttack.Value;
-    int IRangedAttacker.AttackRange => ModifiedStats.AttackRange;
-
-    Vector2Int IGridContent.Position
-    {
-        get { return Position.Value; }
-        set { Position.SetValueAndForceNotify(value); }
-    }
-    public GridContentType GridContentType => GridContentType.unit;
-    public Action Died;
-    public Action<ICombatObject> CombatObjectDied;
-    public Action<DamageContext> Hitted;
-    public Action<DamageContext> Attacked;
-    public Action TurnStarted;
-    public Action HealthChanged;
-    public Action StatsChanged;
-
     public void MoveByRoute(List<Vector2Int> route)
     {
         if (route == null)
@@ -107,7 +108,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public DamageContext SendDamage(AttackContext ctx)
     {
         if (Amount.Value <= 0)
-            throw new ArgumentException("Cant attack unit with 0 or less amount");
+            throw new InvalidOperationException("Cant attack unit with 0 or less amount");
         if (ctx == null)
             throw new ArgumentNullException(nameof(ctx), "AttackContext cannot be null");
             
@@ -209,8 +210,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     {
         if (statusEffect == null)
             throw new ArgumentNullException(nameof(statusEffect), "StatusEffect cannot be null");
-            
-        _statusEffectManager.Remove(statusEffect);
+          _statusEffectManager.Remove(statusEffect);
     }
 
     public bool CanMoveThrough()

@@ -17,10 +17,10 @@ public class CellInputHandler : MonoBehaviour
 
     [SerializeField] private Camera mainCamera;
     [SerializeField] private GameView3D _gameView3D;
+    [Inject] private TurnSystem turnSystem;
     private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
     private Collider _lastHoveredCollider;
     public Action ActionCanceled; // optional external consumer
-
     private void Awake()
     {
         if (mainCamera == null) mainCamera = Camera.main;
@@ -29,10 +29,30 @@ public class CellInputHandler : MonoBehaviour
     private void OnEnable()
     {
         if (inputActions == null) inputActions = new InputSystem_Actions();
-        inputActions.Enable();
+        turnSystem.BattleStateChanged += OnTurnSystem_BattleStateChanged;
+
         inputActions.Grid.MousePosition.performed += OnMouseMoved;
         inputActions.Grid.Select.performed += OnSelectPerformed;
         inputActions.Grid.Action.performed += OnActionPerformed;
+
+        inputActions.GridPlacement.Drag.started += OnDragStarted;
+        inputActions.GridPlacement.Drag.performed += OnDragPerformed;
+        inputActions.GridPlacement.Drag.canceled += OnDragCanceled;
+    }
+
+    private void OnTurnSystem_BattleStateChanged(BattleState state)
+    {
+        switch(state)
+        {
+            case BattleState.replacement:
+                inputActions.Grid.Disable();
+                inputActions.GridPlacement.Enable();
+                break;
+            case BattleState.inProgress:
+                inputActions.Grid.Enable();
+                inputActions.GridPlacement.Disable();
+                break;
+        }
     }
 
     private void OnDisable()
@@ -40,6 +60,9 @@ public class CellInputHandler : MonoBehaviour
         inputActions.Grid.MousePosition.performed -= OnMouseMoved;
         inputActions.Grid.Select.performed -= OnSelectPerformed;
         inputActions.Grid.Action.performed -= OnActionPerformed;
+        inputActions.GridPlacement.Drag.started -= OnDragStarted;
+        inputActions.GridPlacement.Drag.performed -= OnDragPerformed;
+        inputActions.GridPlacement.Drag.canceled -= OnDragCanceled;
         inputActions.Disable();
     }
 
@@ -130,6 +153,30 @@ public class CellInputHandler : MonoBehaviour
             ActionCanceled?.Invoke();
         }
     }
+    private void OnDragStarted(InputAction.CallbackContext ctx)
+    {
+        if (TryGetHit(out var hit))
+        {
+            var unitView = hit.collider.GetComponent<UnitView3D>();
+            if (unitView != null)
+                _gameView3D.BeginDrag(unitView);
+        }
+    }
+
+    private void OnDragPerformed(InputAction.CallbackContext ctx)
+    {
+        var worldPos = GetMouseWorldPosition();
+        _gameView3D.UpdateDrag(worldPos);
+    }
+
+    private void OnDragCanceled(InputAction.CallbackContext ctx)
+    {
+        if (TryGetHit(out var hit))
+        {
+            _gameView3D.EndDrag(hit.point);
+        }
+    }
+
 
     private bool TryGetHit(out RaycastHit hit)
     {
@@ -146,6 +193,15 @@ public class CellInputHandler : MonoBehaviour
         uiRaycastResults.Clear();
         EventSystem.current.RaycastAll(eventData, uiRaycastResults);
         return uiRaycastResults.Count > 0;
+    }
+    private Vector3 GetMouseWorldPosition()
+    {
+        var ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float enter))
+        {
+            return ray.GetPoint(enter);
+        }
+        return Vector3.zero;
     }
 }
 

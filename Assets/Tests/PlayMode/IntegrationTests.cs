@@ -41,7 +41,7 @@ namespace Tests.PlayMode.GridContents.Units
             // Создаем модель юнита
             _unitModel = new UnitModel(_baseStats, UnitType.Archer, baseX, baseY, baseAmount, true);
 
-            
+
             // Создаем ViewModel
             _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
 
@@ -60,7 +60,7 @@ namespace Tests.PlayMode.GridContents.Units
             {
                 UnityEngine.Object.DestroyImmediate(_baseStats);
             }
-            
+
             if (_gameObject != null)
             {
                 UnityEngine.Object.DestroyImmediate(_gameObject);
@@ -147,7 +147,7 @@ namespace Tests.PlayMode.GridContents.Units
             var route = new List<Vector2Int> { new Vector2Int(1, 1), new Vector2Int(2, 2), new Vector2Int(3, 3) };
             var movedEventInvoked = false;
 
-            _unitModel.MovedByRoute += (movedRoute) => 
+            _unitModel.MovedByRoute += (movedRoute) =>
             {
                 movedEventInvoked = true;
                 Assert.That(movedRoute, Is.EqualTo(route));
@@ -272,9 +272,9 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(2f); // Ждем завершения анимации
 
             // Assert - GameObject должен остаться активным
-            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+            Assert.That(_unitView.gameObject.activeSelf, Is.True,
                 "GameObject should remain active after attack that doesn't kill the unit");
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount),
                 "Unit amount should remain the same after non-lethal damage");
         }
 
@@ -291,9 +291,9 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(2f); // Ждем завершения анимации смерти
 
             // Assert - GameObject должен быть деактивирован
-            Assert.That(_unitView.gameObject.activeSelf, Is.False, 
+            Assert.That(_unitView.gameObject.activeSelf, Is.False,
                 "GameObject should be deactivated after unit death");
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0),
                 "Unit amount should be 0 after lethal damage");
         }
 
@@ -310,11 +310,11 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(2f);
 
             // Assert - GameObject должен остаться активным, количество уменьшилось
-            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+            Assert.That(_unitView.gameObject.activeSelf, Is.True,
                 "GameObject should remain active after partial stack death");
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1),
                 "Unit amount should decrease by 1");
-            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth),
                 "Remaining unit should have full health");
         }
 
@@ -324,7 +324,7 @@ namespace Tests.PlayMode.GridContents.Units
             // Arrange
             var onDeathInvoked = false;
             var onHitInvoked = false;
-            
+
             _unitViewModel.OnDeath.Subscribe(_ => onDeathInvoked = true);
             _unitViewModel.OnHit.Subscribe(_ => onHitInvoked = true);
 
@@ -354,7 +354,7 @@ namespace Tests.PlayMode.GridContents.Units
 
             // Assert - Анимация Hit должна играться
             var currentAnimatorState = animator.GetCurrentAnimatorStateInfo(0);
-            Assert.That(currentAnimatorState.IsName("Hit") || currentAnimatorState.IsName("Base Layer"), 
+            Assert.That(currentAnimatorState.IsName("Hit") || currentAnimatorState.IsName("Base Layer"),
                 "Hit animation should play or return to base state");
         }
 
@@ -371,17 +371,17 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(0.5f); // Ждем начала анимации смерти
 
             // Assert - GameObject еще активен, анимация смерти играется
-            Assert.That(_unitView.gameObject.activeSelf, Is.True, 
+            Assert.That(_unitView.gameObject.activeSelf, Is.True,
                 "GameObject should still be active during death animation");
-            
+
             var currentAnimatorState = animator.GetCurrentAnimatorStateInfo(0);
-            Assert.That(currentAnimatorState.IsName("Die"), 
+            Assert.That(currentAnimatorState.IsName("Die"),
                 "Death animation should be playing");
 
             yield return new WaitForSeconds(2f); // Ждем завершения анимации
 
             // Assert - Теперь GameObject деактивирован
-            Assert.That(_unitView.gameObject.activeSelf, Is.False, 
+            Assert.That(_unitView.gameObject.activeSelf, Is.False,
                 "GameObject should be deactivated after death animation");
         }
 
@@ -401,9 +401,9 @@ namespace Tests.PlayMode.GridContents.Units
 
             // Assert - Ratio должен обновиться
             var actualRatio = _unitViewModel.HealthRatio;
-            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio),
                 "Health ratio should be updated correctly after damage");
-            Assert.That(actualRatio, Is.EqualTo(0.5f), 
+            Assert.That(actualRatio, Is.EqualTo(0.5f),
                 "Health ratio should be 0.5 (50%) after 50 damage to 100 health");
         }
 
@@ -420,9 +420,9 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(0.1f);
 
             // Assert - Количество юнитов должно уменьшиться
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1),
                 "Unit amount should decrease by 1 after lethal damage");
-            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth),
                 "Remaining unit should have full health");
         }
 
@@ -439,14 +439,14 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(0.1f);
 
             // Assert - Количество и здоровье должны обновиться
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 2), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 2),
                 "Unit amount should decrease by 2 after killing 2 units");
-            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50),
                 "Remaining unit should have 50 health (100 - 50)");
-            
+
             var actualRatio = _unitViewModel.HealthRatio;
             var expectedRatio = 0.5f; // 50/100
-            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio),
                 "Health ratio should be 0.5 (50%) after multiple unit deaths");
         }
 
@@ -466,12 +466,12 @@ namespace Tests.PlayMode.GridContents.Units
             // Assert - Ratio должен обновиться, количество не изменится
             var actualRatio = _unitViewModel.HealthRatio;
             var expectedRatio = (float)(initialHealth - 30) / maxHealth;
-            
-            Assert.That(actualRatio, Is.EqualTo(expectedRatio), 
+
+            Assert.That(actualRatio, Is.EqualTo(expectedRatio),
                 "Health ratio should be updated correctly after partial damage");
-            Assert.That(actualRatio, Is.EqualTo(0.7f), 
+            Assert.That(actualRatio, Is.EqualTo(0.7f),
                 "Health ratio should be 0.7 (70%) after 30 damage to 100 health");
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(baseAmount), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(baseAmount),
                 "Unit amount should remain the same after non-lethal damage");
         }
 
@@ -479,7 +479,7 @@ namespace Tests.PlayMode.GridContents.Units
         public IEnumerator UnitViewUI_HealthRatio_WithExactKill_UpdatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(_unitModel.ModifiedStats.MaxHealth , DamageType.physical, null);
+            var damageContext = new DamageContext(_unitModel.ModifiedStats.MaxHealth, DamageType.physical, null);
             var initialAmount = _unitModel.Amount.Value;
 
             // Act - Убиваем точно одного юнита
@@ -488,13 +488,13 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(0.1f);
 
             // Assert - Количество уменьшится на 1, здоровье восстановится
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(initialAmount - 1),
                 "Unit amount should decrease by 1 after exact kill");
-            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth), 
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(_unitModel.BaseUnitStats.MaxHealth),
                 "Remaining unit should have full health");
-            
+
             var actualRatio = _unitViewModel.HealthRatio;
-            Assert.That(actualRatio, Is.EqualTo(1.0f), 
+            Assert.That(actualRatio, Is.EqualTo(1.0f),
                 "Health ratio should be 1.0 (100%) after next unit gets full health");
         }
 
@@ -511,13 +511,13 @@ namespace Tests.PlayMode.GridContents.Units
             yield return new WaitForSeconds(0.1f);
 
             // Assert - Все юниты должны умереть
-            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0), 
+            Assert.That(_unitModel.Amount.Value, Is.EqualTo(0),
                 "Unit amount should be 0 after overkill damage");
-            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(0), 
+            Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(0),
                 "Unit health should be 0 after overkill damage");
-            
+
             var actualRatio = _unitViewModel.HealthRatio;
-            Assert.That(actualRatio, Is.EqualTo(0f), 
+            Assert.That(actualRatio, Is.EqualTo(0f),
                 "Health ratio should be 0 when all units are dead");
         }
 
@@ -567,7 +567,6 @@ namespace Tests.PlayMode.GridContents.Units
 
             private class DummyEffectable : IEffectable
             {
-<<<<<<< Current (Your changes)
                 public UnitStats ModifiedStats { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
                 public bool IsBlueTeam => throw new System.NotImplementedException();
@@ -589,33 +588,28 @@ namespace Tests.PlayMode.GridContents.Units
                 {
                     throw new System.NotImplementedException();
                 }
-=======
-                public void ApplyEffect(StatusEffect effect) { }
-                public void RemoveEffect(StatusEffect statusEffect) { }
-                public IReadOnlyList<StatusEffect> GetAppliedEffects() { return Array.Empty<StatusEffect>(); }
->>>>>>> Incoming (Background Agent changes)
-            }
-        }
-
-        private class MockWorldToCellProvider : IWorldToCellProvider
-        {
-            public Vector3 ToWorld(int x, int y)
-            {
-                return new Vector3(x, 0, y);
             }
 
-            public bool ToGrid(Vector3 position, out Vector2Int coords)
+            private class MockWorldToCellProvider : IWorldToCellProvider
             {
-                coords = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
-                return true;
-            }
+                public Vector3 ToWorld(int x, int y)
+                {
+                    return new Vector3(x, 0, y);
+                }
 
-            public bool ToGridPair(Vector3 position, out KeyValuePair<Vector2Int, Vector2Int> coords)
-            {
-                var key = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
-                var value = new Vector2Int(Mathf.RoundToInt(position.x+1), Mathf.RoundToInt(position.z));
-                coords = new(key, value);
-                return true;
+                public bool ToGrid(Vector3 position, out Vector2Int coords)
+                {
+                    coords = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
+                    return true;
+                }
+
+                public bool ToGridPair(Vector3 position, out KeyValuePair<Vector2Int, Vector2Int> coords)
+                {
+                    var key = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
+                    var value = new Vector2Int(Mathf.RoundToInt(position.x + 1), Mathf.RoundToInt(position.z));
+                    coords = new(key, value);
+                    return true;
+                }
             }
         }
     }

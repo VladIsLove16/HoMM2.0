@@ -26,7 +26,6 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private List<CellMaterial> _materials;
     [SerializeField] private List<StatusEffectData> statusEffectDatas;
     [SerializeField] private MaterialProvider materialProvider;
-    [SerializeField] private UnitNetworkService unitNetworkService;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
 
@@ -80,7 +79,6 @@ public class GameLogicMonoInstaller : MonoInstaller
     private void BindViews()
     {
         Container.Bind<GameView3D>().FromInstance(_gameView3D).AsSingle().NonLazy();
-        Container.Bind<IUnitViewResolver>().FromInstance(_gameView3D).AsSingle();
         Container.Bind<UnitTurnPanelView>().FromInstance(_MVVMUnitTurnPanel).AsSingle();
         Container.Bind<GridView>().FromInstance(_gridView).AsSingle().NonLazy();
         Container.Bind<UnitStatsPanel>().FromInstance(_unitStatsPanel).AsSingle();
@@ -104,7 +102,6 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
         
         // Network services
-        Container.Bind<UnitNetworkService>().FromInstance(unitNetworkService).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
 
         Container.Bind<Transform>()

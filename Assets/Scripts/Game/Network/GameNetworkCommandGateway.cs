@@ -351,7 +351,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     {
         var sender = rpcParams.Receive.SenderClientId;
         _clientsUnitsReady.Add(sender);
-        StartBattleForAll();
+        
         //ServerStageChanged?.Invoke(_serverStage, _clientsUnitsReady.Count, NetworkManager.ConnectedClientsIds.Count);
         //if (_clientsUnitsReady.Count >= NetworkManager.ConnectedClientsIds.Count)
         //{
@@ -364,7 +364,6 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     public void StartBattleForAll()
     {
         // Старт боя на сервере/хосте
-        _gameController.RunBattle();
         // И на клиентах
         StartBattleClientRpc();
         // Ход определяется локально по цвету активного юнита (синий == хост)

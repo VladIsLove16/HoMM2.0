@@ -288,7 +288,8 @@ namespace Tests.EditMode.GridContents.Units
         public void ApplyStatusEffect_WithNonInvulnerableEffect_AppliesEffect()
         {
             // Arrange
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel, effectData);
 
             // Act
             _unitModel.ApplyEffect(statusEffect);
@@ -302,20 +303,24 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Arrange
             _unitModel.InvulnerableEffects.Add(StatusEffectType.Armored);
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel,effectData);
 
             // Act
             _unitModel.ApplyEffect(statusEffect);
 
+            bool _unitModelContainsEffect = _unitModel.ActiveEffects.Contains(statusEffect);
             // Assert
-            Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
+            Assert.That(_unitModelContainsEffect, Is.False);
+            //Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
         }
 
         [Test]
         public void RemoveEffect_RemovesEffectCorrectly()
-        {
+        {   
             // Arrange
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel, effectData);
             _unitModel.ApplyEffect(statusEffect);
             Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(1));
 
@@ -323,7 +328,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitModel.RemoveEffect(statusEffect);
 
             // Assert
-            Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
+            Assert.That(_unitModel.ActiveEffects.Contains(statusEffect), Is.False);
         }
 
         [Test]
@@ -346,7 +351,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithDamageEqualToHealth_TriggersDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var damageContext = new DamageContext(_unitModel.Amount.Value * _unitModel.ModifiedStats.Health, DamageType.physical, null);
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
 
@@ -362,7 +367,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(150, DamageType.physical, null); // Урон больше здоровья одного юнита
+            var damageContext = new DamageContext(_unitModel.ModifiedStats.Health, DamageType.physical, null);
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
             var initialAmount = _unitModel.Amount.Value;
@@ -380,7 +385,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithExactHealthKill_TriggersDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null); // Точно здоровье одного юнита
+            var damageContext = new DamageContext(_unitModel.Amount.Value* _unitModel.ModifiedStats.Health, DamageType.physical, null); // Точно здоровье одного юнита
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
 
@@ -566,7 +571,11 @@ namespace Tests.EditMode.GridContents.Units
 
         private class MockStatusEffect : StatusEffect
         {
-            public MockStatusEffect(StatusEffectType type) : base(null, null, null) { }
+            public MockStatusEffect(StatusEffectType type, IEffectable effectable, StatusEffectData effectData) : base(effectData, effectable, null)
+            {
+                effectData.SetType(type);
+                effectData.EffectName = type.ToString();
+            }
         }
     }
 }

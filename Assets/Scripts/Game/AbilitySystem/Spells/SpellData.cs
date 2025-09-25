@@ -13,4 +13,4 @@ public class SpellData : ScriptableObject
     public SpellZoneType ZoneType;
 }
 public enum SpellZoneType { Cross, Quad, Circle, Target, Custom } 
-public enum SpellType { None,FireBall, MagicMissle}
+public enum SpellType { None,Fireball, MagicMissle}

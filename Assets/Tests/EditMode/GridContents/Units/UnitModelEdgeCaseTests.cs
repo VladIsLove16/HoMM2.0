@@ -133,20 +133,17 @@ namespace Tests.EditMode.GridContents.Units
         }
 
         [Test]
-        public void SendDamage_WithZeroAmount_ReturnsZeroDamage()
+        public void SendDamage_WithZeroAmount_ThrowsException()
         {
             // Arrange
             _unitModel.Amount.Value = 0;
             var mockTarget = new MockDamagable();
             var attackContext = new AttackContext(mockTarget);
 
-            // Act
-            var damageContext = _unitModel.SendDamage(attackContext);
-
-            // Assert
-            Assert.That(damageContext.DamageAmount, Is.EqualTo(0));
+            // Act & Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => _unitModel.SendDamage(attackContext));
+            Assert.That(ex.Message, Does.Contain("amount"), "Ожидалось сообщение об ошибке, связанной с amount");
         }
-
         [Test]
         public void SendDamage_WithNegativeAmount_ThrowsException()
         {
@@ -156,7 +153,7 @@ namespace Tests.EditMode.GridContents.Units
             var attackContext = new AttackContext(mockTarget);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => _unitModel.SendDamage(attackContext));
+            Assert.Throws<InvalidOperationException>(() => _unitModel.SendDamage(attackContext));
         }
 
         [Test]

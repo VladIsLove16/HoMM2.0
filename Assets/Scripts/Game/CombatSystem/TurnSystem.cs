@@ -23,7 +23,7 @@ public class TurnSystem
     int turnTowards = 3;
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
-    public event Action<BattleState> OnBattleStateChanged;
+    public event Action<BattleState> BattleStateChanged;
     private BattleState _lastNotifiedBattleState = BattleState.inProgress;
     public BattleState BattleState
     {
@@ -47,7 +47,7 @@ public class TurnSystem
             if (current == BattleState.blueTeamWins || current == BattleState.redTeamWins)
             {
                 _lastNotifiedBattleState = current;
-                OnBattleStateChanged?.Invoke(current);
+                BattleStateChanged?.Invoke(current);
             }
             else
             {

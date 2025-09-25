@@ -17,10 +17,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
-    public UnitModel Model { get; private set; }
-
     public bool IsHoverable => true;
-
     public bool IsSelectable => true;
 
     private Dictionary<bool, Material> _teamMaterials;
@@ -40,7 +37,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     /// <param name="vm"></param>
     public void Init(UnitViewModel vm)
     {
-        Model = vm.Model;
         _vm = vm;
         // Резолвим исполнитель команд после того, как фабрика/вариант префаба добавил компонент
         SetMaterial(vm.TeamMaterial);
@@ -58,7 +54,18 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         // Реакция на смену команды/материалов
         _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_vm.TeamMaterial)).AddTo(_disposables);
     }
-    
+    public void SnapToCell(Vector3 worldPosition)
+    {
+        StopAllCoroutines();
+        actionQueue.Clear();
+        isExecuting = false;
+
+        transform.position = worldPosition;
+        Play(UnitAnimationState.Idle);
+
+        LogDebugEvent($"Snapped instantly to {worldPosition}");
+    }
+
     /// <summary>
     /// Публичный метод для проигрывания перемещения (вызов из GameView3D или сетевого слоя)
     /// </summary>
