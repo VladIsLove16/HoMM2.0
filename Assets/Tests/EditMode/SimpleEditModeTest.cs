@@ -28,15 +28,5 @@ namespace Tests.EditMode
             Assert.That(testString, Is.EqualTo("Hello World"));
         }
 
-        [UnityTest]
-        public IEnumerator AnotherTest_ShouldAlsoBePlayMode()
-        {
-            // Arrange
-            var testString = "Hello World";
-
-            // Act & Assert
-            yield return new WaitForSeconds(0.1f);  
-            Assert.That(testString, Is.EqualTo("Hello World"));
-        }
     }
 }

@@ -12,7 +12,8 @@ public class GridViewModel : IGridViewModel
     ActionResolver _actionResolver;
     MovementSystem _movementSystem;
     public Action<PreviewResult> PreviewChanged { get; set; }
-    public GridViewModel(TurnSystem turnSystem, ActionResolver actionResolver, MovementSystem movementSystem)
+    public Action<GridXZ<GameCell>> GridInited { get; set; }
+    public GridViewModel(TurnSystem turnSystem, ActionResolver actionResolver, MovementSystem movementSystem, GameModel model )
     {
         _turnSystem = turnSystem;
         _actionResolver = actionResolver;
@@ -20,6 +21,12 @@ public class GridViewModel : IGridViewModel
 
         _turnSystem.ActiveObject.Subscribe(ActiveObjectChanged);
         _actionResolver.ActionResolved += OnActionResolved;
+        model.GameChange_Initialized += OnGameModel_GridInilized;
+    }
+
+    private void OnGameModel_GridInilized(GridXZ<GameCell> xZ)
+    {
+        GridInited?.Invoke(xZ);
     }
 
     private void ActiveObjectChanged(ICombatObject combatObject)

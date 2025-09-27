@@ -5,6 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.PlayMode.Views
 {
+	[TestFixture]
 	public class GameView3D_PlayModeTests
 	{
 		[UnityTest]

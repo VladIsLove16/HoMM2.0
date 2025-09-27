@@ -1,4 +1,3 @@
-using Game.Network;
 using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
@@ -22,18 +21,17 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private GridView _gridView;
     [SerializeField] private CellView cellPrefab;
     [SerializeField] private GameObject singleGridPrefab;
-    [SerializeField] private UnitDefinitionSO[] _unitDatas;
-    [SerializeField] private List<CellMaterial> _materials;
+    [SerializeField] private GameUnitDatas _unitDatas;
     [SerializeField] private List<StatusEffectData> statusEffectDatas;
     [SerializeField] private MaterialProvider materialProvider;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
+    [SerializeField] private PerCellGridRenderer perCellGridRenderer;
 
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
     public override void InstallBindings()
     {
-        BindStartup();
         BindServices();
         BindConfigurationProviders();
         BindModels();
@@ -50,34 +48,29 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindModels()
     {
-        Container.Bind<GameModel>().To<GameModel>().AsSingle().NonLazy();
-        Container.Bind<IMaterialProvider>().To<MaterialProvider>().FromInstance(materialProvider);
-
-        Dictionary<CellState, CellMaterial> cellMaterials = _materials.ToDictionary(x => x.CellState);
-        Container.Bind<IReadOnlyDictionary<CellState, CellMaterial>>().FromInstance(cellMaterials);
-
-        Dictionary<UnitType, UnitDefinitionSO> unitDatas = _unitDatas.ToDictionary(x => x.UnitType);
+        IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatas = _unitDatas.ToDictionary();
         Container.Bind<IReadOnlyDictionary<UnitType, UnitDefinitionSO>>().FromInstance(unitDatas);
 
-        // Domain/system-level services
-        Container.Bind<UnitModelFactory>().AsSingle();
+        Container.Bind<UnitModelFactory>().AsSingle().NonLazy();
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<ActionResolver>().AsSingle();
-        Container.Bind<TurnSystem>().To<TurnSystem>().AsSingle();
+        Container.Bind<TurnSystem>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
+        Container.Bind<GameModel>().AsSingle().NonLazy();
     }
 
     private void BindViewModels()
     {
         Container.Bind<GameViewModel>().To<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
-        Container.Bind<UnitViewModelFactory>().AsSingle();
         Container.Bind<IGridViewModel>().To<GridViewModel>().AsSingle();
     }
 
     private void BindViews()
     {
+        Container.Bind<IMaterialProvider>().FromInstance(materialProvider);
+
         Container.Bind<GameView3D>().FromInstance(_gameView3D).AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelView>().FromInstance(_MVVMUnitTurnPanel).AsSingle();
         Container.Bind<GridView>().FromInstance(_gridView).AsSingle().NonLazy();
@@ -97,10 +90,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     {
         Container.Bind<GameNetworkCommandGateway>().FromInstance(_gameNetworkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
-        Container.Bind<ClientGameRpcService>().AsSingle();
-        Container.Bind<ServerGameRpcService>().AsSingle();
         Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
-        
         // Network services
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
 
@@ -109,45 +99,19 @@ public class GameLogicMonoInstaller : MonoInstaller
                  .FromInstance(_gameController.transform);
     }
 
-    private void BindStartup()
-    {
-        Container.Bind<ISessionRoleProvider>().To<NetcodeSessionRoleProvider>().AsSingle().NonLazy();
-
-        // Выбор стратегии старта по роли/режиму в рантайме
-        var roleProvider = Container.Instantiate<NetcodeSessionRoleProvider>();
-        switch (roleProvider.CurrentRole)
-        {
-            case SessionRole.Local:
-                Container.Bind<IGameStartupFlow>().To<SinglePlayerGameStartupFlow>().AsSingle();
-                Container.Bind<IUnitSpawner>().To<LocalUnitSpawner>().AsSingle();
-                Container.Bind<IBattleRunner>().To<LocalBattleRunner>().AsSingle();
-                break;
-            case SessionRole.Host:
-                Container.Bind<IGameStartupFlow>().To<HostGameStartupFlow>().AsSingle();
-                Container.Bind<IUnitSpawner>().To<NetworkUnitSpawner>().AsSingle();
-                Container.Bind<IBattleRunner>().To<NetworkBattleRunner>().AsSingle();
-                break;
-            case SessionRole.Client:
-                Container.Bind<IGameStartupFlow>().To<ClientGameStartupFlow>().AsSingle();
-                Container.Bind<IUnitSpawner>().To<NetworkUnitSpawner>().AsSingle();
-                Container.Bind<IBattleRunner>().To<NetworkBattleRunner>().AsSingle();
-                break;
-        }
-
-    }
-
     private void BindConfigurationProviders()
     {
         Container.Bind<SceneTransitionDataService>().FromMethod(_ => SceneTransitionDataService.Instance).AsSingle();
         Container.Bind<IGameModeProvider>().FromResolve().AsSingle();
-        Container.Bind<IBattleEntryProvider>().To<GameSceneConfigurationProvider>().AsSingle();
+        Container.Bind<GameSceneConfigurationProvider>().AsSingle();
 
-        // Configure command execution services based on current game mode
-        var mode = SceneTransitionDataService.Instance.CurrentGameMode;
+        var mode = SceneTransitionDataService.Instance != null ? SceneTransitionDataService.Instance.CurrentGameMode : GameMode.SinglePlayer;
         if (mode == GameMode.SinglePlayer)
-            Container.Bind<IActionExecutor>().To<LocalActionExecutor>().AsSingle();
+            Container.Bind<IGameCommandExecutor>().To<LocalGameCommandExecutor>().AsSingle();
         else
-            Container.Bind<IActionExecutor>().To<NetworkActionExecutor>().AsSingle();
+            Container.Bind<IGameCommandExecutor>().To<NetworkGameCommandExecutor>().AsSingle();
+        Container.Bind<ActionPipeline>().AsSingle();
+
     }
 
     private void BindGridRenderer()
@@ -169,13 +133,13 @@ public class GameLogicMonoInstaller : MonoInstaller
     private void BindPerCell()
     {
         Container.BindInterfacesTo<PerCellGridRenderer>()
-                 .AsSingle()
-                 .WithArguments(cellPrefab, _gridView.gameObject, _materials);
+                .FromInstance(perCellGridRenderer)
+                .AsSingle();
     }
 
     private void BindSingle()
     {
-        Container.Bind<IGridCellRenderer>().To<SingleGridRenderer>().AsSingle().WithArguments(cellPrefab, _materials);
+        Container.Bind<IGridCellRenderer>().To<SingleGridRenderer>().AsSingle();
     }
 
     private void UnBind()

@@ -7,7 +7,7 @@ using Debug = UnityEngine.Debug;
 
 public class GameModel
 {
-    public event Action<GridXZ<GameCell>> GameChange_Initialized;
+    public Action<GridXZ<GameCell>> GameChange_Initialized;
     public Action<UnitModelCreatedParams> GameChange_UnitSpawned;
 
     private readonly UnitModelFactory _unitFactory;
@@ -28,10 +28,7 @@ public class GameModel
         _movement.Init(_grid);
         GameChange_Initialized?.Invoke(_grid);
     }
-    protected virtual GameCell CreateEmptyGameGridObject(GridXZ<GameCell> grid, int x, int y)
-    {
-        return new GameCell(grid, x, y);
-    }
+  
 
     public IGridCell[,] GetAllCells()
     {
@@ -76,7 +73,7 @@ public class GameModel
         var currentCell = _grid.GetGridObject(gridContent.Position.x, gridContent.Position.y);
         currentCell.RemoveContent(gridContent);
         gridContent.Position = coords;
-        //UnitMovedByRoute?.Invoke(gridContent, path);
+
     }
 
     public (int, int) GetRandomEmpty()
@@ -86,7 +83,7 @@ public class GameModel
         return (0, 0); // fallback
     }
 
-    public GameCell GetCell(Vector2Int pos) => _grid.GetGridObject(pos.x, pos.y);
+    public IGridCell GetCell(Vector2Int pos) => _grid.GetGridObject(pos.x, pos.y);
 
     public void ClearGrid()
     {
@@ -110,34 +107,8 @@ public class GameModel
         }
         return units;
     }
-
-}
-public class GameModelDebugger : GameModel
-{
-    public GameModelDebugger(UnitModelFactory factory, MovementSystem movement) 
-        : base(factory, movement )
+    protected virtual GameCell CreateEmptyGameGridObject(GridXZ<GameCell> grid, int x, int y)
     {
-        Debug.Log("GameModel is ready");
-    }
-
-    protected override GameCell CreateEmptyGameGridObject(GridXZ<GameCell> grid, int x, int y)
-    {
-        //Debug.Log("Creating endCell in " + x + ":" + y);
-        return base.CreateEmptyGameGridObject(grid, x, y);
-    }
-    public override void InitializeGrid(int width, int height)
-    {
-        Debug.Log("Game model InitializeGrid called " + width + " " + height);
-        base.InitializeGrid(width, height);
-    }
-    public override OperationResult SpawnUnit(UnitSpawnParams spawnParams)
-    {
-        Debug.Log("model.SpawnUnit called" + spawnParams.UnitType);
-        return base.SpawnUnit(spawnParams);
-    }
-    public override void MoveObject(IMoveable unit, List<Vector2Int> path)
-    {
-         Debug.Log("MoveObject callled " + unit + " " + path.ToString());
-         base.MoveObject(unit, path);
+        return new GameCell(grid, x, y);
     }
 }

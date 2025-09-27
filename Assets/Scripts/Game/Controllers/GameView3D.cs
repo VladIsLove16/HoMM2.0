@@ -16,8 +16,15 @@ public class GameView3D : MonoBehaviour
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private GameViewModel _gameVM;
-    private IWorldToCellProvider _worldToCellProvider;
+    [Inject]    private IWorldToCellProvider _worldToCellProvider;
     private UnitView3D _draggedUnit;
+
+    // Test hooks - allow tests to inject lightweight handlers without reflection
+    public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
+    public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellSelected;
+
+    // Test-friendly setter for world-to-cell provider
+    public void SetWorldToCellProvider(IWorldToCellProvider provider) => _worldToCellProvider = provider;
 
     [Inject]
     public void Construct(GameViewModel gameVM, UnitViewFactory unitViewFactory)
@@ -27,12 +34,17 @@ public class GameView3D : MonoBehaviour
         _gameVM = gameVM;
         _factory = unitViewFactory;
 
+        gameVM.UnitSpawned += OnGameVM_UnitSpawned;
+    }
+    private void OnGameVM_UnitSpawned(UnitViewModel model)
+    {
+       var view =  _factory.Create(model);
+        _views[model] = view;
     }
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
         Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
-        // Подсвечиваем объект при наведении, если нужно
         if (gameViewObject is IHoverable hoverable)
         {
             hoverable.Hover();
@@ -60,23 +72,28 @@ public class GameView3D : MonoBehaviour
     public void BeginDrag(UnitView3D unit)
     {
         _draggedUnit = unit;
+        Debug.Log(_draggedUnit.gameObject.name);
     }
 
     public void UpdateDrag(Vector3 worldPos)
     {
+        Debug.Log("update drag");
         if (_draggedUnit != null)
             _draggedUnit.transform.position = worldPos + Vector3.up * 0.1f;
     }
 
     public void EndDrag(Vector3 worldPos)
     {
-        if (_draggedUnit == null) return;
+        if (_draggedUnit == null) 
+            throw new ArgumentNullException();
 
         _worldToCellProvider.ToGrid(worldPos, out var coords);
-        var worldCellPos = _worldToCellProvider.ToWorld(coords.x, coords.y);
-        var vm =  _views.First(IGridContent => IGridContent.Value == _draggedUnit).Key as UnitViewModel;
-        _gameVM.SnapToCell(vm, coords);
 
+        var pair = _views.First(pair => pair.Value == _draggedUnit);
+
+        var worldCellPos = _worldToCellProvider.ToWorld(coords.x, coords.y);
+        _gameVM.SnapToCell(pair.Key as UnitViewModel, coords);
+        pair.Value.SnapToCell(worldCellPos);
         _draggedUnit = null;
     }
 

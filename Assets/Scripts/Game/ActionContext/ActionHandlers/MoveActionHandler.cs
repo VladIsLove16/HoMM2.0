@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,10 +27,12 @@ public class MoveActionHandler : IActionHandler
     }
     public void Execute(ActionContext ctx)
     {
+        if(!CanExecute(ctx))
+            throw new InvalidOperationException("Cant execute MoveActionHandler " + ctx.ToString());
         IMoveable moveable = _gameModel.GetCell(ctx.FromCell).Unit as IMoveable;
 
-        List<Vector2Int> moveRoute = GetAccessibleRoute(moveable, ctx.TargetCell);
-        if (_movementSystem.GetRouteCost(moveRoute) > moveable.MoveSpeed)
+        bool accessibleExist = GetAccessibleRoute(moveable, ctx.TargetCell, out var accessiblemoveRoute);
+        if (_movementSystem.GetRouteCost(accessiblemoveRoute) > moveable.MoveSpeed)
         {
             Debug.LogError("Cant execute MoveActionHandler " + ctx.ToString());
             return;
@@ -39,15 +42,17 @@ public class MoveActionHandler : IActionHandler
             Debug.LogError("Cant execute MoveActionHandler " + ctx.ToString());
             return;
         }
-        _gameModel.MoveObject(moveable, moveRoute);
+        _gameModel.MoveObject(moveable, accessiblemoveRoute);
     }
     public bool CanExecute(ActionContext ctx)
     {
         IMoveable moveable = _gameModel.GetCell(ctx.FromCell).Unit as IMoveable;
         if (moveable == null)
             return false;
-        List<Vector2Int> moveRoute = GetAccessibleRoute(moveable, ctx.TargetCell);
-        if (_movementSystem.GetRouteCost(moveRoute) > moveable.MoveSpeed)
+        bool accessibleExist = GetAccessibleRoute(moveable, ctx.TargetCell, out var accessiblemoveRoute);
+        if(!accessibleExist)    
+            return false;
+        if (_movementSystem.GetRouteCost(accessiblemoveRoute) > moveable.MoveSpeed)
         {
             return false;
         }
@@ -58,9 +63,11 @@ public class MoveActionHandler : IActionHandler
         var result = new PreviewResult();
         var moveable = _gameModel.GetCell(ctx.FromCell).Unit as IMoveable;
 
-        var route = GetRoute(moveable, ctx.TargetCell);
-        var accessible = GetAccessibleRoute(moveable, ctx.TargetCell);
-        var inaccessible =GetInaccessibleRoute(route,accessible);
+        var routeExist = GetRoute(moveable, ctx.TargetCell,out var route);
+        if (!routeExist)
+            return new();
+        var AccessiblrouteExist = GetAccessibleRoute(moveable, ctx.TargetCell,out var accessible);
+        var inaccessible = GetInaccessibleRoute(route,accessible);
 
         result.Add(CellState.hovered, new[] { ctx.TargetCell });
         result.Add(CellState.accessibleRoutePoint, accessible);
@@ -79,21 +86,21 @@ public class MoveActionHandler : IActionHandler
         return inaccessRoute;
     }
 
-    private List<Vector2Int> GetRoute(IMoveable moveable, Vector2Int targetCell)
+    private bool GetRoute(IMoveable moveable, Vector2Int targetCell, out List< Vector2Int> route)
     {
-        var route = new List<Vector2Int>();
+        bool result;
         if (moveable.CanFly)
         {
-            _movementSystem.GetRouteIgnoringObstacles(moveable.Position, targetCell, out route);
+            result = _movementSystem.GetRouteIgnoringObstacles(moveable.Position, targetCell, out route);
         }
         else
-            _movementSystem.GetRoute(moveable.Position, targetCell, out route);
-        return route;
+            result = _movementSystem.GetRoute(moveable.Position, targetCell, out route);
+        return result;
     }
-    private List<Vector2Int> GetAccessibleRoute(IMoveable moveable, Vector2Int targetCell)
+    private bool GetAccessibleRoute(IMoveable moveable, Vector2Int targetCell, out List<Vector2Int> route)
     {
-        var route = GetRoute(moveable, targetCell);
+        var result = GetRoute(moveable, targetCell,out route);
         var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveable.MoveSpeed);
-        return moveRoute;
+        return result;
     }
 }

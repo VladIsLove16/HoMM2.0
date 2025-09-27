@@ -8,6 +8,7 @@ using TMPro;
 
 namespace Tests.PlayMode.UI
 {
+    [TestFixture]
     public class UnitViewUI_HealthAndAmount_Tests
     {
         private UnitStats _stats;
@@ -29,7 +30,7 @@ namespace Tests.PlayMode.UI
             _stats.Damage = 25;
             _stats.InvulnerableEffects = new List<StatusEffectType>();
             _model = new UnitModel(_stats, UnitType.Archer, 0, 0, 3, true);
-            _vm = new UnitViewModel(_model, new MaterialProvider());
+            _vm = new UnitViewModel(_model);
 
             // Canvas
             _canvasGO = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));

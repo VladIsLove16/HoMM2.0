@@ -7,6 +7,7 @@ using TMPro;
 
 namespace Tests.PlayMode.UI
 {
+    [TestFixture]
     public class UnitHealthBarTests_PlayMode
     {
         private GameObject _gameObject;

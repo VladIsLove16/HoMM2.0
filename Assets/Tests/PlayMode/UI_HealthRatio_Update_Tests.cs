@@ -9,6 +9,7 @@ using Zenject;
 
 namespace Tests.PlayMode
 {
+    [TestFixture]
     public class UI_HealthRatio_Update_Tests
     {
         private UnitModel _unitModel;
@@ -36,7 +37,7 @@ namespace Tests.PlayMode
             _materialProvider = new MaterialProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
 
             // Создаем Canvas для UI тестов
             var canvasGameObject = new GameObject("TestCanvas");

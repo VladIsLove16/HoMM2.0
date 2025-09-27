@@ -40,7 +40,6 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     public ReactiveProperty<bool> CanAct { get; } = new(true);
     public ReactiveProperty<bool> CanAttack { get; } = new(true);
     public ReactiveProperty<bool> CanMove { get; } = new(true);
-    public ReactiveProperty<bool> IsBlueTeam { get; } = new(true);
     public List<StatusEffectType> InvulnerableEffects;
     public IReadOnlyList<StatusEffect> AppliedEffects => _appliedEffects;
     public IReadOnlyList<StatusEffect> ActiveEffects => _statusEffectManager.ActiveEffects;
@@ -49,7 +48,8 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     private StatusEffectManager _statusEffectManager = new();
     private List<StatusEffect> _appliedEffects = new();
 
-    bool IGridContent.IsBlueTeam => IsBlueTeam.Value;
+    public ReactiveProperty<Team> Team { get; } = new (global::Team.Blue );
+    Team IGridContent.Team => Team.Value;
     UnitStats ICombatObject.Stats => ModifiedStats;
    
     UnitType ICombatObject.UnitType => UnitType.Value;
@@ -59,11 +59,12 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
     bool IAttacker.CanAttack => CanAttack.Value;
     int IRangedAttacker.AttackRange => ModifiedStats.AttackRange;
 
-    public UnitModel(UnitStats stats, UnitType unitType, int x, int y, int amount, bool isPlayer)
+    public UnitModel(UnitStats stats, UnitType unitType, int x, int y, int amount, Team team)
     {
         Position.Value = new Vector2Int(x, y);
         Amount.Value = amount;
-        IsBlueTeam.Value = isPlayer;
+        Team.Value = team;
+    // Team is the single source of truth. (Tests should use Team.Value)
         UnitType.Value = unitType;
         InvulnerableEffects = stats.InvulnerableEffects;
         BaseUnitStats = stats;
@@ -82,6 +83,12 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
         //    InvulnerableEffects = stats.InvulnerableEffects
         //}
         //;
+    }
+
+    // Backwards-compatible constructor for code/tests that still pass bool isPlayer
+    public UnitModel(UnitStats stats, UnitType unitType, int x, int y, int amount, bool isPlayer)
+        : this(stats, unitType, x, y, amount, isPlayer ? global::Team.Blue : global::Team.Red)
+    {
     }
     public void MoveByRoute(List<Vector2Int> route)
     {

@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+[TestFixture]
 public class Network_RemoveAndDeathIntegrationTest
 {
     [UnityTest]
@@ -10,7 +11,12 @@ public class Network_RemoveAndDeathIntegrationTest
     {
         var go = new GameObject("TestRoot");
         GameNetworkCommandGateway gameNetworkCommandGateway = new();
-        var model = new GameModel(new UnitModelFactory(), new MovementSystem());
+    // Provide UnitDefinitionSO dictionary so UnitModelFactory can create unit models during tests
+    var def = ScriptableObject.CreateInstance<UnitDefinitionSO>();
+    def.UnitType = UnitType.Archer;
+    def.Stats = ScriptableObject.CreateInstance<UnitStats>();
+    var dict = new System.Collections.Generic.Dictionary<UnitType, UnitDefinitionSO>() { { UnitType.Archer, def } };
+    var model = new GameModel(new UnitModelFactory(dict), new MovementSystem());
         var turn = new TurnSystem();
 
         // init grid
@@ -32,7 +38,7 @@ public class Network_RemoveAndDeathIntegrationTest
         // create simple view container
         var viewRoot = new GameObject("Views");
         var view = viewRoot.AddComponent<UnitView3D>();
-        var vm = new UnitViewModel(unit, new MaterialProvider());
+        var vm = new UnitViewModel(unit);
         view.Init(vm);
 
         // kill unit

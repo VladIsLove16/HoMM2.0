@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using Game.Network;
-
+using Zenject;
 [RequireComponent(typeof(Animator))]
 public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObject
 {
@@ -14,13 +13,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
+    [Inject] private IMaterialProvider _teamMaterials;
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
     public bool IsHoverable => true;
     public bool IsSelectable => true;
 
-    private Dictionary<bool, Material> _teamMaterials;
     private UnitViewModel _vm;
     private void Awake()
     {
@@ -39,7 +38,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     {
         _vm = vm;
         // Резолвим исполнитель команд после того, как фабрика/вариант префаба добавил компонент
-        SetMaterial(vm.TeamMaterial);
+        SetMaterial(_teamMaterials.GetTeamMaterial(vm.Model.Team.Value));
         _animator = GetComponent<Animator>();
         // Все события теперь обрабатываются через GameView3D
         // Подписки на события ViewModel удалены для единообразного подхода
@@ -52,7 +51,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         unitViewUI.Init(vm);
         
         // Реакция на смену команды/материалов
-        _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_vm.TeamMaterial)).AddTo(_disposables);
+        _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Model.Team.Value))).AddTo(_disposables);
     }
     public void SnapToCell(Vector3 worldPosition)
     {
@@ -245,13 +244,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void Hover()
     {
         LogDebugEvent("Unit Hovered");
-        SetMaterial(_vm.HoveredTeamMaterial);
+        SetMaterial(_teamMaterials.GetHoveredTeamMaterial(_vm.Model.Team.Value));
     }
 
     public void Unhover()
     {
         LogDebugEvent("Unit Unhovered");
-        SetMaterial(_vm.TeamMaterial);
+        SetMaterial(_teamMaterials.GetHoveredTeamMaterial(_vm.Model.Team.Value));
     }
     
     private void LogDebugEvent(string eventMessage)

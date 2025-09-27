@@ -122,8 +122,6 @@ namespace Development.Editor
             debugStats["Position"] = unitView.transform.position;
             debugStats["Rotation"] = unitView.transform.rotation.eulerAngles;
             debugStats["Scale"] = unitView.transform.localScale;
-            debugStats["Model"] = unitView.Model?.GetType().Name ?? "null";
-            
             // Информация об аниматоре
             Animator animator = unitView.GetComponent<Animator>();
             if (animator != null)

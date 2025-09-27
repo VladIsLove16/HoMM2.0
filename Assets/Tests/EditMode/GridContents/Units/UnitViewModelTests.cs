@@ -31,7 +31,7 @@ namespace Tests.EditMode.GridContents.Units
             _worldToCellProvider = new MockWorldToCellProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
             
             // Инжектируем зависимости через reflection (для тестов)
             var field = typeof(UnitViewModel).GetField("_worldToCellProvider", 
@@ -53,36 +53,32 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Assert
             Assert.That(_unitViewModel.Model, Is.EqualTo(_unitModel));
-            Assert.That(_unitViewModel.TeamMaterial, Is.Not.Null);
-            Assert.That(_unitViewModel.HoveredTeamMaterial, Is.Not.Null);
         }
 
         [Test]
-        public void Constructor_WithBlueTeamUnit_SetsBlueTeamMaterials()
+        public void Constructor_WithBlueTeamUnit_InitializesCorrectly()
         {
             // Arrange
             var blueTeamStats = ScriptableObject.CreateInstance<UnitStats>();
             blueTeamStats.InvulnerableEffects = new List<StatusEffectType>();
             var blueTeamModel = new UnitModel(blueTeamStats, UnitType.Archer, 0, 0, 1, true);
-            var blueTeamViewModel = new UnitViewModel(blueTeamModel, _materialProvider);
+            var blueTeamViewModel = new UnitViewModel(blueTeamModel);
 
             // Assert
-            Assert.That(blueTeamViewModel.TeamMaterial, Is.EqualTo(_materialProvider.GetBlueTeamMaterial()));
-            Assert.That(blueTeamViewModel.HoveredTeamMaterial, Is.EqualTo(_materialProvider.GetHoveredBlueTeamMaterial()));
+            Assert.That(blueTeamViewModel.Model, Is.EqualTo(blueTeamModel));
         }
 
         [Test]
-        public void Constructor_WithRedTeamUnit_SetsRedTeamMaterials()
+        public void Constructor_WithRedTeamUnit_InitializesCorrectly()
         {
             // Arrange
             var redTeamStats = ScriptableObject.CreateInstance<UnitStats>();
             redTeamStats.InvulnerableEffects = new List<StatusEffectType>();
             var redTeamModel = new UnitModel(redTeamStats, UnitType.Archer, 0, 0, 1, false);
-            var redTeamViewModel = new UnitViewModel(redTeamModel, _materialProvider);
+            var redTeamViewModel = new UnitViewModel(redTeamModel);
 
             // Assert
-            Assert.That(redTeamViewModel.TeamMaterial, Is.EqualTo(_materialProvider.GetHoveredRedTeamMaterial()));
-            Assert.That(redTeamViewModel.HoveredTeamMaterial, Is.EqualTo(_materialProvider.GetHoveredRedTeamMaterial()));
+            Assert.That(redTeamViewModel.Model, Is.EqualTo(redTeamModel));
         }
 
         [Test]
@@ -276,16 +272,9 @@ namespace Tests.EditMode.GridContents.Units
             Assert.That(_unitViewModel.Model, Is.Not.Null);
             Assert.That(_unitViewModel.Model, Is.EqualTo(_unitModel));
             Assert.That(_unitViewModel.Model.UnitType.Value, Is.EqualTo(UnitType.Archer));
-            Assert.That(_unitViewModel.Model.IsBlueTeam.Value, Is.True);
+            Assert.That(_unitViewModel.Model.Team.Value, Is.EqualTo(Team.Blue));
         }
 
-        [Test]
-        public void Materials_AreNotNull()
-        {
-            // Assert
-            Assert.That(_unitViewModel.TeamMaterial, Is.Not.Null);
-            Assert.That(_unitViewModel.HoveredTeamMaterial, Is.Not.Null);
-        }
 
         [Test]
         public void OnDeath_WhenModelPartiallyDamaged_DoesNotEmitEvent()
@@ -552,7 +541,7 @@ namespace Tests.EditMode.GridContents.Units
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
 

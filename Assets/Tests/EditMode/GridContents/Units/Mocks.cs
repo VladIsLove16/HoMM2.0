@@ -49,7 +49,7 @@ namespace Tests.EditMode.GridContents.Units
         } // Mock классы для тестирования
         internal class MockDamagable : IDamagable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
 
@@ -58,7 +58,7 @@ namespace Tests.EditMode.GridContents.Units
         }
         internal class MockEffectable : IEffectable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
             public UnitStats ModifiedStats { get; set; }

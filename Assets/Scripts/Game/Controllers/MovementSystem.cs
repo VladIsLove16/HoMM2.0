@@ -35,7 +35,7 @@ public class MovementSystem
         return reachableCells;
     }
 
-    public bool GetRoute(Vector2Int fromCell, Vector2Int toCell, out List<Vector2Int> route)
+    public virtual bool  GetRoute(Vector2Int fromCell, Vector2Int toCell, out List<Vector2Int> route)
     {
         if (routesCache.TryGetValue((fromCell, toCell), out route))
         {
@@ -138,6 +138,8 @@ public class MovementSystem
 
     public float GetRouteCost(List<Vector2Int> route)
     {
+        if (route == null||route.Count == 0)
+            return 0;   
         var tempRoute = route.ToList();
         float cost = 0;
         Vector2Int start = tempRoute[0];
@@ -152,8 +154,8 @@ public class MovementSystem
 
     public List<Vector2Int> GetAccessibleRoutePoints(List<Vector2Int> route,int moveSpeed)
     {
-        if (route.Count == 0)
-            return route;
+        if (route==null || route.Count == 0)
+            return new();
         var tempRoute = route.ToList();
         var resultRoute = new List<Vector2Int>();
         float cost = 0;

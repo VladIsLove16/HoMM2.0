@@ -173,6 +173,10 @@ namespace Tests.EditMode.GridContents.Units
             public Material GetHoveredBlueTeamMaterial() => _hoveredBlueTeamMaterial;
             public Material GetRedTeamMaterial() => _redTeamMaterial;
             public Material GetHoveredRedTeamMaterial() => _hoveredRedTeamMaterial;
+
+            public Material GetTeamMaterial(Team team) => team == Team.Blue ? _blueTeamMaterial : _redTeamMaterial;
+
+            public Material GetHoveredTeamMaterial(Team team) => team == Team.Blue ? _hoveredBlueTeamMaterial : _hoveredRedTeamMaterial;
         }
     }
 }

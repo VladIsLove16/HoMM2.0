@@ -1,8 +1,10 @@
+using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 using static UnityEngine.UI.Image;
 [Serializable]
 public class CellMaterial
@@ -11,40 +13,51 @@ public class CellMaterial
     public Material Material;
 
 }
-public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
+public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCellProvider
 {
-    private CellView prefab;
-    private GameObject parent;
-    private float ySize = 1f;
-
+    [SerializeField] private CellView prefab;
+    [SerializeField] private GameObject parent;
+    [SerializeField] private float ySize = 1f;
+    [SerializeField] private float cellSize = 1f;
+    [SerializeField] private float padding = 0.4f;
+    [SerializeField] List<CellMaterial> Materials;
+    [Inject] private IGridViewModel _vm;
     private Grid<CellView> grid;
-    private Dictionary<CellState, CellMaterial> materials = new();
+    private Dictionary<CellState, CellMaterial> materialsDict = new();
     private Dictionary<CellState, List<Vector2Int>> _cellStates = new();
-    private IGridViewModel _vm;
-    public PerCellGridRenderer(CellView prefab, GameObject parent, List<CellMaterial> materials)
+    private void Awake()
     {
-        this.parent = parent;
-        this.prefab = prefab;
-        this.materials = materials.ToDictionary(x => x.CellState);
+        if (Materials == null)
+        {
+            materialsDict = new Dictionary<CellState, CellMaterial>();
+        }
+        else
+        {
+            materialsDict = Materials.ToDictionary(x => x.CellState);
+        }
     }
-
     public void Clear()
     {
         if (grid == null)
             return;
+        
         foreach (CellView child in grid.GetGridObjects())
         {
             GameObject.Destroy(child.gameObject);
         }
+        if (_cellStates == null)
+            return;
         _cellStates.Clear();
     }
-
+    [Button]
+    public void Render()
+    {
+        Render(10, 10, cellSize, transform.position, padding);
+    }
     public void Render(int width, int height, float cellSize, Vector3 origin, float padding)
     {
         Clear();
         grid = new Grid<CellView>(width, height, cellSize, origin, padding, CreateCellView);
-        
-
     }
 
     public void Bind(IGridViewModel viewModel)
@@ -53,6 +66,7 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
         _vm = viewModel;
         if (_vm == null) return;
         _vm.PreviewChanged += OnreviewChanged;
+        _vm.GridInited+=OnVM_GridInited;
         Debug.Log("binded");
     }
 
@@ -60,9 +74,13 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
     {
         if (_vm == null) return;
         _vm.PreviewChanged -= OnreviewChanged;
+        _vm.GridInited -= OnVM_GridInited;
         _vm = null;
     }
-
+    private void OnVM_GridInited(GridXZ<GameCell> xZ)
+    {
+        Render(xZ.GetWidth(), xZ.GetHeight(), cellSize,transform.position, padding);
+    }
     private void OnreviewChanged(PreviewResult result)
     {
         Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
@@ -177,8 +195,29 @@ public class PerCellGridRenderer : IGridCellRenderer, IWorldToCellProvider
         CellView cellView =  GameObject.Instantiate(prefab, grid.GetWorldPosition(x, y), Quaternion.identity, parent.transform);
         cellView.name += $"{x} {y}";
         cellView.transform.localScale = new Vector3(grid.GetCellSize(), ySize, grid.GetCellSize());
-        cellView.Init(materials);
+        cellView.Init(materialsDict);
         return cellView;
+    }
+
+    // Public setters to allow tests and other runtime code to inject dependencies without reflection
+    public void SetPrefab(CellView p)
+    {
+        prefab = p;
+    }
+
+    public void SetParent(GameObject p)
+    {
+        parent = p;
+    }
+
+    public void SetMaterials(List<CellMaterial> materials)
+    {
+        Materials = materials;
+        // reinitialize materials dictionary if Awake already ran
+        if (materialsDict != null)
+        {
+            materialsDict = Materials.ToDictionary(x => x.CellState);
+        }
     }
    
 }

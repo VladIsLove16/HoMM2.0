@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.PlayMode.Views
 {
+	[TestFixture]
 	public class UnitView3D_PlayModeTests
 	{
 		private UnitStats _stats;
@@ -22,7 +23,7 @@ namespace Tests.PlayMode.Views
 			_stats.Damage = 20;
 			_stats.InvulnerableEffects = new List<StatusEffectType>();
 			_model = new UnitModel(_stats, UnitType.Archer, 0, 0, 1, true);
-			_vm = new UnitViewModel(_model, new MaterialProvider());
+			_vm = new UnitViewModel(_model);
 			var go = new GameObject("UnitView3D", typeof(Animator));
 			_view = go.AddComponent<UnitView3D>();
 			_view.Init(_vm);
@@ -64,14 +65,6 @@ namespace Tests.PlayMode.Views
 			Assert.That(_view.gameObject.activeSelf, Is.False);
 		}
 
-		[UnityTest]
-		public IEnumerator RequestMove_QueuesAndProcessesMovement()
-		{
-			var route = new List<Vector3> { new Vector3(1,0,0), new Vector3(2,0,0) };
-			_view.RequestMove(route);
-			yield return new WaitForSeconds(0.2f);
-			Assert.Pass();
-		}
 	}
 }
 

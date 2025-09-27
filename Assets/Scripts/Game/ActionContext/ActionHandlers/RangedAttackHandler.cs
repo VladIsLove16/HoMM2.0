@@ -36,13 +36,22 @@ public class RangedAttackHandler : IActionHandler, IAttackActionHandler
     }
     public bool CanExecute(ActionContext ctx)
     {
-        return true;
+        var unit = _gameModel.GetCell(ctx.AttackFromCell).Unit;
+        if(unit == null)
+            return false;
+        var target = _gameModel.GetCell(ctx.TargetCell).Unit;
+        if(target == null)
+            return false;
+        if (unit.Team == target.Team)
+            return false;
+        return CanShoot(ctx.AttackFromCell,ctx.TargetCell, unit.ModifiedStats.AttackRange);
     }
     private bool CanShoot(Vector2Int from, Vector2Int to, int range)
     {
         _movementSystem.GetRouteIgnoringObstacles(from, to, out var route);
         var dist = _movementSystem.GetRouteCost(route);
-        return dist <= range && _movementSystem.HasLineOfSight(from, to);
+        return dist <= range;
+            //&& _movementSystem.HasLineOfSight(from, to);
     }
     public PreviewResult GetPreview(ActionContext actionContext)
     {

@@ -3,19 +3,31 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using Zenject;
 
 public class UnitModelFactory
 {
-   Dictionary<UnitType, UnitDefinitionSO> _dataMap;
-    public UnitModelFactory(Dictionary<UnitType, UnitDefinitionSO> dataMap)
+    [Inject] IReadOnlyDictionary<UnitType, UnitDefinitionSO> _dataMap;
+    public UnitModelFactory(IReadOnlyDictionary<UnitType, UnitDefinitionSO> dataMap)
     {
         _dataMap = dataMap;
     }
-    public UnitModelFactory()
+    public UnitModelFactory(bool loadFromResource = true)
     {
-        _dataMap = DataMapFromResources();
+        if (loadFromResource)
+        {
+            try
+            {
+                _dataMap = DataMapFromResources();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"UnitModelFactory: failed to load unit data from resources: {ex.Message}");
+                _dataMap = new Dictionary<UnitType, UnitDefinitionSO>();
+            }
+        }
     }
     public UnitModel Create(UnitSpawnParams unitSpawnParams)
     {
@@ -23,19 +35,37 @@ public class UnitModelFactory
         {
             throw new InvalidOperationException("Data map is not initialized");
         }
-        UnitDefinitionSO unitDefinitionSO = _dataMap[unitSpawnParams.UnitType];
-        return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.UnitType, unitSpawnParams.X,unitSpawnParams.Y, unitSpawnParams.Amount,unitSpawnParams.IsPlayer);
+        if (!_dataMap.TryGetValue(unitSpawnParams.UnitType, out var unitDefinitionSO) || unitDefinitionSO == null)
+        {
+            throw new InvalidOperationException($"UnitDefinitionSO not found for UnitType {unitSpawnParams.UnitType}");
+        }
+        return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.UnitType, unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.Amount, unitSpawnParams.Team);
     }
-    public void Add (UnitType unitType, UnitDefinitionSO unitDefinitionSO)
+    private IReadOnlyDictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
     {
-        _dataMap[unitType] = unitDefinitionSO;
-    }
-    private Dictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
-    {
-        var dict = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Witch, Resources.Load<UnitDefinitionSO>("ScriptableObjects/Units/Witch/Witch") }
-            };
+        // Avoid loading editor assets during EditMode tests / serialization time.
+        // Loading the ScriptableObject asset can trigger Unity to call ScriptableObject constructors
+        // during serialization which results in UnityException. When running in the editor but not
+        // in play mode (typical for EditMode tests), return an empty map and let tests inject data.
+        if (!Application.isPlaying)
+        {
+            Debug.Log("UnitModelFactory: Skipping GameUnitDatas load because Application.isPlaying == false");
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
+        var gameUnitDatas = AssetDatabase.LoadAssetAtPath<GameUnitDatas>("Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+        if (gameUnitDatas == null)
+        {
+            Debug.LogWarning("UnitModelFactory: GameUnitDatas asset not found at Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
+        var dict = gameUnitDatas.ToDictionary();
+        if (dict == null)
+        {
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
         return dict;
     }   
 }

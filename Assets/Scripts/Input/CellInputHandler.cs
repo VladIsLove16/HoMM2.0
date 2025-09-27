@@ -17,20 +17,24 @@ public class CellInputHandler : MonoBehaviour
 
     [SerializeField] private Camera mainCamera;
     [SerializeField] private GameView3D _gameView3D;
-    [Inject] private TurnSystem turnSystem;
+    [Inject] private TurnSystem _turnSystem;
     private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
     private Collider _lastHoveredCollider;
-    public Action ActionCanceled; // optional external consumer
+    public Action ActionCanceled;
+    public bool isDragging;
     private void Awake()
     {
         if (mainCamera == null) mainCamera = Camera.main;
     }
-
+    [Inject]
+    public void Construct(TurnSystem turnSystem)
+    {
+        _turnSystem = turnSystem;
+        _turnSystem.CurrentBattleState.Subscribe(OnTurnSystem_BattleStateChanged);
+    }
     private void OnEnable()
     {
         if (inputActions == null) inputActions = new InputSystem_Actions();
-        turnSystem.BattleStateChanged += OnTurnSystem_BattleStateChanged;
-
         inputActions.Grid.MousePosition.performed += OnMouseMoved;
         inputActions.Grid.Select.performed += OnSelectPerformed;
         inputActions.Grid.Action.performed += OnActionPerformed;
@@ -65,15 +69,21 @@ public class CellInputHandler : MonoBehaviour
         inputActions.GridPlacement.Drag.canceled -= OnDragCanceled;
         inputActions.Disable();
     }
-
+    private void Update()
+    {
+        if(isDragging)
+        {
+            Debug.Log("update DRAG");
+            var worldPos = GetMouseWorldPosition();
+            _gameView3D.UpdateDrag(worldPos);
+        }
+    }
     private void OnMouseMoved(InputAction.CallbackContext ctx)
     {
         if (TryGetHit(out var hit))
         {
-            Debug.Log("hit " + hit.collider.gameObject.name);
             if (_lastHoveredCollider == hit.collider)
             {
-                Debug.Log("(_lastHoveredCollider == hit.collider)");
                 return;
             }
             var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
@@ -155,24 +165,34 @@ public class CellInputHandler : MonoBehaviour
     }
     private void OnDragStarted(InputAction.CallbackContext ctx)
     {
+        Debug.Log("Drag started");  
         if (TryGetHit(out var hit))
         {
+            Debug.Log(hit.collider.gameObject.name);
             var unitView = hit.collider.GetComponent<UnitView3D>();
             if (unitView != null)
+            {
+                isDragging = true;
                 _gameView3D.BeginDrag(unitView);
+            }
         }
     }
 
     private void OnDragPerformed(InputAction.CallbackContext ctx)
     {
+        Debug.Log("OnDragPerformed");
         var worldPos = GetMouseWorldPosition();
         _gameView3D.UpdateDrag(worldPos);
     }
 
     private void OnDragCanceled(InputAction.CallbackContext ctx)
     {
+        Debug.Log("OnDragCanceled");
         if (TryGetHit(out var hit))
         {
+            if (!isDragging)
+                return;
+            isDragging = false;
             _gameView3D.EndDrag(hit.point);
         }
     }
@@ -183,7 +203,8 @@ public class CellInputHandler : MonoBehaviour
         var cam = mainCamera != null ? mainCamera : Camera.main;
         var ray = cam.ScreenPointToRay(Input.mousePosition);
         Physics.Raycast(ray, out hit, 999f, mouseColliderLayerMask);
-        return hit.collider != null;
+        var result = hit.collider != null;
+        return result;
     }
 
     private bool IsPointerOverUI()

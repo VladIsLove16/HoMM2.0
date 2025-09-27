@@ -1,4 +1,4 @@
-﻿internal interface IBlockable : IGridContent
+﻿internal interface IBlockable
 {
     bool CanMoveThrough();
 }

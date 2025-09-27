@@ -8,6 +8,7 @@ using Zenject;
 
 namespace Tests.PlayMode
 {
+    [TestFixture]
     public class UnitDeathBehaviorTests
     {
         private UnitModel _unitModel;
@@ -33,7 +34,7 @@ namespace Tests.PlayMode
             _materialProvider = new MaterialProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
 
             // Создаем GameObject с UnitView3D
             var gameObject = new GameObject("TestUnit");

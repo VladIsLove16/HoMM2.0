@@ -6,6 +6,5 @@ public interface IGridCell
     int Y { get; }
     bool IsEmpty { get; }
     IReadOnlyList<IGridContent> Contents { get; }
-
     UnitModel Unit { get; }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 
 /// <summary>
 /// Сервис для передачи данных между сценами
@@ -15,33 +16,10 @@ public class SceneTransitionDataService : MonoBehaviour, IGameModeProvider
     [Header("Game Configuration")]
     [SerializeField] private GridContentEntrySO[] _availableConfigs = new GridContentEntrySO[0];
     [SerializeField] private bool acceptStartingGameWithoutClients;
-    [SerializeField] private int width;
-    [SerializeField] private int height;
-    public int Width
-    {
-        get
-        {
-            return width;
-        }
-        set
-        {
-            width = value;
-        }
-    }
-    public int Height
-    {
-        get
-        {
-            return height;
-        }
-        set
-        {
-            height = value;
-        }
-    }
     public bool AcceptStartingGameWithoutClients => acceptStartingGameWithoutClients;
     public GameMode CurrentGameMode { get; private set; }
-    
+    public Team Team { get; private set; } = Team.Blue;
+
     private int _selectedConfigIndex = 0;
     private Dictionary<string, object> _transitionData = new Dictionary<string, object>();
     
@@ -99,6 +77,10 @@ public class SceneTransitionDataService : MonoBehaviour, IGameModeProvider
     public void SetGameMode(GameMode gameMode)
     {
         CurrentGameMode = gameMode;
+    }
+    public void SetTeam(Team team)
+    {
+        Team = team;
     }
     /// <summary>
     /// Получить выбранную конфигурацию

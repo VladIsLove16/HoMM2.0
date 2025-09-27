@@ -8,6 +8,7 @@ namespace Tests.PlayMode
     /// <summary>
     /// Простой тест для отладки конфигурации
     /// </summary>
+    [TestFixture]
     public class ConfigurationDebugTest
     {
         [UnityTest]
@@ -15,13 +16,13 @@ namespace Tests.PlayMode
         {
             Debug.Log("=== Configuration Debug Test Started ===");
             
-            // Проверяем SceneTransitionDataService
-            if (SceneTransitionDataService.Instance == null)
+            // Ensure SceneTransitionDataService exists for playmode test environment
+            var svc = PlayModeTestSetup.EnsureSceneTransitionDataService();
+            if (svc == null)
             {
                 Debug.LogError("❌ SceneTransitionDataService.Instance is null!");
                 yield break;
             }
-            
             Debug.Log("✅ SceneTransitionDataService.Instance found");
             
             // Проверяем доступные конфигурации

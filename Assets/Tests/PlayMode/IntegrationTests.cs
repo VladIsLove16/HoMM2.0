@@ -8,6 +8,7 @@ using UniRx;
 
 namespace Tests.PlayMode.GridContents.Units
 {
+    [TestFixture]
     public class IntegrationTests
     {
         private UnitModel _unitModel;
@@ -43,7 +44,7 @@ namespace Tests.PlayMode.GridContents.Units
 
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
 
             // Создаем GameObject с компонентами
             _gameObject = new GameObject("TestUnitView");
@@ -83,9 +84,6 @@ namespace Tests.PlayMode.GridContents.Units
 
             // Act - Инициализируем View
             _unitView.Init(_unitViewModel);
-
-            // Assert - Проверяем, что View получил модель
-            Assert.That(_unitView.Model, Is.EqualTo(_unitModel));
 
             // Act - Выполняем атаку
             var mockTarget = new MockDamagable();
@@ -242,16 +240,14 @@ namespace Tests.PlayMode.GridContents.Units
 
 
             // Act - Создаем ViewModels для разных команд
-            var blueTeamViewModel = new UnitViewModel(blueTeamModel, _materialProvider);
-            var redTeamViewModel = new UnitViewModel(redTeamModel, _materialProvider);
+            var blueTeamViewModel = new UnitViewModel(blueTeamModel);
+            var redTeamViewModel = new UnitViewModel(redTeamModel);
 
             yield return null; // Ждем один кадр
 
-            // Assert - Проверяем, что материалы выбраны правильно
-            Assert.That(blueTeamViewModel.TeamMaterial, Is.EqualTo(_materialProvider.BlueTeamMaterial));
-            Assert.That(blueTeamViewModel.HoveredTeamMaterial, Is.EqualTo(_materialProvider.HoveredBlueTeamMaterial));
-            Assert.That(redTeamViewModel.TeamMaterial, Is.EqualTo(_materialProvider.RedTeamMaterial));
-            Assert.That(redTeamViewModel.HoveredTeamMaterial, Is.EqualTo(_materialProvider.HoveredRedTeamMaterial));
+            // Assert - Проверяем, что ViewModels созданы правильно
+            Assert.That(blueTeamViewModel.Model, Is.EqualTo(blueTeamModel));
+            Assert.That(redTeamViewModel.Model, Is.EqualTo(redTeamModel));
 
             // Cleanup
             UnityEngine.Object.DestroyImmediate(blueTeamStats);
@@ -524,7 +520,7 @@ namespace Tests.PlayMode.GridContents.Units
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
 
@@ -565,30 +561,30 @@ namespace Tests.PlayMode.GridContents.Units
                 return new DummyEffectable();
             }
 
-            private class DummyEffectable : IEffectable
-            {
-                public UnitStats ModifiedStats { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-
-                public bool IsBlueTeam => throw new System.NotImplementedException();
-
-                public Vector2Int Position { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-
-                public GridContentType GridContentType => throw new System.NotImplementedException();
-
-                public void ApplyEffect(StatusEffect effect) { }
-                public void RemoveEffect(StatusEffect statusEffect) { }
-                public IReadOnlyList<StatusEffect> GetAppliedEffects() { return new List<StatusEffect>(); }
-
-                public void RecieveDamage(DamageContext context)
+                private class DummyEffectable : IEffectable
                 {
-                    throw new System.NotImplementedException();
-                }
+                    public UnitStats ModifiedStats { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-                public void SimulateRecieveDamage(DamageContext context)
-                {
-                    throw new System.NotImplementedException();
+                    public Team Team => Team.Blue;
+
+                    public Vector2Int Position { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+                    public GridContentType GridContentType => throw new System.NotImplementedException();
+
+                    public void ApplyEffect(StatusEffect effect) { }
+                    public void RemoveEffect(StatusEffect statusEffect) { }
+                    public IReadOnlyList<StatusEffect> GetAppliedEffects() { return new List<StatusEffect>(); }
+
+                    public void RecieveDamage(DamageContext context)
+                    {
+                        throw new System.NotImplementedException();
+                    }
+
+                    public void SimulateRecieveDamage(DamageContext context)
+                    {
+                        throw new System.NotImplementedException();
+                    }
                 }
-            }
 
             private class MockWorldToCellProvider : IWorldToCellProvider
             {

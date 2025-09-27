@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.PlayMode.Combat
 {
+    [TestFixture]
     public class TurnSystemIntegrationTests
     {
         private UnitStats _statsBlue;
@@ -30,8 +31,8 @@ namespace Tests.PlayMode.Combat
 
             _blue1 = new UnitModel(_statsBlue, UnitType.Archer, 0, 0, 1, true);
             _red1 = new UnitModel(_statsRed, UnitType.Archer, 1, 0, 1, false);
-            _blueVm = new UnitViewModel(_blue1, new MaterialProvider());
-            _redVm = new UnitViewModel(_red1, new MaterialProvider());
+            _blueVm = new UnitViewModel(_blue1);
+            _redVm = new UnitViewModel(_red1);
 
             _goBlue = new GameObject("BlueUnit", typeof(Animator));
             _goRed = new GameObject("RedUnit", typeof(Animator));

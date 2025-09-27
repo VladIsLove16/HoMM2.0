@@ -6,12 +6,9 @@ using Zenject;
 /// Получает данные из SceneTransitionDataService
 /// Не зависит от объектов из других сцен
 /// </summary>
-public class GameSceneConfigurationProvider : IBattleEntryProvider, IInitializable
+public class GameSceneConfigurationProvider
 {
     private readonly SceneTransitionDataService _dataService;
-
-    bool IBattleEntryProvider.AcceptStartingBattleWithoutClients => _dataService.AcceptStartingGameWithoutClients;
-
     [Inject]
     public GameSceneConfigurationProvider(SceneTransitionDataService dataService)
     {
@@ -85,9 +82,13 @@ public class GameSceneConfigurationProvider : IBattleEntryProvider, IInitializab
         
         return _dataService.GetSelectedConfigurationIndex();
     }
-
-    public bool AcceptStartingBattleWithoutClients()
+    public Team GetTeam()
     {
-        return _dataService.AcceptStartingGameWithoutClients;
+        if (_dataService == null)
+        {
+            Debug.LogWarning("[GameSceneConfigurationProvider] DataService is null");
+           throw new System.NullReferenceException("SceneTransitionDataService is null");
+        }
+        return _dataService.Team;
     }
 }

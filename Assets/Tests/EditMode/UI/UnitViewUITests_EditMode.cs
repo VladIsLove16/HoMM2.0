@@ -31,7 +31,7 @@ namespace Tests.EditMode.UI
             _materialProvider = new MaterialProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
         }
 
         [TearDown]

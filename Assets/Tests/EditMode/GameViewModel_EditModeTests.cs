@@ -11,17 +11,18 @@ namespace Tests.EditMode.ViewModels
 		private GameModel _model;
 		private MovementSystem _movement;
 		private TurnSystem _turnSystem;
-		private UnitViewModelFactory _uvmFactory;
 		private GameViewModel _vm;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_model = new GameModel(new UnitModelFactory(), new MovementSystem());
+			var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
 			_movement = new MovementSystem();
+			_model = new GameModel(new UnitModelFactory(dict), _movement);
 			_turnSystem = new TurnSystem();
-			_uvmFactory = new UnitViewModelFactory();
-			_vm = new GameViewModel(_model, _movement, new ActionExecutorStub(), _turnSystem, _uvmFactory);
+			var actionPipeline = new ActionPipeline(new(_model, _movement), _turnSystem);
+
+            _vm = new GameViewModel(_model, _movement, new LocalGameCommandExecutor(actionPipeline), _turnSystem );
 			_model.InitializeGrid(3, 3);
 		}
 
@@ -34,10 +35,6 @@ namespace Tests.EditMode.ViewModels
 			Assert.That((w, h), Is.EqualTo((5, 4)));
 		}
 
-		private class ActionExecutorStub : IActionExecutor
-		{
-			public void Execute(IActionHandler actionHandler, ActionContext context) { }
-		}
 	}
 }
 

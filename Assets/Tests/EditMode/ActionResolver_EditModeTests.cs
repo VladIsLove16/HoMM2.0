@@ -6,31 +6,34 @@ namespace Tests.EditMode.Actions
     [TestFixture]
     public class ActionResolver_EditModeTests
     {
-        private GameModel CreateModel()
+        private const int x = 0;
+        private const int y = 0;
+         GameModel _model;
+        MovementSystem _movementSystem;
+        [SetUp]
+        public void Setup()
         {
-            var factory = new UnitModelFactory();
-            var unitSO = ScriptableObject.CreateInstance<UnitDefinitionSO>();
+            UnitDefinitionSO unitDefinitionSO = ScriptableObject.CreateInstance<UnitDefinitionSO>();
+            var dict = new Dictionary<UnitType, UnitDefinitionSO>
+            {
+                { UnitType.Archer, unitDefinitionSO }
+            };
+            var factory = new UnitModelFactory(dict);
             var baseStats = ScriptableObject.CreateInstance<UnitStats>();
-            unitSO.Stats = baseStats;
-            factory.Add(UnitType.Witch, unitSO);
+            unitDefinitionSO.Stats = baseStats;
 
-            var model = new GameModel(new UnitModelFactory(), new MovementSystem());
-            model.InitializeGrid(3, 3);
-            model.SpawnUnit(new UnitSpawnParams(0,0,UnitType.Witch,1,true));
-            return model;
+            _movementSystem = new MovementSystem();
+
+            _model = new(factory, _movementSystem);
+
+            _model.InitializeGrid(3, 3);
+            _model.SpawnUnit(new UnitSpawnParams(x, y, UnitType.Archer, 1, true));
         }
-
-        private ActionContext CreateMoveContext()
-        {
-            return new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 0), default,default);
-        }
-
         [Test]
         public void Resolve_ReturnsMoveHandler_ForSimpleMoveContext()
         {
-            var model = CreateModel();
-            var resolver = new ActionResolver(model, new MovementSystem());
-            var ctx = CreateMoveContext();
+            var resolver = new ActionResolver(_model, _movementSystem);
+            var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 0), default, default);
 
             var result = resolver.Resolve(ctx, out var handler);
 
@@ -42,10 +45,9 @@ namespace Tests.EditMode.Actions
         [Test]
         public void Resolve_ReturnsNoHandler_ForInvalidContext()
         {
-            var model = CreateModel();
-            var resolver = new ActionResolver(model, new MovementSystem());
+            var resolver = new ActionResolver(_model, new MovementSystem());
             // Некорректный контекст: перемещение в ту же клетку
-            var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(0, 0), default, new Vector2Int(0, 0));
+            var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(0, 0), default, default);
 
             var result = resolver.Resolve(ctx, out var handler);
 

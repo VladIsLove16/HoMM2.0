@@ -5,6 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.PlayMode.Input
 {
+	[TestFixture]
 	public class CellInputHandler_PlayModeTests
 	{
 		[UnityTest]

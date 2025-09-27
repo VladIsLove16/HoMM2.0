@@ -17,7 +17,7 @@ namespace Tests.EditMode.GridContents.Units
         private const int TestX = 5;
         private const int TestY = 3;
         private const int TestAmount = 10;
-        private const bool TestIsPlayer = true;
+    private const bool TestIsPlayer = true;
 
         [SetUp]
         public void SetUp()
@@ -54,7 +54,7 @@ namespace Tests.EditMode.GridContents.Units
             // Assert
             Assert.That(_unitModel.Position.Value, Is.EqualTo(new Vector2Int(TestX, TestY)));
             Assert.That(_unitModel.Amount.Value, Is.EqualTo(TestAmount));
-            Assert.That(_unitModel.IsBlueTeam.Value, Is.EqualTo(TestIsPlayer));
+            Assert.That(_unitModel.Team.Value == Team.Blue, Is.EqualTo(TestIsPlayer));
             Assert.That(_unitModel.UnitType.Value, Is.EqualTo(UnitType.Archer));
             Assert.That(_unitModel.CanAct.Value, Is.True);
             Assert.That(_unitModel.CanMove.Value, Is.True);
@@ -561,7 +561,7 @@ namespace Tests.EditMode.GridContents.Units
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
 

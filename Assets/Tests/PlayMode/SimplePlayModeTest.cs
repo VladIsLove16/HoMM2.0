@@ -5,6 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.PlayMode
 {
+    [TestFixture]
     public class SimplePlayModeTest
     {
         [UnityTest]

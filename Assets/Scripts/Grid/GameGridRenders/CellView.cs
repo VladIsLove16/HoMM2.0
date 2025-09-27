@@ -28,6 +28,23 @@ public class CellView : MonoBehaviour, IGameViewObject
         _materials = materials;
     }
 
+    // Public helpers for tests/runtime wiring
+    public void SetHoverRenderer(MeshRenderer r)
+    {
+        _hoverRenderer = r;
+    }
+
+    public void SetRoutePointRenderer(MeshRenderer r)
+    {
+        _routePointRenderer = r;
+    }
+
+    public void SetMaterialsDictionary(IReadOnlyDictionary<CellState, CellMaterial> materials)
+    {
+        _materials = materials;
+        UpdateView();
+    }
+
     public void AddState(CellState state)
     {
         if(!cellStates.Contains(state))
@@ -70,16 +87,26 @@ public class CellView : MonoBehaviour, IGameViewObject
             _routePointRenderer.material = _materials[CellState.inaccessibleRoutePoint].Material;
 
 
-        if (cellStates.Contains(CellState.selected))
+        // Safely set materials only if materials dictionary is available and contains keys
+        if (_materials != null)
         {
-            SetMaterial(_materials[CellState.selected].Material);
+            if (cellStates.Contains(CellState.selected) && _materials.ContainsKey(CellState.selected))
+            {
+                SetMaterial(_materials[CellState.selected].Material);
+                return;
+            }
+            if (cellStates.Contains(CellState.reachableCell) && _materials.ContainsKey(CellState.reachableCell))
+            {
+                SetMaterial(_materials[CellState.reachableCell].Material);
+                return;
+            }
+            if (_materials.ContainsKey(CellState.normal))
+            {
+                SetMaterial(_materials[CellState.normal].Material);
+                return;
+            }
         }
-        else if (cellStates.Contains(CellState.reachableCell))
-        {
-            SetMaterial(_materials[CellState.reachableCell].Material);
-        }
-        else
-            SetMaterial(_materials[CellState.normal].Material);
+        // fallback: do nothing if materials are not ready
     }
     private void SetMaterial(Material material)
     {

@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 namespace Tests.PlayMode.UI
 {
+    [TestFixture]
     public class UnitHealthBarIntegrationTests
     {
         private GameObject _gameObject;
@@ -37,7 +38,7 @@ namespace Tests.PlayMode.UI
             _materialProvider = new MaterialProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel, _materialProvider);
+            _unitViewModel = new UnitViewModel(_unitModel);
 
             // Создаем GameObject с компонентами
             _gameObject = new GameObject("TestUnitViewUI");

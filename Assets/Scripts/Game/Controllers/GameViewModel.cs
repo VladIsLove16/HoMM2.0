@@ -15,22 +15,20 @@ public class GameViewModel : IDisposable
 
     private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
-    private readonly IActionExecutor _actionExecutor;
+    private readonly IGameCommandExecutor _gameCommandExecutor;
     private TurnSystem _turnSystem;
-    private UnitViewModelFactory _unitViewModelsFactory;
     private ActionResolver _actionResolver;
     private Dictionary<IGridContent, UnitViewModel> _uvms = new Dictionary<IGridContent, UnitViewModel>();
     private GameModel model;
 
 
-    public GameViewModel(GameModel model, MovementSystem movementSystem, IActionExecutor actionExecutor, TurnSystem turnSystem, UnitViewModelFactory unitViewModelFactory)
+    public GameViewModel(GameModel model, MovementSystem movementSystem, IGameCommandExecutor actionExecutor, TurnSystem turnSystem)
     {
         _gameModel = model;
         _movementSystem = movementSystem;
-        _actionExecutor = actionExecutor;
+        _gameCommandExecutor = actionExecutor;
         _actionResolver = new(model,movementSystem);
         _turnSystem = turnSystem;
-        _unitViewModelsFactory = unitViewModelFactory;
 
         _gameModel.GameChange_Initialized += OnGameModel_GridInitilized;
         _gameModel.GameChange_UnitSpawned += OnGameModel_UnitSpawned;
@@ -45,21 +43,27 @@ public class GameViewModel : IDisposable
         ActionContext actionContext = new(fromCell, coords.Key, default, coords.Value);
         _actionResolver.Resolve(actionContext, out var actionHandler);
         var previewResult =  actionHandler.GetPreview(actionContext);
-        if(actionHandler is IAttackActionHandler attackActionHandler)
+        PreviewResult hoverPreviewResult =  new();
+        hoverPreviewResult.Add(CellState.hovered, new List<Vector2Int>() { coords.Value });
+        if (actionHandler is IAttackActionHandler attackActionHandler)
         {
             DamageContextPreviewChanged?.Invoke(attackActionHandler.GetDamagePreview(actionContext));
         }
+        PreviewResultChanged?.Invoke(previewResult);
         PreviewResultChanged?.Invoke(previewResult);
     }
 
     public void HandleCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords)
     {
+        Debug.Log("HandleCellSelected");
         if (!_turnSystem.IsMyTurn)
             return;
         var fromCell = _turnSystem.ActiveObject.Value.Position;
         ActionContext actionContext = new(fromCell, coords.Key, default, coords.Value);
         _actionResolver.Resolve(actionContext, out var actionHandler);
-        _actionExecutor.Execute(actionHandler, actionContext);
+        Debug.Log("resolved" + actionContext);
+
+        _gameCommandExecutor.Execute(actionHandler.ActionType, actionContext);
     }
 
     public void HandleCellActionPerformed(KeyValuePair<Vector2Int, Vector2Int> coords)
@@ -74,7 +78,7 @@ public class GameViewModel : IDisposable
 
     protected virtual void OnGameModel_UnitSpawned(UnitModelCreatedParams @params)
     {
-        UnitViewModel uvm = _unitViewModelsFactory.Create(@params.UnitModel);
+        UnitViewModel uvm = new(@params.UnitModel);
         _uvms[@params.UnitModel] = uvm;
 
         UnitSpawned?.Invoke(uvm);

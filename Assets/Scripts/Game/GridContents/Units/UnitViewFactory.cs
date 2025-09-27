@@ -6,8 +6,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
-using Game.Network;
-
 public enum UnitType
 {
     Archer,

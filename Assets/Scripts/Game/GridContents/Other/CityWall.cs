@@ -8,7 +8,7 @@ public class CityWall : IGridContent, IBlockable, IBlocksLineOfSight
 
     public GridContentType GridContentType => throw new System.NotImplementedException();
 
-    public bool IsBlueTeam => throw new System.NotImplementedException();
+    public Team Team => Team.Blue; // default placeholder - implement properly when integrating
 
     public bool CanMoveThrough() => false;
 }

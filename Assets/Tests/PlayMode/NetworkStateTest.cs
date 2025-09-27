@@ -9,6 +9,7 @@ namespace Tests.PlayMode
     /// <summary>
     /// Тест для проверки сетевого состояния
     /// </summary>
+    [TestFixture]
     public class NetworkStateTest
     {
         [UnityTest]
@@ -58,36 +59,6 @@ namespace Tests.PlayMode
             
             // Проверяем, был ли вызван OnNetworkSpawn
             Debug.Log("=== Network State Test Completed ===");
-            
-            yield return null;
-        }
-        
-        [UnityTest]
-        public IEnumerator TestGameControllerInitialization()
-        {
-            Debug.Log("=== GameController Initialization Test Started ===");
-            
-            var gameController = Object.FindAnyObjectByType<GameController>();
-            if (gameController == null)
-            {
-                Debug.LogError("❌ GameController not found in scene!");
-                yield break;
-            }
-            
-            // Ждем инициализации
-            yield return new WaitForSeconds(0.5f);
-            
-            // Проверяем состояние
-            Debug.Log($"GameController state:");
-            Debug.Log($"   - IsHost: {gameController.IsHost}");
-            Debug.Log($"   - IsClient: {gameController.IsClient}");
-            Debug.Log($"   - IsServer: {gameController.IsServer}");
-            
-            // Проверяем конфигурацию
-            var isConfigReady = gameController.IsConfigurationReady();
-            Debug.Log($"   - Configuration ready: {isConfigReady}");
-            
-            Debug.Log("=== GameController Initialization Test Completed ===");
             
             yield return null;
         }

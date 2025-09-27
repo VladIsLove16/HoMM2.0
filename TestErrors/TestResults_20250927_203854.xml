@@ -1,0 +1,1347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="148" result="Failed(Child)" total="148" passed="119" failed="29" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:49Z" duration="4,8938676">
+  <test-suite type="TestSuite" id="1728" name="HoMM2.0" fullname="HoMM2.0" runstate="Runnable" testcasecount="566" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:49Z" duration="4.893868" total="148" passed="119" failed="29" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1168" name="EditModeTests.dll" fullname="D:/Projects/Unity/HoMM2.0/Library/ScriptAssemblies/EditModeTests.dll" runstate="Runnable" testcasecount="148" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:49Z" duration="4.871549" total="148" passed="119" failed="29" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="22440" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1169" name="Tests" fullname="Tests" runstate="Runnable" testcasecount="148" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:49Z" duration="4.868771" total="148" passed="119" failed="29" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1170" name="EditMode" fullname="Tests.EditMode" runstate="Runnable" testcasecount="148" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:49Z" duration="4.866198" total="148" passed="119" failed="29" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1180" name="ActionHandlers" fullname="Tests.EditMode.ActionHandlers" runstate="Runnable" testcasecount="12" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:45Z" duration="0.152347" total="12" passed="3" failed="9" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1152" name="MoveActionHandlerTests" fullname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests" classname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.064404" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1154" name="CanExecute_NoUnit_ThrowsArgumentEx" fullname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests.CanExecute_NoUnit_ThrowsArgumentEx" methodname="CanExecute_NoUnit_ThrowsArgumentEx" classname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests" runstate="Runnable" seed="1254384511" result="Passed" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.029786" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[unit spawned (0, 0)
+]]></output>
+              </test-case>
+              <test-case id="1153" name="CanExecute_ValidMove_ReturnsTrue" fullname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests.CanExecute_ValidMove_ReturnsTrue" methodname="CanExecute_ValidMove_ReturnsTrue" classname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests" runstate="Runnable" seed="749834500" result="Passed" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.009982" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[unit spawned (0, 0)
+]]></output>
+              </test-case>
+              <test-case id="1155" name="GetPreview_ReturnsAccessibleRoute" fullname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests.GetPreview_ReturnsAccessibleRoute" methodname="GetPreview_ReturnsAccessibleRoute" classname="Tests.EditMode.ActionHandlers.MoveActionHandlerTests" runstate="Runnable" seed="470447797" result="Passed" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.005929" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[unit spawned (0, 0)
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1156" name="MoveThenAttackHandlerTests" fullname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests" classname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.037393" total="3" passed="0" failed="3" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1158" name="CanExecute_NoTarget_ReturnsFalse" fullname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.CanExecute_NoTarget_ReturnsFalse" methodname="CanExecute_NoTarget_ReturnsFalse" classname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests" runstate="Runnable" seed="1619130333" result="Failed" label="Error" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.004843" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.SetUp () [0x00095] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\MoveThenAttackHandlerTests.cs:35 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1157" name="CanExecute_ValidMoveAndAttack_ReturnsTrue" fullname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.CanExecute_ValidMoveAndAttack_ReturnsTrue" methodname="CanExecute_ValidMoveAndAttack_ReturnsTrue" classname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests" runstate="Runnable" seed="727192603" result="Failed" label="Error" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.000366" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.SetUp () [0x00095] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\MoveThenAttackHandlerTests.cs:35 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1159" name="GetPreview_ReturnsAttackCell" fullname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.GetPreview_ReturnsAttackCell" methodname="GetPreview_ReturnsAttackCell" classname="Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests" runstate="Runnable" seed="745599501" result="Failed" label="Error" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:44Z" duration="0.000258" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.MoveThenAttackHandlerTests.SetUp () [0x00095] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\MoveThenAttackHandlerTests.cs:35 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1160" name="RangedAttackHandlerTests" fullname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests" classname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2025-09-27 17:38:44Z" end-time="2025-09-27 17:38:45Z" duration="0.028336" total="3" passed="0" failed="3" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1162" name="CanExecute_OutOfRange_ReturnsFalse" fullname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.CanExecute_OutOfRange_ReturnsFalse" methodname="CanExecute_OutOfRange_ReturnsFalse" classname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests" runstate="Runnable" seed="1375602648" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.001875" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.ArgumentNullException : Value cannot be null.
+Parameter name: source]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector, System.Collections.Generic.IEqualityComparer`1[T] comparer) [0x0000d] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector) [0x00000] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.SetUp () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\RangedAttackHandlerTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1161" name="CanExecute_ValidRangedAttack_ReturnsTrue" fullname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.CanExecute_ValidRangedAttack_ReturnsTrue" methodname="CanExecute_ValidRangedAttack_ReturnsTrue" classname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests" runstate="Runnable" seed="2123476626" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000282" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.ArgumentNullException : Value cannot be null.
+Parameter name: source]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector, System.Collections.Generic.IEqualityComparer`1[T] comparer) [0x0000d] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector) [0x00000] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.SetUp () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\RangedAttackHandlerTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1163" name="GetPreview_ReturnsTargetCell" fullname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.GetPreview_ReturnsTargetCell" methodname="GetPreview_ReturnsTargetCell" classname="Tests.EditMode.ActionHandlers.RangedAttackHandlerTests" runstate="Runnable" seed="1845122860" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000250" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.ArgumentNullException : Value cannot be null.
+Parameter name: source]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector, System.Collections.Generic.IEqualityComparer`1[T] comparer) [0x0000d] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at System.Linq.Enumerable.ToDictionary[TSource,TKey] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] keySelector) [0x00000] in <51e69041cf524a30b24fbf0827a0e545>:0 
+  at Tests.EditMode.ActionHandlers.RangedAttackHandlerTests.SetUp () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\RangedAttackHandlerTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1164" name="SpellActionHandlerTests" fullname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests" classname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.019770" total="3" passed="0" failed="3" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1166" name="CanExecute_NoSpell_ReturnsFalse" fullname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests.CanExecute_NoSpell_ReturnsFalse" methodname="CanExecute_NoSpell_ReturnsFalse" classname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests" runstate="Runnable" seed="1602199436" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000450" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.SpellActionHandlerTests.SetUp () [0x00007] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\SpellActionHandlerTests.cs:15 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1165" name="CanExecute_ValidSpell_ReturnsTrue" fullname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests.CanExecute_ValidSpell_ReturnsTrue" methodname="CanExecute_ValidSpell_ReturnsTrue" classname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests" runstate="Runnable" seed="1306930613" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000251" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.SpellActionHandlerTests.SetUp () [0x00007] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\SpellActionHandlerTests.cs:15 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1167" name="GetPreview_ReturnsTargetCell" fullname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests.GetPreview_ReturnsTargetCell" methodname="GetPreview_ReturnsTargetCell" classname="Tests.EditMode.ActionHandlers.SpellActionHandlerTests" runstate="Runnable" seed="2028562181" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000160" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ActionHandlers.SpellActionHandlerTests.SetUp () [0x00007] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionHandlers\SpellActionHandlerTests.cs:15 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1179" name="Actions" fullname="Tests.EditMode.Actions" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.008627" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1149" name="ActionResolver_EditModeTests" fullname="Tests.EditMode.Actions.ActionResolver_EditModeTests" classname="Tests.EditMode.Actions.ActionResolver_EditModeTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.003552" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1150" name="Resolve_ReturnsMoveHandler_ForSimpleMoveContext" fullname="Tests.EditMode.Actions.ActionResolver_EditModeTests.Resolve_ReturnsMoveHandler_ForSimpleMoveContext" methodname="Resolve_ReturnsMoveHandler_ForSimpleMoveContext" classname="Tests.EditMode.Actions.ActionResolver_EditModeTests" runstate="Runnable" seed="1343219717" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.001084" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.Actions.ActionResolver_EditModeTests.CreateModel () [0x00033] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionResolver_EditModeTests.cs:20 
+  at Tests.EditMode.Actions.ActionResolver_EditModeTests.Resolve_ReturnsMoveHandler_ForSimpleMoveContext () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionResolver_EditModeTests.cs:34 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1151" name="Resolve_ReturnsNoHandler_ForInvalidContext" fullname="Tests.EditMode.Actions.ActionResolver_EditModeTests.Resolve_ReturnsNoHandler_ForInvalidContext" methodname="Resolve_ReturnsNoHandler_ForInvalidContext" classname="Tests.EditMode.Actions.ActionResolver_EditModeTests" runstate="Runnable" seed="119856314" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000740" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.Actions.ActionResolver_EditModeTests.CreateModel () [0x00033] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionResolver_EditModeTests.cs:20 
+  at Tests.EditMode.Actions.ActionResolver_EditModeTests.Resolve_ReturnsNoHandler_ForInvalidContext () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\ActionResolver_EditModeTests.cs:48 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1178" name="Combat" fullname="Tests.EditMode.Combat" runstate="Runnable" testcasecount="4" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.042487" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1144" name="TurnSystemTests" fullname="Tests.EditMode.Combat.TurnSystemTests" classname="Tests.EditMode.Combat.TurnSystemTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.026391" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1146" name="EndTurn_DoesNotGiveTurnToRemovedUnit" fullname="Tests.EditMode.Combat.TurnSystemTests.EndTurn_DoesNotGiveTurnToRemovedUnit" methodname="EndTurn_DoesNotGiveTurnToRemovedUnit" classname="Tests.EditMode.Combat.TurnSystemTests" runstate="Runnable" seed="1627455700" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.015397" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Archer takes turn
+Turn already taken by first unit Archer
+]]></output>
+              </test-case>
+              <test-case id="1147" name="MultipleTurns_SkipAllRemovedUnits" fullname="Tests.EditMode.Combat.TurnSystemTests.MultipleTurns_SkipAllRemovedUnits" methodname="MultipleTurns_SkipAllRemovedUnits" classname="Tests.EditMode.Combat.TurnSystemTests" runstate="Runnable" seed="481941983" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.005806" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Archer takes turn
+Archer takes turn
+Witch takes turn
+Archer takes turn
+Witch takes turn
+Archer takes turn
+]]></output>
+              </test-case>
+              <test-case id="1145" name="RunBattle_SkipsDeadUnits_IfRemovedBeforeStart" fullname="Tests.EditMode.Combat.TurnSystemTests.RunBattle_SkipsDeadUnits_IfRemovedBeforeStart" methodname="RunBattle_SkipsDeadUnits_IfRemovedBeforeStart" classname="Tests.EditMode.Combat.TurnSystemTests" runstate="Runnable" seed="801715461" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.001222" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Witch takes turn
+]]></output>
+              </test-case>
+              <test-case id="1148" name="UpdateBattleState_ReturnsWin_WhenOnlyOneTeamLeft_AfterRemovals" fullname="Tests.EditMode.Combat.TurnSystemTests.UpdateBattleState_ReturnsWin_WhenOnlyOneTeamLeft_AfterRemovals" methodname="UpdateBattleState_ReturnsWin_WhenOnlyOneTeamLeft_AfterRemovals" classname="Tests.EditMode.Combat.TurnSystemTests" runstate="Runnable" seed="29460252" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.001531" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Archer takes turn
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1173" name="GridContents" fullname="Tests.EditMode.GridContents" runstate="Runnable" testcasecount="102" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:49Z" duration="4.564505" total="102" passed="89" failed="13" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestSuite" id="1175" name="Input" fullname="Tests.EditMode.GridContents.Input" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.002592" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="TestFixture" id="1136" name="Input_MoveIntegrationTest" fullname="Tests.EditMode.GridContents.Input.Input_MoveIntegrationTest" classname="Tests.EditMode.GridContents.Input.Input_MoveIntegrationTest" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.001781" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1137" name="Move_By_CommandRoute_UpdatesModelAndTriggersEvent" fullname="Tests.EditMode.GridContents.Input.Input_MoveIntegrationTest.Move_By_CommandRoute_UpdatesModelAndTriggersEvent" methodname="Move_By_CommandRoute_UpdatesModelAndTriggersEvent" classname="Tests.EditMode.GridContents.Input.Input_MoveIntegrationTest" runstate="Runnable" seed="1075810610" result="Failed" label="Error" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.000632" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                    <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.GridContents.Input.Input_MoveIntegrationTest.SetUp () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\Input_MoveIntegrationTest.cs:21 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                  </failure>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestSuite" id="1174" name="Units" fullname="Tests.EditMode.GridContents.Units" runstate="Runnable" testcasecount="101" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:49Z" duration="4.543641" total="101" passed="89" failed="12" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="TestFixture" id="1029" name="PerformanceTests" fullname="Tests.EditMode.GridContents.Units.PerformanceTests" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" testcasecount="8" result="Failed" site="Child" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:49Z" duration="4.230631" total="8" passed="7" failed="1" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1030" name="UnitModel_Constructor_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_Constructor_Performance_IsAcceptable" methodname="UnitModel_Constructor_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="1652124345" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.136083" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1032" name="UnitModel_DamageCalculation_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_DamageCalculation_Performance_IsAcceptable" methodname="UnitModel_DamageCalculation_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="1630554206" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.006491" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1035" name="UnitModel_EventSubscription_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_EventSubscription_Performance_IsAcceptable" methodname="UnitModel_EventSubscription_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="503572755" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:45Z" duration="0.367520" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1036" name="UnitModel_MemoryAllocation_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_MemoryAllocation_Performance_IsAcceptable" methodname="UnitModel_MemoryAllocation_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="630733861" result="Passed" start-time="2025-09-27 17:38:45Z" end-time="2025-09-27 17:38:46Z" duration="0.427801" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1034" name="UnitModel_Movement_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_Movement_Performance_IsAcceptable" methodname="UnitModel_Movement_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="237445690" result="Passed" start-time="2025-09-27 17:38:46Z" end-time="2025-09-27 17:38:46Z" duration="0.001855" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1031" name="UnitModel_PositionChange_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_PositionChange_Performance_IsAcceptable" methodname="UnitModel_PositionChange_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="446877168" result="Passed" start-time="2025-09-27 17:38:46Z" end-time="2025-09-27 17:38:46Z" duration="0.001457" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1037" name="UnitModel_ReactiveProperty_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_ReactiveProperty_Performance_IsAcceptable" methodname="UnitModel_ReactiveProperty_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="418219592" result="Failed" start-time="2025-09-27 17:38:46Z" end-time="2025-09-27 17:38:49Z" duration="3.212432" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Изменение ReactiveProperty занимает слишком много времени: 0,320ms в среднем
+  Expected: less than 0.29999999999999999d
+  But was:  0.32029999999999997d
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_ReactiveProperty_Performance_IsAcceptable () [0x00117] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\PerformanceTests.cs:293
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1033" name="UnitModel_StatusEffectApplication_Performance_IsAcceptable" fullname="Tests.EditMode.GridContents.Units.PerformanceTests.UnitModel_StatusEffectApplication_Performance_IsAcceptable" methodname="UnitModel_StatusEffectApplication_Performance_IsAcceptable" classname="Tests.EditMode.GridContents.Units.PerformanceTests" runstate="Runnable" seed="1604318697" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.072902" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Using fallback StatusEffectData for type NotImp. Found 6 total effects in project.
+]]></output>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1038" name="UnitDefinitionSOTests" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" testcasecount="9" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.059189" total="9" passed="4" failed="5" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1039" name="Constructor_WithValidParameters_InitializesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.Constructor_WithValidParameters_InitializesCorrectly" methodname="Constructor_WithValidParameters_InitializesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="182032828" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.004604" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1040" name="GetBlueTeamMaterial_WithMockProvider_ReturnsNotNull" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetBlueTeamMaterial_WithMockProvider_ReturnsNotNull" methodname="GetBlueTeamMaterial_WithMockProvider_ReturnsNotNull" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="890362886" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001421" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: not null
+  But was:  null
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetBlueTeamMaterial_WithMockProvider_ReturnsNotNull () [0x0001f] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitDefinitionSOTests.cs:64
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1042" name="GetHoveredBlueTeamMaterial_WithMockProvider_ReturnsNotNull" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetHoveredBlueTeamMaterial_WithMockProvider_ReturnsNotNull" methodname="GetHoveredBlueTeamMaterial_WithMockProvider_ReturnsNotNull" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="1983419056" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001609" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: not null
+  But was:  null
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetHoveredBlueTeamMaterial_WithMockProvider_ReturnsNotNull () [0x0001f] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitDefinitionSOTests.cs:92
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1043" name="GetHoveredRedTeamMaterial_WithMockProvider_ReturnsNotNull" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetHoveredRedTeamMaterial_WithMockProvider_ReturnsNotNull" methodname="GetHoveredRedTeamMaterial_WithMockProvider_ReturnsNotNull" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="2036364863" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001519" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: not null
+  But was:  null
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetHoveredRedTeamMaterial_WithMockProvider_ReturnsNotNull () [0x0001f] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitDefinitionSOTests.cs:106
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1041" name="GetRedTeamMaterial_WithMockProvider_ReturnsNotNull" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetRedTeamMaterial_WithMockProvider_ReturnsNotNull" methodname="GetRedTeamMaterial_WithMockProvider_ReturnsNotNull" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="2113452762" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001793" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: not null
+  But was:  null
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.GetRedTeamMaterial_WithMockProvider_ReturnsNotNull () [0x0001f] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitDefinitionSOTests.cs:78
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1045" name="InvulnerableEffects_InitiallyEmpty_ReturnsEmptyList" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.InvulnerableEffects_InitiallyEmpty_ReturnsEmptyList" methodname="InvulnerableEffects_InitiallyEmpty_ReturnsEmptyList" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="1642279743" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001800" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1047" name="SetMaterialProvider_WithNullProvider_DoesNotThrowException" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.SetMaterialProvider_WithNullProvider_DoesNotThrowException" methodname="SetMaterialProvider_WithNullProvider_DoesNotThrowException" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="160622784" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001889" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1046" name="SetMaterialProvider_WithValidProvider_UpdatesProvider" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.SetMaterialProvider_WithValidProvider_UpdatesProvider" methodname="SetMaterialProvider_WithValidProvider_UpdatesProvider" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="644555666" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001942" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                    <stack-trace><![CDATA[  at Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.SetMaterialProvider_WithValidProvider_UpdatesProvider () [0x00020] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitDefinitionSOTests.cs:137 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1044" name="StartingEffects_InitiallyEmpty_ReturnsEmptyList" fullname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests.StartingEffects_InitiallyEmpty_ReturnsEmptyList" methodname="StartingEffects_InitiallyEmpty_ReturnsEmptyList" classname="Tests.EditMode.GridContents.Units.UnitDefinitionSOTests" runstate="Runnable" seed="1935141423" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001485" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1048" name="UnitModelEdgeCaseTests" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.103221" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1061" name="ApplyStatusEffect_WithNullEffect_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.ApplyStatusEffect_WithNullEffect_ThrowsException" methodname="ApplyStatusEffect_WithNullEffect_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="776729967" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001206" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1050" name="Constructor_WithNegativePosition_CreatesUnitWithNegativePosition" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.Constructor_WithNegativePosition_CreatesUnitWithNegativePosition" methodname="Constructor_WithNegativePosition_CreatesUnitWithNegativePosition" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1905415452" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001702" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1049" name="Constructor_WithZeroAmount_CreatesUnitWithZeroAmount" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.Constructor_WithZeroAmount_CreatesUnitWithZeroAmount" methodname="Constructor_WithZeroAmount_CreatesUnitWithZeroAmount" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="579307193" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000683" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1064" name="EndTurn_WithMultipleEffects_ProcessesAllEffects" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.EndTurn_WithMultipleEffects_ProcessesAllEffects" methodname="EndTurn_WithMultipleEffects_ProcessesAllEffects" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1376939307" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.024167" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1058" name="MoveByRoute_WithEmptyRoute_DoesNotChangePosition" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.MoveByRoute_WithEmptyRoute_DoesNotChangePosition" methodname="MoveByRoute_WithEmptyRoute_DoesNotChangePosition" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1121350168" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000526" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1060" name="MoveByRoute_WithNullRoute_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.MoveByRoute_WithNullRoute_ThrowsException" methodname="MoveByRoute_WithNullRoute_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1231713281" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000534" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1059" name="MoveByRoute_WithSinglePointRoute_UpdatesPosition" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.MoveByRoute_WithSinglePointRoute_UpdatesPosition" methodname="MoveByRoute_WithSinglePointRoute_UpdatesPosition" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="470601825" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000795" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1066" name="Position_SetterWithSameValue_DoesNotInvokeEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.Position_SetterWithSameValue_DoesNotInvokeEvent" methodname="Position_SetterWithSameValue_DoesNotInvokeEvent" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="631876252" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000881" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1054" name="RecieveDamage_WithDamageEqualToMultipleUnitsHealth_KillsCorrectAmount" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RecieveDamage_WithDamageEqualToMultipleUnitsHealth_KillsCorrectAmount" methodname="RecieveDamage_WithDamageEqualToMultipleUnitsHealth_KillsCorrectAmount" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1251899497" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001373" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1053" name="RecieveDamage_WithExactHealthDamage_KillsOneUnitAndResetsHealth" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RecieveDamage_WithExactHealthDamage_KillsOneUnitAndResetsHealth" methodname="RecieveDamage_WithExactHealthDamage_KillsOneUnitAndResetsHealth" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1349381026" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000625" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1052" name="RecieveDamage_WithNegativeDamage_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RecieveDamage_WithNegativeDamage_ThrowsException" methodname="RecieveDamage_WithNegativeDamage_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="477887283" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000634" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1055" name="RecieveDamage_WithOverkillDamage_KillsAllUnits" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RecieveDamage_WithOverkillDamage_KillsAllUnits" methodname="RecieveDamage_WithOverkillDamage_KillsAllUnits" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="625310295" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000538" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1051" name="RecieveDamage_WithZeroDamage_DoesNotChangeHealth" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RecieveDamage_WithZeroDamage_DoesNotChangeHealth" methodname="RecieveDamage_WithZeroDamage_DoesNotChangeHealth" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="2013681699" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000516" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1063" name="RemoveEffect_WithNonExistentEffect_DoesNotThrowException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RemoveEffect_WithNonExistentEffect_DoesNotThrowException" methodname="RemoveEffect_WithNonExistentEffect_DoesNotThrowException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1077879918" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.013558" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Using fallback StatusEffectData for type NotImp. Found 6 total effects in project.
+]]></output>
+                </test-case>
+                <test-case id="1062" name="RemoveEffect_WithNullEffect_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.RemoveEffect_WithNullEffect_ThrowsException" methodname="RemoveEffect_WithNullEffect_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="986184663" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000654" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1057" name="SendDamage_WithNegativeAmount_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.SendDamage_WithNegativeAmount_ThrowsException" methodname="SendDamage_WithNegativeAmount_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="607034308" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000841" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1056" name="SendDamage_WithZeroAmount_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.SendDamage_WithZeroAmount_ThrowsException" methodname="SendDamage_WithZeroAmount_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1014515485" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001250" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1065" name="TakeTurn_WithMultipleEffects_ProcessesAllEffects" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.TakeTurn_WithMultipleEffects_ProcessesAllEffects" methodname="TakeTurn_WithMultipleEffects_ProcessesAllEffects" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="264686777" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.028069" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Archer takes turn
+Archer takes turn
+]]></output>
+                </test-case>
+                <test-case id="1067" name="ToString_WithDifferentUnitTypes_ReturnsCorrectString" fullname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests.ToString_WithDifferentUnitTypes_ReturnsCorrectString" methodname="ToString_WithDifferentUnitTypes_ReturnsCorrectString" classname="Tests.EditMode.GridContents.Units.UnitModelEdgeCaseTests" runstate="Runnable" seed="1611332081" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000663" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1068" name="UnitModelFactory_EditModeTests" fullname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests" classname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.020798" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1069" name="Create_WithProvidedDictionary_CreatesUnitModel" fullname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests.Create_WithProvidedDictionary_CreatesUnitModel" methodname="Create_WithProvidedDictionary_CreatesUnitModel" classname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests" runstate="Runnable" seed="533739875" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001709" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Expected: Archer
+  But was:  <Archer>
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests.Create_WithProvidedDictionary_CreatesUnitModel () [0x00066] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitModelFactory_EditModeTests.cs:30
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1070" name="UnitDefinitionSO_SetMaterialProvider_AllowsTestProvider" fullname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests.UnitDefinitionSO_SetMaterialProvider_AllowsTestProvider" methodname="UnitDefinitionSO_SetMaterialProvider_AllowsTestProvider" classname="Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests" runstate="Runnable" seed="828112817" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001108" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                    <stack-trace><![CDATA[  at Tests.EditMode.GridContents.Units.UnitModelFactory_EditModeTests.UnitDefinitionSO_SetMaterialProvider_AllowsTestProvider () [0x00015] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitModelFactory_EditModeTests.cs:41 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                  </failure>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1071" name="UnitModelTests" fullname="Tests.EditMode.GridContents.Units.UnitModelTests" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" testcasecount="33" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.052853" total="33" passed="33" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1090" name="ApplyStatusEffect_WithInvulnerableEffect_DoesNotApplyEffect" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.ApplyStatusEffect_WithInvulnerableEffect_DoesNotApplyEffect" methodname="ApplyStatusEffect_WithInvulnerableEffect_DoesNotApplyEffect" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1714177385" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.002289" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1089" name="ApplyStatusEffect_WithNonInvulnerableEffect_AppliesEffect" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.ApplyStatusEffect_WithNonInvulnerableEffect_AppliesEffect" methodname="ApplyStatusEffect_WithNonInvulnerableEffect_AppliesEffect" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1929208116" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000889" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1087" name="CanMoveThrough_ReturnsFalse" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.CanMoveThrough_ReturnsFalse" methodname="CanMoveThrough_ReturnsFalse" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1032080275" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000766" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1073" name="Constructor_WithValidParameters_CreatesModifiedStats" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.Constructor_WithValidParameters_CreatesModifiedStats" methodname="Constructor_WithValidParameters_CreatesModifiedStats" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="921316745" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000890" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1072" name="Constructor_WithValidParameters_InitializesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.Constructor_WithValidParameters_InitializesCorrectly" methodname="Constructor_WithValidParameters_InitializesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="538505098" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001070" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1086" name="EndTurn_DoesNotThrowException" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.EndTurn_DoesNotThrowException" methodname="EndTurn_DoesNotThrowException" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1042231305" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000477" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1075" name="MoveByRoute_WithValidRoute_UpdatesPositionAndInvokesEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.MoveByRoute_WithValidRoute_UpdatesPositionAndInvokesEvent" methodname="MoveByRoute_WithValidRoute_UpdatesPositionAndInvokesEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1561674771" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000735" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1074" name="Position_Setter_UpdatesPositionCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.Position_Setter_UpdatesPositionCorrectly" methodname="Position_Setter_UpdatesPositionCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="2126355969" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000861" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1084" name="RecieveDamage_WithAnyDamage_InvokesHealthChangedEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithAnyDamage_InvokesHealthChangedEvent" methodname="RecieveDamage_WithAnyDamage_InvokesHealthChangedEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="910238454" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000769" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1083" name="RecieveDamage_WithAnyDamage_InvokesHittedEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithAnyDamage_InvokesHittedEvent" methodname="RecieveDamage_WithAnyDamage_InvokesHittedEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1523694316" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000588" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1080" name="RecieveDamage_WithDamageEqualToHealth_KillsOneUnit" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithDamageEqualToHealth_KillsOneUnit" methodname="RecieveDamage_WithDamageEqualToHealth_KillsOneUnit" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1038818872" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000517" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1093" name="RecieveDamage_WithDamageEqualToHealth_TriggersDeath" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithDamageEqualToHealth_TriggersDeath" methodname="RecieveDamage_WithDamageEqualToHealth_TriggersDeath" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="924399373" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000706" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1081" name="RecieveDamage_WithDamageGreaterThanHealth_KillsMultipleUnits" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithDamageGreaterThanHealth_KillsMultipleUnits" methodname="RecieveDamage_WithDamageGreaterThanHealth_KillsMultipleUnits" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1095663906" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000726" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1092" name="RecieveDamage_WithDamageLessThanHealth_DoesNotTriggerDeath" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithDamageLessThanHealth_DoesNotTriggerDeath" methodname="RecieveDamage_WithDamageLessThanHealth_DoesNotTriggerDeath" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="984186838" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000668" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1079" name="RecieveDamage_WithDamageLessThanHealth_ReducesHealthCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithDamageLessThanHealth_ReducesHealthCorrectly" methodname="RecieveDamage_WithDamageLessThanHealth_ReducesHealthCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1019534350" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000708" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1098" name="RecieveDamage_WithExactHealthDamage_KillsOneUnit" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithExactHealthDamage_KillsOneUnit" methodname="RecieveDamage_WithExactHealthDamage_KillsOneUnit" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="752565818" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000748" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1095" name="RecieveDamage_WithExactHealthKill_TriggersDeath" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithExactHealthKill_TriggersDeath" methodname="RecieveDamage_WithExactHealthKill_TriggersDeath" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1906144645" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000686" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1082" name="RecieveDamage_WithLethalDamage_InvokesDiedEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithLethalDamage_InvokesDiedEvent" methodname="RecieveDamage_WithLethalDamage_InvokesDiedEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="150886046" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000544" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1100" name="RecieveDamage_WithMassiveDamage_KillsAllUnits" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithMassiveDamage_KillsAllUnits" methodname="RecieveDamage_WithMassiveDamage_KillsAllUnits" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="804500154" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000533" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1104" name="RecieveDamage_WithMultipleSmallDamages_AccumulatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithMultipleSmallDamages_AccumulatesCorrectly" methodname="RecieveDamage_WithMultipleSmallDamages_AccumulatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="776099248" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000531" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1102" name="RecieveDamage_WithNegativeDamage_ThrowsException" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithNegativeDamage_ThrowsException" methodname="RecieveDamage_WithNegativeDamage_ThrowsException" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="646502435" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000800" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1096" name="RecieveDamage_WithOverkill_TriggersDeath" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithOverkill_TriggersDeath" methodname="RecieveDamage_WithOverkill_TriggersDeath" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="650909270" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000754" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1099" name="RecieveDamage_WithOverkillDamage_KillsMultipleUnits" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithOverkillDamage_KillsMultipleUnits" methodname="RecieveDamage_WithOverkillDamage_KillsMultipleUnits" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="744427290" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000704" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1097" name="RecieveDamage_WithPartialDamage_UpdatesHealthCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithPartialDamage_UpdatesHealthCorrectly" methodname="RecieveDamage_WithPartialDamage_UpdatesHealthCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1399929774" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000560" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1094" name="RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath" methodname="RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1528915384" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000631" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1103" name="RecieveDamage_WithStatusEffects_AppliesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithStatusEffects_AppliesCorrectly" methodname="RecieveDamage_WithStatusEffects_AppliesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1741956803" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000487" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1101" name="RecieveDamage_WithZeroDamage_DoesNothing" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RecieveDamage_WithZeroDamage_DoesNothing" methodname="RecieveDamage_WithZeroDamage_DoesNothing" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="597302160" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000501" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1091" name="RemoveEffect_RemovesEffectCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.RemoveEffect_RemovesEffectCorrectly" methodname="RemoveEffect_RemovesEffectCorrectly" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="477243597" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000633" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1077" name="SendDamage_WithValidAttackContext_InvokesAttackedEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.SendDamage_WithValidAttackContext_InvokesAttackedEvent" methodname="SendDamage_WithValidAttackContext_InvokesAttackedEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1907996441" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000813" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1076" name="SendDamage_WithValidAttackContext_ReturnsDamageContext" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.SendDamage_WithValidAttackContext_ReturnsDamageContext" methodname="SendDamage_WithValidAttackContext_ReturnsDamageContext" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1791573801" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000940" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1078" name="SimulateSendDamage_WithValidAttackContext_ReturnsDamageContext" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.SimulateSendDamage_WithValidAttackContext_ReturnsDamageContext" methodname="SimulateSendDamage_WithValidAttackContext_ReturnsDamageContext" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1810746964" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000906" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1085" name="TakeTurn_InvokesTurnStartedEvent" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.TakeTurn_InvokesTurnStartedEvent" methodname="TakeTurn_InvokesTurnStartedEvent" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="1359027459" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001315" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Archer takes turn
+]]></output>
+                </test-case>
+                <test-case id="1088" name="ToString_ReturnsUnitTypeString" fullname="Tests.EditMode.GridContents.Units.UnitModelTests.ToString_ReturnsUnitTypeString" methodname="ToString_ReturnsUnitTypeString" classname="Tests.EditMode.GridContents.Units.UnitModelTests" runstate="Runnable" seed="323546136" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000455" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1105" name="UnitViewModelTests" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.066920" total="30" passed="26" failed="4" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1107" name="Constructor_WithBlueTeamUnit_InitializesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.Constructor_WithBlueTeamUnit_InitializesCorrectly" methodname="Constructor_WithBlueTeamUnit_InitializesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1946768754" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.004253" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1108" name="Constructor_WithRedTeamUnit_InitializesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.Constructor_WithRedTeamUnit_InitializesCorrectly" methodname="Constructor_WithRedTeamUnit_InitializesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="185054197" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000585" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1106" name="Constructor_WithValidParameters_InitializesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.Constructor_WithValidParameters_InitializesCorrectly" methodname="Constructor_WithValidParameters_InitializesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="15036393" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000537" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1119" name="Events_AreUniRxObservables" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.Events_AreUniRxObservables" methodname="Events_AreUniRxObservables" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="350532395" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001145" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1125" name="EventSequence_WhenModelDamaged_EmitsInCorrectOrder" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.EventSequence_WhenModelDamaged_EmitsInCorrectOrder" methodname="EventSequence_WhenModelDamaged_EmitsInCorrectOrder" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1138131768" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.002259" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1126" name="EventSequence_WhenModelKilled_EmitsInCorrectOrder" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.EventSequence_WhenModelKilled_EmitsInCorrectOrder" methodname="EventSequence_WhenModelKilled_EmitsInCorrectOrder" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1692257814" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000916" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1128" name="HealthRatio_AfterPartialDamage_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_AfterPartialDamage_CalculatesCorrectly" methodname="HealthRatio_AfterPartialDamage_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1483573223" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001521" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Health ratio should be calculated correctly after damage
+  Expected: 0.5f
+  But was:  0.0f
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_AfterPartialDamage_CalculatesCorrectly () [0x00059] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitViewModelTests.cs:411
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1129" name="HealthRatio_AfterUnitDeath_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_AfterUnitDeath_CalculatesCorrectly" methodname="HealthRatio_AfterUnitDeath_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1153898639" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000688" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1127" name="HealthRatio_WhenModelDamaged_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WhenModelDamaged_CalculatesCorrectly" methodname="HealthRatio_WhenModelDamaged_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="192152924" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000560" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1135" name="HealthRatio_WithHealing_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithHealing_CalculatesCorrectly" methodname="HealthRatio_WithHealing_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="437266766" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000952" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Health ratio should be 0.5 after damage
+  Expected: 0.5f
+  But was:  0.0f
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithHealing_CalculatesCorrectly () [0x00030] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitViewModelTests.cs:535
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1130" name="HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly" methodname="HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1809505039" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000851" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Health ratio should be calculated correctly after multiple unit deaths
+  Expected: 0.5f
+  But was:  0.0f
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly () [0x0005c] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitViewModelTests.cs:451
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1134" name="HealthRatio_WithStatusEffects_CalculatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithStatusEffects_CalculatesCorrectly" methodname="HealthRatio_WithStatusEffects_CalculatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="395804319" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000708" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  Health ratio should be calculated correctly with status effects
+  Expected: 0.5f
+  But was:  0.0f
+]]></message>
+                    <stack-trace><![CDATA[at Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithStatusEffects_CalculatesCorrectly () [0x00048] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GridContents\Units\UnitViewModelTests.cs:517
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1131" name="HealthRatio_WithZeroMaxHealth_HandlesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.HealthRatio_WithZeroMaxHealth_HandlesCorrectly" methodname="HealthRatio_WithZeroMaxHealth_HandlesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1972438664" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000466" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1120" name="Model_IsAccessibleAndCorrect" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.Model_IsAccessibleAndCorrect" methodname="Model_IsAccessibleAndCorrect" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="2037584108" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000753" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1109" name="OnAttacked_WhenModelAttacked_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnAttacked_WhenModelAttacked_EmitsEvent" methodname="OnAttacked_WhenModelAttacked_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="845113623" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000709" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1114" name="OnAttacked_WithMultipleSubscribers_NotifiesAllSubscribers" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnAttacked_WithMultipleSubscribers_NotifiesAllSubscribers" methodname="OnAttacked_WithMultipleSubscribers_NotifiesAllSubscribers" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1620143365" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001248" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1111" name="OnDeath_WhenModelDies_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnDeath_WhenModelDies_EmitsEvent" methodname="OnDeath_WhenModelDies_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1786906442" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000566" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1122" name="OnDeath_WhenModelFullyKilled_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnDeath_WhenModelFullyKilled_EmitsEvent" methodname="OnDeath_WhenModelFullyKilled_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1234812373" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000558" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1121" name="OnDeath_WhenModelPartiallyDamaged_DoesNotEmitEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnDeath_WhenModelPartiallyDamaged_DoesNotEmitEvent" methodname="OnDeath_WhenModelPartiallyDamaged_DoesNotEmitEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="731791978" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000618" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1116" name="OnDeath_WithMultipleSubscribers_NotifiesAllSubscribers" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnDeath_WithMultipleSubscribers_NotifiesAllSubscribers" methodname="OnDeath_WithMultipleSubscribers_NotifiesAllSubscribers" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="162579956" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000634" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1124" name="OnHealthChanged_WhenModelDamaged_AlwaysEmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHealthChanged_WhenModelDamaged_AlwaysEmitsEvent" methodname="OnHealthChanged_WhenModelDamaged_AlwaysEmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1825899499" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000764" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1113" name="OnHealthChanged_WhenModelHealthChanges_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHealthChanged_WhenModelHealthChanges_EmitsEvent" methodname="OnHealthChanged_WhenModelHealthChanges_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="307054618" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000725" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1118" name="OnHealthChanged_WithMultipleSubscribers_NotifiesAllSubscribers" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHealthChanged_WithMultipleSubscribers_NotifiesAllSubscribers" methodname="OnHealthChanged_WithMultipleSubscribers_NotifiesAllSubscribers" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1003191995" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000584" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1123" name="OnHit_WhenModelDamaged_AlwaysEmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHit_WhenModelDamaged_AlwaysEmitsEvent" methodname="OnHit_WhenModelDamaged_AlwaysEmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="2086575086" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000540" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1110" name="OnHit_WhenModelHit_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHit_WhenModelHit_EmitsEvent" methodname="OnHit_WhenModelHit_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1942769388" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000495" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1115" name="OnHit_WithMultipleSubscribers_NotifiesAllSubscribers" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnHit_WithMultipleSubscribers_NotifiesAllSubscribers" methodname="OnHit_WithMultipleSubscribers_NotifiesAllSubscribers" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1808468731" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000649" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1112" name="OnTurnStarted_WhenModelTurnStarts_EmitsEvent" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnTurnStarted_WhenModelTurnStarts_EmitsEvent" methodname="OnTurnStarted_WhenModelTurnStarts_EmitsEvent" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1651632966" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001474" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Archer takes turn
+]]></output>
+                </test-case>
+                <test-case id="1117" name="OnTurnStarted_WithMultipleSubscribers_NotifiesAllSubscribers" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.OnTurnStarted_WithMultipleSubscribers_NotifiesAllSubscribers" methodname="OnTurnStarted_WithMultipleSubscribers_NotifiesAllSubscribers" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="73128266" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001389" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Archer takes turn
+]]></output>
+                </test-case>
+                <test-case id="1132" name="UnitAmount_WhenModelDamaged_UpdatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.UnitAmount_WhenModelDamaged_UpdatesCorrectly" methodname="UnitAmount_WhenModelDamaged_UpdatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="871752162" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000529" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1133" name="UnitAmount_WithMultipleDeaths_UpdatesCorrectly" fullname="Tests.EditMode.GridContents.Units.UnitViewModelTests.UnitAmount_WithMultipleDeaths_UpdatesCorrectly" methodname="UnitAmount_WithMultipleDeaths_UpdatesCorrectly" classname="Tests.EditMode.GridContents.Units.UnitViewModelTests" runstate="Runnable" seed="1600760877" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000528" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1177" name="Model" fullname="Tests.EditMode.Model" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.019712" total="3" passed="0" failed="3" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1140" name="GameModel_EditModeTests" fullname="Tests.EditMode.Model.GameModel_EditModeTests" classname="Tests.EditMode.Model.GameModel_EditModeTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.003008" total="3" passed="0" failed="3" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1141" name="InitializeGrid_RaisesEvent_And_CreatesCells" fullname="Tests.EditMode.Model.GameModel_EditModeTests.InitializeGrid_RaisesEvent_And_CreatesCells" methodname="InitializeGrid_RaisesEvent_And_CreatesCells" classname="Tests.EditMode.Model.GameModel_EditModeTests" runstate="Runnable" seed="1836254943" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000416" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.Model.GameModel_EditModeTests.SetUp () [0x0000c] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GameModel_EditModeTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1143" name="MoveObject_MovesUnitBetweenCells" fullname="Tests.EditMode.Model.GameModel_EditModeTests.MoveObject_MovesUnitBetweenCells" methodname="MoveObject_MovesUnitBetweenCells" classname="Tests.EditMode.Model.GameModel_EditModeTests" runstate="Runnable" seed="232182355" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000243" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.Model.GameModel_EditModeTests.SetUp () [0x0000c] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GameModel_EditModeTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1142" name="SpawnUnit_AddsUnitToCell" fullname="Tests.EditMode.Model.GameModel_EditModeTests.SpawnUnit_AddsUnitToCell" methodname="SpawnUnit_AddsUnitToCell" classname="Tests.EditMode.Model.GameModel_EditModeTests" runstate="Runnable" seed="897150886" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000287" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.Model.GameModel_EditModeTests.SetUp () [0x0000c] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GameModel_EditModeTests.cs:18 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1001" name="SimpleEditModeTest" fullname="Tests.EditMode.SimpleEditModeTest" classname="Tests.EditMode.SimpleEditModeTest" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.007037" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1003" name="AnotherTest_ShouldAlsoBeEditMode" fullname="Tests.EditMode.SimpleEditModeTest.AnotherTest_ShouldAlsoBeEditMode" methodname="AnotherTest_ShouldAlsoBeEditMode" classname="Tests.EditMode.SimpleEditModeTest" runstate="Runnable" seed="1572380558" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000302" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1002" name="SimpleTest_ShouldBeEditMode" fullname="Tests.EditMode.SimpleEditModeTest.SimpleTest_ShouldBeEditMode" methodname="SimpleTest_ShouldBeEditMode" classname="Tests.EditMode.SimpleEditModeTest" runstate="Runnable" seed="1543296915" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000420" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestSuite" id="1172" name="UI" fullname="Tests.EditMode.UI" runstate="Runnable" testcasecount="17" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.026710" total="17" passed="16" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1010" name="UnitHealthBarTests_EditMode" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" testcasecount="8" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.005313" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1014" name="CalculateHealthRatio_WithValidValues_ReturnsCorrectRatio" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.CalculateHealthRatio_WithValidValues_ReturnsCorrectRatio" methodname="CalculateHealthRatio_WithValidValues_ReturnsCorrectRatio" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="2106011261" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000336" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="CalculateHealthRatio_WithZeroMaxHealth_ReturnsZero" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.CalculateHealthRatio_WithZeroMaxHealth_ReturnsZero" methodname="CalculateHealthRatio_WithZeroMaxHealth_ReturnsZero" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="982963358" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000250" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1018" name="HideOnFullHP_WhenFalse_AlwaysShows" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.HideOnFullHP_WhenFalse_AlwaysShows" methodname="HideOnFullHP_WhenFalse_AlwaysShows" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="159209059" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000201" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="HideOnFullHP_WhenTrueAndRatioIsNotOne_ShouldShow" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.HideOnFullHP_WhenTrueAndRatioIsNotOne_ShouldShow" methodname="HideOnFullHP_WhenTrueAndRatioIsNotOne_ShouldShow" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="2013567548" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000199" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1016" name="HideOnFullHP_WhenTrueAndRatioIsOne_ShouldHide" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.HideOnFullHP_WhenTrueAndRatioIsOne_ShouldHide" methodname="HideOnFullHP_WhenTrueAndRatioIsOne_ShouldHide" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="1085929793" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000298" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="SetRatio_WithFullRatio_ReturnsOne" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.SetRatio_WithFullRatio_ReturnsOne" methodname="SetRatio_WithFullRatio_ReturnsOne" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="517708381" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000344" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1011" name="SetRatio_WithValidRatio_ReturnsCorrectValue" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.SetRatio_WithValidRatio_ReturnsCorrectValue" methodname="SetRatio_WithValidRatio_ReturnsCorrectValue" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="152821589" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000274" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1012" name="SetRatio_WithZeroRatio_ReturnsZero" fullname="Tests.EditMode.UI.UnitHealthBarTests_EditMode.SetRatio_WithZeroRatio_ReturnsZero" methodname="SetRatio_WithZeroRatio_ReturnsZero" classname="Tests.EditMode.UI.UnitHealthBarTests_EditMode" runstate="Runnable" seed="1003596566" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000229" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1019" name="UnitViewUITests_EditMode" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" testcasecount="9" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.015288" total="9" passed="8" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1028" name="HealthRatio_WithVariousValues_CalculatesCorrectly" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.HealthRatio_WithVariousValues_CalculatesCorrectly" methodname="HealthRatio_WithVariousValues_CalculatesCorrectly" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="612017712" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001274" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1027" name="MultipleHealthChanges_CalculateCorrectly" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.MultipleHealthChanges_CalculateCorrectly" methodname="MultipleHealthChanges_CalculateCorrectly" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="1432103235" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000591" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1026" name="OnDeath_WhenModelDies_EmitsEvent" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.OnDeath_WhenModelDies_EmitsEvent" methodname="OnDeath_WhenModelDies_EmitsEvent" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="1554460372" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000539" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="OnHealthChanged_WhenModelHealthChanges_EmitsEvent" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.OnHealthChanged_WhenModelHealthChanges_EmitsEvent" methodname="OnHealthChanged_WhenModelHealthChanges_EmitsEvent" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="775848622" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000664" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="UpdateAmount_AfterUnitDeath_ReturnsCorrectValue" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateAmount_AfterUnitDeath_ReturnsCorrectValue" methodname="UpdateAmount_AfterUnitDeath_ReturnsCorrectValue" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="14605078" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000488" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="UpdateAmount_WithValidAmount_ReturnsCorrectValue" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateAmount_WithValidAmount_ReturnsCorrectValue" methodname="UpdateAmount_WithValidAmount_ReturnsCorrectValue" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="1335964883" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000547" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="UpdateHealth_WithFullHealth_CalculatesCorrectRatio" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateHealth_WithFullHealth_CalculatesCorrectRatio" methodname="UpdateHealth_WithFullHealth_CalculatesCorrectRatio" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="1796394388" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000647" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="UpdateHealth_WithPartialDamage_CalculatesCorrectRatio" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateHealth_WithPartialDamage_CalculatesCorrectRatio" methodname="UpdateHealth_WithPartialDamage_CalculatesCorrectRatio" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="1606007221" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000561" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="UpdateHealth_WithZeroMaxHealth_HandlesDivisionByZero" fullname="Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateHealth_WithZeroMaxHealth_HandlesDivisionByZero" methodname="UpdateHealth_WithZeroMaxHealth_HandlesDivisionByZero" classname="Tests.EditMode.UI.UnitViewUITests_EditMode" runstate="Runnable" seed="232762099" result="Failed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001115" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  Expected: 0.0f
+  But was:  100
+]]></message>
+                  <stack-trace><![CDATA[at Tests.EditMode.UI.UnitViewUITests_EditMode.UpdateHealth_WithZeroMaxHealth_HandlesDivisionByZero () [0x00054] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\UI\UnitViewUITests_EditMode.cs:91
+]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1171" name="Units" fullname="Tests.EditMode.Units" runstate="Runnable" testcasecount="5" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.023053" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1004" name="UnitModel_EditModeTests" fullname="Tests.EditMode.Units.UnitModel_EditModeTests" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.006822" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1005" name="MoveByRoute_UpdatesPosition_And_RaisesMovedEvent" fullname="Tests.EditMode.Units.UnitModel_EditModeTests.MoveByRoute_UpdatesPosition_And_RaisesMovedEvent" methodname="MoveByRoute_UpdatesPosition_And_RaisesMovedEvent" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" seed="175208590" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001016" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="RecieveDamage_ExactKill_ConsumesOneStack_ResetsHealth" fullname="Tests.EditMode.Units.UnitModel_EditModeTests.RecieveDamage_ExactKill_ConsumesOneStack_ResetsHealth" methodname="RecieveDamage_ExactKill_ConsumesOneStack_ResetsHealth" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" seed="1812730292" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000510" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="RecieveDamage_Overkill_KillsAll_InvokesDied" fullname="Tests.EditMode.Units.UnitModel_EditModeTests.RecieveDamage_Overkill_KillsAll_InvokesDied" methodname="RecieveDamage_Overkill_KillsAll_InvokesDied" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" seed="1056313926" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000564" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="RecieveDamage_PartialDamage_DecreasesHealthOnly" fullname="Tests.EditMode.Units.UnitModel_EditModeTests.RecieveDamage_PartialDamage_DecreasesHealthOnly" methodname="RecieveDamage_PartialDamage_DecreasesHealthOnly" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" seed="2130005751" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000449" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="TakeTurn_RaisesTurnStarted" fullname="Tests.EditMode.Units.UnitModel_EditModeTests.TakeTurn_RaisesTurnStarted" methodname="TakeTurn_RaisesTurnStarted" classname="Tests.EditMode.Units.UnitModel_EditModeTests" runstate="Runnable" seed="392668737" result="Passed" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001316" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Archer takes turn
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1176" name="ViewModels" fullname="Tests.EditMode.ViewModels" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.017619" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1138" name="GameViewModel_EditModeTests" fullname="Tests.EditMode.ViewModels.GameViewModel_EditModeTests" classname="Tests.EditMode.ViewModels.GameViewModel_EditModeTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.001903" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1139" name="GridInitialized_Event_Fires" fullname="Tests.EditMode.ViewModels.GameViewModel_EditModeTests.GridInitialized_Event_Fires" methodname="GridInitialized_Event_Fires" classname="Tests.EditMode.ViewModels.GameViewModel_EditModeTests" runstate="Runnable" seed="838651744" result="Failed" label="Error" start-time="2025-09-27 17:38:49Z" end-time="2025-09-27 17:38:49Z" duration="0.000606" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at UnitModelFactory.DataMapFromResources () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:35 
+  at UnitModelFactory..ctor (System.Boolean loadFromResource) [0x0000d] in D:\Projects\Unity\HoMM2.0\Assets\Scripts\Game\GridContents\Units\UnitModelFactory.cs:19 
+  at Tests.EditMode.ViewModels.GameViewModel_EditModeTests.SetUp () [0x00001] in D:\Projects\Unity\HoMM2.0\Assets\Tests\EditMode\GameViewModel_EditModeTests.cs:19 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <191a1970a53948f9819ac1d2e4f5c72e>:0 ]]></stack-trace>
+                </failure>
+                <output><![CDATA[Saving results to: C:/Users/vladp/AppData/LocalLow/DefaultCompany/HoMM2_0\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

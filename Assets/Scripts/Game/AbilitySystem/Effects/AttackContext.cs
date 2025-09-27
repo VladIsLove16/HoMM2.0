@@ -1,4 +1,6 @@
-﻿public class AttackContext
+﻿using UnityEngine;
+
+public class AttackContext
 {
     public IDamagable Target;
     public bool IsRanged;

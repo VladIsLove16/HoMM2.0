@@ -8,6 +8,10 @@ using UnityEngine;
 )]
 public class GridContentEntrySO : ScriptableObject
 {
+    [SerializeField] int width;
+    [SerializeField] int height;
+    public int Width => width;
+    public int Height => height;
     [Serializable]
     public class UnitContent
     {
@@ -15,7 +19,7 @@ public class GridContentEntrySO : ScriptableObject
         public int Amount;
         public int X;
         public int Y;
-        public bool isPlayer;
+        public Team Team;
     }
     public List<UnitContent> contents;
 }

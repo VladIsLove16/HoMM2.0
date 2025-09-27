@@ -9,24 +9,27 @@ namespace Tests.PlayMode
     /// <summary>
     /// Интеграционные тесты для проверки конфигурации и создания юнитов
     /// </summary>
+    [TestFixture]
     public class ConfigurationIntegrationTests
     {
         private SceneTransitionDataService _dataService;
         private GameController _gameController;
         private GameSceneConfigurationProvider _configProvider;
         
-        [SetUp]
-        public void Setup()
+        [UnitySetUp]
+        public IEnumerator Setup()
         {
             // Создаем тестовые объекты
             SetupTestObjects();
+            yield return null;
         }
         
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             // Очищаем тестовые объекты
             CleanupTestObjects();
+            yield return null;
         }
         
         [UnityTest]

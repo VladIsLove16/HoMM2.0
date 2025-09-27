@@ -15,7 +15,8 @@ namespace Tests.EditMode.Model
 		public void SetUp()
 		{
 			_movement = new MovementSystem();
-			_factory = new UnitModelFactory();
+			var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
+			_factory = new UnitModelFactory(dict);
 			_model = new GameModel(_factory, _movement);
 			_model.InitializeGrid(4, 3);
 		}
@@ -34,7 +35,7 @@ namespace Tests.EditMode.Model
 			stats.InvulnerableEffects = new List<StatusEffectType>();
 			var unit = new UnitModel(stats, UnitType.Archer, 1, 1, 1, true);
 
-			// emulate factory behavior
+			// emulate _factory behavior
 			var cell = (GameCell)_model.GetAllCells()[1,1];
 			cell.AddContent(unit);
 
