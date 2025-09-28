@@ -12,7 +12,7 @@ namespace Tests.EditMode.ActionHandlers
         public void SetUp()
         {
             MovementSystem movementSystem = new MovementSystem();
-            var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
+             var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
             _model = new GameModel(new UnitModelFactory(dict), movementSystem);
             _model.InitializeGrid(3, 3);
             _handler = new SpellActionHandler(movementSystem, _model);
