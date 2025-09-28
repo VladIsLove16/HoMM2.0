@@ -4,6 +4,7 @@ using UnityEngine;
 
 public interface IGridViewModel
 {
-    Action<GridXZ<GameCell>> GridInited { get; set; }
-    Action<PreviewResult> PreviewChanged { get; set; }
+    public event Action<int,int> GridInited;
+    public event Action<PreviewResult> PreviewChanged;
+    public event Action<PreviewResult> PreviewUpdated;
 }

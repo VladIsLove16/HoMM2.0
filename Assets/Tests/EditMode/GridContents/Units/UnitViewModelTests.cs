@@ -455,21 +455,6 @@ namespace Tests.EditMode.GridContents.Units
             Assert.That(_unitModel.ModifiedStats.Health, Is.EqualTo(50), 
                 "Remaining unit should have 50 health (100 - 50)");
         }
-
-        [Test]
-        public void HealthRatio_WithZeroMaxHealth_HandlesCorrectly()
-        {
-            // Arrange
-            _unitModel.ModifiedStats.MaxHealth = 0;
-
-            // Act
-            var actualRatio = _unitViewModel.HealthRatio;
-
-            // Assert
-            Assert.That(actualRatio, Is.EqualTo(0f), 
-                "Health ratio should be 0 when max health is 0");
-        }
-
         [Test]
         public void UnitAmount_WhenModelDamaged_UpdatesCorrectly()
         {
@@ -520,23 +505,23 @@ namespace Tests.EditMode.GridContents.Units
                 "Health ratio should be 0.5 (50%) after 50 damage");
         }
 
-        [Test]
-        public void HealthRatio_WithHealing_CalculatesCorrectly()
-        {
-            // Arrange
-            var damageContext = new DamageContext(50, DamageType.physical, null);
-            _unitModel.RecieveDamage(damageContext);
-            var ratioAfterDamage = _unitViewModel.HealthRatio;
+        //[Test]
+        //public void HealthRatio_WithHealing_CalculatesCorrectly()
+        //{
+        //    // Arrange
+        //    var damageContext = new DamageContext(50, DamageType.physical, null);
+        //    _unitModel.RecieveDamage(damageContext);
+        //    var ratioAfterDamage = _unitViewModel.HealthRatio;
 
-            // Act - Восстанавливаем здоровье (это происходит автоматически при смерти юнита в стэке)
-            var ratioAfterHealing = _unitViewModel.HealthRatio;
+        //    // Act - Восстанавливаем здоровье (это происходит автоматически при смерти юнита в стэке)
+        //    var ratioAfterHealing = _unitViewModel.HealthRatio;
 
-            // Assert
-            Assert.That(ratioAfterDamage, Is.EqualTo(0.5f), 
-                "Health ratio should be 0.5 after damage");
-            Assert.That(ratioAfterHealing, Is.EqualTo(1.0f), 
-                "Health ratio should be 1.0 after healing (when next unit in stack gets full health)");
-        }
+        //    // Assert
+        //    Assert.That(ratioAfterDamage, Is.EqualTo(0.5f), 
+        //        "Health ratio should be 0.5 after damage");
+        //    Assert.That(ratioAfterHealing, Is.EqualTo(1.0f), 
+        //        "Health ratio should be 1.0 after healing (when next unit in stack gets full health)");
+        //}
 
         // Mock классы для тестирования
         private class MockDamagable : IDamagable

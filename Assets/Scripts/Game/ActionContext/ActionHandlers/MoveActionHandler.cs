@@ -19,6 +19,7 @@ public class MoveActionHandler : IActionHandler
 
     protected MovementSystem _movementSystem;
     protected GameModel _gameModel;
+    [Inject] protected TurnSystem TurnSystem;
 
     public MoveActionHandler(MovementSystem movementSystem, GameModel model)
     {
@@ -42,6 +43,7 @@ public class MoveActionHandler : IActionHandler
             Debug.LogError("Cant execute MoveActionHandler " + ctx.ToString());
             return;
         }
+        Debug.Log("Execute moveHandler ");
         _gameModel.MoveObject(moveable, accessiblemoveRoute);
     }
     public bool CanExecute(ActionContext ctx)
@@ -69,7 +71,6 @@ public class MoveActionHandler : IActionHandler
         var AccessiblrouteExist = GetAccessibleRoute(moveable, ctx.TargetCell,out var accessible);
         var inaccessible = GetInaccessibleRoute(route,accessible);
 
-        result.Add(CellState.hovered, new[] { ctx.TargetCell });
         result.Add(CellState.accessibleRoutePoint, accessible);
         result.Add(CellState.inaccessibleRoutePoint, inaccessible);
         return result;

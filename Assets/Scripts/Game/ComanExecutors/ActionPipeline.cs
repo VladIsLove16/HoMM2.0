@@ -14,6 +14,7 @@ public class ActionPipeline
     public void Execute(ActionType type, ActionContext ctx)
     {
         var handler = _resolver.Resolve(type, ctx);
+        Debug.Log("ActionPipeline  " + type);
         if (handler == null)
         {
             Debug.LogWarning($"[Pipeline] No handler for {type}");
@@ -27,6 +28,7 @@ public class ActionPipeline
         }
 
         handler.Execute(ctx);
+        _turnSystem.EndTurn();
     }
 
     public void StartBattle()

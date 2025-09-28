@@ -4,6 +4,13 @@ using UnityEngine;
 public class PreviewResult
 {
     private readonly Dictionary<CellState, List<Vector2Int>> _data = new();
+    public PreviewResult()
+    {
+    }
+    public PreviewResult(Dictionary<CellState, List<Vector2Int>> data)
+    {
+        _data = data;
+    }
 
     public void Add(CellState state, IEnumerable<Vector2Int> cells)
     {

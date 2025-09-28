@@ -9,6 +9,7 @@ public class GameModel
 {
     public Action<GridXZ<GameCell>> GameChange_Initialized;
     public Action<UnitModelCreatedParams> GameChange_UnitSpawned;
+    public Action<List<Vector2Int>> GameChange_UnitMovedByRoute;
 
     private readonly UnitModelFactory _unitFactory;
     private readonly MovementSystem _movement;
@@ -57,13 +58,14 @@ public class GameModel
 
     public virtual void MoveObject(IMoveable gridContent, List<Vector2Int> path)
     {
+        Debug.Log("MoveObject " + path.Count);
         var endCellCoords = path[path.Count - 1];
         var endCell = _grid.GetGridObject(endCellCoords.x, endCellCoords.y);
         endCell.AddContent(gridContent);
         var currentCell = _grid.GetGridObject(gridContent.Position.x, gridContent.Position.y);
         currentCell.RemoveContent(gridContent);
         gridContent.MoveByRoute(path);
-        //UnitMovedByRoute?.Invoke(gridContent, path);
+        GameChange_UnitMovedByRoute?.Invoke(path);
     }
 
     public virtual void MoveObject(IGridContent gridContent, Vector2Int coords)

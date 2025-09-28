@@ -27,7 +27,7 @@ namespace Tests.EditMode.GridContents.Units
 
             // Assert
             Assert.IsNotNull(model);
-            Assert.AreEqual(spawn.UnitType, model.UnitType);
+            Assert.AreEqual(spawn.UnitType, model.UnitType.Value);
             Assert.AreEqual(new Vector2Int(spawn.X, spawn.Y), model.Position.Value);
         }
 

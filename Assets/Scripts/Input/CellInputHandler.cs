@@ -22,19 +22,32 @@ public class CellInputHandler : MonoBehaviour
     private Collider _lastHoveredCollider;
     public Action ActionCanceled;
     public bool isDragging;
+    public enum InputInteractionType { Hover, Select, Action, BeginDrag, DragUpdate, EndDrag }
     private void Awake()
     {
         if (mainCamera == null) mainCamera = Camera.main;
+        EnsureInputActionsInitialized();
     }
+    private void EnsureInputActionsInitialized()
+    {
+        if (inputActions == null)
+        {
+            inputActions = new InputSystem_Actions();
+        }
+    }
+
     [Inject]
     public void Construct(TurnSystem turnSystem)
     {
         _turnSystem = turnSystem;
+        EnsureInputActionsInitialized();
         _turnSystem.CurrentBattleState.Subscribe(OnTurnSystem_BattleStateChanged);
+        OnTurnSystem_BattleStateChanged(_turnSystem.CurrentBattleState.Value);
     }
     private void OnEnable()
     {
-        if (inputActions == null) inputActions = new InputSystem_Actions();
+        EnsureInputActionsInitialized();
+
         inputActions.Grid.MousePosition.performed += OnMouseMoved;
         inputActions.Grid.Select.performed += OnSelectPerformed;
         inputActions.Grid.Action.performed += OnActionPerformed;
@@ -42,11 +55,23 @@ public class CellInputHandler : MonoBehaviour
         inputActions.GridPlacement.Drag.started += OnDragStarted;
         inputActions.GridPlacement.Drag.performed += OnDragPerformed;
         inputActions.GridPlacement.Drag.canceled += OnDragCanceled;
+
+        if (_turnSystem != null)
+        {
+            OnTurnSystem_BattleStateChanged(_turnSystem.CurrentBattleState.Value);
+        }
+        else
+        {
+            inputActions.Grid.Enable();
+            inputActions.GridPlacement.Disable();
+        }
     }
 
     private void OnTurnSystem_BattleStateChanged(BattleState state)
     {
-        switch(state)
+        EnsureInputActionsInitialized();
+
+        switch (state)
         {
             case BattleState.replacement:
                 inputActions.Grid.Disable();
@@ -61,6 +86,11 @@ public class CellInputHandler : MonoBehaviour
 
     private void OnDisable()
     {
+        if (inputActions == null)
+        {
+            return;
+        }
+
         inputActions.Grid.MousePosition.performed -= OnMouseMoved;
         inputActions.Grid.Select.performed -= OnSelectPerformed;
         inputActions.Grid.Action.performed -= OnActionPerformed;
@@ -68,6 +98,7 @@ public class CellInputHandler : MonoBehaviour
         inputActions.GridPlacement.Drag.performed -= OnDragPerformed;
         inputActions.GridPlacement.Drag.canceled -= OnDragCanceled;
         inputActions.Disable();
+        isDragging = false;
     }
     private void Update()
     {
@@ -107,17 +138,14 @@ public class CellInputHandler : MonoBehaviour
             IGameViewObject gameViewObject = null;
             if (selectionMode == SelectionMode.UnitThenGrid)
             {
-                // Сначала пытаемся найти юнит
                 gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
                 if (gameViewObject == null)
                 {
-                    // Если юнит не найден, ищем клетку
                     gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
                 }
             }
             else if (selectionMode == SelectionMode.GridOnly)
             {
-                // Только клетки
                 gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
             }
             
@@ -136,20 +164,17 @@ public class CellInputHandler : MonoBehaviour
         {
             IGameViewObject gameViewObject = null;
             
-            // Определяем, что выбрано в зависимости от режима
             if (selectionMode == SelectionMode.UnitThenGrid)
             {
-                // Сначала пытаемся найти юнит
+                // РЎРЅР°С‡Р°Р»Р° РїС‹С‚Р°РµРјСЃСЏ РЅР°Р№С‚Рё СЋРЅРёС‚
                 gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
                 if (gameViewObject == null)
                 {
-                    // Если юнит не найден, ищем клетку
                     gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
                 }
             }
             else if (selectionMode == SelectionMode.GridOnly)
             {
-                // Только клетки
                 gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
             }
             
@@ -198,9 +223,107 @@ public class CellInputHandler : MonoBehaviour
     }
 
 
+    private void ProcessGameViewObject(IGameViewObject gameViewObject, InputInteractionType interaction)
+    {
+        switch (interaction)
+        {
+            case InputInteractionType.Hover:
+                if (gameViewObject?.IsHoverable == true)
+                {
+                    _gameView3D?.HandleGameViewObjectHovered(gameViewObject);
+                }
+                break;
+            case InputInteractionType.Select:
+                if (gameViewObject?.IsSelectable == true)
+                {
+                    _gameView3D?.HandleGameViewObjectSelected(gameViewObject);
+                }
+                break;
+            case InputInteractionType.Action:
+                if (gameViewObject != null)
+                {
+                    _gameView3D?.HandleActionPerformed(gameViewObject);
+                }
+                else
+                {
+                    ActionCanceled?.Invoke();
+                }
+                break;
+            case InputInteractionType.BeginDrag:
+                var unitView = ResolveUnitView(gameViewObject);
+                if (unitView != null)
+                {
+                    isDragging = true;
+                    _gameView3D?.BeginDrag(unitView);
+                }
+                break;
+            case InputInteractionType.DragUpdate:
+                if (!isDragging)
+                {
+                    break;
+                }
+
+                if (!TryResolveWorldPosition(gameViewObject, out var dragPosition))
+                {
+                    dragPosition = Vector3.zero;
+                }
+
+                _gameView3D?.UpdateDrag(dragPosition);
+                break;
+            case InputInteractionType.EndDrag:
+                if (!isDragging)
+                {
+                    break;
+                }
+
+                isDragging = false;
+                if (TryResolveWorldPosition(gameViewObject, out var endPosition))
+                {
+                    _gameView3D?.EndDrag(endPosition);
+                }
+                else
+                {
+                    ActionCanceled?.Invoke();
+                }
+                break;
+        }
+    }
+
+    private UnitView3D ResolveUnitView(IGameViewObject gameViewObject)
+    {
+        if (gameViewObject is UnitView3D unitView)
+        {
+            return unitView;
+        }
+
+        if (gameViewObject is Component component)
+        {
+            return component.GetComponentInParent<UnitView3D>();
+        }
+
+        return null;
+    }
+
+    private bool TryResolveWorldPosition(IGameViewObject gameViewObject, out Vector3 worldPosition)
+    {
+        if (gameViewObject is Component component)
+        {
+            worldPosition = component.transform.position;
+            return true;
+        }
+
+        worldPosition = default;
+        return false;
+    }
     private bool TryGetHit(out RaycastHit hit)
     {
         var cam = mainCamera != null ? mainCamera : Camera.main;
+        if (cam == null)
+        {
+            hit = default;
+            return false;
+        }
+
         var ray = cam.ScreenPointToRay(Input.mousePosition);
         Physics.Raycast(ray, out hit, 999f, mouseColliderLayerMask);
         var result = hit.collider != null;
@@ -217,6 +340,16 @@ public class CellInputHandler : MonoBehaviour
     }
     private Vector3 GetMouseWorldPosition()
     {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
+
+        if (mainCamera == null || Mouse.current == null)
+        {
+            return Vector3.zero;
+        }
+
         var ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float enter))
         {
@@ -224,6 +357,11 @@ public class CellInputHandler : MonoBehaviour
         }
         return Vector3.zero;
     }
+
+#if UNITY_INCLUDE_TESTS
+    public void TestSetGameView(GameView3D view) => _gameView3D = view;
+    public void TestSetSelectionMode(SelectionMode mode) => selectionMode = mode;
+    public void TestProcessGameViewObject(IGameViewObject obj, InputInteractionType interaction) => ProcessGameViewObject(obj, interaction);
+    public void TestSetCamera(Camera camera) => mainCamera = camera;
+#endif
 }
-
-

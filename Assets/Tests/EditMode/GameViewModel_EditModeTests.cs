@@ -1,41 +1,113 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UniRx;
+using Tests.EditMode.Units;
 
 namespace Tests.EditMode.ViewModels
 {
-	[TestFixture]
-	public class GameViewModel_EditModeTests
-	{
-		private GameModel _model;
-		private MovementSystem _movement;
-		private TurnSystem _turnSystem;
-		private GameViewModel _vm;
+    [TestFixture]
+    public class GameViewModel_EditModeTests
+    {
+        private GameModel _model;
+        private MovementSystem _movement;
+        private TurnSystem _turnSystem;
+        private GameViewModel _vm;
+        private ActionResolver _resolver;
+        private FakeGameCommandExecutor _executor;
 
-		[SetUp]
-		public void SetUp()
-		{
-			var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
-			_movement = new MovementSystem();
-			_model = new GameModel(new UnitModelFactory(dict), _movement);
-			_turnSystem = new TurnSystem();
-			var actionPipeline = new ActionPipeline(new(_model, _movement), _turnSystem);
+        [SetUp]
+        public void SetUp()
+        {
+            var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
+            _movement = new MovementSystem();
+            _model = new GameModel(new UnitModelFactory(dict), _movement);
+            _turnSystem = new TurnSystem();
+            _resolver = new ActionResolver(_model, _movement);
+            _executor = new FakeGameCommandExecutor();
+            _vm = new GameViewModel(_model, _movement, _executor, _turnSystem, _resolver);
+            _model.InitializeGrid(3, 3);
+        }
 
-            _vm = new GameViewModel(_model, _movement, new LocalGameCommandExecutor(actionPipeline), _turnSystem );
-			_model.InitializeGrid(3, 3);
-		}
+        [Test]
+        public void GridInitialized_Event_Fires()
+        {
+            int width = 0, height = 0;
+            _vm.GridInited += (x,y) => { width = x; height = y; };
+            _model.InitializeGrid(5, 4);
+            Assert.That((width, height), Is.EqualTo((5, 4)));
+        }
 
-		[Test]
-		public void GridInitialized_Event_Fires()
-		{
-			int w = 0, h = 0;
-			_vm.GridInitialized += (W, H) => { w = W; h = H; };
-			_model.InitializeGrid(5, 4);
-			Assert.That((w, h), Is.EqualTo((5, 4)));
-		}
+        [Test]
+        public void HandleCellHovered_PublishesMovePreviewAndHoverHighlight()
+        {
+            SpawnActiveUnit(new Vector2Int(0, 0));
 
-	}
+            var previews = new List<PreviewResult>();
+            _vm.PreviewChanged += previews.Add;
+
+            var target = new Vector2Int(1, 0);
+            var coords = new KeyValuePair<Vector2Int, Vector2Int>(target, target);
+
+            _vm.HandleCellHovered(coords);
+
+            Assert.That(previews.Count, Is.EqualTo(2));
+
+            var movePreview = previews[0].ToDictionary();
+            Assert.That(movePreview.ContainsKey(CellState.accessibleRoutePoint));
+            Assert.That(movePreview[CellState.accessibleRoutePoint], Does.Contain(target));
+
+            var hoverPreview = previews[1].ToDictionary();
+            Assert.That(hoverPreview.ContainsKey(CellState.hovered));
+            Assert.That(hoverPreview[CellState.hovered], Does.Contain(target));
+        }
+
+        [Test]
+        public void HandleCellSelected_RaisesGridPreviewThroughSharedResolver()
+        {
+            SpawnActiveUnit(new Vector2Int(0, 0));
+
+            var gridVm = new GridViewModel(new TurnSystem(), _resolver, _movement, _model);
+            PreviewResult latestPreview = null;
+            gridVm.PreviewChanged += preview => latestPreview = preview;
+
+            var target = new Vector2Int(1, 0);
+            var coords = new KeyValuePair<Vector2Int, Vector2Int>(target, target);
+
+            latestPreview = null;
+            _vm.HandleCellSelected(coords);
+
+            Assert.That(latestPreview, Is.Not.Null);
+            var dict = latestPreview.ToDictionary();
+            Assert.That(dict.ContainsKey(CellState.accessibleRoutePoint));
+            Assert.That(dict[CellState.accessibleRoutePoint], Does.Contain(target));
+        }
+
+        private UnitModel SpawnActiveUnit(Vector2Int position)
+        {
+            var spawnParams = new UnitSpawnParams(position.x, position.y, UnitType.Archer, 1, Team.Blue);
+            var spawnResult = _model.SpawnUnit(spawnParams);
+            Assert.That(spawnResult.IsSuccess, Is.True, "Unit spawn failed in test setup");
+
+            var unit = (UnitModel)_model.GetCell(position).Unit;
+            _turnSystem.AddCombatUnit(unit);
+            _turnSystem.ActiveObject.Value = unit;
+            return unit;
+        }
+
+        private class FakeGameCommandExecutor : IGameCommandExecutor
+        {
+            public ActionType? LastType { get; private set; }
+            public ActionContext? LastContext { get; private set; }
+
+            public void Execute(ActionType type, ActionContext ctx)
+            {
+                LastType = type;
+                LastContext = ctx;
+            }
+
+            public void StartBattle()
+            {
+            }
+        }
+    }
 }
-
-

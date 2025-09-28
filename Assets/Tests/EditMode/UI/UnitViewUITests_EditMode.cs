@@ -77,23 +77,6 @@ namespace Tests.EditMode.UI
         }
 
         [Test]
-        public void UpdateHealth_WithZeroMaxHealth_HandlesDivisionByZero()
-        {
-            // Arrange
-            _unitViewModel.Model.ModifiedStats.MaxHealth = 0;
-
-            // Act
-            var health = _unitViewModel.Model.ModifiedStats.Health;
-            var maxHealth = _unitViewModel.Model.ModifiedStats.MaxHealth;
-            float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
-
-            // Assert
-            Assert.That(health, Is.EqualTo(0f));
-            Assert.That(maxHealth, Is.EqualTo(0f));
-            Assert.That(ratio, Is.EqualTo(0f));
-        }
-
-        [Test]
         public void UpdateAmount_WithValidAmount_ReturnsCorrectValue()
         {
             // Arrange

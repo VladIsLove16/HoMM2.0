@@ -33,7 +33,7 @@ namespace Tests.EditMode.Actions
         public void Resolve_ReturnsMoveHandler_ForSimpleMoveContext()
         {
             var resolver = new ActionResolver(_model, _movementSystem);
-            var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 0), default, default);
+            var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 0), SpellType.None, default);
 
             var result = resolver.Resolve(ctx, out var handler);
 

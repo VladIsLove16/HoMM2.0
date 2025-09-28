@@ -6,13 +6,15 @@ using UniRx;
 /// <summary>
 /// Модель представления сетки. Зависит от текущего активного юнита(модель), а также клетки, на которую наведен курсор(модель представления), а также состояния отображения - если играется анимация, то всё скрыть. 
 /// </summary>
-public class GridViewModel : IGridViewModel
+public class GridViewModel
 {
     TurnSystem _turnSystem;
     ActionResolver _actionResolver;
     MovementSystem _movementSystem;
     public Action<PreviewResult> PreviewChanged { get; set; }
+    private Dictionary<CellState, List<Vector2Int>> _data = new();
     public Action<GridXZ<GameCell>> GridInited { get; set; }
+    [Inject]
     public GridViewModel(TurnSystem turnSystem, ActionResolver actionResolver, MovementSystem movementSystem, GameModel model )
     {
         _turnSystem = turnSystem;
@@ -20,6 +22,7 @@ public class GridViewModel : IGridViewModel
         _movementSystem = movementSystem;
 
         _turnSystem.ActiveObject.Subscribe(ActiveObjectChanged);
+        Debug.LogError("GridViewModel ");
         _actionResolver.ActionResolved += OnActionResolved;
         model.GameChange_Initialized += OnGameModel_GridInilized;
     }
@@ -39,10 +42,14 @@ public class GridViewModel : IGridViewModel
             var reachableCells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
             previewResult.Add(CellState.reachableCell, new List<Vector2Int>(reachableCells));
         }
-        PreviewChanged?.Invoke(previewResult);
+        else
+        {
+        }
+            PreviewChanged?.Invoke(previewResult);
     }
     private void OnActionResolved((IActionHandler handler,ActionContext ctx) pair)
     {
+        Debug.LogError("ActionResolved");
         var preview = pair.handler.GetPreview(pair.ctx);
         PreviewChanged?.Invoke(preview);
     }

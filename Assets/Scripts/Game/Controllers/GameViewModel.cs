@@ -1,15 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
 using Zenject;
 
-public class GameViewModel : IDisposable
+public class GameViewModel : IDisposable, IGridViewModel
 {
-    public event Action<int, int> GridInitialized;
+    public event Action<int,int> GridInited;
     public event Action<UnitViewModel> UnitStatsRequested;
-    public event Action<PreviewResult> PreviewResultChanged;
+    public event Action<PreviewResult> PreviewChanged;
+    public event Action<PreviewResult> PreviewUpdated;
     public event Action<DamageContextPreview> DamageContextPreviewChanged;
     public Action<UnitViewModel> UnitSpawned;
 
@@ -17,40 +18,59 @@ public class GameViewModel : IDisposable
     private readonly MovementSystem _movementSystem;
     private readonly IGameCommandExecutor _gameCommandExecutor;
     private TurnSystem _turnSystem;
-    private ActionResolver _actionResolver;
+    private readonly ActionResolver _actionResolver;
     private Dictionary<IGridContent, UnitViewModel> _uvms = new Dictionary<IGridContent, UnitViewModel>();
     private GameModel model;
-
-
-    public GameViewModel(GameModel model, MovementSystem movementSystem, IGameCommandExecutor actionExecutor, TurnSystem turnSystem)
+    private Dictionary<CellState, List<Vector2Int>> _data = new();
+    public GameViewModel(GameModel model, MovementSystem movementSystem, IGameCommandExecutor actionExecutor, TurnSystem turnSystem, ActionResolver actionResolver)
     {
+        if (model == null) throw new ArgumentNullException(nameof(model));
+        if (movementSystem == null) throw new ArgumentNullException(nameof(movementSystem));
+        if (actionExecutor == null) throw new ArgumentNullException(nameof(actionExecutor));
+        if (turnSystem == null) throw new ArgumentNullException(nameof(turnSystem));
+        if (actionResolver == null) throw new ArgumentNullException(nameof(actionResolver));
+
         _gameModel = model;
         _movementSystem = movementSystem;
         _gameCommandExecutor = actionExecutor;
-        _actionResolver = new(model,movementSystem);
         _turnSystem = turnSystem;
+        _actionResolver = actionResolver;
 
         _gameModel.GameChange_Initialized += OnGameModel_GridInitilized;
         _gameModel.GameChange_UnitSpawned += OnGameModel_UnitSpawned;
-        _turnSystem.ActiveObject.Subscribe(_ => OnActiveUnitChanged());
+        _turnSystem.ActiveObject.Subscribe(unit => OnActiveUnitChanged(unit));
     }
-
     public void HandleCellHovered(KeyValuePair<Vector2Int, Vector2Int> coords)
     {
-        if (!_turnSystem.IsMyTurn)
-            return;
-        var fromCell = _turnSystem.ActiveObject.Value.Position;
-        ActionContext actionContext = new(fromCell, coords.Key, default, coords.Value);
-        _actionResolver.Resolve(actionContext, out var actionHandler);
-        var previewResult =  actionHandler.GetPreview(actionContext);
-        PreviewResult hoverPreviewResult =  new();
-        hoverPreviewResult.Add(CellState.hovered, new List<Vector2Int>() { coords.Value });
-        if (actionHandler is IAttackActionHandler attackActionHandler)
+        _data[CellState.hovered] = new List<Vector2Int>() { coords.Key };
+        PreviewResult previewResult = new();
+        previewResult.Add(CellState.hovered, new List<Vector2Int>() { coords.Key });
+        if (_turnSystem.IsMyTurn)
         {
-            DamageContextPreviewChanged?.Invoke(attackActionHandler.GetDamagePreview(actionContext));
+            var fromCell = _turnSystem.ActiveObject.Value.Position;
+            ActionContext actionContext = new(fromCell, coords.Key, SpellType.None, coords.Value);
+            _actionResolver.Resolve(actionContext, out var actionHandler);
+            if (actionHandler == null)
+                return;
+            previewResult.Add(actionHandler.GetPreview(actionContext).ToDictionary());
+            if (actionHandler is IAttackActionHandler attackActionHandler)
+            {
+                DamageContextPreviewChanged?.Invoke(attackActionHandler.GetDamagePreview(actionContext));
+            }
         }
-        PreviewResultChanged?.Invoke(previewResult);
-        PreviewResultChanged?.Invoke(previewResult);
+        else
+        {
+            var fromCell = _turnSystem.ActiveObject.Value.Position;
+            var unit = _gameModel.GetCell(fromCell).Unit;
+            if (unit != null)
+            {
+                var cells = _movementSystem.GetReachableCells(fromCell, unit.ModifiedStats.MoveSpeed);
+                previewResult.Add(CellState.enemyReachableCell, cells);
+            }
+            else
+                previewResult.Add(CellState.enemyReachableCell, new List<Vector2Int>());
+        }
+        PreviewUpdated?.Invoke(previewResult);
     }
 
     public void HandleCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords)
@@ -59,10 +79,9 @@ public class GameViewModel : IDisposable
         if (!_turnSystem.IsMyTurn)
             return;
         var fromCell = _turnSystem.ActiveObject.Value.Position;
-        ActionContext actionContext = new(fromCell, coords.Key, default, coords.Value);
+        ActionContext actionContext = new(fromCell, coords.Key, SpellType.None, coords.Value);
         _actionResolver.Resolve(actionContext, out var actionHandler);
         Debug.Log("resolved" + actionContext);
-
         _gameCommandExecutor.Execute(actionHandler.ActionType, actionContext);
     }
 
@@ -75,7 +94,6 @@ public class GameViewModel : IDisposable
             UnitStatsRequested?.Invoke(vm);
         }
     }
-
     protected virtual void OnGameModel_UnitSpawned(UnitModelCreatedParams @params)
     {
         UnitViewModel uvm = new(@params.UnitModel);
@@ -92,16 +110,27 @@ public class GameViewModel : IDisposable
 
     private void OnGameModel_GridInitilized(GridXZ<GameCell> g)
     {
-        GridInitialized?.Invoke(g.GetWidth(), g.GetHeight());
+        GridInited?.Invoke(g.GetWidth(),g.GetHeight());
     }
 
-    private void OnActiveUnitChanged()
+    private void OnActiveUnitChanged(ICombatObject combatObject)
     {
-        if (_turnSystem.IsMyTurn)
-        {
-
-        }
+        if (combatObject == null)
+            return;
+        PreviewResult previewResult = new(_data);
+        SetReachableCellState(combatObject);
+        PreviewChanged?.Invoke(previewResult);
     }
+
+    private void SetReachableCellState(ICombatObject combatObject)
+    {
+        var reachableCells = new List<Vector2Int>();
+        if (_turnSystem.IsMyTurn)
+            reachableCells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
+        _data[CellState.reachableCell] = reachableCells;
+
+    }
+
     public bool CanExecute(ActionType type, ActionContext actionContext)
     {
         IActionHandler actionHandler = _actionResolver.Resolve(type, actionContext);

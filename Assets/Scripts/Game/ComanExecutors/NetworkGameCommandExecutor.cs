@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class NetworkGameCommandExecutor : IGameCommandExecutor
 {
     private readonly GameNetworkCommandGateway _gateway;
@@ -14,6 +16,7 @@ public class NetworkGameCommandExecutor : IGameCommandExecutor
 
     public void Execute(ActionType type, ActionContext ctx)
     {
+        Debug.Log("Execute " + type);
         _gateway.RequestExecuteAction(type, ctx);
     }
 }

@@ -62,9 +62,9 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindViewModels()
     {
-        Container.Bind<GameViewModel>().To<GameViewModel>().AsSingle().NonLazy();
+        Container.Bind<GameViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<GameViewModel>().FromResolve();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
-        Container.Bind<IGridViewModel>().To<GridViewModel>().AsSingle();
     }
 
     private void BindViews()
@@ -78,25 +78,22 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<InGameUI>().FromInstance(_inGameUI).AsSingle();
         Container.Bind<IAttackActionPanel>().FromInstance(_attackActionPanel).AsSingle();
 
-        // Presentation services removed - views now subscribe directly to GameViewModel
-
-        // Overlay VM + Facade removed in favor of direct VM->Renderer binding
-
-        // View factories
         Container.Bind<UnitViewFactory>().AsSingle();
+        Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
+        Container.Bind<Transform>()
+                 .WithId("UnitsParent")
+                 .FromInstance(_gameController.transform);
+
     }
 
     private void BindServices()
     {
         Container.Bind<GameNetworkCommandGateway>().FromInstance(_gameNetworkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
-        Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
         // Network services
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
 
-        Container.Bind<Transform>()
-                 .WithId("UnitsParent")
-                 .FromInstance(_gameController.transform);
+        
     }
 
     private void BindConfigurationProviders()

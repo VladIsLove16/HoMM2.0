@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine;
+using Tests.EditMode.Units;
 using UniRx;
 using UnityEditor;
 

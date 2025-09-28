@@ -13,8 +13,9 @@
         "GUID:6c18917549f31c442926e2569e8818c8",
         "GUID:1491147abca9d7d4bb7105af628b223e",
         "GUID:9f4f5bf029cebb64f983b7bdc29f62a1",
-        "GUID:fe4fa159f4a96442ba22af67ddf20c65"
+        "GUID:be9329071bdf75e4093bf715d288dcb0"
     ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

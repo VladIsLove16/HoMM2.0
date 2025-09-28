@@ -12,7 +12,7 @@ using Zenject;
 public class ActionResolver
 {
     public event Action<(IActionHandler,ActionContext)> ActionResolved;
-
+    public System.Action ActionNotResolved;
 
     private MoveThenAttackHandler MoveThenAttackHandler;
     private MoveActionHandler MoveActionHandler;
@@ -46,11 +46,15 @@ public class ActionResolver
         if (resolvedHandlers.Count > 0)
         {
             handler = resolvedHandlers[0];
+            Debug.Log("action resolver Invoke");
             ActionResolved?.Invoke((handler,ctx));
             return true;
         }
         else
+        {
+            ActionNotResolved?.Invoke();
             handler = null;
+        }
         return false;
     }
 
@@ -75,9 +79,9 @@ public class ActionResolver
         {
             stringBuilder.Append(resolvedHandler.ToString());
         }
-        Debug.Log("resolved handlers: " + stringBuilder.ToString());
         if (resolvedHandlers.Count > 1)
-            Debug.LogAssertion("resolved handlers count > 1");
+            Debug.LogWarning("resolved handlers count > 1" );
+        Debug.Log("resolved handlers: " + stringBuilder.ToString());
     }
 
 }

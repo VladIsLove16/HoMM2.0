@@ -1293,6 +1293,8 @@ MonoBehaviour:
     Material: {fileID: 2100000, guid: 26161d04c2a3cfc4ca2d0043ab602a4a, type: 2}
   - CellState: 7
     Material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+  - CellState: 10
+    Material: {fileID: 2100000, guid: 8531f0db72cb14d45b68cafc0a668240, type: 2}
 --- !u!224 &370274117 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4987394206893983792, guid: 81458ba6540325c44ad6162b8170c7b4, type: 3}

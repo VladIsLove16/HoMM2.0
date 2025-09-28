@@ -28,7 +28,7 @@ public class SpellActionHandler : IActionHandler
 
     public bool CanExecute(ActionContext ctx)
     {
-        return true;
+        return ctx.AbilityUsed != SpellType.None;
     }
 
     public PreviewResult GetPreview(ActionContext actionContext)

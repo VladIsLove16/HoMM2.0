@@ -14,6 +14,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
     [Inject] private IMaterialProvider _teamMaterials;
+    [Inject] IWorldToCellProvider worldToCellProvider;
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
@@ -52,7 +53,17 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         
         // Реакция на смену команды/материалов
         _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Model.Team.Value))).AddTo(_disposables);
+        _vm.OnMoveByRoute.Subscribe(OnMovedByRoute);
     }
+
+    private void OnMovedByRoute(List<Vector2Int> list)
+    {
+        List<Vector3> worldRoute = new();
+        foreach (var cell in list)
+            worldRoute.Add(worldToCellProvider.ToWorld(cell.x,cell.y));
+        Move(worldRoute);
+    }
+
     public void SnapToCell(Vector3 worldPosition)
     {
         StopAllCoroutines();
@@ -68,9 +79,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     /// <summary>
     /// Публичный метод для проигрывания перемещения (вызов из GameView3D или сетевого слоя)
     /// </summary>
-    public void RequestMove(List<Vector3> route)
+    public void Move(List<Vector3> route)
     {
-        // Больше не отправляем команду из View: только анимация
         ExecuteMove(route);
     }
     
@@ -250,7 +260,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void Unhover()
     {
         LogDebugEvent("Unit Unhovered");
-        SetMaterial(_teamMaterials.GetHoveredTeamMaterial(_vm.Model.Team.Value));
+        SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Model.Team.Value));
     }
     
     private void LogDebugEvent(string eventMessage)

@@ -17,6 +17,7 @@ public class UnitViewModel : IViewModel
     public IObservable<Team> OnTeamChangedEnum => _onTeamChangedEnum;
     public IObservable<int> OnAmountChanged => _onAmountChanged;
     public IObservable<Vector2Int> OnPosChanged => _onPosChanged;
+    public IObservable<List<Vector2Int>> OnMoveByRoute => _onMovedByRoute;
 
     public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? (float)Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0f;
 
@@ -26,7 +27,7 @@ public class UnitViewModel : IViewModel
 
     public int Amount => Model.Amount.Value;
 
-    private Subject<List<Vector3>> _onMoved = new();
+    private Subject<List<Vector2Int>> _onMovedByRoute = new();
     private Subject<Unit> _onAttacked = new();
     private Subject<Unit> _onHit = new();
     private Subject<Unit> _onDeath = new();
@@ -59,5 +60,6 @@ public class UnitViewModel : IViewModel
             _onTeamChanged.OnNext(team == Team.Blue);
             _onTeamChangedEnum.OnNext(team);
         });
+        Model.MovedByRoute+= (route) => _onMovedByRoute.OnNext(route); ;
     }
 }

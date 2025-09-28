@@ -1,4 +1,4 @@
-﻿// GameView3D.cs
+// GameView3D.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ public class GameView3D : MonoBehaviour
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private GameViewModel _gameVM;
-    [Inject]    private IWorldToCellProvider _worldToCellProvider;
+    [Inject]private IWorldToCellProvider _worldToCellProvider;
     private UnitView3D _draggedUnit;
 
     // Test hooks - allow tests to inject lightweight handlers without reflection
@@ -50,12 +50,14 @@ public class GameView3D : MonoBehaviour
             hoverable.Hover();
         }
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
+        TestHandleCellHovered?.Invoke(coords);
         _gameVM?.HandleCellHovered(coords);
     }
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
+        TestHandleCellSelected?.Invoke(coords);
         _gameVM?.HandleCellSelected(coords);
     }
 
@@ -75,7 +77,7 @@ public class GameView3D : MonoBehaviour
         Debug.Log(_draggedUnit.gameObject.name);
     }
 
-    public void UpdateDrag(Vector3 worldPos)
+    public virtual void UpdateDrag(Vector3 worldPos)
     {
         Debug.Log("update drag");
         if (_draggedUnit != null)
@@ -84,16 +86,33 @@ public class GameView3D : MonoBehaviour
 
     public void EndDrag(Vector3 worldPos)
     {
-        if (_draggedUnit == null) 
-            throw new ArgumentNullException();
+        if (_draggedUnit == null)
+        {
+            return;
+        }
 
-        _worldToCellProvider.ToGrid(worldPos, out var coords);
+        var resolvedWorldPos = worldPos;
 
-        var pair = _views.First(pair => pair.Value == _draggedUnit);
+        if (_worldToCellProvider != null && _worldToCellProvider.ToGrid(worldPos, out var coords))
+        {
+            resolvedWorldPos = _worldToCellProvider.ToWorld(coords.x, coords.y);
 
-        var worldCellPos = _worldToCellProvider.ToWorld(coords.x, coords.y);
-        _gameVM.SnapToCell(pair.Key as UnitViewModel, coords);
-        pair.Value.SnapToCell(worldCellPos);
+            if (_gameVM != null)
+            {
+                foreach (var entry in _views)
+                {
+                    if (entry.Value == _draggedUnit)
+                    {
+                        _gameVM.SnapToCell(entry.Key as UnitViewModel, coords);
+                        entry.Value.SnapToCell(resolvedWorldPos);
+                        _draggedUnit = null;
+                        return;
+                    }
+                }
+            }
+        }
+
+        _draggedUnit.transform.position = resolvedWorldPos;
         _draggedUnit = null;
     }
 
@@ -106,3 +125,4 @@ public class GameView3D : MonoBehaviour
 
    
 }
+

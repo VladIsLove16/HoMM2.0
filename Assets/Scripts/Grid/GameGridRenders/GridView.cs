@@ -21,7 +21,7 @@ public class GridView : MonoBehaviour
     {
         _viewModel = viewModel;
         _cellGridRenderer = renderer;
-        _viewModel.GridInitialized += CreateGrid;
+        _viewModel.GridInited +=(x,y) =>  CreateGrid(x,y);
     }
 
     public void CreateGrid(int width, int height)

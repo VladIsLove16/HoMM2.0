@@ -9,6 +9,11 @@ using static UnityEngine.UI.Image;
 [Serializable]
 public class CellMaterial
 {
+    public CellMaterial(CellState cellState, Material material)
+    {
+        CellState = cellState;
+        Material = material;
+    }
     public CellState CellState;
     public Material Material;
 
@@ -65,7 +70,8 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
         if (_vm != null) Unbind(_vm);
         _vm = viewModel;
         if (_vm == null) return;
-        _vm.PreviewChanged += OnreviewChanged;
+        _vm.PreviewChanged += OnPreviewChanged;
+        _vm.PreviewUpdated += OnPreviewUpdated;
         _vm.GridInited+=OnVM_GridInited;
         Debug.Log("binded");
     }
@@ -73,22 +79,49 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     public void Unbind(IGridViewModel viewModel)
     {
         if (_vm == null) return;
-        _vm.PreviewChanged -= OnreviewChanged;
+        _vm.PreviewChanged -= OnPreviewChanged;
         _vm.GridInited -= OnVM_GridInited;
         _vm = null;
     }
-    private void OnVM_GridInited(GridXZ<GameCell> xZ)
+    private void OnVM_GridInited(int x,int y)
     {
-        Render(xZ.GetWidth(), xZ.GetHeight(), cellSize,transform.position, padding);
+        Render(x, y, cellSize,transform.position, padding);
     }
-    private void OnreviewChanged(PreviewResult result)
+    private void OnPreviewUpdated(PreviewResult result)
     {
+        Debug.Log("preview changed");
+        string previewString = string.Empty;
         Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
         foreach (var stateCells in cells)
         {
             RemoveStates(stateCells.Key);
             AddStates(stateCells.Value, stateCells.Key);
+            string coordsString = string.Empty;
+            foreach(var  cell in stateCells.Value)
+            {
+                coordsString += cell + " "; 
+            }
+            previewString += stateCells.Key + " " + coordsString;
         }
+        Debug.Log("new preview " + previewString);
+    }
+    private void OnPreviewChanged(PreviewResult result)
+    {
+        Debug.Log("preview changed");
+        string previewString = string.Empty;
+        Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
+        ClearAllStates();
+        foreach (var stateCells in cells)
+        {
+            AddStates(stateCells.Value, stateCells.Key);
+            string coordsString = string.Empty;
+            foreach(var  cell in stateCells.Value)
+            {
+                coordsString += cell + " "; 
+            }
+            previewString += stateCells.Key + " " + coordsString;
+        }
+        Debug.Log("new preview " + previewString);
     }
 
     public bool ToGrid(Vector3 position,out Vector2Int coords)
@@ -166,8 +199,12 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
         {
             cellView.AddState(state);
         }
-        if(!_cellStates.ContainsKey(state))
+        else
+            throw new Exception(" no value for " + state);
+        if (!_cellStates.ContainsKey(state))
+        {
             _cellStates[state] = new List<Vector2Int>();
+        }
         _cellStates[state].Add(coords);
     }
 
@@ -178,6 +215,11 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
             cellView.RemoveState(state);
         }
         _cellStates[state].Remove(coords);
+    }
+
+    public List<Vector2Int> GetCells( CellState state)
+    {
+        return _cellStates[state];
     }
     private bool TryGetCellView(Vector2Int coords, out CellView cellView)
     {

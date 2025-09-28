@@ -24,12 +24,35 @@ public class CursorService : ICursorService
     {
         _actionResolver = actionResolver;
         actionResolver.ActionResolved += OnActionPreviewChanged;
+        actionResolver.ActionNotResolved += OnActionNotResolved;
+    }
+
+    private void OnActionNotResolved()
+    {
+        SetCursorState(CursorState.Default);
     }
 
     private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
     {
-        SetCursorState(tuple.Item1.CanExecute(tuple.Item2) ?
-            CursorState.ActionAvailable : CursorState.ActionNotAvailable);
+        Debug.Log("[cursor service] OnActionPreviewChanged " + tuple.Item1.ToString());
+        var state = GetCursorStateByActionHandler(tuple.Item1);
+        SetCursorState(state);
+    }
+
+    private CursorState GetCursorStateByActionHandler(IActionHandler actionHandler)
+    {
+        switch (actionHandler.ActionType)
+        {
+            case ActionType.Move:
+                return CursorState.Move;
+            case ActionType.MoveThenAttack:
+            case ActionType.Attack:
+                return CursorState.Attack;
+            case ActionType.RangedAttack:
+                return CursorState.RangedAttack;
+            default:
+                return CursorState.Default;
+        }
     }
 
     /// <summary>
