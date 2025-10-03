@@ -20,7 +20,7 @@ public class UnitModelFactory
         {
             try
             {
-                _dataMap = DataMapFromResources();
+                //_dataMap = DataMapFromResources();
             }
             catch (Exception ex)
             {
@@ -41,31 +41,27 @@ public class UnitModelFactory
         }
         return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.UnitType, unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.Amount, unitSpawnParams.Team);
     }
-    private IReadOnlyDictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
-    {
-        // Avoid loading editor assets during EditMode tests / serialization time.
-        // Loading the ScriptableObject asset can trigger Unity to call ScriptableObject constructors
-        // during serialization which results in UnityException. When running in the editor but not
-        // in play mode (typical for EditMode tests), return an empty map and let tests inject data.
-        if (!Application.isPlaying)
-        {
-            Debug.Log("UnitModelFactory: Skipping GameUnitDatas load because Application.isPlaying == false");
-            return new Dictionary<UnitType, UnitDefinitionSO>();
-        }
+    //private IReadOnlyDictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
+    //{
+    //    if (!Application.isPlaying)
+    //    {
+    //        Debug.Log("UnitModelFactory: Skipping GameUnitDatas load because Application.isPlaying == false");
+    //        return new Dictionary<UnitType, UnitDefinitionSO>();
+    //    }
 
-        var gameUnitDatas = AssetDatabase.LoadAssetAtPath<GameUnitDatas>("Assets/ScriptableObjects/Game/GameUnitDatas.asset");
-        if (gameUnitDatas == null)
-        {
-            Debug.LogWarning("UnitModelFactory: GameUnitDatas asset not found at Assets/ScriptableObjects/Game/GameUnitDatas.asset");
-            return new Dictionary<UnitType, UnitDefinitionSO>();
-        }
+    //    //var gameUnitDatas = AssetDatabase.LoadAssetAtPath<GameUnitDatas>("Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+    //    //if (gameUnitDatas == null)
+    //    //{
+    //    //    Debug.LogWarning("UnitModelFactory: GameUnitDatas asset not found at Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+    //    //    return new Dictionary<UnitType, UnitDefinitionSO>();
+    //    //}
 
-        var dict = gameUnitDatas.ToDictionary();
-        if (dict == null)
-        {
-            return new Dictionary<UnitType, UnitDefinitionSO>();
-        }
+    //    //var dict = gameUnitDatas.ToDictionary();
+    //    //if (dict == null)
+    //    //{
+    //    //    return new Dictionary<UnitType, UnitDefinitionSO>();
+    //    //}
 
-        return dict;
-    }   
+    //    return dict;
+    //}   
 }

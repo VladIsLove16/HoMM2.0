@@ -27,6 +27,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
     [SerializeField] private PerCellGridRenderer perCellGridRenderer;
+    [SerializeField] private CursorService CursorService;
 
     [SerializeField] private GridRenderStrategy strategy = GridRenderStrategy.PerCell;
 
@@ -90,10 +91,8 @@ public class GameLogicMonoInstaller : MonoInstaller
     {
         Container.Bind<GameNetworkCommandGateway>().FromInstance(_gameNetworkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
-        // Network services
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
-
-        
+        Container.Bind<ICursorService>().FromInstance(CursorService).AsSingle().NonLazy();
     }
 
     private void BindConfigurationProviders()

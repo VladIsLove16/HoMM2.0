@@ -6,16 +6,17 @@ using Zenject;
 /// <summary>
 /// Реализация сервиса работы с курсором
 /// </summary>
-public class CursorService : ICursorService
+public class CursorService : MonoBehaviour, ICursorService
 {
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
+    [SerializeField] private List<CursorStateTexture> cursorStateTextures;
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
     private ActionResolver _actionResolver;
-    
-    public CursorService(List<CursorStateTexture> cursorStateTextures)
+    [Inject]
+    public CursorService()
     {
-        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state,y=> y.texture);
+        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
         SetDefaultCursor();
     }
     
