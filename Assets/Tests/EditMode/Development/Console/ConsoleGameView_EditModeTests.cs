@@ -1,0 +1,122 @@
+using System.Collections.Generic;
+using NUnit.Framework;
+using UniRx;
+using UnityEngine;
+using Tests.TestHelpers;
+
+public class ConsoleGameView_EditModeTests
+{
+    [SetUp]
+    public void SetUp()
+    {
+        var service = SceneTransitionTestSetup.EnsureService();
+        service.SetGameMode(GameMode.SinglePlayer);
+        service.SetTeam(Team.Blue);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        SceneTransitionTestSetup.DestroyService();
+    }
+
+    [Test]
+    public void ConsoleGameView_ReactToGridInitializationAndSpawns()
+    {
+        var harness = new GameModelBuilder();
+        var output = new TestConsoleOutput();
+        var gridState = new ConsoleGridState();
+        var consoleView = new ConsoleGameView(harness.GameViewModel, harness.TurnService, gridState, output);
+        consoleView.Initialize();
+
+        harness.GameModel.InitializeGrid(3, 3);
+
+        Assert.That(output.Messages, Has.Some.Contains("Grid initialized 3x3"));
+
+        var spawnResult = harness.GameModel.SpawnUnit(new UnitSpawnParams(0, 0, UnitType.Archer, 1, Team.Blue));
+        Assert.That(spawnResult.IsSuccess, Is.True);
+        Assert.That(output.Messages, Has.Some.Contains("Unit spawned: Archer [Blue]"));
+
+        var unit = harness.GameModel.GetUnits()[0];
+        harness.TurnSystem.AddCombatUnit(unit);
+        harness.TurnSystem.ActiveObject.SetValueAndForceNotify(unit);
+
+        Assert.That(output.Messages, Has.Some.Contains("Active unit: Archer"));
+
+        consoleView.Dispose();
+    }
+
+    [Test]
+    public void ConsoleGridRenderer_ProvidesWorldConversionsAndState()
+    {
+        var gridState = new ConsoleGridState();
+        var output = new TestConsoleOutput();
+        var renderer = new ConsoleGridRenderer(gridState, output);
+
+        renderer.Render(2, 2, 1f, Vector3.zero, 0f);
+        var world = renderer.ToWorld(1, 0);
+        Assert.That(world, Is.EqualTo(new Vector3(1f, 0f, 0f)));
+
+        Assert.That(renderer.ToGrid(new Vector3(1.4f, 0f, 0.49f), out var coords), Is.True);
+        Assert.That(coords, Is.EqualTo(new Vector2Int(1, 0)));
+
+        Assert.That(renderer.GetCellStates(new Vector2Int(0, 0)), Is.Empty);
+        Assert.That(output.Messages, Has.Some.Contains("Console grid render width=2"));
+    }
+
+    private sealed class TestConsoleOutput : IDeveloperConsoleOutput
+    {
+        public readonly List<string> Messages = new();
+        public void AppendLine(string message) => Messages.Add(message);
+        public void AppendWarning(string message) => Messages.Add($"WARN:{message}");
+        public void AppendError(string message) => Messages.Add($"ERR:{message}");
+    }
+
+    private sealed class GameModelBuilder
+    {
+        public GameModel GameModel { get; }
+        public GameViewModel GameViewModel { get; }
+        public TurnSystem TurnSystem { get; } = new();
+        public ITurnService TurnService { get; }
+        public MovementSystem MovementSystem { get; } = new();
+        public ActionResolver ActionResolver { get; }
+        public IGameCommandExecutor CommandExecutor { get; } = new NullCommandExecutor();
+
+        public GameModelBuilder()
+        {
+            var unitStats = ScriptableObject.CreateInstance<UnitStats>();
+            unitStats.MaxHealth = 10;
+            unitStats.Health = 10;
+            unitStats.MoveSpeed = 5;
+            unitStats.AttackRange = 1;
+            unitStats.Damage = 3;
+
+            var unitDefinition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
+            unitDefinition.Stats = unitStats;
+            unitDefinition.UnitType = UnitType.Archer;
+            unitDefinition.name = "Unit_Def";
+
+            var dataMap = new Dictionary<UnitType, UnitDefinitionSO>
+            {
+                { UnitType.Archer, unitDefinition }
+            };
+
+            var unitFactory = new UnitModelFactory(dataMap);
+            GameModel = new GameModel(unitFactory, MovementSystem);
+            ActionResolver = new ActionResolver(GameModel, MovementSystem);
+            TurnService = new TurnService(TurnSystem);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnSystem, ActionResolver);
+        }
+    }
+
+    private sealed class NullCommandExecutor : IGameCommandExecutor
+    {
+        public void Execute(ActionType type, ActionContext ctx)
+        {
+        }
+
+        public void StartBattle()
+        {
+        }
+    }
+}

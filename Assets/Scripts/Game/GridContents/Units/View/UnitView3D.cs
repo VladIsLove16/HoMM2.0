@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UniRx;
@@ -8,7 +8,7 @@ using Zenject;
 public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObject
 {
     private CompositeDisposable _disposables = new();
-    private Animator _animator;
+    [SerializeField]private Animator _animator;
 
     [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
@@ -24,12 +24,25 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     private UnitViewModel _vm;
     private void Awake()
     {
-        // Исполнитель команд назначается позже (через фабрику/вариант префаба) до Init()
-        // Безопасная авто-инициализация мешей, если не назначены в инспекторе
         if (meshes == null || meshes.Length == 0)
         {
-            meshes = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            Debug.LogAssertion("meshes have not been setted");
         }
+        if (unitViewUI == null)
+        {
+            Debug.LogWarning("unitViewUI null ref");
+            return;
+        }
+        if (_animator == null)
+        {
+            _animator = GetComponent<Animator>();
+            if (_animator == null)
+            {
+                Debug.LogWarning("Animator component not found");
+                return;
+            }
+        }
+
     }
     /// <summary>
     /// UnitView does not change UnitModel at all
@@ -38,21 +51,9 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void Init(UnitViewModel vm)
     {
         _vm = vm;
-        // Резолвим исполнитель команд после того, как фабрика/вариант префаба добавил компонент
-        SetMaterial(_teamMaterials.GetTeamMaterial(vm.Model.Team.Value));
-        _animator = GetComponent<Animator>();
-        // Все события теперь обрабатываются через GameView3D
-        // Подписки на события ViewModel удалены для единообразного подхода
-
-        if(unitViewUI == null)
-        {
-            Debug.LogWarning("unitViewUI null ref");
-            return;
-        }
+        SetMaterial(_teamMaterials.GetTeamMaterial(vm.Team));
         unitViewUI.Init(vm);
-        
-        // Реакция на смену команды/материалов
-        _vm.OnTeamChanged.Subscribe(_ => SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Model.Team.Value))).AddTo(_disposables);
+        _vm.OnTeamChangedEnum.Subscribe(team => SetMaterial(_teamMaterials.GetTeamMaterial(team))).AddTo(_disposables);
         _vm.OnMoveByRoute.Subscribe(OnMovedByRoute);
     }
 
@@ -75,17 +76,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
         LogDebugEvent($"Snapped instantly to {worldPosition}");
     }
-
-    /// <summary>
-    /// Публичный метод для проигрывания перемещения (вызов из GameView3D или сетевого слоя)
-    /// </summary>
     public void Move(List<Vector3> route)
     {
         ExecuteMove(route);
     }
     
     /// <summary>
-    /// Внутренний метод для выполнения перемещения (вызывается из сетевых команд)
+    /// ���������� ����� ��� ���������� ����������� (���������� �� ������� ������)
     /// </summary>
     private void ExecuteMove(List<Vector3> route)
     {
@@ -95,7 +92,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     
     private void HandleAttackCommand(ulong targetUnitId)
     {
-        // Здесь будет логика атаки
+        // ����� ����� ������ �����
         LogDebugEvent($"Unit attacking target: {targetUnitId}");
         // TODO: Implement attack logic
     }
@@ -229,7 +226,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void HandleDeath()
     {
         LogDebugEvent("Unit Death");
-        if (_vm.Model.Amount.Value <= 0)
+        if (_vm.Amount <= 0)
         {
             EnqueueAction(HandleDeathAction());
         }
@@ -254,13 +251,13 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void Hover()
     {
         LogDebugEvent("Unit Hovered");
-        SetMaterial(_teamMaterials.GetHoveredTeamMaterial(_vm.Model.Team.Value));
+        SetMaterial(_teamMaterials.GetHoveredTeamMaterial(_vm.Team));
     }
 
     public void Unhover()
     {
         LogDebugEvent("Unit Unhovered");
-        SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Model.Team.Value));
+        SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Team));
     }
     
     private void LogDebugEvent(string eventMessage)

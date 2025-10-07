@@ -1,15 +1,8 @@
 // GameView3D.cs
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
-
-public interface IUnitViewResolver
-{
-    bool TryGetView(UnitModel model, out UnitView3D view);
-}
 
 public class GameView3D : MonoBehaviour
 {
@@ -19,11 +12,9 @@ public class GameView3D : MonoBehaviour
     [Inject]private IWorldToCellProvider _worldToCellProvider;
     private UnitView3D _draggedUnit;
 
-    // Test hooks - allow tests to inject lightweight handlers without reflection
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellSelected;
 
-    // Test-friendly setter for world-to-cell provider
     public void SetWorldToCellProvider(IWorldToCellProvider provider) => _worldToCellProvider = provider;
 
     [Inject]

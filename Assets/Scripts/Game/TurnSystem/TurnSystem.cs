@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
@@ -12,14 +12,16 @@ public class TurnSystem
     public Action<UnitTurnInfo> CombatUnitsAdded;
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
     int turnTowards = 3;
-    public Team MyTeam { get; private set; } = Team.Blue;
+    public Team LocalTeam { get; private set; } = Team.Blue;
     public bool IsMyTurn
     {
         get
         {
+            if (SceneTransitionDataService.Instance.CurrentGameMode == GameMode.SinglePlayer)
+                return true;
             var active = ActiveObject != null ? ActiveObject.Value : null;
             if (active == null) return false;
-            return active.Team == MyTeam;
+            return active.Team == LocalTeam;
         }
     }
     private bool IsCombatEnded(out Team winningTeam)
@@ -35,7 +37,7 @@ public class TurnSystem
     }
     public void ConfigureLocalSide(Team team)
     {
-        MyTeam = team;
+        LocalTeam = team;
     }
     public virtual void AddCombatUnit(ICombatObject unit)
     {
@@ -49,7 +51,7 @@ public class TurnSystem
         if (unit == null) return;
         CombatUnits.Remove(unit);
         RemoveFromTurnDict(unit);
-        // Если удалили активного — сразу перейти к следующему
+        // ���� ������� ��������� � ����� ������� � ����������
         if (ActiveObject.Value == unit)
         {
             EndTurn();
@@ -87,10 +89,8 @@ public class TurnSystem
     }
     public void TakeTurn()
     {
-        // Найти первого живого юнита в актуальном слайсе; если пусто — перелистнуть
         if (!EnsureCurrentTurnListIsValid())
         {
-            // если после очистки нет доступных юнитов — бой может быть закончен
             return;
         }
         ICombatObject combatObject = GetFirstObject();
@@ -164,7 +164,7 @@ public class TurnSystem
         {
             return null;
         }
-        // Удаляем текущего активного из очереди
+        // ������� �������� ��������� �� �������
         turnDict[TurnNumber.Value].Remove(ActiveObject.Value);
         if (turnDict[TurnNumber.Value].Count == 0)
         {
@@ -205,13 +205,10 @@ public class TurnSystem
                 turnDict.Remove(kv.Key);
             }
         }
-        // Если удалили все текущие — перейти на следующий срез
         if (!turnDict.ContainsKey(TurnNumber.Value))
         {
-            // сдвиг вперёд до ближайшего непустого ключа
             while (!turnDict.ContainsKey(TurnNumber.Value) && turnDict.Count > 0)
             {
-                // подобрать минимальный существующий ключ >= текущего
                 int nextKey = turnDict.Keys.OrderBy(x => x).FirstOrDefault(x => x >= TurnNumber.Value);
                 if (nextKey == 0 && !turnDict.ContainsKey(nextKey)) break;
                 TurnNumber.Value = nextKey;
@@ -221,7 +218,6 @@ public class TurnSystem
 
     private bool EnsureCurrentTurnListIsValid()
     {
-        // найти ближайший ключ с непустым листом
         while (true)
         {
             if (!turnDict.ContainsKey(TurnNumber.Value))
@@ -232,12 +228,10 @@ public class TurnSystem
             }
             if (!turnDict.ContainsKey(TurnNumber.Value)) return false;
             var list = turnDict[TurnNumber.Value];
-            // удалить из текущего среза всех, кого нет в CombatUnits (мертвые/удалённые)
             list.RemoveAll(u => u == null || !CombatUnits.Contains(u));
             if (list.Count == 0)
             {
                 OnNoTurnUnitsLeft();
-                // и продолжаем цикл, чтобы найти следующий валидный
                 continue;
             }
             return true;

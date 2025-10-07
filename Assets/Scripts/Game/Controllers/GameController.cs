@@ -10,14 +10,17 @@ public class GameController : MonoBehaviour
 {
     [Header("Grid Settings")]
     [Inject] private GameSceneConfigurationProvider _gameSceneConfigurationProvider;
-    [SerializeField]  private GridContentEntrySO defaultEntry;
+    [SerializeField] private GridContentEntrySO defaultEntry;
     private GameModel _gameModel;
-    [Inject] private TurnSystem _turnSystem;
+    private ITurnService _turnService;
+
     [Inject]
     public void Construct(
-        GameModel model)
+        GameModel model,
+        ITurnService turnService)
     {
         _gameModel = model;
+        _turnService = turnService;
     }
 
     private void Start()
@@ -38,8 +41,9 @@ public class GameController : MonoBehaviour
         CreateGridContent(config);
         var team = gameConfigurationProvider == null ? Team.Blue : gameConfigurationProvider.GetTeam();
         SetPlayerTeam(team);
-        _turnSystem.StartGridPlacementPhase();
+        _turnService.StartGridPlacementPhase();
     }
+
     [Button]
     public void CreateGridContent()
     {
@@ -61,11 +65,11 @@ public class GameController : MonoBehaviour
 
     private void OnGameModel_UnitSpawn(UnitModelCreatedParams @params)
     {
-        _turnSystem.AddCombatUnit(@params.UnitModel);
+        _turnService.AddCombatUnit(@params.UnitModel);
     }
 
     private void SetPlayerTeam(Team team)
     {
-        _turnSystem.ConfigureLocalSide(team);
+        _turnService.ConfigureLocalSide(team);
     }
 }

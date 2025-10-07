@@ -13,7 +13,6 @@ public class GameViewModel : IDisposable, IGridViewModel
     public event Action<PreviewResult> PreviewUpdated;
     public event Action<DamageContextPreview> DamageContextPreviewChanged;
     public Action<UnitViewModel> UnitSpawned;
-
     private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
     private readonly IGameCommandExecutor _gameCommandExecutor;

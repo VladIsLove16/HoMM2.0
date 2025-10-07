@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
@@ -8,6 +8,11 @@ using Zenject;
 public class UnitViewModel : IViewModel
 {
     public UnitModel Model { get; }
+    public Team Team => Model.Team.Value;
+    public UnitType UnitType => Model.UnitType.Value;
+    public IReadOnlyReactiveProperty<Team> TeamObservable => Model.Team;
+    public IReadOnlyReactiveProperty<int> AmountObservable => Model.Amount;
+
     public IObservable<Unit> OnAttacked => _onAttacked;
     public IObservable<Unit> OnHit => _onHit;
     public IObservable<Unit> OnDeath => _onDeath;
@@ -46,7 +51,7 @@ public class UnitViewModel : IViewModel
 
     private void SubscribeToModel()
     {
-        // ÐŸÑ€Ð¾Ð±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÐ¼ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ Ð¼Ð¾Ð´ÐµÐ»Ð¸ Ð²Ð¾ ViewModel (MVVM)
+        // Ïðîáðàñûâàåì ñîáûòèÿ ìîäåëè âî ViewModel (MVVM)
         if (Model == null) return;
 
         Model.Attacked += _ => _onAttacked.OnNext(Unit.Default);

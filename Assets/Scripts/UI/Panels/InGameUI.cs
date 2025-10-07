@@ -7,7 +7,7 @@ using Zenject;
 
 public class InGameUI : MonoBehaviour
 {
-    [Inject] private TurnSystem _turnSystem;
+    private ITurnStateViewModel _turnState;
     [Inject] private IGameCommandExecutor _gameCommandExecutor;
     [SerializeField] private Button StartBattle;
     [SerializeField] private TextMeshProUGUI turnNumber;
@@ -16,19 +16,18 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI battleState;
     [SerializeField] private TextMeshProUGUI isMyTurnText;
     private int currentTurn;
-    private bool _subscribed = false;
-    
+    private readonly CompositeDisposable _disposables = new();
+
     [Inject]
-    public void Init()
+    public void Init(ITurnStateViewModel turnState)
     {
-        // Subscribe to GameViewModel events instead of direct domain access
-        _turnSystem.ActiveObject.Subscribe(OnUnitTurnStarted);
-        _turnSystem.CurrentBattleState.Subscribe(OnTurnSystem_BattleStateChanged);
+        _turnState = turnState;
+        _turnState.ActiveObject.Subscribe(OnUnitTurnStarted).AddTo(_disposables);
+        _turnState.BattleState.Subscribe(OnTurnStateChanged).AddTo(_disposables);
         StartBattle.onClick.AddListener(() => _gameCommandExecutor.StartBattle());
-        _subscribed = true;
     }
 
-    private void OnTurnSystem_BattleStateChanged(BattleState state)
+    private void OnTurnStateChanged(BattleState state)
     {
         battleState.text = state.ToString();
     }
@@ -38,16 +37,16 @@ public class InGameUI : MonoBehaviour
         var newtext = string.Empty;
         if (combatObject == null)
             newtext = "Game starting";
-        else if (_turnSystem.IsMyTurn)
-            newtext = "Your Turn " + combatObject.ToString();
+        else if (_turnState.IsMyTurn)
+            newtext = "Your Turn " + combatObject;
         else
-            newtext = "Enemy Turn " + combatObject.ToString();
+            newtext = "Enemy Turn " + combatObject;
         isMyTurnText.text = newtext;
     }
 
     private void OnDestroy()
     {
-        
+        _disposables.Dispose();
     }
 
     public void OnTurnNumberChanged(int turn)
@@ -61,9 +60,6 @@ public class InGameUI : MonoBehaviour
     }
     public void Dispose()
     {
-        if (_subscribed)
-        {
-            _subscribed = false;
-        }
+        _disposables.Dispose();
     }
 }

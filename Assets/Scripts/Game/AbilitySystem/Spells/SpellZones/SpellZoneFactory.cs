@@ -6,7 +6,7 @@ public class SpellZoneFactory
     {
         return type switch
         {
-            SpellZoneType.Cross => new СrossSpellZone(),
+            SpellZoneType.Cross => new CrossSpellZone(),
             SpellZoneType.Quad => new QuadSpellZone(),
             _ => throw new NotImplementedException(),
         };

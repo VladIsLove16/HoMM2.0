@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
@@ -78,7 +78,7 @@ namespace Tests.PlayMode.GameFlow
             controller.gameObject.SetActive(true);
             yield return null;
 
-            Assert.That(turnSystem.MyTeam, Is.EqualTo(Team.Red));
+            Assert.That(turnSystem.LocalTeam, Is.EqualTo(Team.Red));
         }
 
         [UnityTest]
@@ -113,7 +113,7 @@ namespace Tests.PlayMode.GameFlow
 
             Assert.That(gameModel.LastGridSize.width, Is.EqualTo(5));
             Assert.That(gameModel.LastGridSize.height, Is.EqualTo(4));
-            Assert.That(turnSystem.MyTeam, Is.EqualTo(Team.Blue));
+            Assert.That(turnSystem.LocalTeam, Is.EqualTo(Team.Blue));
         }
 
         [UnityTest]
@@ -148,8 +148,7 @@ namespace Tests.PlayMode.GameFlow
             go.SetActive(false);
             _createdObjects.Add(go);
             var controller = go.AddComponent<GameController>();
-            controller.Construct(gameModel);
-            SetPrivateField(controller, "_turnSystem", turnSystem);
+            controller.Construct(gameModel, new TurnService(turnSystem));
             SetPrivateField(controller, "_gameSceneConfigurationProvider", provider);
             SetPrivateField(controller, "defaultEntry", defaultEntry);
             return controller;
@@ -242,3 +241,4 @@ namespace Tests.PlayMode.GameFlow
         }
     }
 }
+

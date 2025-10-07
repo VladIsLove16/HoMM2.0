@@ -1,6 +1,4 @@
-﻿using System;
-using Unity.VisualScripting;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 public class GridView : MonoBehaviour
@@ -9,13 +7,13 @@ public class GridView : MonoBehaviour
     [SerializeField] private float cellSize;
     [SerializeField] private float padding;
 
-    private GameViewModel _viewModel;
+    private IGridViewModel _viewModel;
     private IGridCellRenderer _cellGridRenderer;
     private CellState previousCellState;
     private Vector2Int previousHoveredCell;
     [Inject]
     public void Construct(
-        GameViewModel viewModel,
+        IGridViewModel viewModel,
         IGridCellRenderer renderer
     )
     {

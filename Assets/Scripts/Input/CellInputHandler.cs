@@ -17,7 +17,8 @@ public class CellInputHandler : MonoBehaviour
 
     [SerializeField] private Camera mainCamera;
     [SerializeField] private GameView3D _gameView3D;
-    [Inject] private TurnSystem _turnSystem;
+    private ITurnStateViewModel _turnState;
+    private IDisposable _battleStateSubscription;
     private readonly System.Collections.Generic.List<RaycastResult> uiRaycastResults = new System.Collections.Generic.List<RaycastResult>(8);
     private Collider _lastHoveredCollider;
     public Action ActionCanceled;
@@ -37,12 +38,12 @@ public class CellInputHandler : MonoBehaviour
     }
 
     [Inject]
-    public void Construct(TurnSystem turnSystem)
+    public void Construct(ITurnStateViewModel turnState)
     {
-        _turnSystem = turnSystem;
+        _turnState = turnState;
         EnsureInputActionsInitialized();
-        _turnSystem.CurrentBattleState.Subscribe(OnTurnSystem_BattleStateChanged);
-        OnTurnSystem_BattleStateChanged(_turnSystem.CurrentBattleState.Value);
+        _battleStateSubscription = _turnState.BattleState.Subscribe(OnTurnStateChanged);
+        OnTurnStateChanged(_turnState.BattleState.Value);
     }
     private void OnEnable()
     {
@@ -56,9 +57,9 @@ public class CellInputHandler : MonoBehaviour
         inputActions.GridPlacement.Drag.performed += OnDragPerformed;
         inputActions.GridPlacement.Drag.canceled += OnDragCanceled;
 
-        if (_turnSystem != null)
+        if (_turnState != null)
         {
-            OnTurnSystem_BattleStateChanged(_turnSystem.CurrentBattleState.Value);
+            OnTurnStateChanged(_turnState.BattleState.Value);
         }
         else
         {
@@ -67,7 +68,7 @@ public class CellInputHandler : MonoBehaviour
         }
     }
 
-    private void OnTurnSystem_BattleStateChanged(BattleState state)
+    private void OnTurnStateChanged(BattleState state)
     {
         EnsureInputActionsInitialized();
 
@@ -100,6 +101,13 @@ public class CellInputHandler : MonoBehaviour
         inputActions.Disable();
         isDragging = false;
     }
+
+    private void OnDestroy()
+    {
+        _battleStateSubscription?.Dispose();
+        _battleStateSubscription = null;
+    }
+
     private void Update()
     {
         if(isDragging)
@@ -129,112 +137,104 @@ public class CellInputHandler : MonoBehaviour
         }
     }
 
-    private void OnSelectPerformed(InputAction.CallbackContext ctx)
+    private void OnSelectPerformed(InputAction.CallbackContext obj)
     {
-        if (IsPointerOverUI()) return;
-        
-        if (TryGetHit(out var hit))
+        if (IsPointerOverUI())
+            return;
+        if (!TryGetHit(out var hit))
         {
-            IGameViewObject gameViewObject = null;
-            if (selectionMode == SelectionMode.UnitThenGrid)
-            {
-                gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
-                if (gameViewObject == null)
-                {
-                    gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
-                }
-            }
-            else if (selectionMode == SelectionMode.GridOnly)
-            {
-                gameViewObject = hit.collider != null ? hit.collider.GetComponent<IGameViewObject>() : null;
-            }
-            
-            if (gameViewObject != null && gameViewObject.IsSelectable)
-            {
-                _gameView3D?.HandleGameViewObjectSelected(gameViewObject);
-            }
+            Debug.Log("no hit");
+            return;
         }
+        var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
+        if (gameViewObject == null || !gameViewObject.IsSelectable)
+        {
+            Debug.Log(hit.collider.name + "is not selectable");
+            return;
+        }
+        Debug.Log(hit.collider.name + " selected");
+        ProcessGameViewObject(gameViewObject, InputInteractionType.Select);
     }
 
-    private void OnActionPerformed(InputAction.CallbackContext ctx)
+    private void OnActionPerformed(InputAction.CallbackContext obj)
     {
-        if (IsPointerOverUI()) return;
-        
-        if (TryGetHit(out var hit))
-        {
-            IGameViewObject gameViewObject = null;
-            
-            if (selectionMode == SelectionMode.UnitThenGrid)
-            {
-                // РЎРЅР°С‡Р°Р»Р° РїС‹С‚Р°РµРјСЃСЏ РЅР°Р№С‚Рё СЋРЅРёС‚
-                gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
-                if (gameViewObject == null)
-                {
-                    gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
-                }
-            }
-            else if (selectionMode == SelectionMode.GridOnly)
-            {
-                gameViewObject = hit.collider != null ? hit.collider.GetComponentInParent<IGameViewObject>() : null;
-            }
-            
-            if (gameViewObject != null)
-            {
-                _gameView3D?.HandleActionPerformed(gameViewObject);
-            }
-        }
-        else
+        if (IsPointerOverUI())
+            return;
+        if (!TryGetHit(out var hit))
         {
             ActionCanceled?.Invoke();
+            return;
         }
+        var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
+        ProcessGameViewObject(gameViewObject, InputInteractionType.Action);
     }
-    private void OnDragStarted(InputAction.CallbackContext ctx)
+
+    private void OnDragStarted(InputAction.CallbackContext obj)
     {
-        Debug.Log("Drag started");  
-        if (TryGetHit(out var hit))
+        if (IsPointerOverUI())
+            return;
+
+        if (!TryGetHit(out var hit))
         {
-            Debug.Log(hit.collider.gameObject.name);
-            var unitView = hit.collider.GetComponent<UnitView3D>();
-            if (unitView != null)
-            {
-                isDragging = true;
-                _gameView3D.BeginDrag(unitView);
-            }
+            return;
         }
+        var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
+        ProcessGameViewObject(gameViewObject, InputInteractionType.BeginDrag);
     }
 
-    private void OnDragPerformed(InputAction.CallbackContext ctx)
+    private void OnDragPerformed(InputAction.CallbackContext obj)
     {
-        Debug.Log("OnDragPerformed");
-        var worldPos = GetMouseWorldPosition();
-        _gameView3D.UpdateDrag(worldPos);
-    }
+        if (!isDragging)
+            return;
 
-    private void OnDragCanceled(InputAction.CallbackContext ctx)
-    {
-        Debug.Log("OnDragCanceled");
-        if (TryGetHit(out var hit))
+        if (!TryGetHit(out var hit))
         {
-            if (!isDragging)
-                return;
-            isDragging = false;
-            _gameView3D.EndDrag(hit.point);
+            ProcessGameViewObject(null, InputInteractionType.DragUpdate);
+            return;
         }
+
+        var objToProcess = hit.collider.GetComponent<IGameViewObject>();
+        ProcessGameViewObject(objToProcess, InputInteractionType.DragUpdate);
     }
 
-
-    private void ProcessGameViewObject(IGameViewObject gameViewObject, InputInteractionType interaction)
+    private void OnDragCanceled(InputAction.CallbackContext obj)
     {
-        switch (interaction)
+        if (!isDragging)
+            return;
+
+        if (!TryGetHit(out var hit))
+        {
+            ProcessGameViewObject(null, InputInteractionType.EndDrag);
+            return;
+        }
+
+        var gameViewObject = hit.collider.GetComponent<IGameViewObject>();
+        ProcessGameViewObject(gameViewObject, InputInteractionType.EndDrag);
+    }
+
+    private void ProcessGameViewObject(IGameViewObject gameViewObject, InputInteractionType interactionType)
+    {
+        if (_gameView3D == null)
+        {
+            Debug.Log("gameView not set");
+            return;
+        }
+
+        if (!TryResolveWorldPosition(gameViewObject, out var worldPosition))
+        {
+            worldPosition = Vector3.zero;
+        }
+
+        switch (interactionType)
         {
             case InputInteractionType.Hover:
-                if (gameViewObject?.IsHoverable == true)
+                if (gameViewObject != null)
                 {
                     _gameView3D?.HandleGameViewObjectHovered(gameViewObject);
                 }
                 break;
             case InputInteractionType.Select:
-                if (gameViewObject?.IsSelectable == true)
+                if (gameViewObject != null)
                 {
                     _gameView3D?.HandleGameViewObjectSelected(gameViewObject);
                 }
@@ -363,5 +363,11 @@ public class CellInputHandler : MonoBehaviour
     public void TestSetSelectionMode(SelectionMode mode) => selectionMode = mode;
     public void TestProcessGameViewObject(IGameViewObject obj, InputInteractionType interaction) => ProcessGameViewObject(obj, interaction);
     public void TestSetCamera(Camera camera) => mainCamera = camera;
+    public void TestSetTurnState(ITurnStateViewModel turnState)
+    {
+        _battleStateSubscription?.Dispose();
+        _turnState = turnState;
+        _battleStateSubscription = turnState?.BattleState.Subscribe(OnTurnStateChanged);
+    }
 #endif
 }

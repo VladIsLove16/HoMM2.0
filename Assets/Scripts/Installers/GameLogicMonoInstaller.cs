@@ -44,7 +44,7 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindInputHandlers()
     {
-        Container.Bind<CellInputHandler>().FromInstance(_cellInputHandler).  AsSingle();
+        Container.Bind<CellInputHandler>().FromInstance(_cellInputHandler).AsSingle();
     }
 
     private void BindModels()
@@ -56,6 +56,7 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<ActionResolver>().AsSingle();
         Container.Bind<TurnSystem>().AsSingle();
+        Container.BindInterfacesTo<TurnService>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
         Container.Bind<GameModel>().AsSingle().NonLazy();

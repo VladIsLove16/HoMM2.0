@@ -82,6 +82,20 @@ namespace Tests.EditMode.ViewModels
             Assert.That(dict[CellState.accessibleRoutePoint], Does.Contain(target));
         }
 
+        [Test]
+        public void HandleCellSelected_ExecutesGameCommand()
+        {
+            SpawnActiveUnit(new Vector2Int(0, 0));
+
+            var target = new Vector2Int(1, 0);
+            var coords = new KeyValuePair<Vector2Int, Vector2Int>(target, target);
+
+            _vm.HandleCellSelected(coords);
+
+            Assert.That(_executor.LastType, Is.Not.Null);
+            Assert.That(_executor.LastContext?.TargetCell, Is.EqualTo(target));
+        }
+
         private UnitModel SpawnActiveUnit(Vector2Int position)
         {
             var spawnParams = new UnitSpawnParams(position.x, position.y, UnitType.Archer, 1, Team.Blue);
@@ -111,3 +125,9 @@ namespace Tests.EditMode.ViewModels
         }
     }
 }
+
+
+
+
+
+

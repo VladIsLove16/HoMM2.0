@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class СrossSpellZone : ISpellZone
+public class CrossSpellZone : ISpellZone
 {
     public List<Vector2Int> GetCells()
     {
