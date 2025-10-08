@@ -9,8 +9,7 @@ using Zenject;
 public class GameController : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [Inject] private GameSceneConfigurationProvider _gameSceneConfigurationProvider;
-    [SerializeField] private GridContentEntrySO defaultEntry;
+    [Inject] private IGameConfigurationProvider _gameConfigurationProvider;
     private GameModel _gameModel;
     private ITurnService _turnService;
 
@@ -25,21 +24,23 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        Setup(_gameSceneConfigurationProvider);
+        Setup(_gameConfigurationProvider);
     }
 
     [Button]
     private void Setup()
     {
-        Setup(_gameSceneConfigurationProvider);
+        Setup(_gameConfigurationProvider);
     }
 
-    public void Setup(GameSceneConfigurationProvider gameConfigurationProvider)
+    public void Setup(IGameConfigurationProvider gameConfigurationProvider)
     {
-        GridContentEntrySO config;
-        config = gameConfigurationProvider == null ? defaultEntry : gameConfigurationProvider.GetSelectedConfiguration();
+        if (gameConfigurationProvider == null)
+            throw new ArgumentNullException();
+        var provider = gameConfigurationProvider;
+        var config = provider?.GetSelectedConfiguration();
         CreateGridContent(config);
-        var team = gameConfigurationProvider == null ? Team.Blue : gameConfigurationProvider.GetTeam();
+        var team = provider.GetTeam();
         SetPlayerTeam(team);
         _turnService.StartGridPlacementPhase();
     }
@@ -47,16 +48,22 @@ public class GameController : MonoBehaviour
     [Button]
     public void CreateGridContent()
     {
-        CreateGridContent(_gameSceneConfigurationProvider.GetSelectedConfiguration());
+        var config = _gameConfigurationProvider.GetSelectedConfiguration();
+        CreateGridContent(config);
     }
 
     public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
     {
+        if (unitContentEntrySO == null)
+        {
+            Debug.LogWarning("CreateGridContent called with null configuration. Skipping grid setup.");
+            return;
+        }
+
         _gameModel.InitializeGrid(unitContentEntrySO.Width, unitContentEntrySO.Height);
         _gameModel.GameChange_UnitSpawned += OnGameModel_UnitSpawn;
         foreach (var content in unitContentEntrySO.contents)
         {
-            // content.Team is a serialized bool in grid entries; translate to Team
             var team = content.Team;
             var spawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, team);
             _gameModel.SpawnUnit(spawnParams);
@@ -73,3 +80,6 @@ public class GameController : MonoBehaviour
         _turnService.ConfigureLocalSide(team);
     }
 }
+
+
+

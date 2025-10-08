@@ -127,35 +127,16 @@ public class ConsoleGridState
         return Array.Empty<CellState>();
     }
 
-    private void DetachSnapshot(ConsoleUnitSnapshot snapshot)
-    {
-        if (snapshot == null)
-        {
-            return;
-        }
-
-        if (_cells.TryGetValue(snapshot.Position, out var cell) && cell.Unit == snapshot)
-        {
-            cell.Unit = null;
-        }
-    }
-
-    public void UpdatePreview(Dictionary<CellState, List<Vector2Int>> data, bool replace)
+    public void UpdatePreview(Dictionary<CellState, List<Vector2Int>> previewStates, bool replace)
     {
         if (replace)
         {
             ClearAllStates();
         }
 
-        if (data == null)
+        foreach (var kv in previewStates)
         {
-            return;
-        }
-
-        foreach (var kv in data)
-        {
-            RemoveState(kv.Key);
-            foreach (var coord in kv.Value)
+            foreach (var coord in kv.Value ?? Enumerable.Empty<Vector2Int>())
             {
                 if (_cells.TryGetValue(coord, out var cell))
                 {
@@ -167,23 +148,17 @@ public class ConsoleGridState
 
     public string BuildRepresentation()
     {
-        if (_width == 0 || _height == 0)
-        {
-            return "Console grid not initialized.";
-        }
-
         var sb = new StringBuilder();
-        sb.AppendLine($"Console Grid {_width}x{_height}");
 
         for (int y = _height - 1; y >= 0; y--)
         {
-            sb.Append(y.ToString("D2")).Append(" | ");
+            sb.Append($"{y:D2}| ");
             for (int x = 0; x < _width; x++)
             {
-                var coord = new Vector2Int(x, y);
-                var cell = _cells[coord];
-                char occupant = cell.Unit?.Symbol ?? '.';
-                char stateMarker = ResolveStateMarker(cell.States);
+                var position = new Vector2Int(x, y);
+                var cell = _cells[position];
+                var occupant = cell.Unit != null ? cell.Unit.Symbol : '.';
+                var stateMarker = ResolveStateMarker(cell.States);
                 sb.Append(occupant);
                 sb.Append(stateMarker);
                 sb.Append(' ');
@@ -250,11 +225,14 @@ public class ConsoleGridState
         }
     }
 
-    private void RemoveState(CellState state)
+    private void DetachSnapshot(ConsoleUnitSnapshot snapshot)
     {
         foreach (var cell in _cells.Values)
         {
-            cell.States.Remove(state);
+            if (cell.Unit == snapshot)
+            {
+                cell.Unit = null;
+            }
         }
     }
 
@@ -311,3 +289,4 @@ public class ConsoleGridState
         }
     }
 }
+

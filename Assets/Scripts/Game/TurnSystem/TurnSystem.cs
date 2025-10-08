@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
+using Zenject;
 public class TurnSystem
 {
     public List<ICombatObject> CombatUnits { get; } = new List<ICombatObject>();
@@ -13,11 +14,21 @@ public class TurnSystem
     protected Dictionary<int, List<ICombatObject>> turnDict = new();
     int turnTowards = 3;
     public Team LocalTeam { get; private set; } = Team.Blue;
+    private IGameModeProvider _gameModeProvider;
+
+    [Inject]
+    public void Construct([InjectOptional] IGameModeProvider gameModeProvider = null)
+    {
+        _gameModeProvider = gameModeProvider;
+    }
+
+    private GameMode CurrentGameMode => (_gameModeProvider ?? GameConfigurationService.Instance).CurrentGameMode;
+
     public bool IsMyTurn
     {
         get
         {
-            if (SceneTransitionDataService.Instance.CurrentGameMode == GameMode.SinglePlayer)
+            if (CurrentGameMode == GameMode.SinglePlayer)
                 return true;
             var active = ActiveObject != null ? ActiveObject.Value : null;
             if (active == null) return false;

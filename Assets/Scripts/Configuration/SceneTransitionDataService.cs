@@ -1,155 +1,110 @@
-using UnityEngine;
-using System;
 using System.Collections.Generic;
-using Unity.Netcode;
+using System.Linq;
+using UnityEngine;
 
 /// <summary>
-/// Сервис для передачи данных между сценами
-/// Реализует паттерн Singleton для глобального доступа
-/// Не уничтожается при смене сцен
+/// Legacy MonoBehaviour kept for scene compatibility.
+/// Acts as a bootstrapper that feeds default configuration data into <see cref="GameConfigurationService"/>.
 /// </summary>
 public class SceneTransitionDataService : MonoBehaviour, IGameModeProvider
 {
-    private static SceneTransitionDataService _instance;
-    public static SceneTransitionDataService Instance => _instance;
-    
-    [Header("Game Configuration")]
-    [SerializeField] private GridContentEntrySO[] _availableConfigs = new GridContentEntrySO[0];
+    [Header("Bootstrapped configuration")]
+    [SerializeField] private GridContentEntrySO[] _defaultConfigurations = new GridContentEntrySO[0];
+    [SerializeField] private int _defaultSelectedConfigIndex = 0;
+    [SerializeField] private GameMode _defaultGameMode = GameMode.SinglePlayer;
+    [SerializeField] private Team _defaultTeam = Team.Blue;
+    [SerializeField] private Vector2Int _defaultGridSize = new Vector2Int(10, 10);
+    [SerializeField] private bool _applyOnAwake = true;
+    [SerializeField] private bool _overrideExistingConfiguration;
+    [SerializeField] private bool _dontDestroyOnLoad = true;
     [SerializeField] private bool acceptStartingGameWithoutClients;
-    public bool AcceptStartingGameWithoutClients => acceptStartingGameWithoutClients;
-    public GameMode CurrentGameMode { get; private set; }
-    public Team Team { get; private set; } = Team.Blue;
 
-    private int _selectedConfigIndex = 0;
-    private Dictionary<string, object> _transitionData = new Dictionary<string, object>();
-    
-    /// <summary>
-    /// Событие изменения выбранной конфигурации
-    /// </summary>
-    public event Action<int> OnConfigurationChanged;
-    
+    public bool AcceptStartingGameWithoutClients => acceptStartingGameWithoutClients;
+
+    private GameConfigurationService Service => GameConfigurationService.Instance;
+
     private void Awake()
     {
-        if (_instance == null)
+        if (_dontDestroyOnLoad)
         {
-            _instance = this;
             DontDestroyOnLoad(gameObject);
-            
-            // Загружаем конфигурации из сохраненных данных
-            LoadConfigurationsFromData();
         }
-        else if (_instance != this)
+
+        if (_applyOnAwake)
         {
-            Destroy(gameObject);
+            ApplyDefaults(_overrideExistingConfiguration);
         }
     }
-    
-    private void LoadConfigurationsFromData()
-    {
-        var savedConfigs = GetTransitionData<GridContentEntrySO[]>("AvailableConfigs");
-        if (savedConfigs != null)
-        {
-            _availableConfigs = savedConfigs;
-            Debug.Log($"[SceneTransitionDataService] Loaded {savedConfigs.Length} configurations from transition data");
-        }
-        else
-        {
-            Debug.Log("[SceneTransitionDataService] No configurations found in transition data yet - waiting for LobbySceneInitializer");
-        }
-    }
-    
+
     /// <summary>
-    /// Установить выбранную конфигурацию
+    /// Applies the serialized defaults to the shared configuration service.
     /// </summary>
+    public void ApplyDefaults(bool force)
+    {
+        if (force || !Service.HasConfiguration)
+        {
+            Service.SetAvailableConfigurations(_defaultConfigurations);
+            Service.SetSelectedConfiguration(_defaultSelectedConfigIndex);
+        }
+
+        if (force || !Service.HasConfiguration)
+        {
+            Service.SetTeam(_defaultTeam);
+            Service.SetGameMode(_defaultGameMode);
+            Service.SetGridSize(_defaultGridSize);
+        }
+    }
+
+    public void SetAvailableConfigurations(IEnumerable<GridContentEntrySO> configs, int selectedIndex = 0)
+    {
+        Service.SetAvailableConfigurations(configs);
+        Service.SetSelectedConfiguration(selectedIndex);
+    }
+
     public void SetSelectedConfiguration(int configIndex)
     {
-        if (_availableConfigs != null && configIndex >= 0 && configIndex < _availableConfigs.Length)
-        {
-            _selectedConfigIndex = configIndex;
-            OnConfigurationChanged?.Invoke(configIndex);
-            Debug.Log($"[SceneTransitionDataService] Configuration set to index: {configIndex}");
-        }
-        else
-        {
-            Debug.LogWarning($"[SceneTransitionDataService] Invalid config index: {configIndex}");
-        }
+        Service.SetSelectedConfiguration(configIndex);
     }
+
     public void SetGameMode(GameMode gameMode)
     {
-        CurrentGameMode = gameMode;
+        Service.SetGameMode(gameMode);
     }
+
     public void SetTeam(Team team)
     {
-        Team = team;
+        Service.SetTeam(team);
     }
-    /// <summary>
-    /// Получить выбранную конфигурацию
-    /// </summary>
+
     public GridContentEntrySO GetSelectedConfiguration()
     {
-        return GetConfigurationByIndex(_selectedConfigIndex);
+        return Service.GetSelectedConfiguration();
     }
-    
-    /// <summary>
-    /// Получить конфигурацию по индексу
-    /// </summary>
+
     public GridContentEntrySO GetConfigurationByIndex(int index)
     {
-        if (_availableConfigs != null && index >= 0 && index < _availableConfigs.Length)
+        var configs = Service.GetAvailableConfigurations();
+        if (index >= 0 && index < configs.Count)
         {
-            return _availableConfigs[index];
+            return configs[index];
         }
-        
-        Debug.LogWarning($"[SceneTransitionDataService] Invalid config index: {index}");
-        return GetDefaultConfiguration();
+        return null;
     }
-    
-    /// <summary>
-    /// Получить индекс выбранной конфигурации
-    /// </summary>
+
     public int GetSelectedConfigurationIndex()
     {
-        return _selectedConfigIndex;
+        return Service.GetSelectedConfigurationIndex();
     }
-    
-    /// <summary>
-    /// Получить все доступные конфигурации
-    /// </summary>
+
     public GridContentEntrySO[] GetAvailableConfigurations()
     {
-        return _availableConfigs;
+        return Service.GetAvailableConfigurations().ToArray();
     }
-    
-    /// <summary>
-    /// Принудительно загрузить конфигурации из переходных данных
-    /// </summary>
+
     public void ReloadConfigurations()
     {
-        LoadConfigurationsFromData();
+        ApplyDefaults(force: false);
     }
-    
-    /// <summary>
-    /// Сохранить данные для передачи между сценами
-    /// </summary>
-    public void SetTransitionData(string key, object value)
-    {
-        _transitionData[key] = value;
-    }
-    
-    /// <summary>
-    /// Получить данные, переданные между сценами
-    /// </summary>
-    public T GetTransitionData<T>(string key, T defaultValue = default(T))
-    {
-        if (_transitionData.TryGetValue(key, out var value) && value is T)
-        {
-            return (T)value;
-        }
-        return defaultValue;
-    }
-    
-    private GridContentEntrySO GetDefaultConfiguration()
-    {
-        return _availableConfigs != null && _availableConfigs.Length > 0 ? _availableConfigs[0] : null;
-    }
+
+    public GameMode CurrentGameMode => Service.CurrentGameMode;
 }

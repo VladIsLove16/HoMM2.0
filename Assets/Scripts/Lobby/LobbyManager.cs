@@ -67,20 +67,20 @@ public class LobbyManager : NetworkBehaviour
     public void StartHost()
     {
         SetGameModeMode(GameMode.Multiplayer);
-        SceneTransitionDataService.Instance.SetTeam(Team.Blue);
+        GameConfigurationService.Instance.SetTeam(Team.Blue);
         NetworkManager.Singleton.StartHost();
     }
     public void StartClient()
     {
         SetGameModeMode(GameMode.Multiplayer);
-        SceneTransitionDataService.Instance.SetTeam(Team.Red);
+        GameConfigurationService.Instance.SetTeam(Team.Red);
         NetworkManager.Singleton.StartClient();
     }
     public void StartSinglePlayer()
     {
         SetGameModeMode(GameMode.SinglePlayer);
-        SceneTransitionDataService.Instance.SetTeam(Team.Blue);
-        // Загрузку игровой сцены выполняем напрямую, минуя сетевой менеджер
+        GameConfigurationService.Instance.SetTeam(Team.Blue);
+        ApplyConfigurationToService();
         UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
     private void AddPlayerToLobby()
@@ -133,9 +133,9 @@ public class LobbyManager : NetworkBehaviour
             ChangeConfigServerRpc(newIndex);
             
             // Обновляем сервис передачи данных
-            if (SceneTransitionDataService.Instance != null)
+            if (GameConfigurationService.Instance != null)
             {
-                SceneTransitionDataService.Instance.SetSelectedConfiguration(newIndex);
+                GameConfigurationService.Instance.SetSelectedConfiguration(newIndex);
             }
         }
     }
@@ -203,15 +203,30 @@ public class LobbyManager : NetworkBehaviour
     
     private void LoadGameScene()
     {
-        // Сохраняем выбранную конфигурацию в сервис передачи данных
-        if (SceneTransitionDataService.Instance != null)
-        {
-            SceneTransitionDataService.Instance.SetSelectedConfiguration(_selectedConfigIndex.Value);
-            // TODO: SceneTransitionDataService should expose SetGridSize. For now, rely on NetworkVariables.
-        }
-        
-        // Загружаем игровую сцену
+        ApplyConfigurationToService();
         NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
+    private void ApplyConfigurationToService()
+    {
+        var service = GameConfigurationService.Instance;
+        if (service == null)
+        {
+            return;
+        }
+
+        var configs = _availableConfigs ?? Array.Empty<GridContentEntrySO>();
+        service.SetAvailableConfigurations(configs);
+
+        if (configs.Length > 0)
+        {
+            var clampedIndex = Mathf.Clamp(_selectedConfigIndex.Value, 0, configs.Length - 1);
+            service.SetSelectedConfiguration(clampedIndex);
+        }
+        else
+        {
+            service.SetSelectedConfiguration(-1);
+        }
     }
     public override void OnNetworkDespawn()
     {
@@ -252,7 +267,7 @@ public class LobbyManager : NetworkBehaviour
 
     internal void SetGameModeMode(GameMode gameMode)
     {
-        SceneTransitionDataService.Instance.SetGameMode(gameMode);
+        GameConfigurationService.Instance.SetGameMode(gameMode);
     }
 
 }
@@ -279,4 +294,6 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
         serializer.SerializeValue(ref IsReady);
     }
 }
+
+
 

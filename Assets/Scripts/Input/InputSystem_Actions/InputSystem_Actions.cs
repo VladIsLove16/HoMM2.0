@@ -118,6 +118,125 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Console"",
+            ""id"": ""d0b47c2b-2d51-4d5a-9c87-1c60d62d9778"",
+            ""actions"": [
+                {
+                    ""name"": ""Toggle"",
+                    ""type"": ""Button"",
+                    ""id"": ""ad1de2b8-261c-4bc8-b328-89a463326645"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Submit"",
+                    ""type"": ""Button"",
+                    ""id"": ""f2c9c5e4-8959-4c2e-a4a8-19db9d8f0bec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Close"",
+                    ""type"": ""Button"",
+                    ""id"": ""87cf3ba2-1101-49d8-80a2-662912b0a4f0"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HistoryUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""db501bd8-1cb0-4c65-84d9-4676cde1eb63"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HistoryDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""be3f9a68-b621-4103-9fb7-9f3c20d26214"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""15a4a4c9-38e7-433c-83d6-c8d36c64eef7"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0f72b9eb-6f75-49b5-9f77-01fb58d1fed0"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""98aef720-7c31-4983-82ba-c1a2f203ca12"",
+                    ""path"": ""<Keyboard>/numpadEnter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bdf58f99-3937-4dac-a382-fe01d3b36f3f"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Close"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e0ed093d-1bf1-4225-8392-3a6c4a994754"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HistoryUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d1e9f3f2-2e13-4f1b-931c-3ff2465f0f79"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HistoryDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -191,12 +310,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         // GridPlacement
         m_GridPlacement = asset.FindActionMap("GridPlacement", throwIfNotFound: true);
         m_GridPlacement_Drag = m_GridPlacement.FindAction("Drag", throwIfNotFound: true);
+        // Console
+        m_Console = asset.FindActionMap("Console", throwIfNotFound: true);
+        m_Console_Toggle = m_Console.FindAction("Toggle", throwIfNotFound: true);
+        m_Console_Submit = m_Console.FindAction("Submit", throwIfNotFound: true);
+        m_Console_Close = m_Console.FindAction("Close", throwIfNotFound: true);
+        m_Console_HistoryUp = m_Console.FindAction("HistoryUp", throwIfNotFound: true);
+        m_Console_HistoryDown = m_Console.FindAction("HistoryDown", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
     {
         UnityEngine.Debug.Assert(!m_Grid.enabled, "This will cause a leak and performance issues, InputSystem_Actions.Grid.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GridPlacement.enabled, "This will cause a leak and performance issues, InputSystem_Actions.GridPlacement.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Console.enabled, "This will cause a leak and performance issues, InputSystem_Actions.Console.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -362,6 +489,84 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         }
     }
     public GridPlacementActions @GridPlacement => new GridPlacementActions(this);
+
+    // Console
+    private readonly InputActionMap m_Console;
+    private List<IConsoleActions> m_ConsoleActionsCallbackInterfaces = new List<IConsoleActions>();
+    private readonly InputAction m_Console_Toggle;
+    private readonly InputAction m_Console_Submit;
+    private readonly InputAction m_Console_Close;
+    private readonly InputAction m_Console_HistoryUp;
+    private readonly InputAction m_Console_HistoryDown;
+    public struct ConsoleActions
+    {
+        private @InputSystem_Actions m_Wrapper;
+        public ConsoleActions(@InputSystem_Actions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Toggle => m_Wrapper.m_Console_Toggle;
+        public InputAction @Submit => m_Wrapper.m_Console_Submit;
+        public InputAction @Close => m_Wrapper.m_Console_Close;
+        public InputAction @HistoryUp => m_Wrapper.m_Console_HistoryUp;
+        public InputAction @HistoryDown => m_Wrapper.m_Console_HistoryDown;
+        public InputActionMap Get() { return m_Wrapper.m_Console; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(ConsoleActions set) { return set.Get(); }
+        public void AddCallbacks(IConsoleActions instance)
+        {
+            if (instance == null || m_Wrapper.m_ConsoleActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_ConsoleActionsCallbackInterfaces.Add(instance);
+            @Toggle.started += instance.OnToggle;
+            @Toggle.performed += instance.OnToggle;
+            @Toggle.canceled += instance.OnToggle;
+            @Submit.started += instance.OnSubmit;
+            @Submit.performed += instance.OnSubmit;
+            @Submit.canceled += instance.OnSubmit;
+            @Close.started += instance.OnClose;
+            @Close.performed += instance.OnClose;
+            @Close.canceled += instance.OnClose;
+            @HistoryUp.started += instance.OnHistoryUp;
+            @HistoryUp.performed += instance.OnHistoryUp;
+            @HistoryUp.canceled += instance.OnHistoryUp;
+            @HistoryDown.started += instance.OnHistoryDown;
+            @HistoryDown.performed += instance.OnHistoryDown;
+            @HistoryDown.canceled += instance.OnHistoryDown;
+        }
+
+        private void UnregisterCallbacks(IConsoleActions instance)
+        {
+            @Toggle.started -= instance.OnToggle;
+            @Toggle.performed -= instance.OnToggle;
+            @Toggle.canceled -= instance.OnToggle;
+            @Submit.started -= instance.OnSubmit;
+            @Submit.performed -= instance.OnSubmit;
+            @Submit.canceled -= instance.OnSubmit;
+            @Close.started -= instance.OnClose;
+            @Close.performed -= instance.OnClose;
+            @Close.canceled -= instance.OnClose;
+            @HistoryUp.started -= instance.OnHistoryUp;
+            @HistoryUp.performed -= instance.OnHistoryUp;
+            @HistoryUp.canceled -= instance.OnHistoryUp;
+            @HistoryDown.started -= instance.OnHistoryDown;
+            @HistoryDown.performed -= instance.OnHistoryDown;
+            @HistoryDown.canceled -= instance.OnHistoryDown;
+        }
+
+        public void RemoveCallbacks(IConsoleActions instance)
+        {
+            if (m_Wrapper.m_ConsoleActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IConsoleActions instance)
+        {
+            foreach (var item in m_Wrapper.m_ConsoleActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_ConsoleActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public ConsoleActions @Console => new ConsoleActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -416,5 +621,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     public interface IGridPlacementActions
     {
         void OnDrag(InputAction.CallbackContext context);
+    }
+    public interface IConsoleActions
+    {
+        void OnToggle(InputAction.CallbackContext context);
+        void OnSubmit(InputAction.CallbackContext context);
+        void OnClose(InputAction.CallbackContext context);
+        void OnHistoryUp(InputAction.CallbackContext context);
+        void OnHistoryDown(InputAction.CallbackContext context);
     }
 }

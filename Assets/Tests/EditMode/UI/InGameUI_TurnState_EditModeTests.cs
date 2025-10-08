@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using NUnit.Framework;
 using TMPro;
@@ -40,7 +41,7 @@ public class InGameUI_TurnState_EditModeTests
         button.onClick.Invoke();
         Assert.That(executor.StartBattleInvoked, Is.True);
 
-        Object.DestroyImmediate(uiGo);
+        UnityEngine.Object.DestroyImmediate(uiGo);
     }
 
     private static void SetField(object instance, string fieldName, object value)
@@ -69,7 +70,7 @@ public class InGameUI_TurnState_EditModeTests
 
     private sealed class StubTurnState : ITurnStateViewModel
     {
-        public ReactiveProperty<BattleState> BattleStateProperty { get; } = new(BattleState.replacement);
+        public ReactiveProperty<BattleState> BattleStateProperty { get; } = new(global::BattleState.replacement);
         public ReactiveProperty<ICombatObject> ActiveObjectProperty { get; } = new();
         private bool _isMyTurn;
         private Team _team = Team.Blue;

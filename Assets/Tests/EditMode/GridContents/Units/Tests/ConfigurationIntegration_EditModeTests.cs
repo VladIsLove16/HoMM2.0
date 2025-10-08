@@ -30,10 +30,9 @@ namespace Tests.EditMode.Configuration
             var service = SceneTransitionTestSetup.EnsureService();
             var configs = CreateConfigs(2);
 
-            service.SetTransitionData("AvailableConfigs", configs);
-            service.ReloadConfigurations();
+            service.SetAvailableConfigurations(configs);
 
-            Assert.That(service.GetAvailableConfigurations(), Is.EqualTo(configs));
+            CollectionAssert.AreEqual(configs, service.GetAvailableConfigurations());
         }
 
         [Test]
@@ -42,8 +41,7 @@ namespace Tests.EditMode.Configuration
             var service = SceneTransitionTestSetup.EnsureService();
             var configs = CreateConfigs(3);
 
-            service.SetTransitionData("AvailableConfigs", configs);
-            service.ReloadConfigurations();
+            service.SetAvailableConfigurations(configs);
             service.SetSelectedConfiguration(1);
 
             Assert.That(service.GetSelectedConfiguration(), Is.SameAs(configs[1]));
@@ -65,3 +63,4 @@ namespace Tests.EditMode.Configuration
         }
     }
 }
+

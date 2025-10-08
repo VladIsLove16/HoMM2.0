@@ -80,3 +80,4 @@ public sealed class ConsoleUnitPresenter : IDisposable
         _gridState.RemoveUnit(_viewModel);
     }
 }
+

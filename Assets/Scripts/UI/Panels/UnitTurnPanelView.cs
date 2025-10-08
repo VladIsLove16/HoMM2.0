@@ -47,7 +47,6 @@ public class UnitTurnPanelView : MonoBehaviour
         AddUnit(info.Unit,info.Turn);
     }
 
-    [Button]
     public void OnActiveObjectChanged(ICombatObject combatUnit)
     {
         UpdateActiveCharacter();
