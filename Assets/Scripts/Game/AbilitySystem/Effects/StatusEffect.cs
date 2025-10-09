@@ -13,7 +13,7 @@ public class StatusEffect
     /// <summary>
     /// Тип эффекта
     /// </summary>
-    public StatusEffectType Type => _data.Type;
+    public StatusEffectType Type => _data.StatusEffectType;
     
     /// <summary>
     /// Цель эффекта (обладатель)

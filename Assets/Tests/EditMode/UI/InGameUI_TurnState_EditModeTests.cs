@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using TMPro;
@@ -75,10 +76,18 @@ public class InGameUI_TurnState_EditModeTests
         private bool _isMyTurn;
         private Team _team = Team.Blue;
 
-        public IReadOnlyReactiveProperty<BattleState> BattleState => BattleStateProperty;
-        public IReadOnlyReactiveProperty<ICombatObject> ActiveObject => ActiveObjectProperty;
         public bool IsMyTurn => _isMyTurn;
         public Team LocalTeam => _team;
+
+        public IReadOnlyReactiveProperty<int> TurnNumber => throw new NotImplementedException();
+
+        public IObservable<UnitTurnInfo> UnitAddedStream => throw new NotImplementedException();
+
+        public IReadOnlyReactiveProperty<ICombatObject> ActiveObject => ActiveObjectProperty;
+
+        IReadOnlyReactiveProperty<BattleState> ITurnStateViewModel.BattleStateProperty => BattleStateProperty;
+
+        public IReadOnlyList<ICombatObject> CombatUnits => throw new NotImplementedException();
 
         public void SetIsMyTurn(bool value)
         {

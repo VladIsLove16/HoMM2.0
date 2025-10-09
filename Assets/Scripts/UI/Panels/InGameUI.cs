@@ -23,7 +23,7 @@ public class InGameUI : MonoBehaviour
     {
         _turnState = turnState;
         _turnState.ActiveObject.Subscribe(OnUnitTurnStarted).AddTo(_disposables);
-        _turnState.BattleState.Subscribe(OnTurnStateChanged).AddTo(_disposables);
+        _turnState.BattleStateProperty.Subscribe(OnTurnStateChanged).AddTo(_disposables);
         StartBattle.onClick.AddListener(() => _gameCommandExecutor.StartBattle());
     }
 

@@ -11,19 +11,20 @@ public class ConsolePresentationInstaller : MonoBehaviour, IGamePresentationInst
         {
             foreach (var behaviour in behavioursToDisable)
             {
-                if (behaviour == null) continue;
+                if (behaviour == null)
+                {
+                    continue;
+                }
+
                 behaviour.enabled = false;
             }
         }
 
         container.Bind<ConsoleGridState>().AsSingle();
         container.Bind<ConsoleGridRenderer>().AsSingle();
-        container.Rebind<IGridCellRenderer>()
-                 .FromResolveGetter<ConsoleGridRenderer>(renderer => renderer)
-                 .AsSingle();
-        container.Rebind<IWorldToCellProvider>()
-                 .FromResolveGetter<ConsoleGridRenderer>(renderer => renderer)
-                 .AsSingle();
+        container.Bind<IGridCellRenderer>().To<ConsoleGridRenderer>().FromResolve().AsSingle();
+        container.Bind<IWorldToCellProvider>().To<ConsoleGridRenderer>().FromResolve().AsSingle();
         container.BindInterfacesTo<ConsoleGameView>().AsSingle();
+        container.BindInterfacesTo<GridRendererBinder>().AsSingle();
     }
 }

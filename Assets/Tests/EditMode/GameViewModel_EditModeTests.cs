@@ -10,7 +10,8 @@ namespace Tests.EditMode.ViewModels
     {
         private GameModel _model;
         private MovementSystem _movement;
-        private TurnSystem _turnSystem;
+        private TurnService _turnService;
+        private TurnStateViewModel _turnState;
         private GameViewModel _vm;
         private ActionResolver _resolver;
         private FakeGameCommandExecutor _executor;
@@ -21,10 +22,11 @@ namespace Tests.EditMode.ViewModels
             var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
             _movement = new MovementSystem();
             _model = new GameModel(new UnitModelFactory(dict), _movement);
-            _turnSystem = new TurnSystem();
+            _turnService = new TurnService(new TurnQueue());
+            _turnState = new TurnStateViewModel(_turnService);
             _resolver = new ActionResolver(_model, _movement);
             _executor = new FakeGameCommandExecutor();
-            _vm = new GameViewModel(_model, _movement, _executor, _turnSystem, _resolver);
+            _vm = new GameViewModel(_model, _movement, _executor, _turnState, _resolver);
             _model.InitializeGrid(3, 3);
         }
 
@@ -66,7 +68,7 @@ namespace Tests.EditMode.ViewModels
         {
             SpawnActiveUnit(new Vector2Int(0, 0));
 
-            var gridVm = new GridViewModel(new TurnSystem(), _resolver, _movement, _model);
+            var gridVm = new GridViewModel(_turnState, _resolver, _movement, _model);
             PreviewResult latestPreview = null;
             gridVm.PreviewChanged += preview => latestPreview = preview;
 
@@ -103,8 +105,8 @@ namespace Tests.EditMode.ViewModels
             Assert.That(spawnResult.IsSuccess, Is.True, "Unit spawn failed in test setup");
 
             var unit = (UnitModel)_model.GetCell(position).Unit;
-            _turnSystem.AddCombatUnit(unit);
-            _turnSystem.ActiveObject.Value = unit;
+            _turnService.AddCombatUnit(unit);
+            _turnService.RunBattle();
             return unit;
         }
 
@@ -123,11 +125,11 @@ namespace Tests.EditMode.ViewModels
             {
             }
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _turnState.Dispose();
+        }
     }
 }
-
-
-
-
-
-

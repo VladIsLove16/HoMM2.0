@@ -1,36 +1,60 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UniRx;
 
-public class UnitTurnPanelViewModel
+public class UnitTurnPanelViewModel : IDisposable
 {
-    private readonly TurnSystem _turnSystem;
-    public List<UnitTurnInfo> turnList = new();
-    public ReactiveProperty<int> TurnNumber = new(0);
-    public ReactiveProperty<ICombatObject> ActiveUnit = new();
-    public Action<UnitTurnInfo> CombatUnitsAdded;
-    public UnitTurnPanelViewModel(TurnSystem turnSystem)
+    private readonly ITurnStateViewModel _turnState;
+    private readonly CompositeDisposable _disposables = new();
+
+    public ReactiveCollection<UnitTurnInfo> TurnQueue { get; } = new();
+    public ReactiveProperty<ICombatObject> ActiveUnit { get; } = new();
+    public ReactiveProperty<int> TurnNumber { get; } = new(0);
+
+    public event Action<UnitTurnInfo> UnitAdded;
+
+    public UnitTurnPanelViewModel(ITurnStateViewModel turnState)
     {
-        _turnSystem = turnSystem;
-        _turnSystem.CombatUnitsAdded += OnCombatUnitsAdded;
-        _turnSystem.ActiveObject.Subscribe(ActiveObjectChanged);
-        _turnSystem.TurnNumber.Subscribe(TurnNumberChanged);
+        _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
+
+        ActiveUnit.Value = _turnState.ActiveObject.Value;
+        TurnNumber.Value = _turnState.TurnNumber.Value;
+
+        _turnState.ActiveObject
+            .Subscribe(OnActiveObjectChanged)
+            .AddTo(_disposables);
+
+        _turnState.TurnNumber
+            .Subscribe(OnTurnNumberChanged)
+            .AddTo(_disposables);
+
+        _turnState.UnitAddedStream
+            .Subscribe(OnCombatUnitAdded)
+            .AddTo(_disposables);
     }
 
-    private void ActiveObjectChanged(ICombatObject combatObject)
+    private void OnActiveObjectChanged(ICombatObject combatObject)
     {
-        ActiveUnit.SetValueAndForceNotify(combatObject);
+        ActiveUnit.Value = combatObject;
+        if (TurnQueue.Count > 0 && TurnQueue[0].Unit == combatObject)
+        {
+            TurnQueue.RemoveAt(0);
+        }
     }
 
-    private void TurnNumberChanged(int turn)
+    private void OnTurnNumberChanged(int number)
     {
-        TurnNumber.SetValueAndForceNotify(turn + 1);
+        TurnNumber.Value = number;
     }
 
-    private void OnCombatUnitsAdded(UnitTurnInfo unitTurnInfo)
+    private void OnCombatUnitAdded(UnitTurnInfo info)
     {
-        UnitTurnInfo viewInfo = new UnitTurnInfo(unitTurnInfo.Unit, unitTurnInfo.Turn + 1);
-        turnList.Add(viewInfo);
-        CombatUnitsAdded?.Invoke(viewInfo);
+        TurnQueue.Add(info);
+        UnitAdded?.Invoke(info);
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
     }
 }

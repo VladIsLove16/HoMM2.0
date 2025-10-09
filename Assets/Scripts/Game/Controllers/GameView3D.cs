@@ -6,6 +6,7 @@ using Zenject;
 
 public class GameView3D : MonoBehaviour
 {
+    [SerializeField] bool Log;
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private GameViewModel _gameVM;
@@ -35,7 +36,8 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
-        Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
+        if(Log)
+            Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
         if (gameViewObject is IHoverable hoverable)
         {
             hoverable.Hover();
@@ -65,12 +67,14 @@ public class GameView3D : MonoBehaviour
     public void BeginDrag(UnitView3D unit)
     {
         _draggedUnit = unit;
+        if(Log)
         Debug.Log(_draggedUnit.gameObject.name);
     }
 
     public virtual void UpdateDrag(Vector3 worldPos)
     {
-        Debug.Log("update drag");
+        if (Log)
+            Debug.Log("update drag");
         if (_draggedUnit != null)
             _draggedUnit.transform.position = worldPos + Vector3.up * 0.1f;
     }

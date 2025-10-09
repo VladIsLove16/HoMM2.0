@@ -8,21 +8,24 @@ using UniRx;
 /// </summary>
 public class GridViewModel
 {
-    TurnSystem _turnSystem;
-    ActionResolver _actionResolver;
-    MovementSystem _movementSystem;
+    private readonly ITurnStateViewModel _turnState;
+    private readonly ActionResolver _actionResolver;
+    private readonly MovementSystem _movementSystem;
+    private readonly CompositeDisposable _subscriptions = new();
     public Action<PreviewResult> PreviewChanged { get; set; }
-    private Dictionary<CellState, List<Vector2Int>> _data = new();
+    private readonly Dictionary<CellState, List<Vector2Int>> _data = new();
     public Action<GridXZ<GameCell>> GridInited { get; set; }
     [Inject]
-    public GridViewModel(TurnSystem turnSystem, ActionResolver actionResolver, MovementSystem movementSystem, GameModel model )
+    public GridViewModel(ITurnStateViewModel turnState, ActionResolver actionResolver, MovementSystem movementSystem, GameModel model )
     {
-        _turnSystem = turnSystem;
+        _turnState = turnState;
         _actionResolver = actionResolver;
         _movementSystem = movementSystem;
 
-        _turnSystem.ActiveObject.Subscribe(ActiveObjectChanged);
-        Debug.LogError("GridViewModel ");
+        _turnState.ActiveObject
+            .Subscribe(ActiveObjectChanged)
+            .AddTo(_subscriptions);
+
         _actionResolver.ActionResolved += OnActionResolved;
         model.GameChange_Initialized += OnGameModel_GridInilized;
     }
@@ -37,7 +40,7 @@ public class GridViewModel
         if (combatObject == null)
             return;
         PreviewResult previewResult = new();
-        if (_turnSystem.IsMyTurn)
+        if (_turnState.IsMyTurn)
         {
             var reachableCells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
             previewResult.Add(CellState.reachableCell, new List<Vector2Int>(reachableCells));

@@ -1,17 +1,21 @@
+using UnityEngine;
+
 namespace Tests.TestHelpers
 {
     public static class SceneTransitionTestSetup
     {
+        private static GameConfigurationService _service;
         public static IGameConfigurationService EnsureService()
         {
-            var service = GameConfigurationService.Instance;
-            service.Clear();
-            return service;
+             _service = ScriptableObject.CreateInstance<GameConfigurationService>();
+
+            _service.Clear();
+            return _service;
         }
 
         public static void DestroyService()
         {
-            GameConfigurationService.Instance.Clear();
+            _service.Clear();
         }
     }
 }

@@ -101,8 +101,9 @@ public class DeveloperConsoleService_EditModeTests
         public GameModel GameModel { get; }
         public GameViewModel GameViewModel { get; }
         public NullCommandExecutor CommandExecutor { get; } = new();
-        public TurnSystem TurnSystem { get; } = new();
-        public ITurnService TurnService { get; }
+        public TurnService ConcreteTurnService { get; }
+        public ITurnService TurnService => ConcreteTurnService;
+        public TurnStateViewModel TurnState { get; }
         public MovementSystem MovementSystem { get; } = new();
         public ActionResolver ActionResolver { get; }
 
@@ -128,8 +129,9 @@ public class DeveloperConsoleService_EditModeTests
             var unitFactory = new UnitModelFactory(dataMap);
             GameModel = new GameModel(unitFactory, MovementSystem);
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
-            TurnService = new TurnService(TurnSystem);
-            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnSystem, ActionResolver);
+            ConcreteTurnService = new TurnService(new TurnQueue());
+            TurnState = new TurnStateViewModel(ConcreteTurnService);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnState, ActionResolver);
         }
     }
 }

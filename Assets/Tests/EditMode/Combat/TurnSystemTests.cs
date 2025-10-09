@@ -11,7 +11,7 @@ namespace Tests.EditMode.Combat
         private UnitStats _statsRed;
         private UnitModel _blue1;
         private UnitModel _red1;
-        private TurnSystem _turnSystem;
+        private TurnService _turnService;
 
         [SetUp]
         public void SetUp()
@@ -25,7 +25,7 @@ namespace Tests.EditMode.Combat
             _blue1 = new UnitModel(_statsBlue, UnitType.Archer, 0, 0, 1, true);
             _red1 = new UnitModel(_statsRed, UnitType.Witch, 1, 0, 1, false);
 
-            _turnSystem = new TurnSystem();
+            _turnService = new TurnService(new TurnQueue());
         }
 
         [TearDown]
@@ -38,63 +38,51 @@ namespace Tests.EditMode.Combat
         [Test]
         public void RunBattle_SkipsDeadUnits_IfRemovedBeforeStart()
         {
-            // Arrange
-            _turnSystem.AddCombatUnit(_blue1);
-            _turnSystem.AddCombatUnit(_red1);
+            _turnService.AddCombatUnit(_blue1);
+            _turnService.AddCombatUnit(_red1);
 
-            // Симулируем смерть синего до старта боя
-            _turnSystem.RemoveCombatUnit(_blue1);
+            _turnService.RemoveCombatUnit(_blue1);
 
-            // Act
-            _turnSystem.RunBattle();
+            _turnService.RunBattle();
 
-            // Assert — активным должен стать живой противник
-            Assert.That(_turnSystem.ActiveObject.Value, Is.EqualTo(_red1));
+            Assert.That(_turnService.ActiveObject, Is.EqualTo(_red1));
         }
 
         [Test]
         public void EndTurn_DoesNotGiveTurnToRemovedUnit()
         {
-            // Arrange
-            _turnSystem.AddCombatUnit(_blue1);
-            _turnSystem.AddCombatUnit(_red1);
-            _turnSystem.RunBattle();
+            _turnService.AddCombatUnit(_blue1);
+            _turnService.AddCombatUnit(_red1);
+            _turnService.RunBattle();
 
-            // Первый ход у первого в очереди (синий)
-            var first = _turnSystem.ActiveObject.Value;
+            var first = _turnService.ActiveObject;
             Assert.That(first, Is.EqualTo(_blue1));
 
-            // Симулируем смерть синего в середине раунда
-            _turnSystem.RemoveCombatUnit(_red1);
+            _turnService.RemoveCombatUnit(_red1);
 
-            // Act — заканчиваем ход, следующий ход не должен достаться удаленному
-            _turnSystem.EndTurn();
+            _turnService.EndTurn();
 
-            // Assert — активный это красный, не удаленный
-            Assert.That(_turnSystem.ActiveObject.Value, Is.EqualTo(_blue1));
+            Assert.That(_turnService.ActiveObject, Is.EqualTo(_blue1));
         }
 
         [Test]
         public void MultipleTurns_SkipAllRemovedUnits()
         {
-            // Arrange
             var blue2Stats = ScriptableObject.CreateInstance<UnitStats>();
             blue2Stats.Health = 100; blue2Stats.MaxHealth = 100; blue2Stats.InvulnerableEffects = new List<StatusEffectType>();
             var blue2 = new UnitModel(blue2Stats, UnitType.Archer, 2, 0, 1, true);
 
-            _turnSystem.AddCombatUnit(_blue1);
-            _turnSystem.AddCombatUnit(blue2);
-            _turnSystem.AddCombatUnit(_red1);
-            _turnSystem.RunBattle();
+            _turnService.AddCombatUnit(_blue1);
+            _turnService.AddCombatUnit(blue2);
+            _turnService.AddCombatUnit(_red1);
+            _turnService.RunBattle();
 
-            // Удаляем синего первого
-            _turnSystem.RemoveCombatUnit(_blue1);
+            _turnService.RemoveCombatUnit(_blue1);
 
-            // Крутим несколько ходов — удаленный больше не должен становиться активным
             for (int i = 0; i < 4; i++)
             {
-                _turnSystem.EndTurn();
-                Assert.That(_turnSystem.ActiveObject.Value, Is.Not.EqualTo(_blue1));
+                _turnService.EndTurn();
+                Assert.That(_turnService.ActiveObject, Is.Not.EqualTo(_blue1));
             }
 
             Object.DestroyImmediate(blue2Stats);
@@ -103,18 +91,14 @@ namespace Tests.EditMode.Combat
         [Test]
         public void UpdateBattleState_ReturnsWin_WhenOnlyOneTeamLeft_AfterRemovals()
         {
-            // Arrange
-            _turnSystem.AddCombatUnit(_blue1);
-            _turnSystem.AddCombatUnit(_red1);
-            _turnSystem.RunBattle();
+            _turnService.AddCombatUnit(_blue1);
+            _turnService.AddCombatUnit(_red1);
+            _turnService.RunBattle();
 
-            // Удаляем всех красных (симуляция смерти)
-            _turnSystem.RemoveCombatUnit(_red1);
+            _turnService.RemoveCombatUnit(_red1);
 
-            // Act
-            var state = _turnSystem.CurrentBattleState.Value;
+            var state = _turnService.BattleState;
 
-            // Assert — бой завершен победой оставшейся команды
             Assert.That(state == BattleState.blueTeamWins || state == BattleState.redTeamWins, Is.True);
         }
     }

@@ -16,37 +16,44 @@ public class GameViewModel : IDisposable, IGridViewModel
     private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
     private readonly IGameCommandExecutor _gameCommandExecutor;
-    private TurnSystem _turnSystem;
+    private readonly ITurnStateViewModel _turnState;
     private readonly ActionResolver _actionResolver;
-    private Dictionary<IGridContent, UnitViewModel> _uvms = new Dictionary<IGridContent, UnitViewModel>();
-    private GameModel model;
-    private Dictionary<CellState, List<Vector2Int>> _data = new();
-    public GameViewModel(GameModel model, MovementSystem movementSystem, IGameCommandExecutor actionExecutor, TurnSystem turnSystem, ActionResolver actionResolver)
+    private readonly CompositeDisposable _subscriptions = new();
+    private readonly Dictionary<IGridContent, UnitViewModel> _uvms = new();
+    private readonly Dictionary<CellState, List<Vector2Int>> _data = new();
+
+    public GameViewModel(GameModel model, MovementSystem movementSystem, IGameCommandExecutor actionExecutor, ITurnStateViewModel turnState, ActionResolver actionResolver)
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
         if (movementSystem == null) throw new ArgumentNullException(nameof(movementSystem));
         if (actionExecutor == null) throw new ArgumentNullException(nameof(actionExecutor));
-        if (turnSystem == null) throw new ArgumentNullException(nameof(turnSystem));
+        if (turnState == null) throw new ArgumentNullException(nameof(turnState));
         if (actionResolver == null) throw new ArgumentNullException(nameof(actionResolver));
 
         _gameModel = model;
         _movementSystem = movementSystem;
         _gameCommandExecutor = actionExecutor;
-        _turnSystem = turnSystem;
+        _turnState = turnState;
         _actionResolver = actionResolver;
 
         _gameModel.GameChange_Initialized += OnGameModel_GridInitilized;
         _gameModel.GameChange_UnitSpawned += OnGameModel_UnitSpawned;
-        _turnSystem.ActiveObject.Subscribe(unit => OnActiveUnitChanged(unit));
+        _turnState.ActiveObject
+            .Subscribe(OnActiveUnitChanged)
+            .AddTo(_subscriptions);
     }
     public void HandleCellHovered(KeyValuePair<Vector2Int, Vector2Int> coords)
     {
+        var activeUnit = _turnState.ActiveObject.Value;
+        if (activeUnit == null)
+            return;
+
         _data[CellState.hovered] = new List<Vector2Int>() { coords.Key };
         PreviewResult previewResult = new();
         previewResult.Add(CellState.hovered, new List<Vector2Int>() { coords.Key });
-        if (_turnSystem.IsMyTurn)
+        if (_turnState.IsMyTurn)
         {
-            var fromCell = _turnSystem.ActiveObject.Value.Position;
+            var fromCell = activeUnit.Position;
             ActionContext actionContext = new(fromCell, coords.Key, SpellType.None, coords.Value);
             _actionResolver.Resolve(actionContext, out var actionHandler);
             if (actionHandler == null)
@@ -59,7 +66,7 @@ public class GameViewModel : IDisposable, IGridViewModel
         }
         else
         {
-            var fromCell = _turnSystem.ActiveObject.Value.Position;
+            var fromCell = activeUnit.Position;
             var unit = _gameModel.GetCell(fromCell).Unit;
             if (unit != null)
             {
@@ -75,9 +82,13 @@ public class GameViewModel : IDisposable, IGridViewModel
     public void HandleCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords)
     {
         Debug.Log("HandleCellSelected");
-        if (!_turnSystem.IsMyTurn)
+        if (!_turnState.IsMyTurn)
             return;
-        var fromCell = _turnSystem.ActiveObject.Value.Position;
+        var activeUnit = _turnState.ActiveObject.Value;
+        if (activeUnit == null)
+            return;
+
+        var fromCell = activeUnit.Position;
         ActionContext actionContext = new(fromCell, coords.Key, SpellType.None, coords.Value);
         _actionResolver.Resolve(actionContext, out var actionHandler);
         Debug.Log("resolved" + actionContext);
@@ -105,6 +116,7 @@ public class GameViewModel : IDisposable, IGridViewModel
     {
         _gameModel.GameChange_Initialized -= OnGameModel_GridInitilized;
         _gameModel.GameChange_UnitSpawned -= OnGameModel_UnitSpawned;
+        _subscriptions.Dispose();
     }
 
     private void OnGameModel_GridInitilized(GridXZ<GameCell> g)
@@ -124,7 +136,7 @@ public class GameViewModel : IDisposable, IGridViewModel
     private void SetReachableCellState(ICombatObject combatObject)
     {
         var reachableCells = new List<Vector2Int>();
-        if (_turnSystem.IsMyTurn)
+        if (_turnState.IsMyTurn)
             reachableCells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
         _data[CellState.reachableCell] = reachableCells;
 

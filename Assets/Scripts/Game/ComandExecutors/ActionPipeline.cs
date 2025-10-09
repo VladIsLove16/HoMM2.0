@@ -3,9 +3,9 @@ using UnityEngine;
 public class ActionPipeline
 {
     private readonly ActionResolver _resolver;
-    private readonly TurnSystem _turnSystem;
+    private readonly ITurnService _turnSystem;
 
-    public ActionPipeline(ActionResolver resolver, TurnSystem turnSystem)
+    public ActionPipeline(ActionResolver resolver, ITurnService turnSystem)
     {
         _resolver = resolver;
         _turnSystem = turnSystem;

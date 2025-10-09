@@ -4,5 +4,5 @@
     replacement,
     inProgress,
     blueTeamWins,
-    redTeamWins
+    redTeamWins,
 }

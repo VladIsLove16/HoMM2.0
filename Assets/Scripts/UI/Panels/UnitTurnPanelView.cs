@@ -1,141 +1,79 @@
-﻿using NaughtyAttributes;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 using UniRx;
 
 public class UnitTurnPanelView : MonoBehaviour
 {
-    [SerializeField] UnitIconController unitIconpf;
-    [SerializeField] GameObject parent;
-    [SerializeField] UnitIconController ActiveCharacterController;
-    [SerializeField] List<UnitDefinitionSO> unitDatas;
-    private Dictionary<UnitIconController, ICombatObject> unitModels = new();
-    [SerializeField] private List<UnitIconController> unitIconControllers = new List<UnitIconController>();
-    private UnitTurnPanelViewModel _combatSystemViewModel;
+    [SerializeField] private UnitIconController unitIconPrefab;
+    [SerializeField] private Transform parent;
+    [SerializeField] private UnitIconController activeCharacterController;
+     private IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatas;
+
+    private readonly Dictionary<UnitIconController, ICombatObject> _iconToUnit = new();
+    private readonly List<UnitIconController> _icons = new();
+
+    private UnitTurnPanelViewModel _vm;
+    private CompositeDisposable _disposables = new();
 
     [Inject]
-    public void Initialize(UnitTurnPanelViewModel combatSystemViewModel)
+    public void Initialize(UnitTurnPanelViewModel vm, IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDataDict )
     {
-        _combatSystemViewModel = combatSystemViewModel;
-        _combatSystemViewModel.ActiveUnit.Subscribe(OnActiveObjectChanged);
-        _combatSystemViewModel.CombatUnitsAdded += OnCombatUnitsAdded;
-        List<UnitTurnInfo> combatQueue = _combatSystemViewModel.turnList;
-        CreatePanelInfo(combatQueue);
+        _vm = vm;
+        unitDatas = unitDataDict;
+
+        _vm.ActiveUnit.Subscribe(UpdateActiveCharacter).AddTo(_disposables);
+        _vm.UnitAdded += AddUnitToPanel;
+
+        // Инициализация начального состояния
+        foreach (var info in _vm.TurnQueue)
+            AddUnitToPanel(info);
     }
 
-    [Button]
-    private void Clear()
+    private void AddUnitToPanel(UnitTurnInfo info)
     {
-        for (int i = parent.transform.childCount - 1; i >= 0; i--)
+        if (!unitDatas.TryGetValue(info.Unit.UnitType, out var unitData))
+        if (unitData == null)
         {
-#if UNITY_EDITOR
-            DestroyImmediate(parent.transform.GetChild(i).gameObject);
-#else
-            Destroy(parent.transform.GetChild(i).gameObject);
-#endif
-        }
-        unitModels.Clear();
-        unitIconControllers.Clear();
-        ActiveCharacterController.Clear();
-    }
-    private void OnCombatUnitsAdded(UnitTurnInfo info)
-    {
-        AddUnit(info.Unit,info.Turn);
-    }
-
-    public void OnActiveObjectChanged(ICombatObject combatUnit)
-    {
-        UpdateActiveCharacter();
-        RemoveObject();
-    }
-
-    public void CreatePanelInfo(List<UnitTurnInfo> unitcontents)
-    {
-        foreach (var model in unitcontents)
-        {
-            AddUnit(model.Unit,model.Turn);
-        }
-    }
-
-    private void AddUnit(ICombatObject model,int turn)
-    {
-        Sprite sprite;
-        Team team;
-        GetData(model, out sprite, out team);
-        UnitIconController unitIconController = Create(model, sprite, team, turn);
-    }
-
-    private void GetData(ICombatObject model, out Sprite sprite, out Team team)
-    {
-        UnitDefinitionSO unitDefinitionSO = unitDatas.First(x => x.UnitType == model.UnitType);
-        sprite = unitDefinitionSO.UnitIcon;
-        team = model.Team;
-    }
-
-    private UnitIconController Create(ICombatObject model, Sprite sprite, Team team, int turn)
-    {
-        UnitIconController unitIconController = Create();
-        unitIconController.SetInfo(sprite, team);
-        unitIconController.Link(model, turn);
-        unitIconControllers.Add(unitIconController);
-        unitModels[unitIconController] = model;
-        return unitIconController;
-    }
-
-    private void UpdateActiveCharacter()
-    {
-        if (unitIconControllers.Count > 0)
-        {
-            ActiveCharacterController.SetInfo(unitIconControllers[0].Sprite, unitIconControllers[0].Team);
-            ActiveCharacterController.Link(unitIconControllers[0].CombatUnit, _combatSystemViewModel.TurnNumber.Value);
-            unitModels[unitIconControllers[0]] = unitIconControllers[0].CombatUnit;
-        }
-    }
-
-    private void RemoveObject()
-    {
-        if (unitIconControllers == null || unitIconControllers.Count == 0)
+            Debug.LogWarning($"Unit data not found for {info.Unit.UnitType}");
             return;
-        UnitIconController unitIconController = unitIconControllers[0];
-        if (unitModels != null)
-        {
-            unitModels.TryGetValue(unitIconController, out var model);
-            if (model != null)
-            {
-                unitModels.Remove(unitIconController);
-            }
         }
-        if (unitIconController != null)
-        {
-            unitIconControllers.Remove(unitIconController);
-#if UNITY_EDITOR
-            DestroyImmediate(unitIconController.gameObject);
-#else
-            Destroy(unitIconController.gameObject);
-#endif
-        }
+
+        var icon = Instantiate(unitIconPrefab, parent);
+        icon.SetInfo(unitData.UnitIcon, info.Unit.Team);
+        icon.Link(info.Unit, info.Turn);
+
+        _icons.Add(icon);
+        _iconToUnit[icon] = info.Unit;
     }
 
-    [Button]
-    private void AddBlueTeamIcons()
+    private void UpdateActiveCharacter(ICombatObject combatUnit)
     {
-        foreach (var item in unitDatas)
-        {
-            UnitIconController iconController = Create();
-            iconController.SetInfo(item.UnitIcon,Team.Blue);
-            unitIconControllers.Add(iconController);
-        }
-        UpdateActiveCharacter();
+        if (combatUnit == null) return;
+
+        var foundIcon = _iconToUnit.FirstOrDefault(x => x.Value == combatUnit).Key;
+        if (foundIcon == null) return;
+
+        activeCharacterController.SetInfo(foundIcon.Sprite, foundIcon.Team);
+        activeCharacterController.Link(combatUnit, _vm.TurnNumber.Value);
+
+        RemoveIcon(foundIcon);
     }
 
-    private UnitIconController Create()
+    private void RemoveIcon(UnitIconController icon)
     {
-        UnitIconController unitIconController = Instantiate(unitIconpf, parent.transform);
-        return unitIconController;
+        if (_icons.Contains(icon))
+        {
+            _icons.Remove(icon);
+            _iconToUnit.Remove(icon);
+            Destroy(icon.gameObject);
+        }
     }
 
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
+        _vm.UnitAdded -= AddUnitToPanel;
+    }
 }

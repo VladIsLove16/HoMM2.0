@@ -14,20 +14,42 @@ public class CursorService : MonoBehaviour, ICursorService
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
     private ActionResolver _actionResolver;
     [Inject]
-    public CursorService()
-    {
-        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
-        SetDefaultCursor();
-    }
-    
-    [Inject]
     public void Construct(ActionResolver actionResolver)
     {
         _actionResolver = actionResolver;
         actionResolver.ActionResolved += OnActionPreviewChanged;
         actionResolver.ActionNotResolved += OnActionNotResolved;
+        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
+        SetDefaultCursor();
+    }
+    /// <summary>
+    /// Установить курсор по умолчанию (системный)
+    /// </summary>
+    public void SetDefaultCursor()
+    {
+        _currentCursor = null;
+        _currentHotspot = Vector2.zero;
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 
+    /// <summary>
+    /// Скрыть/показать курсор
+    /// </summary>
+    public void SetCursorVisibility(bool isVisible)
+    {
+        Cursor.visible = isVisible;
+    }
+    // Расширенный сервис
+    public void SetCursorState(CursorState state)
+    {
+        if (_cursorTextrures.TryGetValue(state, out var tex))
+        {
+            SetCursor(tex);
+        }
+        else
+            Debug.LogWarning("no cursor texture for state " + state.ToString());
+    }
+    
     private void OnActionNotResolved()
     {
         SetCursorState(CursorState.Default);
@@ -55,17 +77,6 @@ public class CursorService : MonoBehaviour, ICursorService
                 return CursorState.Default;
         }
     }
-
-    /// <summary>
-    /// Установить курсор по умолчанию (системный)
-    /// </summary>
-    public void SetDefaultCursor()
-    {
-        _currentCursor = null;
-        _currentHotspot = Vector2.zero;
-        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-    }
-
     /// <summary>
     /// Установить пользовательский курсор
     /// </summary>
@@ -84,20 +95,8 @@ public class CursorService : MonoBehaviour, ICursorService
         Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
     }
 
-    /// <summary>
-    /// Скрыть/показать курсор
-    /// </summary>
-    public void SetCursorVisibility(bool isVisible)
-    {
-        Cursor.visible = isVisible;
-    }
-    // Расширенный сервис
-    public void SetCursorState(CursorState state)
-    {
-        SetCursor(_cursorTextrures[state]);
-    }
-    
-    public void Dispose()
+   
+    private void Dispose()
     {
         if (_actionResolver != null)
         {

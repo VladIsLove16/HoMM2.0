@@ -19,7 +19,7 @@ public class MoveActionHandler : IActionHandler
 
     protected MovementSystem _movementSystem;
     protected GameModel _gameModel;
-    [Inject] protected TurnSystem TurnSystem;
+    [Inject] protected ITurnService TurnService;
 
     public MoveActionHandler(MovementSystem movementSystem, GameModel model)
     {

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3469594b7c5d74f8ef640b9a78f139, type: 3}
+  m_Name: New Status Effect Datas
+  m_EditorClassIdentifier: 
+  statusEffectDatas:
+  - {fileID: 11400000, guid: 6459f838f65011f4fa627e304be16c43, type: 2}
+  - {fileID: 11400000, guid: 08440a7316463c044afe6e91c042582a, type: 2}
+  - {fileID: 11400000, guid: 3d9aa456805570549b796206c2d71cbb, type: 2}
+  - {fileID: 11400000, guid: d3eae05d1f307df4393e0831adf14679, type: 2}
+  - {fileID: 11400000, guid: a733b901f3d950c4ea19a2cdf81e61f5, type: 2}
+  - {fileID: 11400000, guid: 0cd25ed4bf482104294d8304f1d380e4, type: 2}

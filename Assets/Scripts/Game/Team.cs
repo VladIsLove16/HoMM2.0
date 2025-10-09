@@ -1,5 +1,7 @@
 public enum Team
 {
     Blue,
-    Red
+    Red, 
+
+    None
 }

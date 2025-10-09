@@ -43,7 +43,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
             container.Bind<IMaterialProvider>().FromInstance(materialProvider).AsSingle();
         }
 
-        var parentTransform = ResolveUnitsParent(container);
+        var parentTransform = ResolveUnitsParent();
         if (parentTransform != null)
         {
             container.Bind<Transform>()
@@ -75,7 +75,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         container.Bind<UnitViewFactory>().AsSingle();
     }
 
-    private Transform ResolveUnitsParent(DiContainer container)
+    private Transform ResolveUnitsParent()
     {
         if (unitsParent != null)
         {
@@ -85,11 +85,6 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         if (gameView3D != null)
         {
             return gameView3D.transform;
-        }
-
-        if (container.HasBinding<GameController>())
-        {
-            return container.Resolve<GameController>().transform;
         }
 
         return null;
@@ -109,10 +104,11 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
                 break;
         }
 
-        var renderer = container.Resolve<IGridCellRenderer>();
-        var viewModel = container.Resolve<IGridViewModel>();
-        renderer.Bind(viewModel);
+        container.BindInterfacesTo<GridRendererBinder>().AsSingle();
     }
 }
+
+
+
 
 

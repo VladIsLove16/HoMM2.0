@@ -12,6 +12,7 @@ namespace Tests.EditMode.ViewModels
         private ActionResolver _resolver;
         private MovementSystem _movement;
         private GameModel _model;
+        private TurnStateViewModel _turnState;
 
         [SetUp]
         public void SetUp()
@@ -20,8 +21,16 @@ namespace Tests.EditMode.ViewModels
             _movement = new MovementSystem();
             _model = new GameModel(new UnitModelFactory(dict), _movement);
             _resolver = new ActionResolver(_model, _movement);
-            _vm = new GridViewModel(new TurnSystem(), _resolver, _movement, _model);
+            var turnService = new TurnService(new TurnQueue());
+            _turnState = new TurnStateViewModel(turnService);
+            _vm = new GridViewModel(_turnState, _resolver, _movement, _model);
             _model.InitializeGrid(2, 2);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _turnState?.Dispose();
         }
 
         [Test]

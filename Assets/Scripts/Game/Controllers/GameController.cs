@@ -2,14 +2,11 @@ using NaughtyAttributes;
 using System;
 using UnityEngine;
 using Zenject;
-/// <summary>
-/// Основной контроллер игры
-/// Управляет инициализацией игрового процесса и созданием юнитов
-/// </summary>
+
 public class GameController : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [Inject] private IGameConfigurationProvider _gameConfigurationProvider;
+    [Inject] private IGameConfigurationService _configurationService;
     private GameModel _gameModel;
     private ITurnService _turnService;
 
@@ -24,31 +21,28 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        Setup(_gameConfigurationProvider);
+        Setup(_configurationService);
     }
 
     [Button]
     private void Setup()
     {
-        Setup(_gameConfigurationProvider);
+        Setup(_configurationService);
     }
 
-    public void Setup(IGameConfigurationProvider gameConfigurationProvider)
+    public void Setup(IGameConfigurationService configurationService)
     {
-        if (gameConfigurationProvider == null)
-            throw new ArgumentNullException();
-        var provider = gameConfigurationProvider;
-        var config = provider?.GetSelectedConfiguration();
+        var service = configurationService ?? _configurationService;
+        var config = service?.GetSelectedConfiguration();
         CreateGridContent(config);
-        var team = provider.GetTeam();
-        SetPlayerTeam(team);
+        ConfigureTurnControl(service);
         _turnService.StartGridPlacementPhase();
     }
 
     [Button]
     public void CreateGridContent()
     {
-        var config = _gameConfigurationProvider.GetSelectedConfiguration();
+        var config = _configurationService.GetSelectedConfiguration();
         CreateGridContent(config);
     }
 
@@ -75,11 +69,10 @@ public class GameController : MonoBehaviour
         _turnService.AddCombatUnit(@params.UnitModel);
     }
 
-    private void SetPlayerTeam(Team team)
+    private void ConfigureTurnControl(IGameConfigurationService service)
     {
-        _turnService.ConfigureLocalSide(team);
+        var team = service?.Team ?? Team.Blue;
+        var mode = service?.CurrentGameMode ?? GameMode.SinglePlayer;
+        _turnService.ConfigureControl(team, mode);
     }
 }
-
-
-

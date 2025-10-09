@@ -1,76 +1,76 @@
-
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 using Zenject;
 
-/// <summary>
-/// Installs core gameplay dependencies and delegates presentation-specific wiring to an injected strategy.
-/// </summary>
 public class GameLogicMonoInstaller : MonoInstaller
 {
     [Header("Gameplay References")]
-    [SerializeField] private GameController _gameController;
-    [SerializeField] private GameNetworkCommandGateway _gameNetworkCommandGateway;
-    [SerializeField] private GameUnitDatas _unitDatas;
+    [SerializeField] private GameController gameController;
+    [SerializeField] private GameNetworkCommandGateway networkCommandGateway;
+    [SerializeField] private GameUnitDatas unitDatas;
+    [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
     [SerializeField] private CursorService cursorService;
+    [SerializeField] private GameConfigurationService gameConfigurationService;
 
     [Header("Presentation")]
-    [SerializeField] private MonoBehaviour presentationInstallerBehaviour;
-    [SerializeField] private SceneGameConfigurationProvider sceneGameConfigurationProvider;
-
-    private IGamePresentationInstaller _presentationInstaller;
-
+    [SerializeField] private MonoBehaviour _presentationInstaller;
     public override void InstallBindings()
     {
-        if (presentationInstallerBehaviour == null)
-        {
-            throw new InvalidOperationException("Presentation installer reference is not set on GameLogicMonoInstaller.");
-        }
 
-        _presentationInstaller = presentationInstallerBehaviour as IGamePresentationInstaller;
-        if (_presentationInstaller == null)
-        {
-            throw new InvalidOperationException($"Presentation installer '{presentationInstallerBehaviour.name}' must implement IGamePresentationInstaller.");
-        }
-
+        BindConfigurationService();
         BindServices();
         BindModels();
         BindViewModels();
         BindGameController();
-        BindConfigurationProviders();
+        if (_presentationInstaller is IGamePresentationInstaller gamePresentationInstaller)
+            gamePresentationInstaller.Install(Container);
+        else
+            throw new ArgumentException();
+    }
 
-        _presentationInstaller.Install(Container);
+    private void BindConfigurationService()
+    {
+        Container.BindInterfacesTo<GameConfigurationService>().FromInstance(gameConfigurationService).AsSingle();
     }
 
     private void BindServices()
     {
-        Container.Bind<GameNetworkCommandGateway>().FromInstance(_gameNetworkCommandGateway).AsSingle();
+        Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
-        Container.Bind<ICursorService>().FromInstance(cursorService).AsSingle().NonLazy();
+        Container.Bind<CursorService>().FromInstance(cursorService).AsSingle().NonLazy();
     }
 
     private void BindModels()
     {
-        IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatasDictionary = _unitDatas.ToDictionary();
+        IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatasDictionary = unitDatas.ToDictionary();
         Container.Bind<IReadOnlyDictionary<UnitType, UnitDefinitionSO>>().FromInstance(unitDatasDictionary);
 
         Container.Bind<UnitModelFactory>().AsSingle().NonLazy();
         Container.Bind<MovementSystem>().AsSingle();
         Container.Bind<ActionResolver>().AsSingle();
-        Container.Bind<TurnSystem>().AsSingle();
-        Container.BindInterfacesTo<TurnService>().AsSingle();
+        Container.Bind<ActionPipeline>().AsSingle();
+        Container.Bind<ITurnQueue>().To<TurnQueue>().AsSingle();
+        Container.Bind<ITurnService>().To<TurnService>().AsSingle();
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
         Container.Bind<GameModel>().AsSingle().NonLazy();
+          if (gameConfigurationService.CurrentGameMode == GameMode.SinglePlayer)
+        {
+            Container.Bind<IGameCommandExecutor>().To<LocalGameCommandExecutor>().AsSingle();
+        }
+        else
+        {
+            Container.Bind<IGameCommandExecutor>().To<NetworkGameCommandExecutor>().AsSingle();
+        }
     }
 
     private void BindViewModels()
     {
+        Container.BindInterfacesTo<TurnStateViewModel>().AsSingle().NonLazy();
         Container.Bind<GameViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesTo<GameViewModel>().FromResolve();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
@@ -78,21 +78,6 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindGameController()
     {
-        if (_gameController == null)
-        {
-            throw new InvalidOperationException("GameController reference is not assigned.");
-        }
-
-        Container.Bind<GameController>().FromInstance(_gameController).AsSingle().NonLazy();
-    }
-
-    private void BindConfigurationProviders()
-    {
-        var configurationService = GameConfigurationService.Instance;
-        Container.Bind<GameConfigurationService>().FromInstance(configurationService).AsSingle();
-        Container.Bind<SceneGameConfigurationProvider>().FromInstance(sceneGameConfigurationProvider).AsSingle();
-        Container.Bind<IGameConfigurationService>().FromResolve().AsSingle();
-        Container.Bind<IGameModeProvider>().FromResolve().AsSingle();
-        Container.BindInterfacesTo<SceneGameConfigurationProvider>();
+        Container.Bind<GameController>().FromInstance(gameController).AsSingle().NonLazy();
     }
 }

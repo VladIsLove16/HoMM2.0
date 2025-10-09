@@ -42,22 +42,19 @@ namespace Tests.PlayMode.GameFlow
         {
             var service = SceneTransitionTestSetup.EnsureService();
             var entry = CreateEntry(4, 3, CreateContent(UnitType.Archer, 1, 1, Team.Blue));
-            service.SetAvailableConfigurations(new[] { entry });
             service.SetSelectedConfiguration(0);
             service.SetTeam(Team.Red);
-            var provider = new ServiceBackedConfigurationProvider(service);
-
-            var turnSystem = new TurnSystem();
+            var turnService = new TurnService();
             var gameModel = CreateSpyGameModel();
-            var controller = CreateController(turnSystem, provider, gameModel, entry);
+            var controller = CreateController(turnService, service, gameModel, entry);
 
             controller.gameObject.SetActive(true);
             yield return null;
 
             Assert.That(gameModel.InitializeGridCalls, Is.EqualTo(1));
             Assert.That(gameModel.SpawnUnitCalls, Is.EqualTo(1));
-            Assert.That(turnSystem.CombatUnits.Count, Is.EqualTo(1));
-            Assert.That(turnSystem.CombatUnits[0].Team, Is.EqualTo(Team.Blue));
+            Assert.That(turnService.CombatUnits.Count, Is.EqualTo(1));
+            Assert.That(turnService.CombatUnits[0].Team, Is.EqualTo(Team.Blue));
         }
 
         [UnityTest]
@@ -65,13 +62,10 @@ namespace Tests.PlayMode.GameFlow
         {
             var service = SceneTransitionTestSetup.EnsureService();
             var entry = CreateEntry(2, 2);
-            service.SetAvailableConfigurations(new[] { entry });
             service.SetSelectedConfiguration(0);
             service.SetTeam(Team.Red);
-            var provider = new ServiceBackedConfigurationProvider(service);
-
-            var turnSystem = new TurnSystem();
-            var controller = CreateController(turnSystem, provider, CreateSpyGameModel(), entry);
+            var turnSystem = new TurnService();
+            var controller = CreateController(turnSystem, service, CreateSpyGameModel(), entry);
 
             controller.gameObject.SetActive(true);
             yield return null;
@@ -84,26 +78,25 @@ namespace Tests.PlayMode.GameFlow
         {
             var service = SceneTransitionTestSetup.EnsureService();
             var entry = CreateEntry(2, 2);
-            service.SetAvailableConfigurations(new[] { entry });
             service.SetSelectedConfiguration(0);
-            var provider = new ServiceBackedConfigurationProvider(service);
-
-            var turnSystem = new TurnSystem();
-            var controller = CreateController(turnSystem, provider, CreateSpyGameModel(), entry);
+            var turnSystem = new TurnService();
+            var controller = CreateController(turnSystem, service, CreateSpyGameModel(), entry);
 
             controller.gameObject.SetActive(true);
             yield return null;
 
-            Assert.That(turnSystem.CurrentBattleState.Value, Is.EqualTo(BattleState.replacement));
+            Assert.That(turnSystem.BattleState, Is.EqualTo(BattleState.replacement));
         }
 
         [UnityTest]
         public IEnumerator Setup_WithNullProviderUsesDefaultEntry()
+
         {
+            IGameConfigurationService service = ScriptableObject.CreateInstance<GameConfigurationService>();
             var defaultEntry = CreateEntry(5, 4, CreateContent(UnitType.Archer, 0, 0, Team.Blue));
-            var turnSystem = new TurnSystem();
+            var turnSystem = new TurnService();
             var gameModel = CreateSpyGameModel();
-            var controller = CreateController(turnSystem, null, gameModel, defaultEntry);
+            var controller = CreateController(turnSystem, service, gameModel, defaultEntry);
 
             controller.gameObject.SetActive(true);
             yield return null;
@@ -118,13 +111,10 @@ namespace Tests.PlayMode.GameFlow
         {
             var service = SceneTransitionTestSetup.EnsureService();
             var initialEntry = CreateEntry(2, 2);
-            service.SetAvailableConfigurations(new[] { initialEntry });
             service.SetSelectedConfiguration(0);
-            var provider = new ServiceBackedConfigurationProvider(service);
-
-            var turnSystem = new TurnSystem();
+            var turnService = new TurnService();
             var gameModel = CreateSpyGameModel();
-            var controller = CreateController(turnSystem, provider, gameModel, initialEntry);
+            var controller = CreateController(turnService, service, gameModel, initialEntry);
 
             controller.gameObject.SetActive(true);
             yield return null;
@@ -134,18 +124,18 @@ namespace Tests.PlayMode.GameFlow
             yield return null;
 
             Assert.That(gameModel.SpawnUnitCalls, Is.EqualTo(1));
-            Assert.That(turnSystem.CombatUnits.Count, Is.EqualTo(1));
-            Assert.That(turnSystem.CombatUnits[0].Team, Is.EqualTo(Team.Red));
+            Assert.That(turnService.CombatUnits.Count, Is.EqualTo(1));
+            Assert.That(turnService.CombatUnits[0].Team, Is.EqualTo(Team.Red));
         }
 
-        private GameController CreateController(TurnSystem turnSystem, IGameConfigurationProvider provider, SpyGameModel gameModel, GridContentEntrySO defaultEntry)
+        private GameController CreateController(ITurnService turnSystem, IGameConfigurationService configurationService, SpyGameModel gameModel, GridContentEntrySO defaultEntry)
         {
             var go = new GameObject("GameController");
             go.SetActive(false);
             _createdObjects.Add(go);
             var controller = go.AddComponent<GameController>();
-            controller.Construct(gameModel, new TurnService(turnSystem));
-            SetPrivateField(controller, "_gameConfigurationProvider", provider);
+            controller.Construct(gameModel, turnSystem);
+            SetPrivateField(controller, "_configurationService", configurationService);
             SetPrivateField(controller, "defaultEntry", defaultEntry);
             return controller;
         }
@@ -210,37 +200,6 @@ namespace Tests.PlayMode.GameFlow
         {
             var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             field?.SetValue(target, value);
-        }
-
-        private sealed class ServiceBackedConfigurationProvider : IGameConfigurationProvider
-        {
-            private readonly IGameConfigurationService _service;
-
-            public ServiceBackedConfigurationProvider(IGameConfigurationService service)
-            {
-                _service = service;
-            }
-
-            public GridContentEntrySO GetSelectedConfiguration() => _service.GetSelectedConfiguration();
-
-            public GridContentEntrySO GetConfigurationByIndex(int index)
-            {
-                var configs = _service.GetAvailableConfigurations();
-                if (index >= 0 && index < configs.Count)
-                {
-                    return configs[index];
-                }
-                return null;
-            }
-
-            public int GetSelectedConfigurationIndex() => _service.GetSelectedConfigurationIndex();
-
-            public Team GetTeam() => _service.Team;
-
-            public GameMode GetGameMode() => _service.CurrentGameMode;
-
-            public Vector2Int GetGridSize() => _service.GridSize;
-
         }
 
         private class SpyGameModel : GameModel

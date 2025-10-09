@@ -28,7 +28,7 @@ namespace Tests.EditMode.GridContents.Units
                 }
 
                 // Сначала пытаемся найти по типу
-                var existing = allEffects.FirstOrDefault(se => se.Type == type);
+                var existing = allEffects.FirstOrDefault(se => se.StatusEffectType == type);
                 if (existing != null)
                 {
                     return existing;

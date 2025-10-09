@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UniRx;
 using UnityEngine;
 using Tests.TestHelpers;
 
@@ -27,7 +26,7 @@ public class ConsoleGameView_EditModeTests
         var harness = new GameModelBuilder();
         var output = new TestConsoleOutput();
         var gridState = new ConsoleGridState();
-        var consoleView = new ConsoleGameView(harness.GameViewModel, harness.TurnService, gridState, output);
+        var consoleView = new ConsoleGameView(harness.GameViewModel, harness.TurnStateViewModel, gridState, output);
         consoleView.Initialize();
 
         harness.GameModel.InitializeGrid(3, 3);
@@ -39,12 +38,13 @@ public class ConsoleGameView_EditModeTests
         Assert.That(output.Messages, Has.Some.Contains("Unit spawned: Archer [Blue]"));
 
         var unit = harness.GameModel.GetUnits()[0];
-        harness.TurnSystem.AddCombatUnit(unit);
-        harness.TurnSystem.ActiveObject.SetValueAndForceNotify(unit);
+        harness.TurnService.AddCombatUnit(unit);
+        harness.TurnService.RunBattle();
 
         Assert.That(output.Messages, Has.Some.Contains("Active unit: Archer"));
 
         consoleView.Dispose();
+        harness.TurnStateViewModel.Dispose();
     }
 
     [Test]
@@ -77,8 +77,9 @@ public class ConsoleGameView_EditModeTests
     {
         public GameModel GameModel { get; }
         public GameViewModel GameViewModel { get; }
-        public TurnSystem TurnSystem { get; } = new();
-        public ITurnService TurnService { get; }
+        public TurnService ConcreteTurnService { get; }
+        public TurnStateViewModel TurnStateViewModel { get; }
+        public ITurnService TurnService => ConcreteTurnService;
         public MovementSystem MovementSystem { get; } = new();
         public ActionResolver ActionResolver { get; }
         public IGameCommandExecutor CommandExecutor { get; } = new NullCommandExecutor();
@@ -105,8 +106,9 @@ public class ConsoleGameView_EditModeTests
             var unitFactory = new UnitModelFactory(dataMap);
             GameModel = new GameModel(unitFactory, MovementSystem);
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
-            TurnService = new TurnService(TurnSystem);
-            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnSystem, ActionResolver);
+            ConcreteTurnService = new TurnService(new TurnQueue());
+            TurnStateViewModel = new TurnStateViewModel(ConcreteTurnService);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnStateViewModel, ActionResolver);
         }
     }
 

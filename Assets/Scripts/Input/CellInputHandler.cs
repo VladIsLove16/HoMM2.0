@@ -42,8 +42,8 @@ public class CellInputHandler : MonoBehaviour
     {
         _turnState = turnState;
         EnsureInputActionsInitialized();
-        _battleStateSubscription = _turnState.BattleState.Subscribe(OnTurnStateChanged);
-        OnTurnStateChanged(_turnState.BattleState.Value);
+        _battleStateSubscription = _turnState.BattleStateProperty.Subscribe(OnTurnStateChanged);
+        OnTurnStateChanged(_turnState.BattleStateProperty.Value);
     }
     private void OnEnable()
     {
@@ -59,7 +59,7 @@ public class CellInputHandler : MonoBehaviour
 
         if (_turnState != null)
         {
-            OnTurnStateChanged(_turnState.BattleState.Value);
+            OnTurnStateChanged(_turnState.BattleStateProperty.Value);
         }
         else
         {
@@ -367,7 +367,7 @@ public class CellInputHandler : MonoBehaviour
     {
         _battleStateSubscription?.Dispose();
         _turnState = turnState;
-        _battleStateSubscription = turnState?.BattleState.Subscribe(OnTurnStateChanged);
+        _battleStateSubscription = turnState?.BattleStateProperty.Subscribe(OnTurnStateChanged);
     }
 #endif
 }

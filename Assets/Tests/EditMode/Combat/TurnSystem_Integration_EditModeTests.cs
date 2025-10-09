@@ -8,14 +8,14 @@ namespace Tests.EditMode.Combat
     [TestFixture]
     public class TurnSystem_Integration_EditModeTests
     {
-        private TurnSystem _turnSystem;
+        private ITurnService _turnSystem;
         private CombatStub _blueUnit;
         private CombatStub _redUnit;
 
         [SetUp]
         public void SetUp()
         {
-            _turnSystem = new TurnSystem();
+            _turnSystem = new TurnService();
             _blueUnit = new CombatStub(Team.Blue);
             _redUnit = new CombatStub(Team.Red);
             _turnSystem.AddCombatUnit(_blueUnit);
@@ -41,7 +41,7 @@ namespace Tests.EditMode.Combat
         {
             _turnSystem.RunBattle();
 
-            Assert.That(_turnSystem.ActiveObject.Value, Is.SameAs(_blueUnit));
+            Assert.That(_turnSystem.ActiveObject, Is.SameAs(_blueUnit));
             Assert.That(_blueUnit.TurnsTaken, Is.EqualTo(1));
         }
 
@@ -51,7 +51,7 @@ namespace Tests.EditMode.Combat
             _turnSystem.RunBattle();
             _turnSystem.EndTurn();
 
-            Assert.That(_turnSystem.ActiveObject.Value, Is.SameAs(_redUnit));
+            Assert.That(_turnSystem.ActiveObject, Is.SameAs(_redUnit));
             Assert.That(_redUnit.TurnsTaken, Is.EqualTo(1));
         }
 
