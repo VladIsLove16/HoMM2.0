@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
+  m_Name: SampleDialogueBattle
+  m_EditorClassIdentifier: 
+  nodeId: start
+  speaker: Guide
+  text: Welcome, traveler. What will you do?
+  choices:
+  - Id: battle
+    Text: Let's test our might.
+    Action: 1
+    NextNode: {fileID: 0}
+  - Id: leave
+    Text: I'll be back later.
+    Action: 2
+    NextNode: {fileID: 11400000, guid: b15791099651688429abe37b04877a9b, type: 2}

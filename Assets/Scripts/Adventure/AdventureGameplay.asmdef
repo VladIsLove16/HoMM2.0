@@ -1,0 +1,22 @@
+{
+    "name": "AdventureGameplay",
+    "rootNamespace": "",
+    "references": [
+        "Assembly-CSharp",
+        "Unity.InputSystem",
+        "UniRx",
+        "Zenject",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "GameAssembly"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

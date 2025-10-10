@@ -1,0 +1,69 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace Adventure.Integration.Battle
+{
+    public sealed class GridConfigurationGateway : MonoBehaviour, IGridConfigurationGateway
+    {
+        [SerializeField] private GameConfigurationService configurationService;
+        [SerializeField] private string battleSceneName = "SampleScene";
+        [SerializeField] private int gridWidth = 12;
+        [SerializeField] private int gridHeight = 8;
+        [SerializeField] private Team playerTeam = Team.Blue;
+
+        public void ApplyConfiguration(IReadOnlyList<GridSlot> playerSlots, IReadOnlyList<GridSlot> enemySlots)
+        {
+            if (configurationService == null)
+            {
+                Debug.LogError("Configuration service is not assigned", this);
+                return;
+            }
+
+            var entry = ScriptableObject.CreateInstance<GridContentEntrySO>();
+            SetPrivateField(entry, "width", Mathf.Max(1, gridWidth));
+            SetPrivateField(entry, "height", Mathf.Max(1, gridHeight));
+            entry.contents = new List<GridContentEntrySO.UnitContent>();
+
+            Append(entry, playerSlots);
+            Append(entry, enemySlots);
+
+            configurationService.SetAvailableConfigurations(new List<GridContentEntrySO> { entry });
+            configurationService.SetSelectedConfiguration(0);
+            configurationService.SetTeam(playerTeam);
+        }
+
+        public void LoadBattleScene()
+        {
+            if (string.IsNullOrEmpty(battleSceneName))
+            {
+                Debug.LogError("Battle scene name is not set", this);
+                return;
+            }
+
+            SceneManager.LoadScene(battleSceneName, LoadSceneMode.Single);
+        }
+
+        private static void SetPrivateField(GridContentEntrySO entry, string fieldName, int value)
+        {
+            var field = typeof(GridContentEntrySO).GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            field?.SetValue(entry, value);
+        }
+
+        private static void Append(GridContentEntrySO entry, IReadOnlyList<GridSlot> slots)
+        {
+            if (slots == null) return;
+            foreach (var slot in slots)
+            {
+                entry.contents.Add(new GridContentEntrySO.UnitContent
+                {
+                    unitType = slot.UnitType,
+                    Amount = Mathf.Max(1, slot.Amount),
+                    X = slot.X,
+                    Y = slot.Y,
+                    Team = slot.Team
+                });
+            }
+        }
+    }
+}

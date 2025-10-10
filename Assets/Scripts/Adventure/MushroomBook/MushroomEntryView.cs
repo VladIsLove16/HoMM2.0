@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+using Adventure.Domain.Inventory;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public interface IEntryView
 {
-    void Bind(UnitDefinitionSO definition);
+    void Bind(MushroomBookEntryViewData? data);
     void SetPresentationMode(PresentationMode mode);
 }
 
@@ -18,17 +18,16 @@ public class MushroomEntryView : MonoBehaviour, IPointerEnterHandler, IPointerEx
     [SerializeField] private Transform characteristicsRoot;
     [SerializeField] private GameObject characteristicItemPrefab;
 
-    private UnitDefinitionSO current;
+    private MushroomBookEntryViewData? runtimeData;
     private PresentationMode mode = PresentationMode.Normal;
     private bool isHovered;
 
-    public void Bind(UnitDefinitionSO definition)
+
+
+    public void Bind(MushroomBookEntryViewData? data)
     {
-        current = definition;
-        nameText.text = definition != null ? definition.Name : string.Empty;
-        descriptionText.text = definition != null ? definition.Description : string.Empty;
-        RebuildCharacteristics(definition);
-        UpdateImage();
+        runtimeData = data;
+        ApplyData();
     }
 
     public void SetPresentationMode(PresentationMode mode)
@@ -51,20 +50,38 @@ public class MushroomEntryView : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     private void UpdateImage()
     {
-        if (picture == null || current == null) return;
-        Sprite sprite = null;
+        if (picture == null || runtimeData == null) return;
+        var data = runtimeData.Value;
+        Sprite sprite;
         if (mode == PresentationMode.Humanized)
         {
-            sprite = isHovered ? current.HumanizedIconHovered : current.HumanizedIcon;
+            sprite = isHovered ? data.HumanizedHoveredIcon : data.HumanizedIcon;
         }
         else
         {
-            sprite = isHovered ? current.UnitIconHovered : current.UnitIcon;
+            sprite = isHovered ? data.HoveredIcon : data.Icon;
         }
         picture.sprite = sprite;
     }
 
-    private void RebuildCharacteristics(UnitDefinitionSO definition)
+    private void ApplyData()
+    {
+        if (nameText != null)
+            nameText.text = runtimeData?.Name ?? string.Empty;
+        if (descriptionText != null)
+            descriptionText.text = runtimeData?.Description ?? string.Empty;
+        RebuildCharacteristics(runtimeData);
+        if (runtimeData == null && picture != null)
+        {
+            picture.sprite = null;
+        }
+        else
+        {
+            UpdateImage();
+        }
+    }
+
+    private void RebuildCharacteristics(MushroomBookEntryViewData? data)
     {
         if (characteristicsRoot == null || characteristicItemPrefab == null) return;
         for (int i = characteristicsRoot.childCount - 1; i >= 0; i--)
@@ -72,8 +89,8 @@ public class MushroomEntryView : MonoBehaviour, IPointerEnterHandler, IPointerEx
             DestroyImmediate(characteristicsRoot.GetChild(i).gameObject);
         }
 
-        if (definition == null) return;
-        var list = definition.Characteristics;
+        if (data == null) return;
+        var list = data.Value.Characteristics;
         if (list == null) return;
 
         foreach (var c in list)
@@ -82,10 +99,9 @@ public class MushroomEntryView : MonoBehaviour, IPointerEnterHandler, IPointerEx
             var text = go.GetComponentInChildren<Text>();
             if (text != null)
             {
-                text.text = string.IsNullOrEmpty(c.Key) ? c.Value : $"{c.Key}: {c.Value}";
+                text.text = c;
             }
         }
     }
 }
-
 
