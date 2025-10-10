@@ -45,14 +45,14 @@ public class UnitModelFactory
     //{
     //    if (!Application.isPlaying)
     //    {
-    //        Debug.Log("UnitModelFactory: Skipping GameUnitDatas load because Application.isPlaying == false");
+    //        Debug.Log("UnitModelFactory: Skipping UnitDefinitionSOCollection load because Application.isPlaying == false");
     //        return new Dictionary<UnitType, UnitDefinitionSO>();
     //    }
 
-    //    //var gameUnitDatas = AssetDatabase.LoadAssetAtPath<GameUnitDatas>("Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+    //    //var gameUnitDatas = AssetDatabase.LoadAssetAtPath<UnitDefinitionSOCollection>("Assets/ScriptableObjects/Game/UnitDefinitionSOCollection.asset");
     //    //if (gameUnitDatas == null)
     //    //{
-    //    //    Debug.LogWarning("UnitModelFactory: GameUnitDatas asset not found at Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+    //    //    Debug.LogWarning("UnitModelFactory: UnitDefinitionSOCollection asset not found at Assets/ScriptableObjects/Game/UnitDefinitionSOCollection.asset");
     //    //    return new Dictionary<UnitType, UnitDefinitionSO>();
     //    //}
 

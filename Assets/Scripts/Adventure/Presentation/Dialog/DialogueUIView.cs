@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using Adventure.Application.Dialog;
 using Adventure.Domain.Dialog;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace Adventure.Presentation.Dialog
 {
@@ -15,11 +17,11 @@ namespace Adventure.Presentation.Dialog
         [SerializeField] private Transform choicesRoot;
         [SerializeField] private Button choiceButtonPrefab;
 
-        private DialogueViewModel _viewModel;
+        private DialogVM _viewModel;
         private readonly List<Button> _spawnedButtons = new List<Button>();
         private readonly CompositeDisposable _bindings = new CompositeDisposable();
-
-        public void Construct(DialogueViewModel viewModel)
+        [Inject]
+        public void Construct(DialogVM viewModel)
         {
             _viewModel = viewModel;
             _viewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(_bindings);
@@ -50,22 +52,36 @@ namespace Adventure.Presentation.Dialog
 
         private void RebuildChoices(DialogueNode node)
         {
+            ClearChoicesButtons();
+            SpawnChoicesButtons(node);
+        }
+
+        private void SpawnChoicesButtons(DialogueNode node)
+        {
+            foreach (var choice in node.Choices)
+            {
+                SpawnButton(choice);
+            }
+        }
+
+        private void SpawnButton(DialogueChoice choice)
+        {
+            var button = Instantiate(choiceButtonPrefab, choicesRoot);
+            var label = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+                label.text = choice.Text;
+            button.onClick.AddListener(() => _viewModel.SelectChoice(choice.Id));
+            _spawnedButtons.Add(button);
+        }
+
+        private void ClearChoicesButtons()
+        {
             foreach (var button in _spawnedButtons)
             {
                 if (button != null)
                     Destroy(button.gameObject);
             }
             _spawnedButtons.Clear();
-
-            foreach (var choice in node.Choices)
-            {
-                var button = Instantiate(choiceButtonPrefab, choicesRoot);
-                var label = button.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                    label.text = choice.Text;
-                button.onClick.AddListener(() => _viewModel.SelectChoice(choice.Id));
-                _spawnedButtons.Add(button);
-            }
         }
 
         private void Show()

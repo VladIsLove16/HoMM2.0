@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,6 +12,17 @@ namespace Adventure.Integration.Battle
         [SerializeField] private int gridWidth = 12;
         [SerializeField] private int gridHeight = 8;
         [SerializeField] private Team playerTeam = Team.Blue;
+        [SerializeField] private int playerFrontlineX = 1;
+        [SerializeField] private int enemyFrontlineX = 10;
+        [SerializeField, Min(1)] private int rowSpacing = 1;
+
+        public void ConfigureBattle(IReadOnlyList<UnitStackData> playerLineup, IReadOnlyList<UnitStackData> enemyLineup)
+        {
+            var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, Mathf.Max(1, rowSpacing));
+            var playerSlots = resolver.ResolveForPlayer(playerLineup ?? Array.Empty<UnitStackData>());
+            var enemySlots = resolver.ResolveForEnemy(enemyLineup ?? Array.Empty<UnitStackData>());
+            ApplyConfiguration(playerSlots, enemySlots);
+        }
 
         public void ApplyConfiguration(IReadOnlyList<GridSlot> playerSlots, IReadOnlyList<GridSlot> enemySlots)
         {
@@ -21,12 +33,12 @@ namespace Adventure.Integration.Battle
             }
 
             var entry = ScriptableObject.CreateInstance<GridContentEntrySO>();
-            SetPrivateField(entry, "width", Mathf.Max(1, gridWidth));
-            SetPrivateField(entry, "height", Mathf.Max(1, gridHeight));
+            entry.Width = Mathf.Max(1, gridWidth);
+            entry.Height = Mathf.Max(1, gridHeight);
             entry.contents = new List<GridContentEntrySO.UnitContent>();
 
-            Append(entry, playerSlots);
-            Append(entry, enemySlots);
+            entry.Append(ToContents(playerSlots));
+            entry.Append(ToContents(enemySlots));
 
             configurationService.SetAvailableConfigurations(new List<GridContentEntrySO> { entry });
             configurationService.SetSelectedConfiguration(0);
@@ -44,12 +56,6 @@ namespace Adventure.Integration.Battle
             SceneManager.LoadScene(battleSceneName, LoadSceneMode.Single);
         }
 
-        private static void SetPrivateField(GridContentEntrySO entry, string fieldName, int value)
-        {
-            var field = typeof(GridContentEntrySO).GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field?.SetValue(entry, value);
-        }
-
         private static void Append(GridContentEntrySO entry, IReadOnlyList<GridSlot> slots)
         {
             if (slots == null) return;
@@ -64,6 +70,26 @@ namespace Adventure.Integration.Battle
                     Team = slot.Team
                 });
             }
+        }
+        private GridContentEntrySO.UnitContent ToContent(GridSlot slot)
+        {
+           return new GridContentEntrySO.UnitContent
+            {
+                unitType = slot.UnitType,
+                Amount = Mathf.Max(1, slot.Amount),
+                X = slot.X,
+                Y = slot.Y,
+                Team = slot.Team
+            };
+        }
+        private GridContentEntrySO.UnitContent[] ToContents(IReadOnlyList<GridSlot> slots)
+        {
+            GridContentEntrySO.UnitContent[] result =new GridContentEntrySO.UnitContent[slots.Count];
+           for (int i = 0; i < slots.Count; i++)
+            {
+                result[i] = ToContent(slots[i]);
+            }
+            return result;
         }
     }
 }

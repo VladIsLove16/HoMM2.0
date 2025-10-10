@@ -2,11 +2,6 @@ using System.Collections.Generic;
 
 namespace Adventure.Integration.Battle
 {
-    public interface IGridConfigurationGateway
-    {
-        void ApplyConfiguration(IReadOnlyList<GridSlot> playerSlots, IReadOnlyList<GridSlot> enemySlots);
-        void LoadBattleScene();
-    }
 
     public sealed class BattleLaunchService
     {
@@ -21,10 +16,13 @@ namespace Adventure.Integration.Battle
             _gateway = gateway;
         }
 
-        public void SetLineups(IReadOnlyList<UnitStackData> player, IReadOnlyList<UnitStackData> enemy)
+        public void SetEnemyLineup(IReadOnlyList<UnitStackData> enemy)
+        {
+            _enemyLineup = enemy;
+        }
+        public void SetPlayerLineup(IReadOnlyList<UnitStackData> player )
         {
             _playerLineup = player;
-            _enemyLineup = enemy;
         }
 
         public void Launch()

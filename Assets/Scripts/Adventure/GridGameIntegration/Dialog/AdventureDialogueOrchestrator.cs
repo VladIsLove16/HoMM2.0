@@ -3,40 +3,40 @@ using Adventure.Integration.Battle;
 using Adventure.Application.Dialog;
 using Adventure.Presentation.Dialog;
 using UnityEngine;
+using System;
 
 namespace Adventure.Infrastructure.Dialog
 {
     public sealed class AdventureDialogueOrchestrator : MonoBehaviour
     {
         [SerializeField] private DialogueUIView view;
-        [SerializeField] private ArmyLineupSO defaultLineup;
+        private ArmyLineupSO currentEnemyArmyLineup;
         
-        private DialogService _dialogService;
+        private Application.Dialog.DialogVM _dialogService;
         private BattleLaunchService _battleLaunchService;
-        private DialogueViewModel _viewModel;
+        private Presentation.Dialog.DialogService _viewModel;
 
-        public void Construct(DialogService dialogService, BattleLaunchService battleLaunchService)
+        public void Construct(Application.Dialog.DialogVM dialogService, BattleLaunchService battleLaunchService )
         {
             _dialogService = dialogService;
             _battleLaunchService = battleLaunchService;
-            _viewModel = new DialogueViewModel(dialogService);
+            _viewModel = new Presentation.Dialog.DialogService(dialogService);
             if (view != null)
                 view.Construct(_viewModel);
 
             _dialogService.ChoiceActionTriggered += HandleChoiceAction;
-
-            ApplyLineup(defaultLineup);
         }
 
-        public bool StartDialog(string dialogId)
+        public bool StartDialog(string dialogId, ArmyLineupSO currentArmyLineup)
         {
+            this.currentEnemyArmyLineup = currentArmyLineup;
             return _viewModel.TryStartDialog(dialogId);
         }
 
         public void ApplyLineup(ArmyLineupSO lineup)
         {
             if (lineup == null) return;
-            _battleLaunchService.SetLineups(lineup.GetPlayerLineup(), lineup.GetEnemyLineup());
+            _battleLaunchService.SetEnemyLineup(lineup.Convert());
         }
 
         private void HandleChoiceAction(DialogueChoiceAction action)
@@ -44,6 +44,7 @@ namespace Adventure.Infrastructure.Dialog
             switch (action)
             {
                 case DialogueChoiceAction.StartBattle:
+                    _battleLaunchService.SetPlayerLineup();
                     _battleLaunchService.Launch();
                     break;
                 case DialogueChoiceAction.EndDialogue:

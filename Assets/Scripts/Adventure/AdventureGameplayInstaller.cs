@@ -28,18 +28,17 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     [Header("UI & Interaction")]
     [SerializeField] private PlayerInteractionController interactionController;
-    [SerializeField] private MushroomBookInventoryPresenter bookPresenter;
     [SerializeField] private AdventureDialogueOrchestrator dialogueOrchestrator;
 
     public override void InstallBindings()
     {
         Container.Bind<IMushroomCatalog>().FromInstance(mushroomCatalog).AsSingle();
-        Container.Bind<MushroomInventory>().AsSingle();
-        Container.Bind<MushroomInventoryService>().AsSingle();
+        Container.Bind<MushroomInventoryModel>().AsSingle();
+        Container.Bind<Adventure.Application.Inventory.MushroomBookViewModel>().AsSingle();
 
         Container.Bind<IDialogRepository>().FromInstance(dialogueDatabase).AsSingle();
         Container.Bind<IDialogStateStore>().To<PlayerPrefsDialogStateStore>().AsSingle();
-        Container.Bind<DialogService>().AsSingle();
+        Container.Bind<DialogVM>().AsSingle();
 
         var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, rowSpacing);
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();
@@ -59,16 +58,11 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     }
 
     [Inject]
-    private void OnInjected(MushroomInventoryService inventoryService, DialogService dialogService, BattleLaunchService battleLaunchService)
+    private void OnInjected(Adventure.Application.Inventory.MushroomBookViewModel inventoryService, DialogVM dialogService, BattleLaunchService battleLaunchService)
     {
         if (interactionController != null)
         {
             interactionController.Construct(inventoryService);
-        }
-
-        if (bookPresenter != null)
-        {
-            bookPresenter.Construct(inventoryService);
         }
 
         if (dialogueOrchestrator != null)

@@ -15,12 +15,17 @@ namespace Adventure.Domain.Movement
             _settings = settings;
         }
 
-        public MovementCommand Tick(PlayerMovementState state, MovementInput input, float deltaTime)
+        public MovementCommand Tick(PlayerMovementState state, MovementInput input, Quaternion orientation, float deltaTime)
         {
             var targetSpeed = input.Sprint ? _settings.MoveSpeed * _settings.SprintMultiplier : _settings.MoveSpeed;
             var moveDir = new Vector3(input.Move.x, 0f, input.Move.y);
             moveDir = Vector3.ClampMagnitude(moveDir, 1f);
-            var desiredVelocity = moveDir * targetSpeed;
+
+            var worldMoveDir = orientation * moveDir;
+            worldMoveDir.y = 0f;
+            worldMoveDir = Vector3.ClampMagnitude(worldMoveDir, 1f);
+
+            var desiredVelocity = worldMoveDir * targetSpeed;
 
             // accelerate towards desired velocity
             var velocity = state.Velocity;
@@ -44,7 +49,7 @@ namespace Adventure.Domain.Movement
             pitch = Mathf.Clamp(pitch, -_settings.MaxLookPitch, _settings.MaxLookPitch);
             state.SetPitch(pitch);
 
-            return new MovementCommand(new Vector3(newHorizontalVelocity.x, finalVelocity.y, newHorizontalVelocity.z), pitch, input.InteractPressed, input.CollectPressed);
+            return new MovementCommand(finalVelocity, pitch);
         }
     }
 }

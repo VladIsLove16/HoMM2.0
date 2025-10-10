@@ -2,7 +2,6 @@
     "name": "AdventureGameplay",
     "rootNamespace": "",
     "references": [
-        "Assembly-CSharp",
         "Unity.InputSystem",
         "UniRx",
         "Zenject",

@@ -7,7 +7,6 @@ using UnityEngine;
 public class UnitDefinitionSO : ScriptableObject
 {
     public UnitType UnitType;
-
     /// <summary>
     /// Основной префаб юнита (для обратной совместимости)
     /// </summary>
@@ -24,6 +23,7 @@ public class UnitDefinitionSO : ScriptableObject
     [Tooltip("Иконка в хуманизированном представлении при наведении")]
     public Sprite HumanizedIconHovered;
     public string Name;
+    [SerializeField] private string displayName;
 
     [SerializeField] private MaterialProvider _materialProviderSerialized = new MaterialProvider();
     // Runtime provider can be any IMaterialProvider (including mocks in tests)
@@ -51,10 +51,10 @@ public class UnitDefinitionSO : ScriptableObject
     [SerializeField] private List<Characteristic> characteristics = new List<Characteristic>();
     [SerializeField] private List<StatusEffectData> startingEffects = new List<StatusEffectData>();
     [SerializeField] private List<StatusEffectData> invulnerableEffects = new List<StatusEffectData>();
-
     public IReadOnlyList<StatusEffectData> StartingEffects => startingEffects;
     public IReadOnlyList<StatusEffectData> InvulnerableEffects => invulnerableEffects;
     public string Description => description;
+    public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? Name : displayName;
     public IReadOnlyList<Characteristic> Characteristics => characteristics;
 
     // Методы для получения материалов (для тестирования)

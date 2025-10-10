@@ -1,0 +1,130 @@
+using System;
+using System.Collections.Generic;
+using Adventure.Domain.Inventory;
+using UniRx;
+using UnityEngine;
+
+namespace Adventure.Presentation.Mushroom
+{
+    public sealed class MushroomBookViewModel : IDisposable
+    {
+        private readonly MushroomInventoryModel _mushroomInventoryModel;
+        private readonly IMushroomCatalog _catalog;
+        private readonly int _entriesPerPage;
+        private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
+        private readonly List<MushroomViewModel> _allEntries = new List<MushroomViewModel>();
+
+        private readonly ReactiveCollection<MushroomViewModel> _currentPageEntries =
+            new ReactiveCollection<MushroomViewModel>();
+        private readonly ReactiveProperty<int> _currentPageIndex = new ReactiveProperty<int>(0);
+        private readonly ReactiveProperty<int> _totalPages = new ReactiveProperty<int>(0);
+        private readonly ReactiveProperty<PresentationMode> _presentationMode =
+            new ReactiveProperty<PresentationMode>(global::PresentationMode.Normal);
+
+        public MushroomBookViewModel(
+            MushroomInventoryModel mushroomInventoryModel,
+            IMushroomCatalog catalog,
+            int entriesPerPage)
+        {
+            _mushroomInventoryModel = mushroomInventoryModel;
+            _catalog = catalog;
+            _entriesPerPage = Math.Max(1, entriesPerPage);
+
+            RebuildEntries();
+        }
+
+        public IReadOnlyReactiveCollection<MushroomViewModel> CurrentPageEntries => _currentPageEntries;
+        public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
+        public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
+        public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
+
+        public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
+        public void PrevPage() => GoToPage(_currentPageIndex.Value - 1);
+
+        public void GoToPage(int pageIndex)
+        {
+            var clamped = Mathf.Clamp(pageIndex, 0, Math.Max(0, _totalPages.Value - 1));
+            if (clamped == _currentPageIndex.Value && _currentPageEntries.Count > 0)
+                return;
+
+            _currentPageIndex.Value = clamped;
+            UpdateCurrentPage();
+        }
+
+        public void SetPresentationMode(PresentationMode mode)
+        {
+            if (_presentationMode.Value == mode)
+                return;
+
+            _presentationMode.Value = mode;
+        }
+
+        private void RebuildEntries()
+        {
+            _allEntries.Clear();
+            foreach (var entry in _mushroomInventoryModel.Items)
+            {
+                if (!_catalog.TryGetVisuals(entry.Key, out var visuals))
+                    continue;
+
+                var characteristics = new List<string>(visuals.Characteristics ?? Array.Empty<string>());
+                characteristics.Add($"Count: {entry.Value}");
+
+                var enriched = new MushroomViewModel(
+                    visuals.Id,
+                    visuals.Name,
+                    visuals.Description,
+                    visuals.Icon,
+                    visuals.HoveredIcon,
+                    visuals.HumanizedIcon,
+                    visuals.HumanizedHoveredIcon,
+                    characteristics);
+                _allEntries.Add(enriched);
+            }
+
+            UpdatePagination();
+        }
+
+        private void UpdatePagination()
+        {
+            var total = Mathf.CeilToInt(_allEntries.Count / (float)_entriesPerPage);
+            _totalPages.Value = Math.Max(0, total);
+
+            if (_totalPages.Value == 0)
+            {
+                _currentPageIndex.Value = 0;
+                _currentPageEntries.Clear();
+                return;
+            }
+
+            _currentPageIndex.Value = Mathf.Clamp(_currentPageIndex.Value, 0, _totalPages.Value - 1);
+            UpdateCurrentPage();
+        }
+
+        private void UpdateCurrentPage()
+        {
+            _currentPageEntries.Clear();
+
+            if (_totalPages.Value == 0)
+                return;
+
+            var start = _currentPageIndex.Value * _entriesPerPage;
+            var end = Mathf.Min(start + _entriesPerPage, _allEntries.Count);
+
+            for (int i = start; i < end; i++)
+            {
+                _currentPageEntries.Add(_allEntries[i]);
+            }
+        }
+
+
+        public void Dispose()
+        {
+            _subscriptions.Dispose();
+            _currentPageEntries?.Dispose();
+            _currentPageIndex?.Dispose();
+            _totalPages?.Dispose();
+            _presentationMode?.Dispose();
+        }
+    }
+}

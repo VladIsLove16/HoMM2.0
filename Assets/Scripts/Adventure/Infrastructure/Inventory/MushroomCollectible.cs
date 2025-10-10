@@ -1,34 +1,39 @@
+using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Interaction;
 using UnityEngine;
-
 namespace Adventure.Infrastructure.Inventory
 {
+    /// <summary>
+    /// Runtime behaviour for mushroom pickups encountered in the world.
+    /// </summary>
     public sealed class MushroomCollectible : MonoBehaviour, IMushroomCollectible
     {
-        [SerializeField] private string mushroomId;
+        [SerializeField] private UnitType UnitType = UnitType.Archer;
         [SerializeField] private bool destroyOnCollect = true;
-
-        public string MushroomId => mushroomId;
+        public UnitType Type => UnitType;
         public bool CanCollect { get; private set; } = true;
 
-        public void Collect()
+        public void Interact(PlayerInteractionContext context)
+        {
+            Collect(context);
+        }
+
+        public void Collect(PlayerInteractionContext context)
         {
             if (!CanCollect)
                 return;
 
             CanCollect = false;
-            if (destroyOnCollect)
+
+            if (destroyOnCollect && gameObject != null)
             {
                 Destroy(gameObject);
             }
         }
 
-        private void OnValidate()
+        public string GetPrompt()
         {
-            if (string.IsNullOrWhiteSpace(mushroomId))
-            {
-                mushroomId = name;
-            }
+            return "Collect " + UnitType.ToString();
         }
     }
 }

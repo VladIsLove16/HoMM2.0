@@ -1,24 +1,26 @@
-using System;
 using Adventure.Domain.Movement;
-using Adventure.Infrastructure.Input;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Assets.Scripts.Adventure.Infrastructure.Input;
 
 namespace Adventure.Infrastructure.Movement
 {
     [RequireComponent(typeof(CharacterController))]
-    public sealed class PlayerMovementController : MonoBehaviour, IDisposable
+    public sealed class PlayerMovementController : MonoBehaviour
     {
         [SerializeField] private MovementSettingsSO settings;
         [SerializeField] private Transform cameraPivot;
 
         private CharacterController _controller;
-        private AdventureInputReader _inputReader;
         private PlayerMovementService _movementService;
         private PlayerMovementState _state;
         private float _yaw;
-
-        public event Action Interact;
-        public event Action Collect;
+        private Vector2 _moveInput;
+        private bool _sprintInput;
+        private Vector2 _pendingLookInput;
+        private bool _useExternalInput;
+        [FormerlySerializedAs("playerInput")]
+        [SerializeField] private AdventurePlayerInput legacyInputProvider;
 
         private void Awake()
         {
@@ -29,7 +31,6 @@ namespace Adventure.Infrastructure.Movement
                 return;
             }
             _controller = GetComponent<CharacterController>();
-            _inputReader = new AdventureInputReader();
             _movementService = new PlayerMovementService(settings.ToDomain());
             _state = new PlayerMovementState(Vector3.zero, _controller.isGrounded);
             _yaw = transform.eulerAngles.y;
@@ -38,23 +39,69 @@ namespace Adventure.Infrastructure.Movement
         private void Update()
         {
             var deltaTime = Time.deltaTime;
-            var input = _inputReader.Read();
+            Vector2 move;
+            Vector2 lookDelta;
+            bool sprint;
 
-            _yaw += input.Look.x * settings.LookSensitivity;
+            if (_useExternalInput)
+            {
+                move = _moveInput;
+                lookDelta = _pendingLookInput;
+                sprint = _sprintInput;
+                _pendingLookInput = Vector2.zero;
+            }
+            else
+            {
+                var provider = legacyInputProvider != null ? legacyInputProvider : GetComponent<AdventurePlayerInput>();
+                if (provider != null)
+                {
+                    move = provider.Move;
+                    lookDelta = provider.Look;
+                    sprint = provider.IsSprinting;
+                }
+                else
+                {
+                    move = Vector2.zero;
+                    lookDelta = Vector2.zero;
+                    sprint = false;
+                }
+            }
+
+            var movementInput = new MovementInput(move, lookDelta, sprint);
+
+            _yaw += movementInput.Look.x * settings.LookSensitivity;
             transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
 
-            var command = _movementService.Tick(_state, input, deltaTime);
+            var command = _movementService.Tick(_state, movementInput, transform.rotation, deltaTime);
             UpdateCameraPitch(command.DesiredPitch);
 
-            var desiredVelocity = command.DesiredVelocity;
-            var worldHorizontal = transform.TransformDirection(new Vector3(desiredVelocity.x, 0f, desiredVelocity.z));
-            var worldVelocity = new Vector3(worldHorizontal.x, desiredVelocity.y, worldHorizontal.z);
-            PerformMove(worldVelocity, deltaTime);
+            PerformMove(command.Velocity, deltaTime);
+        }
 
-            if (command.InteractRequested)
-                Interact?.Invoke();
-            if (command.CollectRequested)
-                Collect?.Invoke();
+        public void SetMoveInput(Vector2 move)
+        {
+            _useExternalInput = true;
+            _moveInput = move;
+        }
+
+        public void SetSprintInput(bool sprint)
+        {
+            _useExternalInput = true;
+            _sprintInput = sprint;
+        }
+
+        public void EnqueueLookDelta(Vector2 delta)
+        {
+            _useExternalInput = true;
+            _pendingLookInput += delta;
+        }
+
+        public void ResetExternalInput()
+        {
+            _useExternalInput = false;
+            _moveInput = Vector2.zero;
+            _sprintInput = false;
+            _pendingLookInput = Vector2.zero;
         }
 
         private void PerformMove(Vector3 velocity, float deltaTime)
@@ -90,16 +137,6 @@ namespace Adventure.Infrastructure.Movement
                 return;
 
             cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-        }
-
-        public void Dispose()
-        {
-            _inputReader?.Dispose();
-        }
-
-        private void OnDestroy()
-        {
-            Dispose();
         }
     }
 }

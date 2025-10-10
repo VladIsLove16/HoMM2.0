@@ -4,17 +4,13 @@ namespace Adventure.Domain.Movement
 {
     public readonly struct MovementCommand
     {
-        public MovementCommand(Vector3 desiredVelocity, float desiredPitch, bool interactRequested, bool collectRequested)
+        public MovementCommand(Vector3 velocity, float desiredPitch)
         {
-            DesiredVelocity = desiredVelocity;
+            Velocity = velocity;
             DesiredPitch = desiredPitch;
-            InteractRequested = interactRequested;
-            CollectRequested = collectRequested;
         }
 
-        public Vector3 DesiredVelocity { get; }
+        public Vector3 Velocity { get; }
         public float DesiredPitch { get; }
-        public bool InteractRequested { get; }
-        public bool CollectRequested { get; }
     }
 }

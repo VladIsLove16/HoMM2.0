@@ -1,4 +1,5 @@
 using Adventure.Infrastructure.Interaction;
+using Adventure.Integration.Battle;
 using UnityEngine;
 
 namespace Adventure.Infrastructure.Dialog
@@ -7,6 +8,7 @@ namespace Adventure.Infrastructure.Dialog
     {
         [SerializeField] private string dialogueId;
         [SerializeField] private AdventureDialogueOrchestrator orchestrator;
+        [SerializeField] ArmyLineupSO lineup;
 
         public void Interact(PlayerInteractionContext context)
         {
@@ -16,10 +18,13 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            if (!orchestrator.StartDialog(dialogueId))
+            bool isDialogStarted = orchestrator.StartDialog(dialogueId, lineup,);
+            if (!isDialogStarted)
             {
                 Debug.LogWarning($"Dialogue '{dialogueId}' could not be started");
             }
         }
+
+        public string GetPrompt() => "Talk";
     }
 }

@@ -14,10 +14,8 @@ namespace Adventure.Integration.Battle
         }
 
         [SerializeField] private List<UnitStack> playerUnits = new List<UnitStack>();
-        [SerializeField] private List<UnitStack> enemyUnits = new List<UnitStack>();
 
-        public IReadOnlyList<UnitStackData> GetPlayerLineup() => Convert(playerUnits);
-        public IReadOnlyList<UnitStackData> GetEnemyLineup() => Convert(enemyUnits);
+        public IReadOnlyList<UnitStackData> Convert() => Convert(playerUnits);
 
         private static List<UnitStackData> Convert(List<UnitStack> source)
         {

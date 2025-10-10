@@ -6,16 +6,19 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Zenject;
 using Adventure.Application.Dialog;
 using Adventure.Presentation.Dialog;
+using Adventure.Presentation.Interaction;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Domain.Dialog;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
 using Adventure.Infrastructure.Movement;
 using Adventure.Infrastructure.Interaction;
+using Assets.Scripts.Adventure.Infrastructure.Input;
 public static class AdventureSetupUtility
 {
     private const string RootFolder = "Assets/Adventure/Generated";
@@ -27,6 +30,7 @@ public static class AdventureSetupUtility
     private const string DialogueBattleNodeAssetName = "SampleDialogueBattle.asset";
     private const string ArmyLineupAssetName = "ArmyLineup.asset";
     private const string GameConfigurationServiceAssetName = "GameConfigurationService.asset";
+    private const string InputActionsAssetPath = "Assets/Scripts/Input/InputSystem_Actions/InputSystem_Adventure.inputactions";
 
     [MenuItem("Tools/Adventure/Setup Scene")]
     public static void SetupScene()
@@ -41,8 +45,9 @@ public static class AdventureSetupUtility
             var lineup = EnsureArmyLineup();
             var configurationService = EnsureGameConfigurationService();
 
-            var playerRoot = EnsurePlayer(movementSettings);
             var systemsRoot = EnsureSystemsRoot();
+            var promptView = EnsureInteractionPromptView(systemsRoot);
+            var playerRoot = EnsurePlayer(movementSettings, promptView);
 
             var gateway = EnsureGridConfigurationGateway(systemsRoot, configurationService);
             var dialogueView = EnsureDialogueView(systemsRoot);
@@ -51,14 +56,13 @@ public static class AdventureSetupUtility
             var interaction = playerRoot.GetComponent<PlayerInteractionController>();
             if (interaction == null)
                 interaction = playerRoot.AddComponent<PlayerInteractionController>();
-
-            var bookPresenter = EnsureBookPresenter(catalog);
+            ConfigureInteractionController(interaction, playerRoot, promptView);
 
             var installer = systemsRoot.GetComponent<AdventureGameplayInstaller>();
             if (installer == null)
                 installer = systemsRoot.AddComponent<AdventureGameplayInstaller>();
             BindInstaller(installer, playerRoot.GetComponent<PlayerMovementController>(), catalog, dialogueDatabase,
-                gateway, lineup, interaction, bookPresenter, orchestrator);
+                gateway, lineup, interaction , orchestrator);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             AssetDatabase.SaveAssets();
@@ -268,49 +272,155 @@ public static class AdventureSetupUtility
         return configuration;
     }
 
-    private static GameObject EnsurePlayer(MovementSettingsSO settings)
+    private static GameObject EnsurePlayer(MovementSettingsSO settings, InteractionPromptView promptView)
     {
         const string playerName = "AdventurePlayer";
-        var existing = GameObject.Find(playerName);
-        if (existing != null)
-            return existing;
+        var player = GameObject.Find(playerName);
+        var wasCreated = false;
+        if (player == null)
+        {
+            player = new GameObject(playerName);
+            Undo.RegisterCreatedObjectUndo(player, "Create Adventure Player");
+            player.transform.position = Vector3.zero;
+            wasCreated = true;
+        }
 
-        var player = new GameObject(playerName);
-        Undo.RegisterCreatedObjectUndo(player, "Create Adventure Player");
-        player.transform.position = Vector3.zero;
-        var characterController = player.AddComponent<CharacterController>();
+        var characterController = player.GetComponent<CharacterController>();
+        if (characterController == null)
+        {
+            characterController = player.AddComponent<CharacterController>();
+            if (!wasCreated)
+                Undo.RegisterCreatedObjectUndo(characterController, "Add CharacterController");
+        }
         characterController.height = 1.8f;
         characterController.radius = 0.4f;
 
-        var movement = player.AddComponent<PlayerMovementController>();
-        var moveSO = new SerializedObject(movement);
-        moveSO.FindProperty("settings").objectReferenceValue = settings;
-        moveSO.ApplyModifiedPropertiesWithoutUndo();
+        var playerInput = player.GetComponent<AdventurePlayerInput>();
+        if (playerInput == null)
+        {
+            playerInput = player.AddComponent<AdventurePlayerInput>();
+            Undo.RegisterCreatedObjectUndo(playerInput, "Add AdventurePlayerInput");
+        }
+        ConfigurePlayerInput(playerInput);
 
-        var interaction = player.AddComponent<PlayerInteractionController>();
-
-        var cameraPivot = new GameObject("CameraPivot");
-        Undo.RegisterCreatedObjectUndo(cameraPivot, "Create Camera Pivot");
-        cameraPivot.transform.SetParent(player.transform);
-        cameraPivot.transform.localPosition = new Vector3(0f, 1.6f, 0f);
-        var cameraGO = new GameObject("PlayerCamera");
-        Undo.RegisterCreatedObjectUndo(cameraGO, "Create Player Camera");
-        cameraGO.transform.SetParent(cameraPivot.transform);
-        cameraGO.transform.localPosition = Vector3.zero;
-        cameraGO.transform.localRotation = Quaternion.identity;
-        var camera = cameraGO.AddComponent<Camera>();
-        camera.tag = "MainCamera";
+        var movement = player.GetComponent<PlayerMovementController>();
+        if (movement == null)
+        {
+            movement = player.AddComponent<PlayerMovementController>();
+            Undo.RegisterCreatedObjectUndo(movement, "Add PlayerMovementController");
+        }
 
         var movementSO = new SerializedObject(movement);
-        movementSO.FindProperty("cameraPivot").objectReferenceValue = cameraPivot.transform;
-        movementSO.ApplyModifiedPropertiesWithoutUndo();
+        movementSO.FindProperty("settings").objectReferenceValue = settings;
 
-        var interactionSO = new SerializedObject(interaction);
-        interactionSO.FindProperty("movementController").objectReferenceValue = movement;
-        interactionSO.FindProperty("playerCamera").objectReferenceValue = camera;
-        interactionSO.ApplyModifiedPropertiesWithoutUndo();
+        var pivotTransform = player.transform.Find("CameraPivot");
+        if (pivotTransform == null)
+        {
+            var cameraPivot = new GameObject("CameraPivot");
+            Undo.RegisterCreatedObjectUndo(cameraPivot, "Create Camera Pivot");
+            pivotTransform = cameraPivot.transform;
+            pivotTransform.SetParent(player.transform);
+        }
+        pivotTransform.localPosition = new Vector3(0f, 1.6f, 0f);
+
+        var cameraTransform = pivotTransform.Find("PlayerCamera");
+        Camera playerCamera;
+        if (cameraTransform == null)
+        {
+            var cameraGO = new GameObject("PlayerCamera");
+            Undo.RegisterCreatedObjectUndo(cameraGO, "Create Player Camera");
+            cameraTransform = cameraGO.transform;
+            cameraTransform.SetParent(pivotTransform);
+            cameraTransform.localPosition = Vector3.zero;
+            cameraTransform.localRotation = Quaternion.identity;
+            playerCamera = cameraGO.AddComponent<Camera>();
+        }
+        else
+        {
+            playerCamera = cameraTransform.GetComponent<Camera>();
+            if (playerCamera == null)
+                playerCamera = cameraTransform.gameObject.AddComponent<Camera>();
+        }
+        playerCamera.tag = "MainCamera";
+
+        movementSO.FindProperty("cameraPivot").objectReferenceValue = pivotTransform;
+        movementSO.FindProperty("legacyInputProvider").objectReferenceValue = playerInput;
+        movementSO.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(movement);
+
+        var interaction = player.GetComponent<PlayerInteractionController>();
+        if (interaction == null)
+        {
+            interaction = player.AddComponent<PlayerInteractionController>();
+            Undo.RegisterCreatedObjectUndo(interaction, "Add PlayerInteractionController");
+        }
+        ConfigureInteractionController(interaction, player, promptView, playerCamera, playerInput);
+
+        var router = player.GetComponent<AdventureInputRouter>();
+        if (router == null)
+        {
+            router = player.AddComponent<AdventureInputRouter>();
+            Undo.RegisterCreatedObjectUndo(router, "Add AdventureInputRouter");
+        }
+        ConfigureInputRouter(router, movement, interaction, playerInput);
 
         return player;
+    }
+
+    private static void ConfigurePlayerInput(AdventurePlayerInput playerInput)
+    {
+        if (playerInput == null)
+            return;
+
+        var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsAssetPath);
+        if (asset == null)
+        {
+            Debug.LogWarning($"Input actions asset not found at '{InputActionsAssetPath}'. AdventurePlayerInput will remain unconfigured.", playerInput);
+            return;
+        }
+
+        var so = new SerializedObject(playerInput);
+        so.FindProperty("inputActions").objectReferenceValue = asset;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(playerInput);
+    }
+
+    private static void ConfigureInteractionController(
+        PlayerInteractionController controller,
+        GameObject player,
+        InteractionPromptView promptView,
+        Camera cameraOverride = null,
+        AdventurePlayerInput playerInputOverride = null)
+    {
+        if (controller == null)
+            return;
+
+        var playerInput = playerInputOverride ?? player.GetComponent<AdventurePlayerInput>();
+        var camera = cameraOverride ?? player.GetComponentInChildren<Camera>();
+
+        var so = new SerializedObject(controller);
+        so.FindProperty("playerInput").objectReferenceValue = playerInput;
+        so.FindProperty("playerCamera").objectReferenceValue = camera;
+        so.FindProperty("promptView").objectReferenceValue = promptView;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(controller);
+    }
+
+    private static void ConfigureInputRouter(
+        AdventureInputRouter router,
+        PlayerMovementController movementController,
+        PlayerInteractionController interactionController,
+        AdventurePlayerInput playerInput)
+    {
+        if (router == null)
+            return;
+
+        var so = new SerializedObject(router);
+        so.FindProperty("playerInput").objectReferenceValue = playerInput;
+        so.FindProperty("movementController").objectReferenceValue = movementController;
+        so.FindProperty("interactionController").objectReferenceValue = interactionController;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(router);
     }
 
     private static GameObject EnsureSystemsRoot()
@@ -323,6 +433,85 @@ public static class AdventureSetupUtility
         var systems = new GameObject(systemsName);
         Undo.RegisterCreatedObjectUndo(systems, "Create Adventure Systems");
         return systems;
+    }
+
+    private static InteractionPromptView EnsureInteractionPromptView(GameObject systemsRoot)
+    {
+        const string canvasName = "InteractionPromptCanvas";
+        var canvasTransform = systemsRoot.transform.Find(canvasName);
+        GameObject canvasGO;
+        if (canvasTransform == null)
+        {
+            canvasGO = new GameObject(canvasName, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            Undo.RegisterCreatedObjectUndo(canvasGO, "Create Interaction Prompt Canvas");
+            canvasGO.transform.SetParent(systemsRoot.transform);
+            canvasGO.transform.localPosition = Vector3.zero;
+            canvasGO.transform.localRotation = Quaternion.identity;
+            canvasGO.transform.localScale = Vector3.one;
+        }
+        else
+        {
+            canvasGO = canvasTransform.gameObject;
+        }
+
+        var canvas = canvasGO.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var scaler = canvasGO.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        EnsureEventSystem();
+
+        Transform viewTransform = canvasGO.transform.Find("Prompt");
+        GameObject viewGO;
+        if (viewTransform == null)
+        {
+            viewGO = new GameObject("Prompt", typeof(RectTransform), typeof(CanvasGroup), typeof(Image), typeof(InteractionPromptView));
+            Undo.RegisterCreatedObjectUndo(viewGO, "Create Interaction Prompt View");
+            viewGO.transform.SetParent(canvasGO.transform);
+        }
+        else
+        {
+            viewGO = viewTransform.gameObject;
+            if (viewGO.GetComponent<CanvasGroup>() == null)
+                viewGO.AddComponent<CanvasGroup>();
+            if (viewGO.GetComponent<Image>() == null)
+                viewGO.AddComponent<Image>();
+            if (viewGO.GetComponent<InteractionPromptView>() == null)
+                viewGO.AddComponent<InteractionPromptView>();
+        }
+
+        var rect = viewGO.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.2f);
+        rect.anchorMax = new Vector2(0.5f, 0.2f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(320f, 90f);
+
+        var background = viewGO.GetComponent<Image>();
+        background.color = new Color(0f, 0f, 0f, 0.65f);
+
+        var canvasGroup = viewGO.GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+
+        var bindingText = EnsureText(viewGO.transform, "BindingLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(280f, 32f), 24f, FontStyles.Bold);
+        bindingText.alignment = TextAlignmentOptions.Center;
+
+        var actionText = EnsureText(viewGO.transform, "ActionLabel", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 12f), new Vector2(280f, 32f), 20f);
+        actionText.alignment = TextAlignmentOptions.Center;
+
+        var view = viewGO.GetComponent<InteractionPromptView>();
+        var viewSO = new SerializedObject(view);
+        viewSO.FindProperty("root").objectReferenceValue = canvasGroup;
+        viewSO.FindProperty("bindingLabel").objectReferenceValue = bindingText;
+        viewSO.FindProperty("actionLabel").objectReferenceValue = actionText;
+        viewSO.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(view);
+
+        return view;
     }
 
     private static GridConfigurationGateway EnsureGridConfigurationGateway(GameObject parent, GameConfigurationService configurationService)
@@ -518,43 +707,6 @@ public static class AdventureSetupUtility
         EditorUtility.SetDirty(orchestrator);
         return orchestrator;
     }
-
-    private static MushroomBookInventoryPresenter EnsureBookPresenter(MushroomCatalogSO catalog)
-    {
-        const string presenterName = "MushroomBookPresenter";
-        var bookController = UnityEngine.Object.FindObjectOfType<MushroomBookController>();
-        if (bookController == null)
-        {
-            Debug.LogWarning("MushroomBookController not found in scene. Inventory presenter will not be created.");
-            return null;
-        }
-
-        var existing = GameObject.Find(presenterName);
-        GameObject presenterGO;
-        if (existing == null)
-        {
-            presenterGO = new GameObject(presenterName);
-            Undo.RegisterCreatedObjectUndo(presenterGO, "Create Mushroom Book Presenter");
-        }
-        else
-        {
-            presenterGO = existing;
-        }
-
-        var presenter = presenterGO.GetComponent<MushroomBookInventoryPresenter>();
-        if (presenter == null)
-            presenter = presenterGO.AddComponent<MushroomBookInventoryPresenter>();
-
-        presenterGO.transform.SetParent(bookController.transform);
-
-        var so = new SerializedObject(presenter);
-        so.FindProperty("bookController").objectReferenceValue = bookController;
-        so.FindProperty("catalog").objectReferenceValue = catalog;
-        so.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(presenter);
-        return presenter;
-    }
-
     private static void BindInstaller(
         AdventureGameplayInstaller installer,
         PlayerMovementController movementController,
@@ -563,7 +715,6 @@ public static class AdventureSetupUtility
         GridConfigurationGateway gateway,
         ArmyLineupSO lineup,
         PlayerInteractionController interactionController,
-        MushroomBookInventoryPresenter bookPresenter,
         AdventureDialogueOrchestrator orchestrator)
     {
         var so = new SerializedObject(installer);
@@ -573,7 +724,6 @@ public static class AdventureSetupUtility
         so.FindProperty("gridConfigurationGateway").objectReferenceValue = gateway;
         so.FindProperty("defaultLineup").objectReferenceValue = lineup;
         so.FindProperty("interactionController").objectReferenceValue = interactionController;
-        so.FindProperty("bookPresenter").objectReferenceValue = bookPresenter;
         so.FindProperty("dialogueOrchestrator").objectReferenceValue = orchestrator;
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(installer);

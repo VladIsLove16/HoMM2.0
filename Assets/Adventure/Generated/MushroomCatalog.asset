@@ -12,13 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9917218971e26ad44abb15b4fd575bd9, type: 3}
   m_Name: MushroomCatalog
   m_EditorClassIdentifier: 
-  entries:
-  - Id: mushroom_sample
-    DisplayName: Sample Mushroom
-    Description: A mysterious mushroom found near the camp.
-    Icon: {fileID: 0}
-    IconHovered: {fileID: 0}
-    HumanizedIcon: {fileID: 0}
-    HumanizedIconHovered: {fileID: 0}
-    Characteristics:
-    - 'Weight: Light'
+  mushroomDefinitions: []

@@ -10,8 +10,22 @@ public class GridContentEntrySO : ScriptableObject
 {
     [SerializeField] int width;
     [SerializeField] int height;
-    public int Width => width;
-    public int Height => height;
+    public int Width
+    {
+        get
+        {
+            return width;
+        }
+        set
+        {
+            width = value;
+        }
+    }
+    public int Height
+    {
+        set { height = value; }
+        get { return height; }
+    }
     [Serializable]
     public class UnitContent
     {
@@ -22,4 +36,12 @@ public class GridContentEntrySO : ScriptableObject
         public Team Team;
     }
     public List<UnitContent> contents;
+    public void Append(UnitContent[] slots)
+    {
+        if (slots == null) return;
+        foreach (var slot in slots)
+        {
+            contents.Add(slot); 
+        }
+    }
 }

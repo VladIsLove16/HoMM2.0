@@ -8,7 +8,7 @@ public class GameLogicMonoInstaller : MonoInstaller
     [Header("Gameplay References")]
     [SerializeField] private GameController gameController;
     [SerializeField] private GameNetworkCommandGateway networkCommandGateway;
-    [SerializeField] private GameUnitDatas unitDatas;
+    [SerializeField] private UnitDefinitionSOCollection unitDefinitionSOCollection;
     [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
@@ -46,7 +46,7 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindModels()
     {
-        IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatasDictionary = unitDatas.ToDictionary();
+        IReadOnlyDictionary<UnitType, UnitDefinitionSO> unitDatasDictionary = unitDefinitionSOCollection.ToDictionary();
         Container.Bind<IReadOnlyDictionary<UnitType, UnitDefinitionSO>>().FromInstance(unitDatasDictionary);
 
         Container.Bind<UnitModelFactory>().AsSingle().NonLazy();

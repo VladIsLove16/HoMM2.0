@@ -112,7 +112,6 @@ public class CellInputHandler : MonoBehaviour
     {
         if(isDragging)
         {
-            Debug.Log("update DRAG");
             var worldPos = GetMouseWorldPosition();
             _gameView3D.UpdateDrag(worldPos);
         }
