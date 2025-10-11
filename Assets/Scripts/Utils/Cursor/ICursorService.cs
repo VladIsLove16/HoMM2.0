@@ -5,6 +5,8 @@
 public interface ICursorService
 {
     void SetDefaultCursor();
-    void SetCursorState(CursorState state);
+    void SetCursorState(CursorVisualState state);
     void SetCursorVisibility(bool isVisible);
+    void LockToCenter();
+    void Unlock();
 }

@@ -1,9 +1,10 @@
-﻿public enum CursorState
+﻿public enum CursorVisualState
 {
     Default,
     Attack,
     RangedAttack,
     Move,
     NotAvailable,
-    Point
+    Point,
+    Hidden
 }

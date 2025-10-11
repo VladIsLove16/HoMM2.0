@@ -1,16 +1,20 @@
+using Adventure.Domain.Inventory;
+using Adventure.Presentation.Mushroom;
+using Adventure.Settings.ViewModel;
+using Assets.Scripts.Adventure.Infrastructure.Input;
 using System;
 using System.Collections.Generic;
-using Adventure.Domain.Inventory;
 using UniRx;
 using UnityEngine;
+using Zenject;
 
 namespace Adventure.Presentation.Mushroom
 {
-    public class MushroomBookViewModel : IDisposable
+    public class MushroomBookViewModel : IDisposable, IActiveMenu
     {
+        private const int _entriesPerPage = 4;
         private readonly MushroomInventoryModel _mushroomInventoryModel;
         private readonly UnitDefinitionSOCollection _catalog;
-        private readonly int _entriesPerPage;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
         private readonly List<UnitDefinitionSO> _allEntries = new List<UnitDefinitionSO>();
 
@@ -20,19 +24,18 @@ namespace Adventure.Presentation.Mushroom
         private readonly ReactiveProperty<int> _totalPages = new ReactiveProperty<int>(0);
         private readonly ReactiveProperty<PresentationMode> _presentationMode =
             new ReactiveProperty<PresentationMode>(global::PresentationMode.Normal);
+        private readonly ReactiveProperty<bool> _isOpen = new(false);
 
         public MushroomBookViewModel(
             MushroomInventoryModel mushroomInventoryModel,
-            UnitDefinitionSOCollection catalog,
-            int entriesPerPage)
+            UnitDefinitionSOCollection catalog)
         {
             _mushroomInventoryModel = mushroomInventoryModel;
             _catalog = catalog;
-            _entriesPerPage = Math.Max(1, entriesPerPage);
 
             RebuildEntries();
         }
-
+        public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         public IReadOnlyReactiveCollection<UnitDefinitionSO> CurrentPageEntries => _currentPageEntries;
         public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
         public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
@@ -41,6 +44,29 @@ namespace Adventure.Presentation.Mushroom
         public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
         public void PrevPage() => GoToPage(_currentPageIndex.Value - 1);
 
+        public void Toggle()
+        {
+            if (_isOpen.Value)
+                Close();
+            else
+                Open();
+        }
+
+        public void Open()
+        {
+            if (_isOpen.Value)
+                return;
+
+            _isOpen.SetValueAndForceNotify(true);
+        }
+
+        public void Close()
+        {
+            if (!_isOpen.Value)
+                return;
+
+            _isOpen.SetValueAndForceNotify(false);
+        }
         public void GoToPage(int pageIndex)
         {
             var clamped = Mathf.Clamp(pageIndex, 0, Math.Max(0, _totalPages.Value - 1));

@@ -11,7 +11,7 @@ public class CursorService : MonoBehaviour, ICursorService
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
     [SerializeField] private List<CursorStateTexture> cursorStateTextures;
-    private Dictionary<CursorState, Texture2D> _cursorTextrures;
+    private Dictionary<CursorVisualState, Texture2D> _cursorTextrures;
     private ActionResolver _actionResolver;
     [Inject]
     public void Construct(ActionResolver actionResolver)
@@ -40,7 +40,7 @@ public class CursorService : MonoBehaviour, ICursorService
         Cursor.visible = isVisible;
     }
     // Расширенный сервис
-    public void SetCursorState(CursorState state)
+    public void SetCursorState(CursorVisualState state)
     {
         if (_cursorTextrures.TryGetValue(state, out var tex))
         {
@@ -52,16 +52,16 @@ public class CursorService : MonoBehaviour, ICursorService
     public void LockToCenter()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        SetCursorState(CursorState.Point);
+        SetCursorState(CursorVisualState.Point);
     }
     public void Unlock()
     {
         Cursor.lockState = CursorLockMode.None;
-        SetCursorState(CursorState.Default);
+        SetCursorState(CursorVisualState.Default);
     }
     private void OnActionNotResolved()
     {
-        SetCursorState(CursorState.Default);
+        SetCursorState(CursorVisualState.Default);
     }
 
     private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
@@ -71,19 +71,19 @@ public class CursorService : MonoBehaviour, ICursorService
         SetCursorState(state);
     }
 
-    private CursorState GetCursorStateByActionHandler(IActionHandler actionHandler)
+    private CursorVisualState GetCursorStateByActionHandler(IActionHandler actionHandler)
     {
         switch (actionHandler.ActionType)
         {
             case ActionType.Move:
-                return CursorState.Move;
+                return CursorVisualState.Move;
             case ActionType.MoveThenAttack:
             case ActionType.Attack:
-                return CursorState.Attack;
+                return CursorVisualState.Attack;
             case ActionType.RangedAttack:
-                return CursorState.RangedAttack;
+                return CursorVisualState.RangedAttack;
             default:
-                return CursorState.Default;
+                return CursorVisualState.Default;
         }
     }
     /// <summary>

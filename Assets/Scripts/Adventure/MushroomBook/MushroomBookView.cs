@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 public class MushroomBookView : MonoBehaviour
 {
-    [Header("UI")]
+    [Header("Blocked")]
     [SerializeField] private List<MushroomBookEntryView> entrySlots = new List<MushroomBookEntryView>();
     [SerializeField] private TextMeshProUGUI pageNumberText;
     [SerializeField] private UnitDefinitionSOCollection testMushrooms;
@@ -18,33 +18,6 @@ public class MushroomBookView : MonoBehaviour
     private CompositeDisposable _subscriptions = new CompositeDisposable();
     private readonly ReactiveCollection<UnitDefinitionSO> _reactiveEntries = new();
     public int PageCapacity => entrySlots?.Count ?? 0;
-
-    public Action Closed { get; internal set; }
-
-    [Button("Render Test Page")]
-    private void RenderTestPage()
-    {
-        // Очистим коллекцию и добавим тестовые данные
-        _reactiveEntries.Clear();
-        foreach (var m in testMushrooms.GetAll())
-        {
-            _reactiveEntries.Add(m);
-        }
-
-        // Отрисуем "фиктивную" страницу
-        RenderEntries(_reactiveEntries);
-        UpdatePageNumber(0, 1);
-
-        Debug.Log($"[MushroomBookView] Rendered {testMushrooms.GetAll()} test entries.");
-    }
-    [Button("ToglePresMode")]
-    private void ToglePresMode()
-    {
-       foreach( var slot in entrySlots)
-        {
-            slot?.SetPresentationMode(slot.Mode == PresentationMode.Normal ? PresentationMode.Humanized : PresentationMode.Normal);
-        }
-    }
     public void Construct(MushroomBookViewModel viewModel)
     {
         if (_viewModel == viewModel)
@@ -78,22 +51,50 @@ public class MushroomBookView : MonoBehaviour
         _viewModel.TotalPages
             .Subscribe(_ => RefreshPageNumber())
             .AddTo(_subscriptions);
+        _viewModel.IsOpen
+            .Subscribe(OnBookStateChanged)
+            .AddTo(_subscriptions);
 
         OnPresentationModeChanged(_viewModel.PresentationMode.Value);
         RenderEntries(_viewModel.CurrentPageEntries);
         RefreshPageNumber();
     }
 
-    public void NextPage() => _viewModel?.NextPage();
-    public void PrevPage() => _viewModel?.PrevPage();
-    public void GoToPage(int pageIndex) => _viewModel?.GoToPage(pageIndex);
+    [Button("Render Test Page")]
+    private void RenderTestPage()
+    {
+        // Очистим коллекцию и добавим тестовые данные
+        _reactiveEntries.Clear();
+        foreach (var m in testMushrooms.GetAll())
+        {
+            _reactiveEntries.Add(m);
+        }
 
-    public void SetModeHumanized(bool humanized)
+        // Отрисуем "фиктивную" страницу
+        RenderEntries(_reactiveEntries);
+        UpdatePageNumber(0, 1);
+
+        Debug.Log($"[MushroomBookView] Rendered {testMushrooms.GetAll()} test entries.");
+    }
+    [Button("ToglePresMode")]
+    private void ToglePresMode()
+    {
+       foreach( var slot in entrySlots)
+        {
+            slot?.SetPresentationMode(slot.Mode == PresentationMode.Normal ? PresentationMode.Humanized : PresentationMode.Normal);
+        }
+    }
+
+    //public void NextPage() => _viewModel?.NextPage();
+    //public void PrevPage() => _viewModel?.PrevPage();
+    //public void GoToPage(int pageIndex) => _viewModel?.GoToPage(pageIndex);
+
+    private void SetModeHumanized(bool humanized)
     {
         _viewModel?.SetPresentationMode(humanized ? PresentationMode.Humanized : PresentationMode.Normal);
     }
 
-    public void Open()
+    private void Open()
     {
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
@@ -126,7 +127,10 @@ public class MushroomBookView : MonoBehaviour
             }
         }
     }
-
+    private void OnBookStateChanged(bool isOpen)
+    {
+        gameObject.SetActive(isOpen);
+    }
     private void RefreshPageNumber()
     {
         if (_viewModel == null)

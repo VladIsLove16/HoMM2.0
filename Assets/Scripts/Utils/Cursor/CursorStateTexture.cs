@@ -5,5 +5,5 @@ using UnityEngine;
 public class CursorStateTexture
 {
     [SerializeField] public Texture2D texture;
-    [SerializeField] public CursorState state;
+    [SerializeField] public CursorVisualState state;
 }

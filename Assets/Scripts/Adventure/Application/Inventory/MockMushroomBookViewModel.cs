@@ -19,7 +19,7 @@ public class MockMushroomBookViewModel : ScriptableObject
         {
             mushroomInventoryModel.Add(mushroom.UnitType, 2);
         }
-        mushroomBookViewModel = new MushroomBookViewModel(mushroomInventoryModel, catalog, entriesPerPage);
+        mushroomBookViewModel = new MushroomBookViewModel(mushroomInventoryModel, catalog);
         mushroomBookViewModel.SetPresentationMode(PresentationMode.Normal);
         mushroomBookViewModel.GoToPage(0);
     }
