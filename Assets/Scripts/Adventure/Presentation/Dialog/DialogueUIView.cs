@@ -25,6 +25,7 @@ namespace Adventure.Presentation.Dialog
         {
             _viewModel = viewModel;
             _viewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(_bindings);
+            _viewModel.EnemyArmy.Subscribe((x)=>Debug.Log("enemy army count " + x.Convert().Count)).AddTo(_bindings);
             Hide();
         }
 

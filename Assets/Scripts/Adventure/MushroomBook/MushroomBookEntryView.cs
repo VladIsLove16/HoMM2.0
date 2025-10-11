@@ -22,8 +22,6 @@ public class MushroomBookEntryView : MonoBehaviour, IPointerEnterHandler, IPoint
     private PresentationMode mode = PresentationMode.Normal;
     private bool isHovered;
 
-
-
     public void Bind(MushroomViewModel? data)
     {
         runtimeData = data;
@@ -91,16 +89,26 @@ public class MushroomBookEntryView : MonoBehaviour, IPointerEnterHandler, IPoint
 
         if (data == null) return;
         var list = data.Value.Characteristics;
-        if (list == null) return;
 
-        foreach (var c in list)
+        if (list == null)
         {
-            var go = Instantiate(characteristicItemPrefab, characteristicsRoot);
-            var text = go.GetComponentInChildren<Text>();
-            if (text != null)
+            string c = "No characteristics";
+            CreateCharacteristicEntry(c);
+        }
+        else
+            foreach (var c in list)
             {
-                text.text = c;
+                CreateCharacteristicEntry(c);
             }
+    }
+
+    private void CreateCharacteristicEntry(string c)
+    {
+        var go = Instantiate(characteristicItemPrefab, characteristicsRoot);
+        var text = go.GetComponentInChildren<Text>();
+        if (text != null)
+        {
+            text.text = c;
         }
     }
 }

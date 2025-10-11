@@ -41,29 +41,17 @@ public class UnitDefinitionSO : ScriptableObject
     [Header("Unit Data for Book")]
     [TextArea(2, 6)]
     [SerializeField] private string description;
-
-    [System.Serializable]
-    public class Characteristic
-    {
-        public string Key;
-        public string Value;
-    }
-    [SerializeField] private List<Characteristic> characteristics = new List<Characteristic>();
     [SerializeField] private List<StatusEffectData> startingEffects = new List<StatusEffectData>();
     [SerializeField] private List<StatusEffectData> invulnerableEffects = new List<StatusEffectData>();
     public IReadOnlyList<StatusEffectData> StartingEffects => startingEffects;
     public IReadOnlyList<StatusEffectData> InvulnerableEffects => invulnerableEffects;
     public string Description => description;
     public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? Name : displayName;
-    public IReadOnlyList<Characteristic> Characteristics => characteristics;
+    public Material GetBlueTeamMaterial() => materialProvider?.GetBlueTeamMaterial();
+    public Material GetHoveredBlueTeamMaterial() => materialProvider?.GetHoveredBlueTeamMaterial();
+    public Material GetRedTeamMaterial() => materialProvider?.GetRedTeamMaterial();
+    public Material GetHoveredRedTeamMaterial() => materialProvider?.GetHoveredRedTeamMaterial();
 
-    // Методы для получения материалов (для тестирования)
-        public Material GetBlueTeamMaterial() => materialProvider?.GetBlueTeamMaterial();
-        public Material GetHoveredBlueTeamMaterial() => materialProvider?.GetHoveredBlueTeamMaterial();
-        public Material GetRedTeamMaterial() => materialProvider?.GetRedTeamMaterial();
-        public Material GetHoveredRedTeamMaterial() => materialProvider?.GetHoveredRedTeamMaterial();
-
-    // Метод для установки провайдера материалов (для тестирования)
     public void SetMaterialProvider(IMaterialProvider provider)
     {
         // Allow test mocks (any IMaterialProvider) to be used at runtime.

@@ -2,16 +2,14 @@ using System.Collections.Generic;
 
 namespace Adventure.Domain.Inventory
 {
-    public sealed class MushroomInventory
+    public sealed class MushroomInventoryModel
     {
-        private readonly Dictionary<string, int> _items = new Dictionary<string, int>();
+        private readonly Dictionary<UnitType, int> _items = new Dictionary<UnitType, int>();
 
-        public IReadOnlyDictionary<string, int> Items => _items;
+        public IReadOnlyDictionary<UnitType, int> Items => _items;
 
-        public void Add(string mushroomId, int amount = 1)
+        public void Add(UnitType mushroomId, int amount = 1)
         {
-            if (string.IsNullOrEmpty(mushroomId) || amount <= 0)
-                return;
 
             if (_items.TryGetValue(mushroomId, out var existing))
             {
@@ -23,7 +21,7 @@ namespace Adventure.Domain.Inventory
             }
         }
 
-        public int GetCount(string mushroomId)
+        public int GetCount(UnitType mushroomId)
         {
             return _items.TryGetValue(mushroomId, out var value) ? value : 0;
         }

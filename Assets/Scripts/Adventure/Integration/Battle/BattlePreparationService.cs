@@ -1,23 +1,22 @@
 using System;
 using System.Collections.Generic;
-using Adventure.Application.Inventory;
 using Adventure.Domain.Inventory;
 
 namespace Adventure.Integration.Battle
 {
     public sealed class BattlePreparationService
     {
-        private readonly MushroomBookViewModel _inventoryService;
-        private readonly IMushroomCatalog _catalog;
-        private NpcArmyDefinitionSO _currentEnemy;
+        private readonly MushroomInventoryModel _inventoryService;
+        private readonly UnitDefinitionSOCollection _catalog;
+        private ArmyLineupSO _currentEnemy;
 
-        public BattlePreparationService(MushroomBookViewModel inventoryService, IMushroomCatalog catalog)
+        public BattlePreparationService(MushroomInventoryModel inventoryService, UnitDefinitionSOCollection catalog)
         {
             _inventoryService = inventoryService;
             _catalog = catalog;
         }
 
-        public void SetEnemyArmy(NpcArmyDefinitionSO armyDefinition)
+        public void SetEnemyArmy(ArmyLineupSO armyDefinition)
         {
             _currentEnemy = armyDefinition;
         }
@@ -31,13 +30,13 @@ namespace Adventure.Integration.Battle
 
         private IReadOnlyList<UnitStackData> BuildPlayerLineup()
         {
-            var result = new List<UnitStackData>(_inventoryService.Entries.Count);
-            foreach (var entry in _inventoryService.Entries)
+            var result = new List<UnitStackData>(_inventoryService.Items.Count);
+            foreach (var entry in _inventoryService.Items)
             {
-                if (entry.Amount <= 0)
+                if (entry.Value <= 0)
                     continue;
 
-                result.Add(new UnitStackData(entry.Item.UnitType, entry.Amount));
+                result.Add(new UnitStackData(entry.Key, entry.Value));
             }
 
             return result;
@@ -60,17 +59,5 @@ namespace Adventure.Integration.Battle
 
             return result;
         }
-    }
-
-    public readonly struct BattleArmies
-    {
-        public BattleArmies(IReadOnlyList<UnitStackData> playerUnits, IReadOnlyList<UnitStackData> enemyUnits)
-        {
-            PlayerUnits = playerUnits ?? Array.Empty<UnitStackData>();
-            EnemyUnits = enemyUnits ?? Array.Empty<UnitStackData>();
-        }
-
-        public IReadOnlyList<UnitStackData> PlayerUnits { get; }
-        public IReadOnlyList<UnitStackData> EnemyUnits { get; }
     }
 }

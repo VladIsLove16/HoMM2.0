@@ -1,5 +1,4 @@
 using Adventure.Application.Dialog;
-using Adventure.Application.Inventory;
 using Adventure.Domain.Inventory;
 using Adventure.Domain.Dialog;
 using Adventure.Infrastructure.Interaction;
@@ -16,7 +15,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private PlayerMovementController playerMovementController;
 
     [Header("Catalogues")]
-    [SerializeField] private MushroomCatalogSO mushroomCatalog;
+    [SerializeField] private UnitDefinitionSOCollection mushroomCatalog;
     [SerializeField] private DialogueDatabaseSO dialogueDatabase;
 
     [Header("Battle")]
@@ -28,17 +27,17 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     [Header("UI & Interaction")]
     [SerializeField] private PlayerInteractionController interactionController;
-    [SerializeField] private AdventureDialogueOrchestrator dialogueOrchestrator;
 
     public override void InstallBindings()
     {
-        Container.Bind<IMushroomCatalog>().FromInstance(mushroomCatalog).AsSingle();
+        Container.Bind<UnitDefinitionSOCollection>().FromInstance(mushroomCatalog).AsSingle();
         Container.Bind<MushroomInventoryModel>().AsSingle();
-        Container.Bind<Adventure.Application.Inventory.MushroomBookViewModel>().AsSingle();
-
-        Container.Bind<IDialogRepository>().FromInstance(dialogueDatabase).AsSingle();
         Container.Bind<IDialogStateStore>().To<PlayerPrefsDialogStateStore>().AsSingle();
+        Container.Bind<IDialogRepository>().FromInstance(dialogueDatabase).AsSingle();
+
+        Container.Bind<MushroomBookViewModel>().AsSingle();
         Container.Bind<DialogVM>().AsSingle();
+        Container.Bind<MushroomCollectionViewModel>().AsSingle();
 
         var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, rowSpacing);
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();

@@ -1,6 +1,7 @@
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Interaction;
 using UnityEngine;
+using Zenject;
 namespace Adventure.Infrastructure.Inventory
 {
     /// <summary>
@@ -12,9 +13,15 @@ namespace Adventure.Infrastructure.Inventory
         [SerializeField] private bool destroyOnCollect = true;
         public UnitType Type => UnitType;
         public bool CanCollect { get; private set; } = true;
-
+        private MushroomCollectionViewModel _mushroomCollectionViewModel;
+        [Inject]
+        public void Construct(MushroomCollectionViewModel mushroomCollectionvm)
+        {
+            _mushroomCollectionViewModel = mushroomCollectionvm;
+        }
         public void Interact(PlayerInteractionContext context)
         {
+            _mushroomCollectionViewModel.Collect(Type);
             Collect(context);
         }
 

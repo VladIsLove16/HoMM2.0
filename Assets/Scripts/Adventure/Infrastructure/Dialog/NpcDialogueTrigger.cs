@@ -1,24 +1,20 @@
+using Adventure.Application.Dialog;
 using Adventure.Infrastructure.Interaction;
 using Adventure.Integration.Battle;
 using UnityEngine;
+using Zenject;
 
 namespace Adventure.Infrastructure.Dialog
 {
     public sealed class NpcDialogueTrigger : MonoBehaviour, IInteractable
     {
         [SerializeField] private string dialogueId;
-        [SerializeField] private AdventureDialogueOrchestrator orchestrator;
         [SerializeField] ArmyLineupSO lineup;
+        [Inject] DialogVM DialogVM;
 
         public void Interact(PlayerInteractionContext context)
         {
-            if (orchestrator == null)
-            {
-                Debug.LogWarning("Dialogue orchestrator not set");
-                return;
-            }
-
-            bool isDialogStarted = orchestrator.StartDialog(dialogueId, lineup,);
+            bool isDialogStarted = DialogVM.TryStartDialog(dialogueId, lineup);
             if (!isDialogStarted)
             {
                 Debug.LogWarning($"Dialogue '{dialogueId}' could not be started");

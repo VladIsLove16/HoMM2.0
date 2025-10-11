@@ -20,15 +20,9 @@ namespace Adventure.Infrastructure.Interaction
         [SerializeField] private string hintBinding = "RMB";
         [SerializeField, Range(0.25f, 5f)] private float hintDisplayDuration = 2f;
 
-        private MushroomCollector _mushroomCollector;
         private InteractionCandidate? _currentCandidate;
         private bool _hintVisible;
         private float _hintExpiresAt;
-
-        public void Construct(MushroomBookViewModel inventoryService)
-        {
-            _mushroomCollector = new MushroomCollector(inventoryService);
-        }
 
         private void Awake()
         {
@@ -72,10 +66,6 @@ namespace Adventure.Infrastructure.Interaction
             if (candidate.Collectible != null)
             {
                 if (candidate.Collectible is IMushroomCollectible mushroom)
-                {
-                    _mushroomCollector?.Collect(mushroom, context);
-                }
-                else
                 {
                     candidate.Collectible.Collect(context);
                 }

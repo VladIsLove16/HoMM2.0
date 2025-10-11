@@ -40,7 +40,7 @@ public static class AdventureSetupUtility
             EnsureFolderStructure();
 
             var movementSettings = EnsureMovementSettings();
-            var catalog = EnsureMushroomCatalog();
+            //var catalog = EnsureMushroomCatalog();
             var (dialogueDatabase, startNode, exitNode) = EnsureDialogueAssets();
             var lineup = EnsureArmyLineup();
             var configurationService = EnsureGameConfigurationService();
@@ -115,36 +115,36 @@ public static class AdventureSetupUtility
         return settings;
     }
 
-    private static MushroomCatalogSO EnsureMushroomCatalog()
-    {
-        var path = Path.Combine(RootFolder, MushroomCatalogAssetName).Replace("\\", "/");
-        var catalog = AssetDatabase.LoadAssetAtPath<MushroomCatalogSO>(path);
-        if (catalog == null)
-        {
-            catalog = ScriptableObject.CreateInstance<MushroomCatalogSO>();
-            AssetDatabase.CreateAsset(catalog, path);
-        }
+    //private static MushroomCatalogSO EnsureMushroomCatalog()
+    //{
+    //    var path = Path.Combine(RootFolder, MushroomCatalogAssetName).Replace("\\", "/");
+    //    var catalog = AssetDatabase.LoadAssetAtPath<MushroomCatalogSO>(path);
+    //    if (catalog == null)
+    //    {
+    //        catalog = ScriptableObject.CreateInstance<MushroomCatalogSO>();
+    //        AssetDatabase.CreateAsset(catalog, path);
+    //    }
 
-        var so = new SerializedObject(catalog);
-        var entries = so.FindProperty("entries");
-        if (entries.arraySize == 0)
-            entries.arraySize = 1;
-        var entry = entries.GetArrayElementAtIndex(0);
-        entry.FindPropertyRelative("Id").stringValue = "mushroom_sample";
-        entry.FindPropertyRelative("DisplayName").stringValue = "Sample Mushroom";
-        entry.FindPropertyRelative("Description").stringValue = "A mysterious mushroom found near the camp.";
-        entry.FindPropertyRelative("Icon").objectReferenceValue = null;
-        entry.FindPropertyRelative("IconHovered").objectReferenceValue = null;
-        entry.FindPropertyRelative("HumanizedIcon").objectReferenceValue = null;
-        entry.FindPropertyRelative("HumanizedIconHovered").objectReferenceValue = null;
-        var characteristics = entry.FindPropertyRelative("Characteristics");
-        if (characteristics.arraySize == 0)
-            characteristics.arraySize = 1;
-        characteristics.GetArrayElementAtIndex(0).stringValue = "Weight: Light";
-        so.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(catalog);
-        return catalog;
-    }
+    //    var so = new SerializedObject(catalog);
+    //    var entries = so.FindProperty("entries");
+    //    if (entries.arraySize == 0)
+    //        entries.arraySize = 1;
+    //    var entry = entries.GetArrayElementAtIndex(0);
+    //    entry.FindPropertyRelative("Id").stringValue = "mushroom_sample";
+    //    entry.FindPropertyRelative("DisplayName").stringValue = "Sample Mushroom";
+    //    entry.FindPropertyRelative("Description").stringValue = "A mysterious mushroom found near the camp.";
+    //    entry.FindPropertyRelative("Icon").objectReferenceValue = null;
+    //    entry.FindPropertyRelative("IconHovered").objectReferenceValue = null;
+    //    entry.FindPropertyRelative("HumanizedIcon").objectReferenceValue = null;
+    //    entry.FindPropertyRelative("HumanizedIconHovered").objectReferenceValue = null;
+    //    var characteristics = entry.FindPropertyRelative("Characteristics");
+    //    if (characteristics.arraySize == 0)
+    //        characteristics.arraySize = 1;
+    //    characteristics.GetArrayElementAtIndex(0).stringValue = "Weight: Light";
+    //    so.ApplyModifiedPropertiesWithoutUndo();
+    //    EditorUtility.SetDirty(catalog);
+    //    return catalog;
+    //}
 
     private static (DialogueDatabaseSO database, DialogueNodeSO startNode, DialogueNodeSO exitNode) EnsureDialogueAssets()
     {

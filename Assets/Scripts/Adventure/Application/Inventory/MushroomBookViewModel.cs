@@ -9,7 +9,7 @@ namespace Adventure.Presentation.Mushroom
     public sealed class MushroomBookViewModel : IDisposable
     {
         private readonly MushroomInventoryModel _mushroomInventoryModel;
-        private readonly IMushroomCatalog _catalog;
+        private readonly UnitDefinitionSOCollection _catalog;
         private readonly int _entriesPerPage;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
         private readonly List<MushroomViewModel> _allEntries = new List<MushroomViewModel>();
@@ -23,7 +23,7 @@ namespace Adventure.Presentation.Mushroom
 
         public MushroomBookViewModel(
             MushroomInventoryModel mushroomInventoryModel,
-            IMushroomCatalog catalog,
+            UnitDefinitionSOCollection catalog,
             int entriesPerPage)
         {
             _mushroomInventoryModel = mushroomInventoryModel;
@@ -64,21 +64,19 @@ namespace Adventure.Presentation.Mushroom
             _allEntries.Clear();
             foreach (var entry in _mushroomInventoryModel.Items)
             {
-                if (!_catalog.TryGetVisuals(entry.Key, out var visuals))
+                if (!_catalog.TryGet(entry.Key, out var visuals))
                     continue;
 
-                var characteristics = new List<string>(visuals.Characteristics ?? Array.Empty<string>());
-                characteristics.Add($"Count: {entry.Value}");
 
                 var enriched = new MushroomViewModel(
-                    visuals.Id,
+                    visuals.UnitType,
                     visuals.Name,
                     visuals.Description,
-                    visuals.Icon,
-                    visuals.HoveredIcon,
+                    visuals.UnitIcon,
+                    visuals.UnitIconHovered,
                     visuals.HumanizedIcon,
-                    visuals.HumanizedHoveredIcon,
-                    characteristics);
+                    visuals.HumanizedIconHovered,
+                    null);
                 _allEntries.Add(enriched);
             }
 
