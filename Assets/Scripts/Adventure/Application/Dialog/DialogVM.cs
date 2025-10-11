@@ -25,7 +25,10 @@ namespace Adventure.Application.Dialog
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
         public IReadOnlyReactiveProperty<ArmyLineupSO> EnemyArmy => _enenyArmy;
         public event Action<DialogueChoiceAction> ChoiceActionTriggered;
-
+        public bool DialogExist(string dialogId)
+        {
+            return _repository.TryGet(dialogId, out var graph);
+        }
         public bool TryStartDialog(string dialogId, ArmyLineupSO armyLineupSO)
         {
             if (string.IsNullOrEmpty(dialogId))
@@ -37,7 +40,7 @@ namespace Adventure.Application.Dialog
             _enenyArmy.SetValueAndForceNotify(armyLineupSO);
             _activeDialogId = dialogId;
             _session = new DialogueSession(graph);
-            _currentNode.Value = _session.CurrentNode;
+            _currentNode.SetValueAndForceNotify(_session.CurrentNode);
             return true;
         }
 
@@ -75,7 +78,7 @@ namespace Adventure.Application.Dialog
         public void Cancel()
         {
             _session = null;
-            _currentNode.Value = null;
+            _currentNode.SetValueAndForceNotify ( null);
             if (!string.IsNullOrEmpty(_activeDialogId))
             {
                 _stateStore?.ClearState(_activeDialogId);

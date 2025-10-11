@@ -19,6 +19,8 @@ public class MushroomBookView : MonoBehaviour
     private readonly ReactiveCollection<UnitDefinitionSO> _reactiveEntries = new();
     public int PageCapacity => entrySlots?.Count ?? 0;
 
+    public Action Closed { get; internal set; }
+
     [Button("Render Test Page")]
     private void RenderTestPage()
     {

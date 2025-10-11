@@ -15,17 +15,10 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         [SerializeField] private PlayerInteractionController interactionController;
         [SerializeField] private GameSettings settingsMenuBehaviour;
         [SerializeField] private MushroomBookView mushroomBookBehaviour;
-
+        [SerializeField] private AdventureSceneCursorService cursorService;
         private void Awake()
         {
-            if (playerInput == null)
-                playerInput = GetComponent<AdventurePlayerInput>();
-
-            if (movementController == null)
-                movementController = GetComponent<PlayerMovementController>();
-
-            if (interactionController == null)
-                interactionController = GetComponent<PlayerInteractionController>();
+            cursorService.LockToCenter();
         }
 
         private void OnEnable()
@@ -92,7 +85,14 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
 
         private void OnOpenMushroomBook()
         {
+            cursorService.SetCursorState(CursorState.Default);
+            cursorService.Unlock();
+            mushroomBookBehaviour.Closed += OnMushroomBookClosed;
             mushroomBookBehaviour?.Open();
+        }
+        private void OnMushroomBookClosed()
+        {
+            cursorService.LockToCenter(); 
         }
     }
 }

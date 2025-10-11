@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Adventure.Infrastructure.Input
 {
@@ -40,14 +41,6 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             _openSettingsAction = _playerMap.Player.OpenSettings;
             _openBookAction = _playerMap.Player.OpenMushroomBook;
             SubscribeActionCallbacks();
-        }
-
-        private void OnEnable()
-        {
-            if (_playerMap == null)
-                return;
-
-            _playerMap.Enable();
         }
 
         private void OnDisable()
@@ -177,7 +170,10 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         private void OnInteractPerformed(InputAction.CallbackContext context)
         {
             if (context.performed)
+            {
+                Debug.Log("InteractPerformed?.Invoke();");
                 InteractPerformed?.Invoke();
+            }
         }
 
         private void OnCollectPerformed(InputAction.CallbackContext context)
@@ -195,7 +191,9 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         private void OnOpenBookPerformed(InputAction.CallbackContext context)
         {
             if (context.performed)
+            {
                 OpenMushroomBookPerformed?.Invoke();
+            }
         }
 
         public void Dispose()

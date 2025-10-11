@@ -226,6 +226,17 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
+                    ""id"": ""723ecbaa-572b-4e36-aeb0-977c39dbda52"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""a4ce677b-5164-417c-98a2-530f35990a22"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",

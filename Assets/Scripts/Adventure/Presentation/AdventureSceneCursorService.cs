@@ -3,25 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Zenject;
-/// <summary>
-/// Реализация сервиса работы с курсором
-/// </summary>
-public class CursorService : MonoBehaviour, ICursorService
+
+public class AdventureSceneCursorService : MonoBehaviour, ICursorService
 {
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
     [SerializeField] private List<CursorStateTexture> cursorStateTextures;
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
-    private ActionResolver _actionResolver;
-    [Inject]
-    public void Construct(ActionResolver actionResolver)
+    public void Awake()
     {
-        _actionResolver = actionResolver;
-        actionResolver.ActionResolved += OnActionPreviewChanged;
-        actionResolver.ActionNotResolved += OnActionNotResolved;
-        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
+        Cache();
         SetDefaultCursor();
     }
+
+    private void Cache()
+    {
+        _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
+    }
+
     /// <summary>
     /// Установить курсор по умолчанию (системный)
     /// </summary>
@@ -42,6 +41,8 @@ public class CursorService : MonoBehaviour, ICursorService
     // Расширенный сервис
     public void SetCursorState(CursorState state)
     {
+        if(_cursorTextrures==null)
+            Cache();
         if (_cursorTextrures.TryGetValue(state, out var tex))
         {
             SetCursor(tex);
@@ -103,14 +104,4 @@ public class CursorService : MonoBehaviour, ICursorService
         _currentHotspot = hotspot;
         Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
     }
-
-   
-    private void Dispose()
-    {
-        if (_actionResolver != null)
-        {
-            _actionResolver.ActionResolved-=OnActionPreviewChanged;
-        }
-    }
-
 }

@@ -29,6 +29,7 @@ namespace Adventure.Presentation.Dialog
             _viewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(_bindings);
             _viewModel.EnemyArmy.Subscribe(OnVMEnemyArmyChanged).AddTo(_bindings); 
             Hide();
+            Debug.Log("dialog ui constuct");
         }
 
         private void OnVMEnemyArmyChanged(ArmyLineupSO x)
@@ -45,6 +46,7 @@ namespace Adventure.Presentation.Dialog
         {
             if (node == null)
             {
+                Debug.LogWarning("attempt to set null ref DialogueNode");
                 Hide();
                 return;
             }

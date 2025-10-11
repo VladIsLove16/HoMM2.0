@@ -18,7 +18,7 @@ MonoBehaviour:
   gravity: -9.81
   stepHeight: 0.5
   groundSnapDistance: 0.2
-  lookSensitivity: 1
+  lookSensitivity: 0.1
   maxLookPitch: 80
   collisionMask:
     serializedVersion: 2

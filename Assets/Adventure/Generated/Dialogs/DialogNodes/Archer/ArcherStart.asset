@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: SampleDialogueBattle
+  m_Name: ArcherStart
   m_EditorClassIdentifier: 
   nodeId: start
-  speaker: Guide
+  speaker: Archer
   text: Welcome, traveler. What will you do?
   choices:
   - Id: battle

@@ -9,12 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05b168592454616439bbcfc4154dc7d5, type: 3}
-  m_Name: ArmyLineup
+  m_Script: {fileID: 11500000, guid: 9ae2ddc16c1c2a74cb3f8111eb9151fe, type: 3}
+  m_Name: WitchDialog
   m_EditorClassIdentifier: 
-  playerUnits:
-  - UnitType: 0
-    Amount: 10
-  enemyUnits:
-  - UnitType: 1
-    Amount: 10
+  startNode: {fileID: 11400000, guid: 5b0def6f51ec06745abc425faa6d9642, type: 2}
+  additionalNodes:
+  - {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}

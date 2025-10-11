@@ -16,10 +16,10 @@ namespace Adventure.Infrastructure.Interaction
         [SerializeField] private LayerMask interactionMask = ~0;
         [SerializeField] private InteractionPromptView promptView;
         [SerializeField] private string interactBinding = "LMB";
-        [SerializeField] private string hintBinding = "RMB";
+        //[SerializeField] private string hintBinding = "RMB";
         [SerializeField, Range(0.25f, 5f)] private float hintDisplayDuration = 2f;
 
-        private InteractionCandidate? _currentCandidate;
+        private IInteractable? _currentInteractable;
         private bool _hintVisible;
         private float _hintExpiresAt;
 
@@ -51,29 +51,28 @@ namespace Adventure.Infrastructure.Interaction
 
         public void PerformInteract()
         {
-            if (!enabled || (playerInput != null && !playerInput.isActiveAndEnabled))
+            Debug.Log("interaction performed");
+            if (!enabled)
+            {
+                Debug.LogWarning("PlayerInteractionController not enabled!");
                 return;
+            }
+            if(playerInput == null && !playerInput.isActiveAndEnabled)
+            {
+                Debug.LogWarning("playerInput is not ready!");
+                return;
+            }
 
-            if (!EnsureCandidate(out var candidate))
+            if (!EnsureCandidate(out var interactable))
             {
                 HidePrompt();
+                Debug.LogWarning("interactable is not ensured!");
                 return;
             }
 
             var context = new PlayerInteractionContext(transform);
 
-            if (candidate.Collectible != null)
-            {
-                if (candidate.Collectible is IMushroomCollectible mushroom)
-                {
-                    candidate.Collectible.Collect(context);
-                }
-
-                HidePrompt();
-                return;
-            }
-
-            candidate.Interactable?.Interact(context);
+            interactable.Interact(context);
             HidePrompt();
         }
 
@@ -88,55 +87,52 @@ namespace Adventure.Infrastructure.Interaction
                 return;
             }
 
-            ShowPrompt(candidate, hintBinding);
+            ShowPrompt(candidate, interactBinding);
             _hintVisible = true;
             _hintExpiresAt = Time.time + hintDisplayDuration;
         }
 
         private void UpdateCandidate()
         {
-            if (TryFindCandidate(out var candidate))
+            if (TryFindInteractable(out var interactable))
             {
-                _currentCandidate = candidate;
+                _currentInteractable = interactable;
 
-                var binding = _hintVisible ? hintBinding : interactBinding;
-                ShowPrompt(candidate, binding);
+                ShowPrompt(interactable, interactBinding);
             }
             else
             {
-                _currentCandidate = null;
+                _currentInteractable = null;
                 HidePrompt();
             }
         }
 
-        private bool EnsureCandidate(out InteractionCandidate candidate)
+        private bool EnsureCandidate(out IInteractable interactable)
         {
-            if (_currentCandidate.HasValue)
+            if (_currentInteractable!=null)
             {
-                candidate = _currentCandidate.Value;
+                interactable = _currentInteractable;
                 return true;
             }
 
-            if (TryFindCandidate(out candidate))
+            if (TryFindInteractable(out interactable))
             {
-                _currentCandidate = candidate;
+                _currentInteractable = interactable;
                 return true;
             }
 
-            candidate = default;
+            interactable = default;
             return false;
         }
 
-        private void ShowPrompt(InteractionCandidate candidate, string bindingLabel)
+        private void ShowPrompt(IInteractable interactable, string bindingLabel)
         {
             if (promptView == null)
                 return;
+            if (interactable == null)
+                return;
 
-            var prompt = string.IsNullOrWhiteSpace(candidate.Prompt)
-                ? (candidate.Type == InteractionType.Collectible ? DefaultCollectPrompt : DefaultInteractPrompt)
-                : candidate.Prompt;
-
-            promptView.Show(bindingLabel, prompt);
+            promptView.Show(bindingLabel, interactable.GetPrompt());
         }
 
         private void HidePrompt()
@@ -149,9 +145,9 @@ namespace Adventure.Infrastructure.Interaction
             promptView?.Hide();
         }
 
-        private bool TryFindCandidate(out InteractionCandidate candidate)
+        private bool TryFindInteractable(out IInteractable interactable)
         {
-            candidate = default;
+            interactable = null;
 
             if (playerCamera == null)
                 return false;
@@ -162,16 +158,11 @@ namespace Adventure.Infrastructure.Interaction
             if (!Physics.Raycast(origin, direction, out var hit, interactDistance, interactionMask))
                 return false;
 
-            var collectible = hit.collider.GetComponentInParent<ICollectible>();
-            var interactable = collectible ?? hit.collider.GetComponentInParent<IInteractable>();
+            interactable = hit.collider.GetComponentInParent<IInteractable>();
 
             if (interactable == null)
                 return false;
 
-            var prompt = interactable.GetPrompt();
-            var type = collectible != null ? InteractionType.Collectible : InteractionType.Generic;
-
-            candidate = new InteractionCandidate(type, interactable, collectible, prompt);
             return true;
         }
     }

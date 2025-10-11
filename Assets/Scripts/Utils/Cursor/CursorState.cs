@@ -4,5 +4,6 @@
     Attack,
     RangedAttack,
     Move,
-    NotAvailable
+    NotAvailable,
+    Point
 }

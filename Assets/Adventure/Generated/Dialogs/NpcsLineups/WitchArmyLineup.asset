@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: SampleDialogueExit
+  m_Script: {fileID: 11500000, guid: 05b168592454616439bbcfc4154dc7d5, type: 3}
+  m_Name: WitchArmyLineup
   m_EditorClassIdentifier: 
-  nodeId: exit
-  speaker: Guide
-  text: Safe travels.
-  choices: []
+  playerUnits:
+  - UnitType: 0
+    Amount: 10
+  - UnitType: 1
+    Amount: 7
