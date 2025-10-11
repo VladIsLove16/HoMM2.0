@@ -1,7 +1,9 @@
 using Adventure.Domain.Inventory;
 using Adventure.Presentation.Mushroom;
+using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,13 +12,37 @@ public class MushroomBookView : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private List<MushroomBookEntryView> entrySlots = new List<MushroomBookEntryView>();
-    [SerializeField] private Text pageNumberText;
-
+    [SerializeField] private TextMeshProUGUI pageNumberText;
+    [SerializeField] private UnitDefinitionSOCollection testMushrooms;
     private MushroomBookViewModel _viewModel;
     private CompositeDisposable _subscriptions = new CompositeDisposable();
-
+    private readonly ReactiveCollection<UnitDefinitionSO> _reactiveEntries = new();
     public int PageCapacity => entrySlots?.Count ?? 0;
 
+    [Button("Render Test Page")]
+    private void RenderTestPage()
+    {
+        // Очистим коллекцию и добавим тестовые данные
+        _reactiveEntries.Clear();
+        foreach (var m in testMushrooms.GetAll())
+        {
+            _reactiveEntries.Add(m);
+        }
+
+        // Отрисуем "фиктивную" страницу
+        RenderEntries(_reactiveEntries);
+        UpdatePageNumber(0, 1);
+
+        Debug.Log($"[MushroomBookView] Rendered {testMushrooms.GetAll()} test entries.");
+    }
+    [Button("ToglePresMode")]
+    private void ToglePresMode()
+    {
+       foreach( var slot in entrySlots)
+        {
+            slot?.SetPresentationMode(slot.Mode == PresentationMode.Normal ? PresentationMode.Humanized : PresentationMode.Normal);
+        }
+    }
     public void Construct(MushroomBookViewModel viewModel)
     {
         if (_viewModel == viewModel)
@@ -78,7 +104,7 @@ public class MushroomBookView : MonoBehaviour
             slot?.SetPresentationMode(mode);
         }
     }
-    private void RenderEntries(IReadOnlyReactiveCollection<MushroomViewModel> entries)
+    private void RenderEntries(IReadOnlyReactiveCollection<UnitDefinitionSO> entries)
     {
         var count = entries?.Count ?? 0;
         for (var i = 0; i < entrySlots.Count; i++)
@@ -90,7 +116,7 @@ public class MushroomBookView : MonoBehaviour
             if (i < count)
             {
                 slot.Bind(entries[i]);
-                slot.SetPresentationMode(_viewModel.PresentationMode.Value);
+                slot.SetPresentationMode(_viewModel == null ? PresentationMode.Normal : _viewModel.PresentationMode.Value);
             }
             else
             {

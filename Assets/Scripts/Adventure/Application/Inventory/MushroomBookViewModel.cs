@@ -6,16 +6,16 @@ using UnityEngine;
 
 namespace Adventure.Presentation.Mushroom
 {
-    public sealed class MushroomBookViewModel : IDisposable
+    public class MushroomBookViewModel : IDisposable
     {
         private readonly MushroomInventoryModel _mushroomInventoryModel;
         private readonly UnitDefinitionSOCollection _catalog;
         private readonly int _entriesPerPage;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
-        private readonly List<MushroomViewModel> _allEntries = new List<MushroomViewModel>();
+        private readonly List<UnitDefinitionSO> _allEntries = new List<UnitDefinitionSO>();
 
-        private readonly ReactiveCollection<MushroomViewModel> _currentPageEntries =
-            new ReactiveCollection<MushroomViewModel>();
+        private readonly ReactiveCollection<UnitDefinitionSO> _currentPageEntries =
+            new ReactiveCollection<UnitDefinitionSO>();
         private readonly ReactiveProperty<int> _currentPageIndex = new ReactiveProperty<int>(0);
         private readonly ReactiveProperty<int> _totalPages = new ReactiveProperty<int>(0);
         private readonly ReactiveProperty<PresentationMode> _presentationMode =
@@ -33,7 +33,7 @@ namespace Adventure.Presentation.Mushroom
             RebuildEntries();
         }
 
-        public IReadOnlyReactiveCollection<MushroomViewModel> CurrentPageEntries => _currentPageEntries;
+        public IReadOnlyReactiveCollection<UnitDefinitionSO> CurrentPageEntries => _currentPageEntries;
         public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
         public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
         public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
@@ -67,17 +67,7 @@ namespace Adventure.Presentation.Mushroom
                 if (!_catalog.TryGet(entry.Key, out var visuals))
                     continue;
 
-
-                var enriched = new MushroomViewModel(
-                    visuals.UnitType,
-                    visuals.Name,
-                    visuals.Description,
-                    visuals.UnitIcon,
-                    visuals.UnitIconHovered,
-                    visuals.HumanizedIcon,
-                    visuals.HumanizedIconHovered,
-                    null);
-                _allEntries.Add(enriched);
+                _allEntries.Add(visuals);
             }
 
             UpdatePagination();

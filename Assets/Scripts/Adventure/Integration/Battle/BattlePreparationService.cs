@@ -49,7 +49,7 @@ namespace Adventure.Integration.Battle
 
             var result = new List<UnitStackData>();
 
-            foreach (var stack in _currentEnemy.EnumerateEntries())
+            foreach (var stack in _currentEnemy.Convert())
             {
                 if (!_catalog.TryGet(stack.UnitType, out var item))
                     continue;

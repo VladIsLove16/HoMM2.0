@@ -1,4 +1,3 @@
-using Adventure.Application.Inventory;
 using Adventure.Infrastructure.Inventory;
 using Adventure.Presentation.Interaction;
 using Assets.Scripts.Adventure.Infrastructure.Input;

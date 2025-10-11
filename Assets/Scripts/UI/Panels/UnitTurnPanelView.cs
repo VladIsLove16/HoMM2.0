@@ -41,7 +41,7 @@ public class UnitTurnPanelView : MonoBehaviour
         }
 
         var icon = Instantiate(unitIconPrefab, parent);
-        icon.SetInfo(unitData.UnitIcon, info.Unit.Team);
+        icon.SetInfo(unitData.Icon, info.Unit.Team);
         icon.Link(info.Unit, info.Turn);
 
         _icons.Add(icon);

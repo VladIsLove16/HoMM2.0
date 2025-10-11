@@ -14,14 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UnitType: 0
   UnitViewPrefab: {fileID: 4902409752770258832, guid: 254ae3127c1f2d347a45cd446a8c4a76, type: 3}
-  UnitIcon: {fileID: 21300000, guid: de7da5901b9fac84d8fddb8b46c9284f, type: 3}
+  Icon: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
+  HoveredIcon: {fileID: 21300000, guid: da567883eebf21b4aa7fab1fb11f5e8c, type: 3}
+  HumanizedIcon: {fileID: 21300000, guid: 236de3bd419cc0146adee449186176f9, type: 3}
+  HumanizedHoveredIcon: {fileID: 21300000, guid: 4a5d5dd8b6a787c4db7eca03c7e9b783, type: 3}
   Name: Archer
-  _materialProvider:
+  displayName: Archer Display
+  _materialProviderSerialized:
     _blueTeamMaterial: {fileID: 0}
     _hoveredBlueTeamMaterial: {fileID: 0}
     _redTeamMaterial: {fileID: 0}
     _hoveredRedTeamMaterial: {fileID: 0}
   Stats: {fileID: 11400000, guid: 55c3152c55c8a9142ada4847e72001c5, type: 2}
+  description: Game Archer
   startingEffects:
   - {fileID: 11400000, guid: 0cd25ed4bf482104294d8304f1d380e4, type: 2}
   invulnerableEffects: []

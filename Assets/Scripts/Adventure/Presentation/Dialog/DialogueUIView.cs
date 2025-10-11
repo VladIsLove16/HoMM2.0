@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Adventure.Application.Dialog;
 using Adventure.Domain.Dialog;
+using Adventure.Integration.Battle;
 using TMPro;
 using UniRx;
 using UnityEngine;
@@ -17,7 +19,7 @@ namespace Adventure.Presentation.Dialog
         [SerializeField] private Transform choicesRoot;
         [SerializeField] private Button choiceButtonPrefab;
 
-        private DialogVM _viewModel;
+        [Inject] private DialogVM _viewModel;
         private readonly List<Button> _spawnedButtons = new List<Button>();
         private readonly CompositeDisposable _bindings = new CompositeDisposable();
         [Inject]
@@ -25,8 +27,13 @@ namespace Adventure.Presentation.Dialog
         {
             _viewModel = viewModel;
             _viewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(_bindings);
-            _viewModel.EnemyArmy.Subscribe((x)=>Debug.Log("enemy army count " + x.Convert().Count)).AddTo(_bindings);
+            _viewModel.EnemyArmy.Subscribe(OnVMEnemyArmyChanged).AddTo(_bindings); 
             Hide();
+        }
+
+        private void OnVMEnemyArmyChanged(ArmyLineupSO x)
+        {
+            
         }
 
         private void OnDestroy()

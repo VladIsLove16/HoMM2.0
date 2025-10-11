@@ -10,11 +10,15 @@ namespace Adventure.Infrastructure.Dialog
     {
         [SerializeField] private string dialogueId;
         [SerializeField] ArmyLineupSO lineup;
-        [Inject] DialogVM DialogVM;
-
+        private DialogVM _dialogVM;
+        [Inject]
+        public void Construct(DialogVM dialogVM)
+        {
+            _dialogVM = dialogVM;
+        }
         public void Interact(PlayerInteractionContext context)
         {
-            bool isDialogStarted = DialogVM.TryStartDialog(dialogueId, lineup);
+            bool isDialogStarted = _dialogVM.TryStartDialog(dialogueId, lineup);
             if (!isDialogStarted)
             {
                 Debug.LogWarning($"Dialogue '{dialogueId}' could not be started");

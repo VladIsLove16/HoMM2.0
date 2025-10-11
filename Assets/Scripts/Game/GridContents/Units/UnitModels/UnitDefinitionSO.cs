@@ -15,13 +15,13 @@ public class UnitDefinitionSO : ScriptableObject
 
     [Header("Unit Appearance")]
     [Tooltip("Иконка по умолчанию (обычное представление)")]
-    public Sprite UnitIcon;
+    public Sprite Icon;
     [Tooltip("Иконка при наведении (обычное представление)")]
-    public Sprite UnitIconHovered;
+    public Sprite HoveredIcon;
     [Tooltip("Иконка в хуманизированном представлении")]
     public Sprite HumanizedIcon;
     [Tooltip("Иконка в хуманизированном представлении при наведении")]
-    public Sprite HumanizedIconHovered;
+    public Sprite HumanizedHoveredIcon;
     public string Name;
     [SerializeField] private string displayName;
 

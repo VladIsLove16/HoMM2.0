@@ -1,5 +1,4 @@
-﻿// UnitDefinitionSOCollection.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -65,10 +64,10 @@ public class UnitDefinitionSOCollection : ScriptableObject
     //            id,
     //            item.DisplayName,
     //            item.Description,
-    //            definition.UnitIcon,
-    //            definition.UnitIconHovered,
+    //            definition.Icon,
+    //            definition.HoveredIcon,
     //            definition.HumanizedIcon,
-    //            definition.HumanizedIconHovered,
+    //            definition.HumanizedHoveredIcon,
     //            characteristics);
     //        return true;
     //    }

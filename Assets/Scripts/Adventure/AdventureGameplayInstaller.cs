@@ -8,6 +8,8 @@ using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
 using UnityEngine;
 using Zenject;
+using Adventure.Presentation.Dialog;
+using Adventure.Infrastructure.Inventory;
 
 public sealed class AdventureGameplayInstaller : MonoInstaller
 {
@@ -27,21 +29,32 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     [Header("UI & Interaction")]
     [SerializeField] private PlayerInteractionController interactionController;
+    [SerializeField] private DialogueUIView dialogueUIView;
+    [SerializeField] private MushroomBookView mushroomBookView;
 
     public override void InstallBindings()
     {
         Container.Bind<UnitDefinitionSOCollection>().FromInstance(mushroomCatalog).AsSingle();
-        Container.Bind<MushroomInventoryModel>().AsSingle();
-        Container.Bind<IDialogStateStore>().To<PlayerPrefsDialogStateStore>().AsSingle();
         Container.Bind<IDialogRepository>().FromInstance(dialogueDatabase).AsSingle();
+        var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, rowSpacing);
+        Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); Container.Bind<MushroomInventoryModel>().AsSingle();
+
+        Container.Bind<IDialogStateStore>().To<PlayerPrefsDialogStateStore>().AsSingle();
+        Container.Bind<BattleLaunchService>().AsSingle();
+        Container.Bind<BattlePreparationService>().AsSingle();
 
         Container.Bind<MushroomBookViewModel>().AsSingle();
         Container.Bind<DialogVM>().AsSingle();
         Container.Bind<MushroomCollectionViewModel>().AsSingle();
 
-        var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, rowSpacing);
-        Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();
-
+        Container.Bind<DialogueUIView>().FromInstance(dialogueUIView). AsSingle();
+        Container.Bind<MushroomBookView>().FromInstance(mushroomBookView).AsSingle();
+        Container.Bind<NpcDialogueTrigger>()
+            .FromComponentsInHierarchy()
+            .AsTransient();
+        Container.Bind<MushroomCollectible>()
+            .FromComponentsInHierarchy()
+            .AsTransient();
         if (gridConfigurationGateway != null)
         {
             Container.Bind<IGridConfigurationGateway>().FromInstance(gridConfigurationGateway).AsSingle();
@@ -49,24 +62,6 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         else
         {
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
-        }
-
-        Container.Bind<BattleLaunchService>().AsSingle();
-
-        Container.QueueForInject(this);
-    }
-
-    [Inject]
-    private void OnInjected(Adventure.Application.Inventory.MushroomBookViewModel inventoryService, DialogVM dialogService, BattleLaunchService battleLaunchService)
-    {
-        if (interactionController != null)
-        {
-            interactionController.Construct(inventoryService);
-        }
-
-        if (dialogueOrchestrator != null)
-        {
-            dialogueOrchestrator.Construct(dialogService, battleLaunchService);
         }
     }
 }
