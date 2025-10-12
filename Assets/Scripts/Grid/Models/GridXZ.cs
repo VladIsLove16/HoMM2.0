@@ -84,10 +84,10 @@ public partial class GridXZ<TGridObject> {
     public TGridObject GetGridObject(int x, int z)
     {
         if (!IsInBounds(x, z))
-            Debug.Log($"GameModel index ({x},{z}) is out of bounds ({width},{height})");
-        if(gridArray[x, z] == null )
+            throw new ArgumentException($" index({ x },{ z}) is out of bounds({ width},{ height}))");
+        if(gridArray[x, z] == null)
         {
-           throw new ArgumentException(ToString());
+           throw new InvalidProgramException(ToString());
         }
         return gridArray[x, z];
     }

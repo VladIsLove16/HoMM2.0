@@ -1,70 +1,40 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Zenject;
 public class SpellActionHandler : IActionHandler
 {
+    public ActionType ActionType
+    {
+        get
+        {
+            return ActionType.Spell;
+        }
+    }
     private IEffectApplier caster;
     private SpellCasterService spellCasterService;
-    public SpellActionHandler(SpellCasterService spellCasterService)
+    public SpellActionHandler(MovementSystem movementSystem ,GameModel gameModel)
     {
-        this.spellCasterService = spellCasterService;
-    }
-    public void AddTarget(GameCell gameCell)
-    {
-        return;
     }
 
-    public bool CanHandle(ActionContext ctx)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public IEnumerator Execute(ActionContext ctx)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public List<(Vector2Int, bool)> GetRoute(GameCell gameCell)
-    {
-        return new() { ( gameCell.Position,true) };
-    }
-
-    public void HidePreview()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public bool IsAvailable(GameCell gameCell)
-    {
-        return true;
-    }
-
-    public bool Perform(GameCell gameCell)
+    public void Execute(ActionContext ctx)
     {
         SpellData spellData = null;
-        GridXZ< GameCell> gridXZ = null;    
-        spellCasterService.Cast(spellData, gameCell.Position, (pos)=> gridXZ.GetGridObject(pos).Unit, caster);
-        return true;
+        GridXZ<GameCell> gridXZ = null;
+        spellCasterService.Cast(spellData, ctx.TargetCell, (pos) => gridXZ.GetGridObject(pos).Unit, caster);
     }
 
-    public void ShowAvaiableTargetCells()
+
+    public bool CanExecute(ActionContext ctx)
     {
-        throw new System.NotImplementedException();
+        return ctx.AbilityUsed != SpellType.None;
     }
 
-    public void ShowPreview(ActionContext ctx)
+    public PreviewResult GetPreview(ActionContext actionContext)
     {
-        throw new System.NotImplementedException();
-    }
-
-    void IActionHandler.Execute(ActionContext ctx)
-    {
-        throw new System.NotImplementedException();
+        var preview = new PreviewResult();
+        preview.Add(CellState.attackTarget,new List<Vector2Int>() { actionContext.TargetCell });
+        return preview;
     }
 }

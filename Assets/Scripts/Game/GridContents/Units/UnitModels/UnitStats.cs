@@ -8,7 +8,21 @@ using UnityEngine;
 public class UnitStats : ScriptableObject
 {
     public int Health = 0;
-    public int MaxHealth = 0;
+    public int MaxHealth
+    {
+        get
+        {
+            return maxHealth;
+        }
+         set
+        {
+            if (value <= 1)
+                value = 1;
+            maxHealth = value;
+        }
+
+    }
+    public int maxHealth = 0;
     public int Damage = 0;
     public int SpellPower = 0;
 

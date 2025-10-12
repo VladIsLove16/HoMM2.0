@@ -112,7 +112,7 @@ namespace Tests.EditMode.Combat
             _turnSystem.RemoveCombatUnit(_red1);
 
             // Act
-            var state = _turnSystem.BattleState;
+            var state = _turnSystem.CurrentBattleState.Value;
 
             // Assert — бой завершен победой оставшейся команды
             Assert.That(state == BattleState.blueTeamWins || state == BattleState.redTeamWins, Is.True);

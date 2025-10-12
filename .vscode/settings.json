@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "HoMM2.0.sln"
+    "dotnet.defaultSolution": "HoMM2.0.sln",
+    "dotnet.preferCSharpExtension": true
 }

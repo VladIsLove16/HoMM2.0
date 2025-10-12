@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 /// <summary>
 /// Реализация сервиса работы с курсором
 /// </summary>
@@ -9,10 +11,48 @@ public class CursorService : ICursorService
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;
     private Dictionary<CursorState, Texture2D> _cursorTextrures;
+    private ActionResolver _actionResolver;
+    
     public CursorService(List<CursorStateTexture> cursorStateTextures)
     {
         _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state,y=> y.texture);
         SetDefaultCursor();
+    }
+    
+    [Inject]
+    public void Construct(ActionResolver actionResolver)
+    {
+        _actionResolver = actionResolver;
+        actionResolver.ActionResolved += OnActionPreviewChanged;
+        actionResolver.ActionNotResolved += OnActionNotResolved;
+    }
+
+    private void OnActionNotResolved()
+    {
+        SetCursorState(CursorState.Default);
+    }
+
+    private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
+    {
+        Debug.Log("[cursor service] OnActionPreviewChanged " + tuple.Item1.ToString());
+        var state = GetCursorStateByActionHandler(tuple.Item1);
+        SetCursorState(state);
+    }
+
+    private CursorState GetCursorStateByActionHandler(IActionHandler actionHandler)
+    {
+        switch (actionHandler.ActionType)
+        {
+            case ActionType.Move:
+                return CursorState.Move;
+            case ActionType.MoveThenAttack:
+            case ActionType.Attack:
+                return CursorState.Attack;
+            case ActionType.RangedAttack:
+                return CursorState.RangedAttack;
+            default:
+                return CursorState.Default;
+        }
     }
 
     /// <summary>
@@ -54,6 +94,14 @@ public class CursorService : ICursorService
     public void SetCursorState(CursorState state)
     {
         SetCursor(_cursorTextrures[state]);
+    }
+    
+    public void Dispose()
+    {
+        if (_actionResolver != null)
+        {
+            _actionResolver.ActionResolved-=OnActionPreviewChanged;
+        }
     }
 
 }

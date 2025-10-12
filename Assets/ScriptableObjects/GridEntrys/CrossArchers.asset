@@ -12,29 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e804a7737baca34fa645add25977933, type: 3}
   m_Name: CrossArchers
   m_EditorClassIdentifier: 
+  width: 10
+  height: 10
   contents:
   - unitType: 0
     Amount: 1
     X: 2
     Y: 2
-    isPlayer: 1
+    Team: 1
   - unitType: 0
     Amount: 1
     X: 1
     Y: 2
-    isPlayer: 1
+    Team: 0
   - unitType: 0
     Amount: 1
     X: 3
     Y: 2
-    isPlayer: 1
+    Team: 0
   - unitType: 0
     Amount: 1
     X: 2
     Y: 1
-    isPlayer: 0
+    Team: 0
   - unitType: 0
     Amount: 1
     X: 2
     Y: 3
-    isPlayer: 0
+    Team: 0

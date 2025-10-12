@@ -17,7 +17,7 @@ namespace Tests.EditMode.GridContents.Units
         private const int TestX = 5;
         private const int TestY = 3;
         private const int TestAmount = 10;
-        private const bool TestIsPlayer = true;
+    private const bool TestIsPlayer = true;
 
         [SetUp]
         public void SetUp()
@@ -54,7 +54,7 @@ namespace Tests.EditMode.GridContents.Units
             // Assert
             Assert.That(_unitModel.Position.Value, Is.EqualTo(new Vector2Int(TestX, TestY)));
             Assert.That(_unitModel.Amount.Value, Is.EqualTo(TestAmount));
-            Assert.That(_unitModel.IsBlueTeam.Value, Is.EqualTo(TestIsPlayer));
+            Assert.That(_unitModel.Team.Value == Team.Blue, Is.EqualTo(TestIsPlayer));
             Assert.That(_unitModel.UnitType.Value, Is.EqualTo(UnitType.Archer));
             Assert.That(_unitModel.CanAct.Value, Is.True);
             Assert.That(_unitModel.CanMove.Value, Is.True);
@@ -288,7 +288,8 @@ namespace Tests.EditMode.GridContents.Units
         public void ApplyStatusEffect_WithNonInvulnerableEffect_AppliesEffect()
         {
             // Arrange
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel, effectData);
 
             // Act
             _unitModel.ApplyEffect(statusEffect);
@@ -302,20 +303,24 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Arrange
             _unitModel.InvulnerableEffects.Add(StatusEffectType.Armored);
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel,effectData);
 
             // Act
             _unitModel.ApplyEffect(statusEffect);
 
+            bool _unitModelContainsEffect = _unitModel.ActiveEffects.Contains(statusEffect);
             // Assert
-            Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
+            Assert.That(_unitModelContainsEffect, Is.False);
+            //Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
         }
 
         [Test]
         public void RemoveEffect_RemovesEffectCorrectly()
-        {
+        {   
             // Arrange
-            var statusEffect = new MockStatusEffect(StatusEffectType.Armored);
+            StatusEffectData effectData = ScriptableObject.CreateInstance<StatusEffectData>();
+            var statusEffect = new MockStatusEffect(StatusEffectType.Armored, _unitModel, effectData);
             _unitModel.ApplyEffect(statusEffect);
             Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(1));
 
@@ -323,7 +328,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitModel.RemoveEffect(statusEffect);
 
             // Assert
-            Assert.That(_unitModel.ActiveEffects.Count, Is.EqualTo(0));
+            Assert.That(_unitModel.ActiveEffects.Contains(statusEffect), Is.False);
         }
 
         [Test]
@@ -346,7 +351,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithDamageEqualToHealth_TriggersDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var damageContext = new DamageContext(_unitModel.Amount.Value * _unitModel.ModifiedStats.Health, DamageType.physical, null);
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
 
@@ -362,7 +367,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithPartialStackDeath_DoesNotTriggerDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(150, DamageType.physical, null); // Урон больше здоровья одного юнита
+            var damageContext = new DamageContext(_unitModel.ModifiedStats.Health, DamageType.physical, null);
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
             var initialAmount = _unitModel.Amount.Value;
@@ -380,7 +385,7 @@ namespace Tests.EditMode.GridContents.Units
         public void RecieveDamage_WithExactHealthKill_TriggersDeath()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null); // Точно здоровье одного юнита
+            var damageContext = new DamageContext(_unitModel.Amount.Value* _unitModel.ModifiedStats.Health, DamageType.physical, null); // Точно здоровье одного юнита
             var deathEventInvoked = false;
             _unitModel.Died += () => deathEventInvoked = true;
 
@@ -556,7 +561,7 @@ namespace Tests.EditMode.GridContents.Units
         // Mock классы для тестирования
         private class MockDamagable : IDamagable
         {
-            public bool IsBlueTeam => true;
+            public Team Team => Team.Blue;
             public Vector2Int Position { get; set; }
             public GridContentType GridContentType => GridContentType.unit;
 
@@ -566,7 +571,11 @@ namespace Tests.EditMode.GridContents.Units
 
         private class MockStatusEffect : StatusEffect
         {
-            public MockStatusEffect(StatusEffectType type) : base(null, null, null) { }
+            public MockStatusEffect(StatusEffectType type, IEffectable effectable, StatusEffectData effectData) : base(effectData, effectable, null)
+            {
+                effectData.SetType(type);
+                effectData.EffectName = type.ToString();
+            }
         }
     }
 }

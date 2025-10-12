@@ -8,37 +8,38 @@ using Zenject;
 public class UnitViewModel : IViewModel
 {
     public UnitModel Model { get; }
-
-    public Material TeamMaterial { get; private set; }
-    public Material HoveredTeamMaterial { get; private set; }
     public IObservable<Unit> OnAttacked => _onAttacked;
     public IObservable<Unit> OnHit => _onHit;
     public IObservable<Unit> OnDeath => _onDeath;
     public IObservable<Unit> OnTurnStarted => _onTurnStarted;
     public IObservable<Unit> OnHealthChanged => _onHealthChanged;
-    public IObservable<Unit> OnTeamChanged => _onTeamChanged;
+    public IObservable<bool> OnTeamChanged => _onTeamChanged;
+    public IObservable<Team> OnTeamChangedEnum => _onTeamChangedEnum;
     public IObservable<int> OnAmountChanged => _onAmountChanged;
+    public IObservable<Vector2Int> OnPosChanged => _onPosChanged;
+    public IObservable<List<Vector2Int>> OnMoveByRoute => _onMovedByRoute;
 
-    public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0;
+    public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? (float)Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0f;
 
-    private Subject<List<Vector3>> _onMoved = new();
+    public int Health => Model.ModifiedStats.Health;
+
+    public int MaxHealth => Model.ModifiedStats.MaxHealth;
+
+    public int Amount => Model.Amount.Value;
+
+    private Subject<List<Vector2Int>> _onMovedByRoute = new();
     private Subject<Unit> _onAttacked = new();
     private Subject<Unit> _onHit = new();
     private Subject<Unit> _onDeath = new();
     private Subject<Unit> _onTurnStarted = new();
     private Subject<Unit> _onHealthChanged = new();
-    private Subject<Unit> _onTeamChanged = new();
+    private Subject<bool> _onTeamChanged = new();
+    private Subject<Team> _onTeamChangedEnum = new();
     private Subject<int> _onAmountChanged = new();
-
-    [Inject]  private IWorldToCellProvider _worldToCellProvider;
-    private readonly IMaterialProvider _materialProvider;
-    public UnitViewModel(UnitModel model, IMaterialProvider definition)
+    private Subject<Vector2Int> _onPosChanged = new();
+    public UnitViewModel(UnitModel model)
     {
         Model = model;
-        _materialProvider = definition;
-
-        // В зависимости от команды выбираем нужные материалы
-        UpdateTeamMaterials(model.IsBlueTeam.Value);
 
         SubscribeToModel();
     }
@@ -54,25 +55,11 @@ public class UnitViewModel : IViewModel
         Model.TurnStarted += () => _onTurnStarted.OnNext(Unit.Default);
         Model.HealthChanged += () => _onHealthChanged.OnNext(Unit.Default);
         Model.Amount.Subscribe(v => _onAmountChanged.OnNext(v));
-        Model.IsBlueTeam.Subscribe(isBlue =>
+        Model.Team.Subscribe(team =>
         {
-            UpdateTeamMaterials(isBlue);
-            _onTeamChanged.OnNext(Unit.Default);
+            _onTeamChanged.OnNext(team == Team.Blue);
+            _onTeamChangedEnum.OnNext(team);
         });
+        Model.MovedByRoute+= (route) => _onMovedByRoute.OnNext(route); ;
     }
-
-    private void UpdateTeamMaterials(bool isBlue)
-    {
-        if (isBlue)
-        {
-            TeamMaterial = _materialProvider.GetBlueTeamMaterial();
-            HoveredTeamMaterial = _materialProvider.GetHoveredBlueTeamMaterial();
-        }
-        else
-        {
-            TeamMaterial = _materialProvider.GetRedTeamMaterial();
-            HoveredTeamMaterial = _materialProvider.GetHoveredRedTeamMaterial();
-        }
-    }
-    
 }

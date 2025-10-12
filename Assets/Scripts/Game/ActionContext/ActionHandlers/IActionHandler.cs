@@ -3,7 +3,7 @@
 public interface IActionHandler
 {
     void Execute(ActionContext ctx);
-    void ShowPreview(ActionContext ctx);
-    void ShowAvaiableTargetCells();
-    void HidePreview();
+    bool CanExecute(ActionContext ctx);
+    PreviewResult GetPreview(ActionContext actionContext);
+    ActionType ActionType { get; }
 }

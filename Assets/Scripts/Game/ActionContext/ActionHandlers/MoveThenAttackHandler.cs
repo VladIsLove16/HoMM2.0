@@ -1,143 +1,73 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
 
-public class MoveThenAttackHandlerFactory : PlaceholderFactory<ICombatObject, MoveThenAttackHandler>
-{
-    [Inject] private DiContainer _container;
-
-    public override MoveThenAttackHandler Create(ICombatObject unit)
-    {
-        var handler = new MoveThenAttackHandler(unit);
-
-        _container.Inject(handler);
-
-        return handler;
-    }
-}
-
 public class MoveThenAttackHandler : IActionHandler
-{ 
-    [Inject] private MovementSystem _movementSystem;
-    [Inject] private GameModel _gameModel;
-    [Inject] private IGridCellRenderer _renderer;
-    [Inject] private IAttackActionPanel _attackPanel;
-
-    private ICombatObject _activeUnit;
-    private List<Vector2Int> savedRoute = new();
-    public MoveThenAttackHandler(ICombatObject unitModel)
+{
+    public ActionType ActionType
     {
-        _activeUnit = unitModel;    
+        get
+        {
+            return ActionType.MoveThenAttack;
+        }
     }
-    public bool CanHandle(ActionContext ctx)
+    private MovementSystem _movementSystem;
+    private GameModel _gameModel;
+    private MoveActionHandler _moveActionHandler;
+    private AttackActionHandler _attackActionHandler;
+    public MoveThenAttackHandler(MovementSystem movementSystem, GameModel gameModel)
     {
-        if(ctx.TargetObject == null)
-            return false;
-        var route = GetMoveRoute(ctx);
-        var moveRoute = GetMoveRoute(ctx);
-        float fullRouteCost = _movementSystem.GetRouteCost(route);
-        float moveRouteCost = _movementSystem.GetRouteCost(moveRoute);
-        if(! _movementSystem.HasLineOfSight(_activeUnit.Position, ctx.TargetCell))
-            return false;
-        if (moveRouteCost + _activeUnit.Stats.AttackRange >= fullRouteCost)
-            return true;
-        return false;
-    }
-    public bool CanShowPreview(ActionContext ctx)
-    {
-        return ctx.TargetObject != null;
+        _movementSystem = movementSystem;
+        _gameModel = gameModel;
+        _moveActionHandler = new(_movementSystem, gameModel);
+        _attackActionHandler = new(_movementSystem, gameModel);
     }
     public void Execute(ActionContext ctx)
     {
-        var moveRoute = GetMoveRoute(ctx);
-        if(_activeUnit is IMoveable moveable)
-        {
-            _gameModel.MoveObject(moveable, moveRoute);
-        }
-        if (_activeUnit is IDamageSource source)
-            source.SendDamage(new(ctx.TargetObject));
+        GetContexts(ctx,out var moveActionContext,out var attackActionContext);
+        _moveActionHandler.Execute(moveActionContext);
+        _attackActionHandler.Execute(attackActionContext);
     }
-    public void ShowPreview(ActionContext ctx)
+    public bool CanExecute(ActionContext ctx)
     {
-        int moveSpeed = _activeUnit. Stats.MoveSpeed;
-        var route = GetRoute(ctx);
-        var moveRoute = GetMoveRoute(ctx);
-        var inaccessRoute = GetInaccessibleRoute(route, moveRoute);
-
-        _renderer.RemoveStates(CellState.accessibleRoutePoint);
-        _renderer.RemoveStates(CellState.inaccessibleRoutePoint);
-        _renderer.AddStates(moveRoute, CellState.accessibleRoutePoint);
-        _renderer.AddStates(moveRoute, CellState.inaccessibleRoutePoint);
-
-        var movaAvailableCells = _movementSystem.GetReachableCells(_activeUnit.Position, _activeUnit.Stats.MoveSpeed);
-        _renderer.AddStates(movaAvailableCells, CellState.moveAvailable);
-
-        if(_activeUnit is IDamageSource source)
-        {
-            DamageContext damageContext = source.SimulateSendDamage(new(ctx.TargetObject));
-            var info = new AttackPreviewInfo
-            {
-                TargetPosition = ctx.TargetCell,
-                DamageContext = damageContext,
-                Description = damageContext.DamageAmount.ToString(),
-            };
-            _attackPanel.Show(info);
-        }
-    }
-    private List<Vector2Int> GetRoute(ActionContext ctx)
-    {
-        var route = new List<Vector2Int>();
-        if (_activeUnit.Stats.CanFly)
-        {
-            _movementSystem.GetRouteIgnoringObstacles(_activeUnit.Position, ctx.TargetCell, out route);
-        }
-        else
-            _movementSystem.GetRoute(_activeUnit.Position, ctx.TargetCell, out route);
-        return route;
-    }
-    private static List<Vector2Int> GetInaccessibleRoute(List<Vector2Int> route, List<Vector2Int> moveRoute)
-    {
-        var inaccessRoute = route.ToList();
-        foreach (var movePoint in moveRoute)
-        {
-            inaccessRoute.Remove(movePoint);
-        }
-
-        return inaccessRoute;
-    }
-    private List<Vector2Int> GetMoveRoute(ActionContext ctx)
-    {
-        var route = GetRoute(ctx);
-        int moveSpeed = _activeUnit.Stats.MoveSpeed;
-        var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveSpeed);
-        return moveRoute;
+        GetContexts(ctx, out var moveActionContext, out var attackActionContext);
+        if (!_moveActionHandler.CanExecute(moveActionContext))
+            return false;
+        if (!_attackActionHandler.CanExecute(attackActionContext))
+            return false;
+        return true;
     }
 
-    public void ShowAvaiableTargetCells()
+    public PreviewResult GetPreview(ActionContext actionContext)
     {
-        var units = _gameModel.GetUnits();
-        List<Vector2Int> unitPositions = units.Select(x=>x.Position.Value).ToList();
-        foreach(var unit in units)
-        {
-            ActionContext ctx = new ActionContext() { TargetCell = unit.Position.Value, TargetObject = unit,AbilityUsed = null }; 
-            if(!CanHandle(ctx))
-            {
-                unitPositions.Remove(unit.Position.Value);
-            }
-        }
-        _renderer.AddStates(unitPositions,CellState.moveAvailable);
+        PreviewResult previewResult = new();
+
+        GetPreviews(actionContext, out var movePreview, out var attackPreview);
+        previewResult.Add(movePreview.ToDictionary());
+        previewResult.Add(attackPreview.ToDictionary());
+        return previewResult;
     }
 
-    public void Cancel()
+    private void GetPreviews(ActionContext actionContext, out PreviewResult movePreview, out PreviewResult attackPreview)
     {
-        
+        ActionContext moveActionContext, attackActionContext;
+        GetContexts(actionContext, out moveActionContext, out attackActionContext);
+
+        movePreview = _moveActionHandler.GetPreview(moveActionContext);
+        attackPreview = _attackActionHandler.GetPreview(attackActionContext);
     }
 
-    public void HidePreview()
+    private static void GetContexts(ActionContext actionContext, out ActionContext moveActionContext, out ActionContext attackActionContext)
     {
-        _attackPanel.Hide();
+        moveActionContext = new(actionContext);
+        moveActionContext.TargetCell = actionContext.AttackFromCell;
+        attackActionContext = new(actionContext);
+        attackActionContext.FromCell = actionContext.AttackFromCell;
     }
 }
+
+

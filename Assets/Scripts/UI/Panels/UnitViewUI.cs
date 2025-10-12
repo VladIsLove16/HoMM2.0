@@ -1,0 +1,78 @@
+using System;
+using TMPro;
+using UnityEngine;
+using UniRx;
+
+public class UnitViewUI : MonoBehaviour, IDisposable
+{
+    [SerializeField] private UnitHealthBar healthBar;
+    [SerializeField] private TextMeshProUGUI amountText;
+    [SerializeField] private TextMeshProUGUI healthAmountText;
+
+    private UnitViewModel _unitViewModel;
+    private CompositeDisposable _disposables = new();
+
+    public virtual void Init(UnitViewModel vm)
+    {
+        _unitViewModel = vm;
+
+        // Подписываемся на события ViewModel (MVVM)
+        _unitViewModel.OnHealthChanged
+            .Subscribe(_ => UpdateHealth())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnAmountChanged
+            .Subscribe(_ => UpdateAmount())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnDeath
+            .Subscribe(_ => OnDeath())
+            .AddTo(_disposables);
+
+        _unitViewModel.OnTurnStarted
+            .Subscribe(_ => OnTurnStart())
+            .AddTo(_disposables);
+
+        healthBar.Init();
+
+        UpdateHealth();
+        UpdateAmount();
+
+        var mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            transform.rotation = new(mainCam.transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+        }
+    }
+
+    private void UpdateHealth()
+    {
+        // Use ViewModel properties instead of direct model access
+        var health = _unitViewModel.Health;
+        var maxHealth = _unitViewModel.MaxHealth;
+
+        healthAmountText.text = health.ToString();
+
+        float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
+        healthBar.SetRatio(ratio);
+    }
+
+    private void UpdateAmount()
+    {
+        amountText.text = _unitViewModel.Amount.ToString();
+    }
+
+    private void OnDeath()
+    {
+        amountText.color = Color.black;
+    }
+
+    private void OnTurnStart()
+    {
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
+    }
+}

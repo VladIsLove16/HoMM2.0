@@ -1,0 +1,30 @@
+{
+    "name": "TestHelpers",
+    "rootNamespace": "",
+    "references": [
+        "GUID:54c7bef1210f94b478f4e42eb5ecf9af",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:f3f11ce7cceded94da87c83e9439ee38",
+        "GUID:b76e22fa7004371439e90c316f3bbf84",
+        "GUID:b179c831e13362d459b748849c84d0de",
+        "GUID:6c18917549f31c442926e2569e8818c8",
+        "GUID:1491147abca9d7d4bb7105af628b223e",
+        "GUID:9f4f5bf029cebb64f983b7bdc29f62a1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

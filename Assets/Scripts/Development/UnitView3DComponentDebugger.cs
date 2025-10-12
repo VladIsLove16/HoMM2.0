@@ -53,7 +53,6 @@ namespace Development
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             meshes = meshesField?.GetValue(unitView) as SkinnedMeshRenderer[];
 
-            UpdateName();
             LogEvent("UnitView3DComponentDebugger инициализирован");
             
             // Подписываемся на события UnitView3D
@@ -64,11 +63,6 @@ namespace Development
         {
             // Здесь можно добавить подписку на события, если они есть
             LogEvent("Подписка на события UnitView3D завершена");
-        }
-
-        private void UpdateName()
-        {
-            unitView.gameObject.name = unitView.Model.ToString() + unitView.Model.Position.ToString();
         }
 
         private void Update()

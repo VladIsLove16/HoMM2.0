@@ -1,80 +1,88 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
-//using System.Linq;
-//using UniRx;
-//using Unity.VisualScripting;
-//using UnityEditor;
-//using Zenject;
-//public partial class PlayerInputHandler
-//{
-//    public class ActionResolver
-//    {
-//        [Inject] protected MoveActionHandlerFactory _moveFactory = new();
-//        [Inject] protected RangedAttackHandlerFactory _rangedFactory = new();
-//        [Inject] protected MoveThenAttackHandlerFactory _moveThenAttackFactory = new();
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UniRx;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEngine;
+using Zenject;
+public class ActionResolver
+{
+    public event Action<(IActionHandler,ActionContext)> ActionResolved;
+    public System.Action ActionNotResolved;
 
-//        public List<IActionHandler> _handlers = new();
-//        public ReactiveProperty<IActionHandler> CurrentAction = new();
-//        public ActionResolver()
-//        {
-//        }
+    private MoveThenAttackHandler MoveThenAttackHandler;
+    private MoveActionHandler MoveActionHandler;
+    private RangedAttackHandler RangedAttackHandler;
+    private AttackActionHandler AttackActionHandler;
+    private SpellActionHandler SpellActionHandler;
 
-//        public virtual void SetActions(UnitModel unit)
-//        {
-//            var list = new List<IActionHandler>()
-//            list.Add(moveAction);
-//            CurrentAction.SetValueAndForceNotify( moveAction);
-//            if (unit.CanAct.Value)
-//            {
-//                list.Add(_moveThenAttackFactory.Create(unit));
-//            }
-//            if (unit.ModifiedStats.AttackRange > 1)
-//            {
-//                list.Add(_rangedFactory.Create(unit));
-//            }
-//            SetActions(list);
-//        }
+    private Dictionary<ActionType, IActionHandler> actionDict = new();
+    public ActionResolver(GameModel gameModel, MovementSystem movementSystem)
+    {
+        MoveThenAttackHandler = new(movementSystem, gameModel);
+        MoveActionHandler = new(movementSystem, gameModel);
+        RangedAttackHandler = new(movementSystem, gameModel);
+        AttackActionHandler = new(movementSystem, gameModel);
+        SpellActionHandler = new(movementSystem, gameModel);
+        actionDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
+        actionDict.Add(ActionType.Attack, AttackActionHandler);
+        actionDict.Add(ActionType.Move, MoveActionHandler);
+        actionDict.Add(ActionType.RangedAttack, RangedAttackHandler);
+        actionDict.Add(ActionType.Spell, SpellActionHandler);
+    }
+    public IActionHandler Resolve(ActionType type, ActionContext actionContext)
+    {
+        return actionDict[type];
+    }
+    public bool Resolve(ActionContext ctx, out IActionHandler handler)
+    {
+        var resolvedHandlers = new List<IActionHandler>();
+        DetermineResolvedHandlers(ctx, resolvedHandlers);
+        LogAssertions(resolvedHandlers);
+        if (resolvedHandlers.Count > 0)
+        {
+            handler = resolvedHandlers[0];
+            Debug.Log("action resolver Invoke");
+            ActionResolved?.Invoke((handler,ctx));
+            return true;
+        }
+        else
+        {
+            ActionNotResolved?.Invoke();
+            handler = null;
+        }
+        return false;
+    }
 
-//        public virtual void SetActions(List<IActionHandler> handlers)
-//        {
-//            _handlers.Clear();
-//            handlers.AddRange(_handlers);
-//        }
+    private void DetermineResolvedHandlers(ActionContext ctx, List<IActionHandler> resolvedHandlers)
+    {
+        if (MoveThenAttackHandler.CanExecute(ctx))
+            resolvedHandlers.Add(MoveThenAttackHandler);
+        if (MoveActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(MoveActionHandler);
+        if (RangedAttackHandler.CanExecute(ctx))
+            resolvedHandlers.Add(RangedAttackHandler);
+        if (AttackActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(AttackActionHandler);
+        if (SpellActionHandler.CanExecute(ctx))
+            resolvedHandlers.Add(SpellActionHandler);
+    }
 
-//        /// <summary>
-//        /// GetActionHandler for ctx
-//        /// </summary>
-//        /// <param name="ctx"></param>
-//        /// <param name="handler"></param>
-//        /// <returns></returns>
-//        public virtual bool Resolve(ActionContext ctx, out IActionHandler handler)
-//        {
-//            handler = _handlers.FirstOrDefault(h => CanHandle(h,ctx));
-//            if (handler == null)
-//                return false;
+    private void LogAssertions(List<IActionHandler> resolvedHandlers)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        foreach (var resolvedHandler in resolvedHandlers)
+        {
+            stringBuilder.Append(resolvedHandler.ToString());
+        }
+        if (resolvedHandlers.Count > 1)
+            Debug.LogWarning("resolved handlers count > 1" );
+        Debug.Log("resolved handlers: " + stringBuilder.ToString());
+    }
 
-//            return true;
-//        }
-
-//        protected bool CanHandle(IActionHandler handler, ActionContext ctx)
-//        {
-//            return handler.CanHandle(ctx);
-//        }
-//        /// <summary>
-//        /// Execute action forcly
-//        /// </summary>
-//        /// <param name="handler"></param>
-//        /// <param name="ctx"></param>
-//        private void Execute(IActionHandler handler, ActionContext ctx)
-//        {
-//            handler.Execute(ctx);
-//        }
-
-//        public void ShowPreview(ActionContext ctx)
-//        {
-//            var handler = _handlers.FirstOrDefault(h => h.CanShowPreview(ctx));
-//            handler?.ShowPreview(ctx);
-//        }
-//    }
-//}
+}
 

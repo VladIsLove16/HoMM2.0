@@ -55,12 +55,6 @@ namespace Development
                 TestDeath();
             }
             
-            // Тест движения
-            if (Input.GetKeyDown(testMoveKey))
-            {
-                TestMove();
-            }
-            
             // Тест hover
             if (Input.GetKeyDown(testHoverKey))
             {
@@ -104,21 +98,6 @@ namespace Development
             }
         }
         
-        private void TestMove()
-        {
-            Debug.Log("=== Тест движения ===");
-            
-            // Создаем тестовый маршрут
-            List<Vector3> route = new List<Vector3>
-            {
-                transform.position + Vector3.forward * 2f,
-                transform.position + Vector3.forward * 4f + Vector3.right * 2f,
-                transform.position + Vector3.forward * 6f
-            };
-            
-            unitView.RequestMove(route);
-        }
-        
         private void TestHover()
         {
             Debug.Log("=== Тест hover ===");
@@ -133,7 +112,7 @@ namespace Development
         private System.Collections.IEnumerator UnhoverAfterDelay()
         {
             yield return new WaitForSeconds(2f);
-            unitView.UnHover();
+            unitView.Unhover();
         }
         
         private UnitViewModel GetViewModel()

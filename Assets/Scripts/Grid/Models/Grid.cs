@@ -99,9 +99,81 @@ public class Grid<TGridObject> {
         GetXY(worldPosition, out x, out y);
         return new Vector2Int(x,y);
     }
+    public TGridObject[,] GetGridObjects()
+    {
+        return gridArray;
+    }
 
     internal bool IsInBounds(Vector2Int vector2Int)
     {
        return vector2Int.x<=width && vector2Int.y<=height && vector2Int.x>=0 && vector2Int.y >=0;
+    }
+    public List<Vector2Int> GetNeighbors(Vector2Int cell, int width, int height, bool includeDiagonals = false)
+    {
+        var neighbors = new List<Vector2Int>();
+
+        // Четыре направления: вверх, вниз, влево, вправо
+        Vector2Int[] directions = new Vector2Int[]
+        {
+            new Vector2Int(0, 1),  // вверх
+            new Vector2Int(0, -1), // вниз
+            new Vector2Int(-1, 0), // влево
+            new Vector2Int(1, 0),  // вправо
+        };
+
+        // Диагональные направления
+        Vector2Int[] diagonals = new Vector2Int[]
+        {
+            new Vector2Int(-1, 1),  // верх-лево
+            new Vector2Int(1, 1),   // верх-право
+            new Vector2Int(-1, -1), // низ-лево
+            new Vector2Int(1, -1)   // низ-право
+        };
+
+        foreach (var dir in directions)
+        {
+            Vector2Int neighbor = cell + dir;
+            if (IsInBounds(neighbor))
+                neighbors.Add(neighbor);
+        }
+
+        // Добавляем диагональные, если нужно
+        if (includeDiagonals)
+        {
+            foreach (var dir in diagonals)
+            {
+                Vector2Int neighbor = cell + dir;
+                if (IsInBounds(neighbor))
+                    neighbors.Add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+    public Vector2Int GetClosestNeighbor(Vector3 worldPosition, bool includeDiagonals = false)
+    {
+        // Получаем координаты клетки, в которой находится точка
+        Vector2Int cell = GetXY(worldPosition);
+
+        // Получаем соседей
+        List<Vector2Int> neighbors = GetNeighbors(cell, width, height, includeDiagonals);
+
+        if (neighbors.Count == 0)
+            return cell; // если соседей нет, возвращаем саму клетку
+
+        Vector2Int closest = neighbors[0];
+        float minDistance = Vector3.Distance(worldPosition, GetWorldPosition(closest.x, closest.y));
+
+        foreach (var neighbor in neighbors)
+        {
+            float distance = Vector3.Distance(worldPosition, GetWorldPosition(neighbor.x, neighbor.y));
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = neighbor;
+            }
+        }
+
+        return closest;
     }
 }

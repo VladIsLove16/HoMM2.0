@@ -1,0 +1,71 @@
+﻿using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using Zenject;
+
+public class UnitModelFactory
+{
+    [Inject] IReadOnlyDictionary<UnitType, UnitDefinitionSO> _dataMap;
+    public UnitModelFactory(IReadOnlyDictionary<UnitType, UnitDefinitionSO> dataMap)
+    {
+        _dataMap = dataMap;
+    }
+    public UnitModelFactory(bool loadFromResource = true)
+    {
+        if (loadFromResource)
+        {
+            try
+            {
+                _dataMap = DataMapFromResources();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"UnitModelFactory: failed to load unit data from resources: {ex.Message}");
+                _dataMap = new Dictionary<UnitType, UnitDefinitionSO>();
+            }
+        }
+    }
+    public UnitModel Create(UnitSpawnParams unitSpawnParams)
+    {
+        if(_dataMap == null)
+        {
+            throw new InvalidOperationException("Data map is not initialized");
+        }
+        if (!_dataMap.TryGetValue(unitSpawnParams.UnitType, out var unitDefinitionSO) || unitDefinitionSO == null)
+        {
+            throw new InvalidOperationException($"UnitDefinitionSO not found for UnitType {unitSpawnParams.UnitType}");
+        }
+        return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.UnitType, unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.Amount, unitSpawnParams.Team);
+    }
+    private IReadOnlyDictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
+    {
+        // Avoid loading editor assets during EditMode tests / serialization time.
+        // Loading the ScriptableObject asset can trigger Unity to call ScriptableObject constructors
+        // during serialization which results in UnityException. When running in the editor but not
+        // in play mode (typical for EditMode tests), return an empty map and let tests inject data.
+        if (!Application.isPlaying)
+        {
+            Debug.Log("UnitModelFactory: Skipping GameUnitDatas load because Application.isPlaying == false");
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
+        var gameUnitDatas = AssetDatabase.LoadAssetAtPath<GameUnitDatas>("Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+        if (gameUnitDatas == null)
+        {
+            Debug.LogWarning("UnitModelFactory: GameUnitDatas asset not found at Assets/ScriptableObjects/Game/GameUnitDatas.asset");
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
+        var dict = gameUnitDatas.ToDictionary();
+        if (dict == null)
+        {
+            return new Dictionary<UnitType, UnitDefinitionSO>();
+        }
+
+        return dict;
+    }   
+}

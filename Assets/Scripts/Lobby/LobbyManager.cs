@@ -1,9 +1,10 @@
-using Unity.Netcode;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.Collections;
-using System;
+using Unity.Netcode;
+using UnityEngine;
 
 /// <summary>
 /// Менеджер лобби для управления подключениями игроков и настройками игры
@@ -66,16 +67,19 @@ public class LobbyManager : NetworkBehaviour
     public void StartHost()
     {
         SetGameModeMode(GameMode.Multiplayer);
+        SceneTransitionDataService.Instance.SetTeam(Team.Blue);
         NetworkManager.Singleton.StartHost();
     }
     public void StartClient()
     {
         SetGameModeMode(GameMode.Multiplayer);
+        SceneTransitionDataService.Instance.SetTeam(Team.Red);
         NetworkManager.Singleton.StartClient();
     }
     public void StartSinglePlayer()
     {
-        SetGameModeMode(GameMode.Singleplayer);
+        SetGameModeMode(GameMode.SinglePlayer);
+        SceneTransitionDataService.Instance.SetTeam(Team.Blue);
         // Загрузку игровой сцены выполняем напрямую, минуя сетевой менеджер
         UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
@@ -203,27 +207,12 @@ public class LobbyManager : NetworkBehaviour
         if (SceneTransitionDataService.Instance != null)
         {
             SceneTransitionDataService.Instance.SetSelectedConfiguration(_selectedConfigIndex.Value);
-            SceneTransitionDataService.Instance.Width = _selectedGridWidth.Value;
-            SceneTransitionDataService.Instance.Height = _selectedGridHeight.Value;
             // TODO: SceneTransitionDataService should expose SetGridSize. For now, rely on NetworkVariables.
         }
         
         // Загружаем игровую сцену
         NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-
-        // Доп. сценарий: отправка сетки и юнитов ещё при переходе на сцену
-        // Хост, зная настройки лобби, может инициировать ранний сетап, чтобы клиенты вошли уже с данными
-        TrySendEarlyBattleSetup();
     }
-
-    private void TrySendEarlyBattleSetup()
-    {
-        if (!IsHost) return;
-        var gateway = FindObjectOfType<GameNetworkCommandGateway>();
-        if (gateway == null) return;
-        gateway.TrySendBattleSetup();
-    }
-    
     public override void OnNetworkDespawn()
     {
         if (IsClient || IsHost)

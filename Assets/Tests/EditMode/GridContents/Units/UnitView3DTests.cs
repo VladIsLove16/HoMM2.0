@@ -144,7 +144,7 @@
 //            _unitView.Init(_unitViewModel);
 
 //            // Act
-//            _unitView.UnHover();
+//            _unitView.Unhover();
 
 //            // Assert
 //            // В реальном коде здесь проверяли бы изменение материала

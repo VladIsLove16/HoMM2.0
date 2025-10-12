@@ -12,34 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e804a7737baca34fa645add25977933, type: 3}
   m_Name: Battle1
   m_EditorClassIdentifier: 
+  width: 10
+  height: 10
   contents:
   - unitType: 0
     Amount: 2
     X: 1
     Y: 5
-    isPlayer: 0
+    Team: 0
   - unitType: 1
     Amount: 2
     X: 3
     Y: 5
-    isPlayer: 0
+    Team: 0
   - unitType: 2
     Amount: 2
     X: 5
     Y: 5
-    isPlayer: 0
+    Team: 0
   - unitType: 0
     Amount: 3
     X: 5
     Y: 0
-    isPlayer: 1
+    Team: 1
   - unitType: 1
     Amount: 3
     X: 3
     Y: 0
-    isPlayer: 1
+    Team: 1
   - unitType: 2
     Amount: 3
     X: 1
     Y: 0
-    isPlayer: 1
+    Team: 1
