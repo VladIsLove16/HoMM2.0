@@ -6,7 +6,7 @@ using Zenject;
 /// <summary>
 /// Реализация сервиса работы с курсором
 /// </summary>
-public class CursorService : MonoBehaviour, ICursorService
+public class CursorService : ICursorService
 {
     private Texture2D _currentCursor;
     private Vector2 _currentHotspot;

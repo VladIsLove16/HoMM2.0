@@ -69,7 +69,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.Bind<DialogVM>().AsSingle();
         Container.Bind<MushroomCollectionViewModel>().AsSingle();
         Container.Bind<GameSettingsViewModel>().AsSingle();
-        Container.Bind<MenusCoordinator>().AsSingle();
+        Container.Bind<MenusCoordinatorViewModel>().AsSingle();
 
     }
     private void BindsModels()
@@ -104,7 +104,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     private void BindInputs()
     {
-        Container.Bind<ICursorService>().To<AdventureSceneCursorService>().AsSingle().WithArguments(cursorStateTextures);
+        Container.Bind<ICursorService>().To<CursorService>().AsSingle().WithArguments(cursorStateTextures);
         Container.Bind<ICursorContextManager>().To<CursorContextManager>().AsSingle();
         Container.Bind<IInputModeService>().To<InputModeViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<InputCoordinator>().AsSingle();

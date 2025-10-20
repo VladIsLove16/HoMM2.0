@@ -1,6 +1,7 @@
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
 using System.Collections.Generic;
+using UniRx;
 using Zenject;
 
 public class MenusCoordinatorViewModel : IInitializable
