@@ -2,6 +2,7 @@ using Adventure.Domain.Movement;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Assets.Scripts.Adventure.Infrastructure.Input;
+using Zenject;
 
 namespace Adventure.Infrastructure.Movement
 {
@@ -19,8 +20,8 @@ namespace Adventure.Infrastructure.Movement
         private bool _sprintInput;
         private Vector2 _pendingLookInput;
         private bool _useExternalInput;
-        [FormerlySerializedAs("playerInput")]
-        [SerializeField] private AdventurePlayerInput legacyInputProvider;
+        [FormerlySerializedAs("adventureCharacterInput")]
+        [Inject] private AdventureInput legacyInputProvider;
 
         private void Awake()
         {
@@ -52,7 +53,7 @@ namespace Adventure.Infrastructure.Movement
             }
             else
             {
-                var provider = legacyInputProvider != null ? legacyInputProvider : GetComponent<AdventurePlayerInput>();
+                var provider = legacyInputProvider;
                 if (provider != null)
                 {
                     move = provider.Move;

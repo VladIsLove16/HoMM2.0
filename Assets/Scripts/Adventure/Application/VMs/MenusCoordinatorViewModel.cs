@@ -1,69 +1,54 @@
+using Adventure.Application.Dialog;
+using Adventure.Infrastructure.Dialog;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UniRx;
 using Zenject;
 
-public class MenusCoordinatorViewModel : IInitializable
+public class MenusCoordinatorViewModel
 {
     private readonly List<IActiveMenu> _activeMenus = new();
-    private readonly InputModeViewModel _inputModeVM;
-    private readonly GameSettingsViewModel _settingsVM;
-    private readonly MushroomBookViewModel _bookVM;
-
+    private readonly IInputModeVM _inputModeVM;
     [Inject]
     public MenusCoordinatorViewModel(
-        InputModeViewModel inputModeVM,
-        GameSettingsViewModel settingsVM,
-        MushroomBookViewModel bookVM)
+        IInputModeVM inputModeVM,
+        IEnumerable<IActiveMenu> menus)
     {
         _inputModeVM = inputModeVM;
-        _settingsVM = settingsVM;
-        _bookVM = bookVM;
-    }
-
-    public void Initialize()
-    {
-        _settingsVM.IsOpen.Subscribe(OnMenuStateChanged);
-        _bookVM.IsOpen.Subscribe(OnMenuStateChanged);
-    }
-
-    private void OnMenuStateChanged(bool _)
-    {
-        UpdateMenuState();
-    }
-
-    private void UpdateMenuState()
-    {
-        _activeMenus.Clear();
-        if (_settingsVM.IsOpen.Value) _activeMenus.Add(_settingsVM);
-        if (_bookVM.IsOpen.Value) _activeMenus.Add(_bookVM);
-
-        if (_activeMenus.Count == 0)
+        if(menus.Count() == 0)
+            throw new ArgumentException("No menus registered in MenusCoordinatorViewModel");
+        foreach (var menu in menus)
         {
-            _inputModeVM.PushMode(InputMode.Enabled);
+            menu.IsOpen
+                .Skip(1)
+                .Subscribe(_ => OnMenuStateChanged(menu));
+        }
+    }
+    private void OnMenuStateChanged(IActiveMenu activeMenu)
+    {
+        if (activeMenu.IsOpen.Value == true)
+        {
+            _inputModeVM.PushMode(activeMenu.InputMode);
+            _activeMenus.Add(activeMenu);
         }
         else
         {
-            // приоритет: настройки блокируют управление
-            if (_settingsVM.IsOpen.Value)
-            {
-                _inputModeVM.PushMode(InputMode.Blocked);
-            }
-            else if (_bookVM.IsOpen.Value)
-            {
-                _inputModeVM.PushMode(InputMode.Enabled);
-            }
+            _inputModeVM.PopMode(activeMenu.InputMode);
+            _activeMenus.Remove(activeMenu);
         }
     }
 
-    public void CloseFirst()
+    internal void CloseFirst()
     {
-        if (_settingsVM.IsOpen.Value)
-            _settingsVM.Close();
-        else if (_bookVM.IsOpen.Value)
-            _bookVM.Close();
+        if(!_activeMenus.Any())
+            return;
+        var menu = _activeMenus.First();
+        menu.Close();
+        _activeMenus.Remove(menu);
     }
 
-    public bool HasAnyOpen => _settingsVM.IsOpen.Value || _bookVM.IsOpen.Value;
+    public bool HasAnyOpen => _activeMenus.Any();
 }

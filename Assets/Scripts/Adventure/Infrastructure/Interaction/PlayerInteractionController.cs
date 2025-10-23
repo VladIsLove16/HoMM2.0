@@ -2,6 +2,7 @@ using Adventure.Infrastructure.Inventory;
 using Adventure.Presentation.Interaction;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using UnityEngine;
+using Zenject;
 
 namespace Adventure.Infrastructure.Interaction
 {
@@ -10,7 +11,7 @@ namespace Adventure.Infrastructure.Interaction
         private const string DefaultInteractPrompt = "Interact";
         private const string DefaultCollectPrompt = "Collect";
 
-        [SerializeField] private AdventurePlayerInput playerInput;
+        [Inject] private AdventureInput playerInput;
         [SerializeField] private Camera playerCamera;
         [SerializeField] private float interactDistance = 2f;
         [SerializeField] private LayerMask interactionMask = ~0;
@@ -22,12 +23,6 @@ namespace Adventure.Infrastructure.Interaction
         private IInteractable? _currentInteractable;
         private bool _hintVisible;
         private float _hintExpiresAt;
-
-        private void Awake()
-        {
-            if (playerInput == null)
-                playerInput = GetComponent<AdventurePlayerInput>();
-        }
 
         private void Update()
         {
@@ -57,9 +52,9 @@ namespace Adventure.Infrastructure.Interaction
                 Debug.LogWarning("PlayerInteractionController not enabled!");
                 return;
             }
-            if(playerInput == null && !playerInput.isActiveAndEnabled)
+            if(playerInput == null)
             {
-                Debug.LogWarning("playerInput is not ready!");
+                Debug.LogWarning("adventureCharacterInput is not ready!");
                 return;
             }
 
@@ -78,7 +73,7 @@ namespace Adventure.Infrastructure.Interaction
 
         public void DisplayHint()
         {
-            if (!enabled || promptView == null || (playerInput != null && !playerInput.isActiveAndEnabled))
+            if (!enabled || promptView == null || (playerInput != null))
                 return;
 
             if (!EnsureCandidate(out var candidate))

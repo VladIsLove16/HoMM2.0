@@ -3,39 +3,40 @@ using Adventure.Infrastructure.Movement;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
+using System;
 using UnityEngine;
 using Zenject;
 
 [DefaultExecutionOrder(-150)]
-public sealed class AdventureInputRouter : MonoBehaviour
+public sealed class AdventureInputRouter : IDisposable
 {
-    [SerializeField] private AdventurePlayerInput playerInput;
-    [SerializeField] private PlayerMovementController movementController;
-    [SerializeField] private PlayerInteractionController interactionController;
+    [Inject] private AdventureInput adventureCharacterInput;
+    [Inject] private PlayerMovementController movementController;
+    [Inject] private PlayerInteractionController interactionController;
 
-    [Inject] private InputModeViewModel inputModeVM;
+    [Inject] private IInputModeVM inputModeVM;
     [Inject] private MenusCoordinatorViewModel menusVM;
     [Inject] private GameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
-
-    private void OnEnable()
+    [Inject]
+    private void Construct()
     {
-        playerInput.MoveChanged += OnMoveChanged;
-        playerInput.LookChanged += OnLookChanged;
-        playerInput.SprintChanged += OnSprintChanged;
-        playerInput.InteractPerformed += OnInteract;
-        playerInput.OpenSettingsPerformed += OnOpenSettings;
-        playerInput.OpenMushroomBookPerformed += OnOpenMushroomBook;
+        adventureCharacterInput.MoveChanged += OnMoveChanged;
+        adventureCharacterInput.LookChanged += OnLookChanged;
+        adventureCharacterInput.SprintChanged += OnSprintChanged;
+        adventureCharacterInput.InteractPerformed += OnInteract;
+        adventureCharacterInput.OpenSettingsPerformed += OnOpenSettings;
+        adventureCharacterInput.OpenMushroomBookPerformed += OnOpenMushroomBook;
     }
 
-    private void OnDisable()
+    public void Dispose()
     {
-        playerInput.MoveChanged -= OnMoveChanged;
-        playerInput.LookChanged -= OnLookChanged;
-        playerInput.SprintChanged -= OnSprintChanged;
-        playerInput.InteractPerformed -= OnInteract;
-        playerInput.OpenSettingsPerformed -= OnOpenSettings;
-        playerInput.OpenMushroomBookPerformed -= OnOpenMushroomBook;
+        adventureCharacterInput.MoveChanged -= OnMoveChanged;
+        adventureCharacterInput.LookChanged -= OnLookChanged;
+        adventureCharacterInput.SprintChanged -= OnSprintChanged;
+        adventureCharacterInput.InteractPerformed -= OnInteract;
+        adventureCharacterInput.OpenSettingsPerformed -= OnOpenSettings;
+        adventureCharacterInput.OpenMushroomBookPerformed -= OnOpenMushroomBook;
     }
 
     private void OnMoveChanged(Vector2 move)
@@ -47,7 +48,10 @@ public sealed class AdventureInputRouter : MonoBehaviour
     private void OnLookChanged(Vector2 delta)
     {
         if (inputModeVM.CanLook)
+        {
             movementController?.EnqueueLookDelta(delta);
+
+        }
     }
 
     private void OnSprintChanged(bool sprint)
@@ -56,7 +60,11 @@ public sealed class AdventureInputRouter : MonoBehaviour
             movementController?.SetSprintInput(sprint);
     }
 
-    private void OnInteract() => interactionController?.PerformInteract();
+    private void OnInteract()
+    {
+        if (inputModeVM.CanMove)
+            interactionController?.PerformInteract();
+    }
 
     private void OnOpenSettings()
     {

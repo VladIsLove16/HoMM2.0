@@ -13,7 +13,7 @@ public class CellInputHandler : MonoBehaviour
     public enum SelectionMode { GridOnly, UnitThenGrid }
     [SerializeField] private SelectionMode selectionMode = SelectionMode.UnitThenGrid;
 
-    private InputSystem_Actions inputActions;
+    private InputSystem_GridGame inputActions;
 
     [SerializeField] private Camera mainCamera;
     [SerializeField] private GameView3D _gameView3D;
@@ -33,7 +33,7 @@ public class CellInputHandler : MonoBehaviour
     {
         if (inputActions == null)
         {
-            inputActions = new InputSystem_Actions();
+            inputActions = new InputSystem_GridGame();
         }
     }
 

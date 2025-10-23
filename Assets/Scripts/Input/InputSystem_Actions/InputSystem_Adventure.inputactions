@@ -2,7 +2,7 @@
     "name": "InputSystem_Adventure",
     "maps": [
         {
-            "name": "Player",
+            "name": "Character",
             "id": "9681ab8e-c8d5-470a-87ed-ca24375bde9b",
             "actions": [
                 {
@@ -45,24 +45,6 @@
                     "name": "ShowHint",
                     "type": "Button",
                     "id": "6d669a0b-4cda-4771-9bd8-d409e253daf5",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "OpenMushroomBook",
-                    "type": "Button",
-                    "id": "d6a973dc-9dbe-42dd-81ec-01f853733b24",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "OpenSettings",
-                    "type": "Button",
-                    "id": "2a1aa4b3-0691-4bbc-8bde-b6d01909617b",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -234,10 +216,36 @@
                     "action": "ShowHint",
                     "isComposite": false,
                     "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Menus",
+            "id": "ef14b8b3-c470-4eea-9c9f-5856989e7a30",
+            "actions": [
+                {
+                    "name": "OpenMushroomBook",
+                    "type": "Button",
+                    "id": "d2fb0939-a9a9-46e4-831a-af505851dc7f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
+                    "name": "OpenSettings",
+                    "type": "Button",
+                    "id": "f3017812-6020-4893-99fd-1136de3f6b25",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
                     "name": "",
-                    "id": "3f628070-8f3e-49c6-8010-6f3e7987f434",
+                    "id": "1f652db2-8f72-4997-8586-b20bfd3cafe6",
                     "path": "<Keyboard>/m",
                     "interactions": "",
                     "processors": "",
@@ -248,7 +256,7 @@
                 },
                 {
                     "name": "",
-                    "id": "e8f66128-4668-4799-90e0-edf2f3101e91",
+                    "id": "41700660-69fb-4e99-ad5f-68757993501a",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",

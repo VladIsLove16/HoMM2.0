@@ -12,7 +12,6 @@ public class GameLogicMonoInstaller : MonoInstaller
     [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private UnitPrefabManager unitPrefabManager;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
-    [SerializeField] private CursorService cursorService;
     [SerializeField] private GameConfigurationService gameConfigurationService;
 
     [Header("Presentation")]
@@ -41,7 +40,6 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
-        Container.Bind<CursorService>().FromInstance(cursorService).AsSingle().NonLazy();
     }
 
     private void BindModels()
@@ -74,6 +72,7 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesTo<GameViewModel>().FromResolve();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
+        Container.Bind<GridCursorViewModel>().AsSingle().NonLazy();
     }
 
     private void BindGameController()

@@ -1759,7 +1759,7 @@ GameObject:
   - component: {fileID: 6078116808003930132}
   - component: {fileID: 8847554396893888244}
   - component: {fileID: 7491051654111878216}
-  - component: {fileID: 8726446854565214564}
+  - component: {fileID: 3503992488345042944}
   m_Layer: 5
   m_Name: GameSettings
   m_TagString: Untagged
@@ -1850,7 +1850,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &8726446854565214564
+--- !u!114 &3503992488345042944
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1859,7 +1859,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5681960485334387708}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34b2319e96db5ca4598a0413d678df0a, type: 3}
+  m_Script: {fileID: 11500000, guid: b6298fb5b1acac843b5e38089569fd9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   panelRoot: {fileID: 5702734201918499524}

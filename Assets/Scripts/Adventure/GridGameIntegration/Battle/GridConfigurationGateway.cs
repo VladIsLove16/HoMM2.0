@@ -16,15 +16,15 @@ namespace Adventure.Integration.Battle
         [SerializeField] private int enemyFrontlineX = 10;
         [SerializeField, Min(1)] private int rowSpacing = 1;
 
-        public void ConfigureBattle(IReadOnlyList<UnitStackData> playerLineup, IReadOnlyList<UnitStackData> enemyLineup)
-        {
-            var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, Mathf.Max(1, rowSpacing));
-            var playerSlots = resolver.ResolveForPlayer(playerLineup ?? Array.Empty<UnitStackData>());
-            var enemySlots = resolver.ResolveForEnemy(enemyLineup ?? Array.Empty<UnitStackData>());
-            ApplyConfiguration(playerSlots, enemySlots);
-        }
+        //public void ConfigureBattle(IReadOnlyList<UnitStackData> playerLineup, IReadOnlyList<UnitStackData> enemyLineup)
+        //{
+        //    var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, Mathf.Max(1, rowSpacing));
+        //    var playerSlots = resolver.ResolveForPlayer(playerLineup ?? Array.Empty<UnitStackData>());
+        //    var enemySlots = resolver.ResolveForEnemy(enemyLineup ?? Array.Empty<UnitStackData>());
+        //    ApplyConfiguration(playerSlots, enemySlots);
+        //}
 
-        public void ApplyConfiguration(IReadOnlyList<GridSlot> playerSlots, IReadOnlyList<GridSlot> enemySlots)
+        public void ApplyConfiguration(ArmyFormation playerSlots, ArmyFormation enemySlots)
         {
             if (configurationService == null)
             {
@@ -82,7 +82,7 @@ namespace Adventure.Integration.Battle
                 Team = slot.Team
             };
         }
-        private GridContentEntrySO.UnitContent[] ToContents(IReadOnlyList<GridSlot> slots)
+        private GridContentEntrySO.UnitContent[] ToContents(ArmyFormation slots)
         {
             GridContentEntrySO.UnitContent[] result =new GridContentEntrySO.UnitContent[slots.Count];
            for (int i = 0; i < slots.Count; i++)

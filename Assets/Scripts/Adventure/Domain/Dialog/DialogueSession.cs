@@ -27,17 +27,26 @@ namespace Adventure.Domain.Dialog
             var choice = FindChoice(choiceId);
             if (choice == null)
                 throw new InvalidOperationException($"Choice '{choiceId}' not found");
-
-            if (!string.IsNullOrEmpty(choice.NextNodeId) && _graph.TryGetNode(choice.NextNodeId, out var next))
+            if (FindNextNode(choice, out DialogueNode next))
             {
                 _currentNode = next;
                 return choice.Action;
             }
 
-            // No next node -> dialogue ends
             IsCompleted = true;
             _currentNode = null;
             return choice.Action;
+        }
+
+        private bool FindNextNode(DialogueChoice choice, out DialogueNode next)
+        {
+            if (choice.NextNodeId == null)
+            {
+                next = null; 
+                return false;
+            }
+            bool isNextNode = _graph.TryGetNode(choice.NextNodeId, out next);
+            return isNextNode && !string.IsNullOrEmpty(choice.NextNodeId);
         }
 
         private DialogueChoice FindChoice(string choiceId)

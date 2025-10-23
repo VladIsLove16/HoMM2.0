@@ -24,7 +24,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
     ""name"": ""InputSystem_Adventure"",
     ""maps"": [
         {
-            ""name"": ""Player"",
+            ""name"": ""Character"",
             ""id"": ""9681ab8e-c8d5-470a-87ed-ca24375bde9b"",
             ""actions"": [
                 {
@@ -67,24 +67,6 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""name"": ""ShowHint"",
                     ""type"": ""Button"",
                     ""id"": ""6d669a0b-4cda-4771-9bd8-d409e253daf5"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""OpenMushroomBook"",
-                    ""type"": ""Button"",
-                    ""id"": ""d6a973dc-9dbe-42dd-81ec-01f853733b24"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""OpenSettings"",
-                    ""type"": ""Button"",
-                    ""id"": ""2a1aa4b3-0691-4bbc-8bde-b6d01909617b"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -256,10 +238,36 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""action"": ""ShowHint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Menus"",
+            ""id"": ""ef14b8b3-c470-4eea-9c9f-5856989e7a30"",
+            ""actions"": [
+                {
+                    ""name"": ""OpenMushroomBook"",
+                    ""type"": ""Button"",
+                    ""id"": ""d2fb0939-a9a9-46e4-831a-af505851dc7f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""OpenSettings"",
+                    ""type"": ""Button"",
+                    ""id"": ""f3017812-6020-4893-99fd-1136de3f6b25"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
                     ""name"": """",
-                    ""id"": ""3f628070-8f3e-49c6-8010-6f3e7987f434"",
+                    ""id"": ""1f652db2-8f72-4997-8586-b20bfd3cafe6"",
                     ""path"": ""<Keyboard>/m"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -270,7 +278,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e8f66128-4668-4799-90e0-edf2f3101e91"",
+                    ""id"": ""41700660-69fb-4e99-ad5f-68757993501a"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -345,20 +353,23 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
         }
     ]
 }");
-        // Player
-        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
-        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
-        m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
-        m_Player_ShowHint = m_Player.FindAction("ShowHint", throwIfNotFound: true);
-        m_Player_OpenMushroomBook = m_Player.FindAction("OpenMushroomBook", throwIfNotFound: true);
-        m_Player_OpenSettings = m_Player.FindAction("OpenSettings", throwIfNotFound: true);
+        // Character
+        m_Character = asset.FindActionMap("Character", throwIfNotFound: true);
+        m_Character_Move = m_Character.FindAction("Move", throwIfNotFound: true);
+        m_Character_Look = m_Character.FindAction("Look", throwIfNotFound: true);
+        m_Character_Sprint = m_Character.FindAction("Sprint", throwIfNotFound: true);
+        m_Character_Interact = m_Character.FindAction("Interact", throwIfNotFound: true);
+        m_Character_ShowHint = m_Character.FindAction("ShowHint", throwIfNotFound: true);
+        // Menus
+        m_Menus = asset.FindActionMap("Menus", throwIfNotFound: true);
+        m_Menus_OpenMushroomBook = m_Menus.FindAction("OpenMushroomBook", throwIfNotFound: true);
+        m_Menus_OpenSettings = m_Menus.FindAction("OpenSettings", throwIfNotFound: true);
     }
 
     ~@InputSystem_Adventure()
     {
-        UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, InputSystem_Adventure.Player.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Character.enabled, "This will cause a leak and performance issues, InputSystem_Adventure.Character.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Menus.enabled, "This will cause a leak and performance issues, InputSystem_Adventure.Menus.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -417,36 +428,32 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Player
-    private readonly InputActionMap m_Player;
-    private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
-    private readonly InputAction m_Player_Move;
-    private readonly InputAction m_Player_Look;
-    private readonly InputAction m_Player_Sprint;
-    private readonly InputAction m_Player_Interact;
-    private readonly InputAction m_Player_ShowHint;
-    private readonly InputAction m_Player_OpenMushroomBook;
-    private readonly InputAction m_Player_OpenSettings;
-    public struct PlayerActions
+    // Character
+    private readonly InputActionMap m_Character;
+    private List<ICharacterActions> m_CharacterActionsCallbackInterfaces = new List<ICharacterActions>();
+    private readonly InputAction m_Character_Move;
+    private readonly InputAction m_Character_Look;
+    private readonly InputAction m_Character_Sprint;
+    private readonly InputAction m_Character_Interact;
+    private readonly InputAction m_Character_ShowHint;
+    public struct CharacterActions
     {
         private @InputSystem_Adventure m_Wrapper;
-        public PlayerActions(@InputSystem_Adventure wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Move => m_Wrapper.m_Player_Move;
-        public InputAction @Look => m_Wrapper.m_Player_Look;
-        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
-        public InputAction @Interact => m_Wrapper.m_Player_Interact;
-        public InputAction @ShowHint => m_Wrapper.m_Player_ShowHint;
-        public InputAction @OpenMushroomBook => m_Wrapper.m_Player_OpenMushroomBook;
-        public InputAction @OpenSettings => m_Wrapper.m_Player_OpenSettings;
-        public InputActionMap Get() { return m_Wrapper.m_Player; }
+        public CharacterActions(@InputSystem_Adventure wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Move => m_Wrapper.m_Character_Move;
+        public InputAction @Look => m_Wrapper.m_Character_Look;
+        public InputAction @Sprint => m_Wrapper.m_Character_Sprint;
+        public InputAction @Interact => m_Wrapper.m_Character_Interact;
+        public InputAction @ShowHint => m_Wrapper.m_Character_ShowHint;
+        public InputActionMap Get() { return m_Wrapper.m_Character; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
-        public void AddCallbacks(IPlayerActions instance)
+        public static implicit operator InputActionMap(CharacterActions set) { return set.Get(); }
+        public void AddCallbacks(ICharacterActions instance)
         {
-            if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_CharacterActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_CharacterActionsCallbackInterfaces.Add(instance);
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
@@ -462,15 +469,9 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             @ShowHint.started += instance.OnShowHint;
             @ShowHint.performed += instance.OnShowHint;
             @ShowHint.canceled += instance.OnShowHint;
-            @OpenMushroomBook.started += instance.OnOpenMushroomBook;
-            @OpenMushroomBook.performed += instance.OnOpenMushroomBook;
-            @OpenMushroomBook.canceled += instance.OnOpenMushroomBook;
-            @OpenSettings.started += instance.OnOpenSettings;
-            @OpenSettings.performed += instance.OnOpenSettings;
-            @OpenSettings.canceled += instance.OnOpenSettings;
         }
 
-        private void UnregisterCallbacks(IPlayerActions instance)
+        private void UnregisterCallbacks(ICharacterActions instance)
         {
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
@@ -487,6 +488,54 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             @ShowHint.started -= instance.OnShowHint;
             @ShowHint.performed -= instance.OnShowHint;
             @ShowHint.canceled -= instance.OnShowHint;
+        }
+
+        public void RemoveCallbacks(ICharacterActions instance)
+        {
+            if (m_Wrapper.m_CharacterActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ICharacterActions instance)
+        {
+            foreach (var item in m_Wrapper.m_CharacterActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_CharacterActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public CharacterActions @Character => new CharacterActions(this);
+
+    // Menus
+    private readonly InputActionMap m_Menus;
+    private List<IMenusActions> m_MenusActionsCallbackInterfaces = new List<IMenusActions>();
+    private readonly InputAction m_Menus_OpenMushroomBook;
+    private readonly InputAction m_Menus_OpenSettings;
+    public struct MenusActions
+    {
+        private @InputSystem_Adventure m_Wrapper;
+        public MenusActions(@InputSystem_Adventure wrapper) { m_Wrapper = wrapper; }
+        public InputAction @OpenMushroomBook => m_Wrapper.m_Menus_OpenMushroomBook;
+        public InputAction @OpenSettings => m_Wrapper.m_Menus_OpenSettings;
+        public InputActionMap Get() { return m_Wrapper.m_Menus; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(MenusActions set) { return set.Get(); }
+        public void AddCallbacks(IMenusActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MenusActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MenusActionsCallbackInterfaces.Add(instance);
+            @OpenMushroomBook.started += instance.OnOpenMushroomBook;
+            @OpenMushroomBook.performed += instance.OnOpenMushroomBook;
+            @OpenMushroomBook.canceled += instance.OnOpenMushroomBook;
+            @OpenSettings.started += instance.OnOpenSettings;
+            @OpenSettings.performed += instance.OnOpenSettings;
+            @OpenSettings.canceled += instance.OnOpenSettings;
+        }
+
+        private void UnregisterCallbacks(IMenusActions instance)
+        {
             @OpenMushroomBook.started -= instance.OnOpenMushroomBook;
             @OpenMushroomBook.performed -= instance.OnOpenMushroomBook;
             @OpenMushroomBook.canceled -= instance.OnOpenMushroomBook;
@@ -495,21 +544,21 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             @OpenSettings.canceled -= instance.OnOpenSettings;
         }
 
-        public void RemoveCallbacks(IPlayerActions instance)
+        public void RemoveCallbacks(IMenusActions instance)
         {
-            if (m_Wrapper.m_PlayerActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_MenusActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IPlayerActions instance)
+        public void SetCallbacks(IMenusActions instance)
         {
-            foreach (var item in m_Wrapper.m_PlayerActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_MenusActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_MenusActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public PlayerActions @Player => new PlayerActions(this);
+    public MenusActions @Menus => new MenusActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -555,13 +604,16 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             return asset.controlSchemes[m_XRSchemeIndex];
         }
     }
-    public interface IPlayerActions
+    public interface ICharacterActions
     {
         void OnMove(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnShowHint(InputAction.CallbackContext context);
+    }
+    public interface IMenusActions
+    {
         void OnOpenMushroomBook(InputAction.CallbackContext context);
         void OnOpenSettings(InputAction.CallbackContext context);
     }

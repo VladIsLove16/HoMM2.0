@@ -17,6 +17,8 @@ namespace Adventure.Settings.ViewModel
         public GraphicsSettingsModel Graphics => _model.Graphics;
         public ControlSettingsModel Controls => _model.Controls;
 
+        public InputMode InputMode => InputMode.Blocked;
+
         public GameSettingsViewModel(GameSettingsModel model, PauseController pauseController)
         {
             _model = model;

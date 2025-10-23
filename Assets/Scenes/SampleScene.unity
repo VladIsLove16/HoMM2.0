@@ -2497,61 +2497,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &843088424
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 843088425}
-  - component: {fileID: 843088426}
-  m_Layer: 0
-  m_Name: Cursor
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &843088425
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 843088424}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1714518246}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &843088426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 843088424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90c75e54cb1e37e43bf382f5a0d19778, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cursorStateTextures:
-  - texture: {fileID: 2800000, guid: 8a8420ff8f83a9b40ab618e5272c45f4, type: 3}
-    state: 0
-  - texture: {fileID: 2800000, guid: 4a5d5dd8b6a787c4db7eca03c7e9b783, type: 3}
-    state: 1
-  - texture: {fileID: 2800000, guid: c6897824c361ba64787d66ae6cb2713b, type: 3}
-    state: 2
-  - texture: {fileID: 2800000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
-    state: 3
-  - texture: {fileID: 2800000, guid: b60854f28028aeb47a2fb65fb95e9a6e, type: 3}
-    state: 4
 --- !u!1 &898538626
 GameObject:
   m_ObjectHideFlags: 0
@@ -2638,11 +2583,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameController: {fileID: 985392989}
   networkCommandGateway: {fileID: 1271283385}
-  unitDatas: {fileID: 11400000, guid: 40340ffc2ed77d34eacbaeb7486900af, type: 2}
+  unitDefinitionSOCollection: {fileID: 11400000, guid: 40340ffc2ed77d34eacbaeb7486900af, type: 2}
   statusEffectDatas: {fileID: 11400000, guid: cea81fc749bd97c498b9aac4ee9f9402, type: 2}
   unitPrefabManager: {fileID: 51146517}
   sceneLoadWatcher: {fileID: 1391039215}
-  cursorService: {fileID: 843088426}
   gameConfigurationService: {fileID: 11400000, guid: 826b593e69c0a7e45b2b2b78633b385b, type: 2}
   _presentationInstaller: {fileID: 752650013}
 --- !u!1 &985392986
@@ -4609,7 +4553,6 @@ Transform:
   - {fileID: 1374322315}
   - {fileID: 1492948229}
   - {fileID: 985392987}
-  - {fileID: 843088425}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1739302205

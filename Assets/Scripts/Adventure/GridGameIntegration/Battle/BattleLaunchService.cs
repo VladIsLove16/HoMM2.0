@@ -1,34 +1,31 @@
+using Adventure.Domain.Inventory;
+using System;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
+using Zenject;
+using Zenject.SpaceFighter;
 
 namespace Adventure.Integration.Battle
 {
 
-    public sealed class BattleLaunchService
+    public class BattleLaunchService
     {
         private readonly ArmyFormationResolver _resolver;
         private readonly IGridConfigurationGateway _gateway;
-        private IReadOnlyList<UnitStackData> _playerLineup;
-        private IReadOnlyList<UnitStackData> _enemyLineup;
-
+        [Inject]  private MushroomInventoryModel _inventoryModel;
         public BattleLaunchService(ArmyFormationResolver resolver, IGridConfigurationGateway gateway)
         {
             _resolver = resolver;
             _gateway = gateway;
         }
 
-        public void SetEnemyLineup(IReadOnlyList<UnitStackData> enemy)
-        {
-            _enemyLineup = enemy;
-        }
-        public void SetPlayerLineup(IReadOnlyList<UnitStackData> player )
-        {
-            _playerLineup = player;
-        }
 
-        public void Launch()
+        public void Launch(ArmyLineupSO enemyArmy)
         {
-            var playerSlots = _resolver.ResolveForPlayer(_playerLineup ?? new List<UnitStackData>());
-            var enemySlots = _resolver.ResolveForEnemy(_enemyLineup ?? new List<UnitStackData>());
+            var playerSlots = _resolver.ResolveForPlayer(_inventoryModel.GetData());
+            var enemySlots = _resolver.ResolveForEnemy(enemyArmy.Convert());
+            UnityLogger.Log("BATTLE LAUNCH!! \n player: " + playerSlots.ToString() + "\n enemy: " + enemySlots.ToString());
+
             _gateway.ApplyConfiguration(playerSlots, enemySlots);
             _gateway.LoadBattleScene();
         }

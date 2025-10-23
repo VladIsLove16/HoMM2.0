@@ -20,6 +20,9 @@ namespace Adventure.Domain.Dialog
             }
         }
 
-        public bool TryGetNode(string nodeId, out DialogueNode node) => _nodes.TryGetValue(nodeId, out node);
+        public bool TryGetNode(string nodeId, out DialogueNode node)
+        {
+            return  _nodes.TryGetValue(nodeId, out node);
+        }
     }
 }

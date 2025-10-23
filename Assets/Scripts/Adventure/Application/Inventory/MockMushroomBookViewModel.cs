@@ -4,6 +4,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Adventure.Integration.Battle;
 [CreateAssetMenu(menuName = "MockMushroomBook/MockMushroomBookViewModel", fileName = "MockMushroomBookViewModel")]
 public class MockMushroomBookViewModel : ScriptableObject 
 {
@@ -14,7 +15,7 @@ public class MockMushroomBookViewModel : ScriptableObject
     [Button("Initialize ViewModel")]
     private void OnEnable()
     {
-        mushroomInventoryModel = new();
+        mushroomInventoryModel = new(new List<UnitStackData>());
         foreach(var mushroom in catalog.GetAll())
         {
             mushroomInventoryModel.Add(mushroom.UnitType, 2);

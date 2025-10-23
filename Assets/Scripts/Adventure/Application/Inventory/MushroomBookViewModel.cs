@@ -26,6 +26,14 @@ namespace Adventure.Presentation.Mushroom
             new ReactiveProperty<PresentationMode>(global::PresentationMode.Normal);
         private readonly ReactiveProperty<bool> _isOpen = new(false);
 
+        public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
+        public IReadOnlyReactiveCollection<UnitDefinitionSO> CurrentPageEntries => _currentPageEntries;
+        public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
+        public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
+        public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
+
+        public InputMode InputMode => InputMode.Blocked;
+
         public MushroomBookViewModel(
             MushroomInventoryModel mushroomInventoryModel,
             UnitDefinitionSOCollection catalog)
@@ -35,12 +43,6 @@ namespace Adventure.Presentation.Mushroom
 
             RebuildEntries();
         }
-        public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
-        public IReadOnlyReactiveCollection<UnitDefinitionSO> CurrentPageEntries => _currentPageEntries;
-        public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
-        public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
-        public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
-
         public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
         public void PrevPage() => GoToPage(_currentPageIndex.Value - 1);
 
@@ -59,7 +61,10 @@ namespace Adventure.Presentation.Mushroom
 
             _isOpen.SetValueAndForceNotify(true);
         }
-
+        public void Collect(UnitType type)
+        {
+            _mushroomInventoryModel?.Add(type);
+        }
         public void Close()
         {
             if (!_isOpen.Value)

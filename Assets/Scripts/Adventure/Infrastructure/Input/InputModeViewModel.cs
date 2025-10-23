@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class InputModeViewModel : IInputModeService
+public sealed class InputModeViewModel : IInputModeVM
 {
     private readonly Stack<InputMode> _modes = new();
     public event Action<InputMode> OnModeChanged;
@@ -12,7 +12,8 @@ public sealed class InputModeViewModel : IInputModeService
     public bool IsCursorVisible => Current is InputMode.Blocked or InputMode.OnlyMove;
     public void PushMode(InputMode mode)
     {
-        _modes.Push(mode);
+        _modes.Push( mode);
+        UnityLogger.Log("new input " + mode);
         OnModeChanged?.Invoke(Current);
     }
 
@@ -25,6 +26,7 @@ public sealed class InputModeViewModel : IInputModeService
             foreach (var m in remaining)
                 _modes.Push(m);
 
+            UnityLogger.Log("new input " + mode);
             OnModeChanged?.Invoke(Current);
         }
     }
