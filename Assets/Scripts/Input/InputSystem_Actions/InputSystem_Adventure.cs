@@ -268,7 +268,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                 {
                     ""name"": """",
                     ""id"": ""1f652db2-8f72-4997-8586-b20bfd3cafe6"",
-                    ""path"": ""<Keyboard>/m"",
+                    ""path"": ""<Keyboard>/b"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",

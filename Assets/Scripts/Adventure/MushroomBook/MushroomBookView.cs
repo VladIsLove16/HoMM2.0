@@ -7,6 +7,7 @@ using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class MushroomBookView : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class MushroomBookView : MonoBehaviour
     private CompositeDisposable _subscriptions = new CompositeDisposable();
     private readonly ReactiveCollection<UnitDefinitionSO> _reactiveEntries = new();
     public int PageCapacity => entrySlots?.Count ?? 0;
+    [Inject]
     public void Construct(MushroomBookViewModel viewModel)
     {
         if (_viewModel == viewModel)
@@ -93,13 +95,6 @@ public class MushroomBookView : MonoBehaviour
     {
         _viewModel?.SetPresentationMode(humanized ? PresentationMode.Humanized : PresentationMode.Normal);
     }
-
-    private void Open()
-    {
-        if (!gameObject.activeSelf)
-            gameObject.SetActive(true);
-    }
-
     private void OnPresentationModeChanged(PresentationMode mode)
     {
         foreach (var slot in entrySlots)
@@ -129,6 +124,7 @@ public class MushroomBookView : MonoBehaviour
     }
     private void OnBookStateChanged(bool isOpen)
     {
+        Debug.Log("new book state" +  isOpen);
         gameObject.SetActive(isOpen);
     }
     private void RefreshPageNumber()

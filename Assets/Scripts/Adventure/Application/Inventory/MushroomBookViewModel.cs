@@ -48,6 +48,7 @@ namespace Adventure.Presentation.Mushroom
 
         public void Toggle()
         {
+            UnityLogger.Log("book toggle");
             if (_isOpen.Value)
                 Close();
             else
@@ -69,7 +70,6 @@ namespace Adventure.Presentation.Mushroom
         {
             if (!_isOpen.Value)
                 return;
-
             _isOpen.SetValueAndForceNotify(false);
         }
         public void GoToPage(int pageIndex)

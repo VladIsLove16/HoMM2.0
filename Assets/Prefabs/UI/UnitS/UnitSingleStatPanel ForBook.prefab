@@ -146,9 +146,9 @@ GameObject:
   m_Component:
   - component: {fileID: 557796145571425282}
   - component: {fileID: 8588582056798173403}
-  - component: {fileID: 3437103737646112024}
+  - component: {fileID: 154960754243255149}
   m_Layer: 0
-  m_Name: UnitSingleStatPanel
+  m_Name: UnitSingleStatPanel ForBook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -202,7 +202,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &3437103737646112024
+--- !u!114 &154960754243255149
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,9 +214,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26e817b2d7811f42908ccc86a6d6f74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Image: {fileID: 4275698453715469790}
-  StatText: {fileID: 442744392758624545}
-  StatAmount: {fileID: 2470124826809868631}
+  Image: {fileID: 4275698453715469790, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
+  StatText: {fileID: 442744392758624545, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
+  StatAmount: {fileID: 2470124826809868631, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
 --- !u!1 &3597570878699103332
 GameObject:
   m_ObjectHideFlags: 0

@@ -43,6 +43,8 @@ public sealed class AdventureInputRouter : IDisposable
     {
         if (inputModeVM.CanMove)
             movementController?.SetMoveInput(move);
+        else
+            movementController?.SetMoveInput(Vector2.zero);
     }
 
     private void OnLookChanged(Vector2 delta)
@@ -50,7 +52,6 @@ public sealed class AdventureInputRouter : IDisposable
         if (inputModeVM.CanLook)
         {
             movementController?.EnqueueLookDelta(delta);
-
         }
     }
 
