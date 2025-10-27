@@ -7,10 +7,15 @@ public class UnitSingleStatPanel : MonoBehaviour
     [SerializeField] Image Image;
     [SerializeField] TextMeshProUGUI StatText;
     [SerializeField] TextMeshProUGUI StatAmount;
-    public void SetInfo(Sprite sprite,string statText,int amount)
+    public void SetInfo(Sprite sprite, string statText, string amount)
     {
-        Image.sprite = sprite;
-        StatText.text = statText;
-        StatAmount.text = amount.ToString();
+        if (Image != null)
+            Image.sprite = sprite;
+
+        if (StatText != null)
+            StatText.text = statText ?? string.Empty;
+
+        if (StatAmount != null)
+            StatAmount.text = amount ?? string.Empty;
     }
 }

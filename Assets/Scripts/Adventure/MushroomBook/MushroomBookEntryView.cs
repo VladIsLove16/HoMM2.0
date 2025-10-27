@@ -1,131 +1,213 @@
-using Adventure.Domain.Inventory;
+using System;
+using System.Collections.Generic;
+using Adventure.Presentation.Mushroom;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public interface IEntryView
 {
-    void Bind(UnitDefinitionSO? data);
+    void Bind(MushroomBookEntryViewModel data);
     void SetPresentationMode(PresentationMode mode);
+}
+[Serializable]
+public class StatIconBinding
+{
+    public UnitStatType Type;
+    public Sprite Icon;
 }
 
 public class MushroomBookEntryView : MonoBehaviour, IEntryView
 {
-    [Header("Refs")]
+    [SerializeField] private MushroomImageController mushroomImageController;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private Transform characteristicsRoot;
-    [SerializeField] private UnitSingleStatPanel characteristicItemPrefab;
-    [SerializeField] private MushroomImageController mushroomImage;
+    [SerializeField] private Transform statsRoot;
+    [SerializeField] private UnitSingleStatPanel statItemPrefab;
+    [SerializeField] private StatIcons statIcons;
 
-    private UnitDefinitionSO? runtimeData;
-    private PresentationMode mode = PresentationMode.Normal;
-    public PresentationMode Mode => mode;
-    private void Start()
+    private readonly Dictionary<UnitStatType, Sprite> _iconLookup = new();
+    private MushroomBookEntryViewModel _viewData = MushroomBookEntryViewModel.Empty;
+    private PresentationMode _mode = PresentationMode.Normal;
+    private bool _isPointerOver;
+    private bool _pointerSubscribed;
+
+    public PresentationMode Mode => _mode;
+    public string Title => nameText != null ? nameText.text : string.Empty;
+    public string Description => descriptionText != null ? descriptionText.text : string.Empty;
+    public int StatItemCount => statsRoot != null ? statsRoot.childCount : 0;
+    public Sprite CurrentSprite => mushroomImageController != null ? mushroomImageController.CurrentSprite : null;
+
+    private void Awake()
     {
-        mushroomImage.PointerEnter += OnImagePointerEnter;
-        mushroomImage.PointerExit += OnImagePointerExit;
+        BuildIconLookup();
+        SubscribeToPointerEvents();
     }
 
-    public void Bind(UnitDefinitionSO data)
+    private void OnEnable()
     {
-        runtimeData = data;
+        SubscribeToPointerEvents();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromPointerEvents();
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        BuildIconLookup();
+    }
+#endif
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromPointerEvents();
+    }
+
+    public void Bind(MushroomBookEntryViewModel data)
+    {
+        _viewData = data ?? MushroomBookEntryViewModel.Empty;
+        _isPointerOver = false;
+        SubscribeToPointerEvents();
         ApplyData();
     }
 
     public void SetPresentationMode(PresentationMode mode)
     {
-        this.mode = mode;
-        UpdateImage();
+        _mode = mode;
+        RefreshImage();
     }
 
-    private void UpdateImage()
+    private void BuildIconLookup()
     {
-        Sprite sprite;
-        if (mode == PresentationMode.Humanized)
-        {
-            sprite = runtimeData.HumanizedIcon;
-        }
-        else
-        {
-            sprite = runtimeData.Icon;
-        }
-        mushroomImage.SetSprite(sprite);
+        _iconLookup.Clear();
+        if (statIcons == null)
+            return;
 
+        foreach (var binding in statIcons.statIconBindings)
+        {
+            if (binding == null)
+                continue;
+
+            _iconLookup[binding.Type] = binding.Icon;
+        }
+    }
+
+    private void EnsureIconLookup()
+    {
+        if (_iconLookup.Count == 0 && statIcons != null && statIcons.statIconBindings.Count > 0)
+        {
+            BuildIconLookup();
+        }
     }
 
     private void ApplyData()
     {
-        UpdateTexts();
-        RebuildCharacteristics(runtimeData);
-        UpdateImage();
+        SetText(nameText, _viewData.DisplayName);
+        SetText(descriptionText, _viewData.Description);
+        RenderStats(_viewData.Stats);
+        RefreshImage();
     }
 
-    private void UpdateTexts()
+    private void RenderStats(IReadOnlyList<MushroomStatViewData> stats)
     {
-        if (nameText != null)
-            nameText.text = runtimeData?.Name ?? string.Empty;
-        if (descriptionText != null)
-            descriptionText.text = runtimeData?.Description ?? string.Empty;
+        if (statsRoot == null)
+            return;
+
+        ClearChildren(statsRoot);
+
+        if (stats == null || statItemPrefab == null)
+            return;
+
+        EnsureIconLookup();
+
+        foreach (var stat in stats)
+        {
+            var statItem = Instantiate(statItemPrefab, statsRoot);
+            var icon = ResolveIcon(stat);
+            statItem.SetInfo(icon, stat.Label, stat.Value);
+        }
     }
 
-    private void RebuildCharacteristics(UnitDefinitionSO? data)
+    private void OnPointerEnter()
     {
-        if (characteristicsRoot == null || characteristicItemPrefab == null) return;
-        for (int i = characteristicsRoot.childCount - 1; i >= 0; i--)
-        {
-            DestroyImmediate(characteristicsRoot.GetChild(i).gameObject);
-        }
-
-        if (data == null) return;
-        var stats = data.Stats;
-
-        if (stats == null)
-        {
-            string c = "No characteristics";
-            CreateCharacteristicEntry(c,0);
-        }
-        else
-        {
-            CreateCharacteristicEntry("Health" , stats.Health);
-            CreateCharacteristicEntry("Damage" , stats.Damage);
-            CreateCharacteristicEntry("MoveSpeed", stats.MoveSpeed);
-        }
+        _isPointerOver = true;
+        RefreshImage();
     }
 
-    private void CreateCharacteristicEntry(string statText, int amount)
+    private void OnPointerExit()
     {
-        UnitSingleStatPanel go = Instantiate(characteristicItemPrefab, characteristicsRoot);
-        go.SetInfo(null, statText, amount);
-    }
-    private void OnImagePointerExit()
-    {
-        var data = runtimeData;
-        Sprite sprite;
-        if (mode == PresentationMode.Humanized)
-        {
-            sprite = data.HumanizedIcon;
-        }
-        else
-        {
-            sprite = data.Icon;
-        }
-        mushroomImage.SetSprite(sprite);
+        _isPointerOver = false;
+        RefreshImage();
     }
 
-    private void OnImagePointerEnter()
+    private void RefreshImage()
     {
-        var data = runtimeData;
-        Sprite sprite;
-        if (mode == PresentationMode.Humanized)
-        {
-            sprite = data.HoveredIcon;
-        }
-        else
-        {
-            sprite = data.HumanizedHoveredIcon;
-        }
-        mushroomImage.SetSprite(sprite);
+        if (mushroomImageController == null)
+            return;
+
+        var sprite = _viewData.GetSprite(_mode, _isPointerOver);
+        mushroomImageController.SetSprite(sprite);
     }
 
+    private Sprite ResolveIcon(MushroomStatViewData stat)
+    {
+        if (stat.Icon != null)
+            return stat.Icon;
+
+        _iconLookup.TryGetValue(stat.Type, out var icon);
+        return icon;
+    }
+
+    private void SubscribeToPointerEvents()
+    {
+        if (mushroomImageController == null || _pointerSubscribed)
+            return;
+
+        mushroomImageController.PointerEnter += OnPointerEnter;
+        mushroomImageController.PointerExit += OnPointerExit;
+        _pointerSubscribed = true;
+    }
+
+    private void UnsubscribeFromPointerEvents()
+    {
+        if (mushroomImageController == null || !_pointerSubscribed)
+            return;
+
+        mushroomImageController.PointerEnter -= OnPointerEnter;
+        mushroomImageController.PointerExit -= OnPointerExit;
+        _pointerSubscribed = false;
+    }
+
+    private static void SetText(TMP_Text field, string value)
+    {
+        if (field != null)
+        {
+            field.text = value ?? string.Empty;
+        }
+    }
+
+    private static void ClearChildren(Transform parent)
+    {
+        if (parent == null)
+            return;
+
+        for (int i = parent.childCount - 1; i >= 0; i--)
+        {
+            var child = parent.GetChild(i);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                DestroyImmediate(child.gameObject);
+            }
+            else
+#endif
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
 }

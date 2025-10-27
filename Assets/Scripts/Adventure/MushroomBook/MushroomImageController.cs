@@ -10,6 +10,7 @@ public class MushroomImageController : MonoBehaviour , IPointerEnterHandler, IPo
 
     public Action PointerEnter;
     public Action PointerExit;
+    public Sprite CurrentSprite => picture != null ? picture.sprite : null;
     public void SetSprite(Sprite sprite)
     {
         picture.sprite = sprite;

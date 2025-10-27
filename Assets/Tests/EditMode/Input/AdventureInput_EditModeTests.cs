@@ -96,13 +96,13 @@ namespace Tests.EditMode.Input
         }
 
         [Test]
-        public void OpenMushroomBookPerformed_RaisedOnMKey()
+        public void OpenMushroomBookPerformed_RaisedOnBKey()
         {
             var keyboard = InputSystem.AddDevice<Keyboard>();
             var invoked = false;
             _input.OpenMushroomBookPerformed += () => invoked = true;
 
-            Press(keyboard.mKey);
+            Press(keyboard.bKey);
 
             Assert.That(invoked, Is.True);
         }

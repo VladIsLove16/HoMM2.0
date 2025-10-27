@@ -1,7 +1,7 @@
 using Adventure.Domain.Inventory;
-using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
+using ModestTree;
 using System;
 using System.Collections.Generic;
 using UniRx;
@@ -12,24 +12,35 @@ namespace Adventure.Presentation.Mushroom
 {
     public class MushroomBookViewModel : IDisposable, IActiveMenu
     {
-        private const int _entriesPerPage = 4;
+        private int _entriesPerPage = 4;
+        private static readonly UnitStatType[] _statOrder =
+        {
+            UnitStatType.Health,
+            UnitStatType.MaxHealth,
+            UnitStatType.Damage,
+            UnitStatType.SpellPower,
+            UnitStatType.Offense,
+            UnitStatType.Defense,
+            UnitStatType.MoveSpeed,
+            UnitStatType.AttackRange
+        };
+
         private readonly MushroomInventoryModel _mushroomInventoryModel;
         private readonly UnitDefinitionSOCollection _catalog;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
-        private readonly List<UnitDefinitionSO> _allEntries = new List<UnitDefinitionSO>();
+        private readonly List<MushroomBookEntryViewModel> _allEntries = new();
 
-        private readonly ReactiveCollection<UnitDefinitionSO> _currentPageEntries =
-            new ReactiveCollection<UnitDefinitionSO>();
+        private readonly ReactiveCollection<MushroomBookEntryViewModel> _currentPageEntries =
+            new ReactiveCollection<MushroomBookEntryViewModel>();
         private readonly ReactiveProperty<int> _currentPageIndex = new ReactiveProperty<int>(0);
-        private readonly ReactiveProperty<int> _totalPages = new ReactiveProperty<int>(0);
         private readonly ReactiveProperty<PresentationMode> _presentationMode =
             new ReactiveProperty<PresentationMode>(global::PresentationMode.Normal);
         private readonly ReactiveProperty<bool> _isOpen = new(false);
 
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
-        public IReadOnlyReactiveCollection<UnitDefinitionSO> CurrentPageEntries => _currentPageEntries;
+        public IReadOnlyReactiveCollection<MushroomBookEntryViewModel> CurrentPageEntries => _currentPageEntries;
         public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
-        public IReadOnlyReactiveProperty<int> TotalPages => _totalPages;
+        public int TotalPages => (_allEntries.Count  + _entriesPerPage -1) / _entriesPerPage;
         public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
 
         public InputMode InputMode => InputMode.Blocked;
@@ -42,6 +53,7 @@ namespace Adventure.Presentation.Mushroom
             _catalog = catalog;
 
             RebuildEntries();
+            UpdateCurrentPage();
         }
         public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
         public void PrevPage() => GoToPage(_currentPageIndex.Value - 1);
@@ -64,7 +76,16 @@ namespace Adventure.Presentation.Mushroom
         }
         public void Collect(UnitType type)
         {
-            _mushroomInventoryModel?.Add(type);
+            if (_mushroomInventoryModel == null)
+                return;
+
+            _mushroomInventoryModel.Add(type);
+            RebuildEntries();
+        }
+        public void SetPageCapacity(int count)
+        {
+            _entriesPerPage = count;
+            UpdateCurrentPage();
         }
         public void Close()
         {
@@ -74,7 +95,7 @@ namespace Adventure.Presentation.Mushroom
         }
         public void GoToPage(int pageIndex)
         {
-            var clamped = Mathf.Clamp(pageIndex, 0, Math.Max(0, _totalPages.Value - 1));
+            var clamped = Mathf.Clamp(pageIndex, 0, TotalPages);
             if (clamped == _currentPageIndex.Value && _currentPageEntries.Count > 0)
                 return;
 
@@ -95,36 +116,19 @@ namespace Adventure.Presentation.Mushroom
             _allEntries.Clear();
             foreach (var entry in _mushroomInventoryModel.Items)
             {
-                if (!_catalog.TryGet(entry.Key, out var visuals))
+                if (!_catalog.TryGet(entry.Key, out var definition) || definition == null)
                     continue;
 
-                _allEntries.Add(visuals);
+                var viewData = CreateEntryViewData(definition);
+                _allEntries.Add(viewData);
             }
-
-            UpdatePagination();
-        }
-
-        private void UpdatePagination()
-        {
-            var total = Mathf.CeilToInt(_allEntries.Count / (float)_entriesPerPage);
-            _totalPages.Value = Math.Max(0, total);
-
-            if (_totalPages.Value == 0)
-            {
-                _currentPageIndex.Value = 0;
-                _currentPageEntries.Clear();
-                return;
-            }
-
-            _currentPageIndex.Value = Mathf.Clamp(_currentPageIndex.Value, 0, _totalPages.Value - 1);
-            UpdateCurrentPage();
         }
 
         private void UpdateCurrentPage()
         {
             _currentPageEntries.Clear();
 
-            if (_totalPages.Value == 0)
+            if (TotalPages == 0)
                 return;
 
             var start = _currentPageIndex.Value * _entriesPerPage;
@@ -134,16 +138,107 @@ namespace Adventure.Presentation.Mushroom
             {
                 _currentPageEntries.Add(_allEntries[i]);
             }
+            UnityLogger.Log("new _currentPageEntries " + _currentPageEntries.Count);
+
         }
 
+        private MushroomBookEntryViewModel CreateEntryViewData(UnitDefinitionSO definition)
+        {
+            var stats = BuildStats(definition.Stats);
+
+            return new MushroomBookEntryViewModel(
+                definition.UnitType,
+                definition.DisplayName,
+                definition.Description,
+                definition.Icon,
+                definition.HoveredIcon,
+                definition.HumanizedIcon,
+                definition.HumanizedHoveredIcon,
+                stats);
+        }
+
+        private IReadOnlyList<MushroomStatViewData> BuildStats(UnitStats stats)
+        {
+            if (stats == null)
+                return Array.Empty<MushroomStatViewData>();
+
+            var result = new List<MushroomStatViewData>();
+
+            foreach (var statType in _statOrder)
+            {
+                if (TryGetStatValue(statType, stats, out var value))
+                {
+                    result.Add(new MushroomStatViewData(statType, value, GetLabel(statType)));
+                }
+            }
+
+            if (stats.CanFly)
+            {
+                result.Add(new MushroomStatViewData(UnitStatType.CanFly, "Yes", GetLabel(UnitStatType.CanFly)));
+            }
+
+            return result;
+        }
+
+        private static bool TryGetStatValue(UnitStatType type, UnitStats stats, out string value)
+        {
+            value = string.Empty;
+
+            switch (type)
+            {
+                case UnitStatType.Health:
+                    value = stats.Health.ToString();
+                    return stats.Health != 0;
+                case UnitStatType.MaxHealth:
+                    value = stats.MaxHealth.ToString();
+                    return stats.MaxHealth != 0;
+                case UnitStatType.Damage:
+                    value = stats.Damage.ToString();
+                    return stats.Damage != 0;
+                case UnitStatType.SpellPower:
+                    value = stats.SpellPower.ToString();
+                    return stats.SpellPower != 0;
+                case UnitStatType.Offense:
+                    value = stats.Offense.ToString();
+                    return stats.Offense != 0;
+                case UnitStatType.Defense:
+                    value = stats.Defense.ToString();
+                    return stats.Defense != 0;
+                case UnitStatType.MoveSpeed:
+                    value = stats.MoveSpeed.ToString();
+                    return stats.MoveSpeed != 0;
+                case UnitStatType.AttackRange:
+                    value = stats.AttackRange.ToString();
+                    return stats.AttackRange != 0;
+                default:
+                    return false;
+            }
+        }
+
+        private static string GetLabel(UnitStatType statType)
+        {
+            switch (statType)
+            {
+                case UnitStatType.MaxHealth:
+                    return "Max Health";
+                case UnitStatType.MoveSpeed:
+                    return "Move Speed";
+                case UnitStatType.AttackRange:
+                    return "Attack Range";
+                case UnitStatType.CanFly:
+                    return "Can Fly";
+                default:
+                    return statType.ToString();
+            }
+        }
 
         public void Dispose()
         {
             _subscriptions.Dispose();
             _currentPageEntries?.Dispose();
             _currentPageIndex?.Dispose();
-            _totalPages?.Dispose();
             _presentationMode?.Dispose();
         }
+
     }
 }

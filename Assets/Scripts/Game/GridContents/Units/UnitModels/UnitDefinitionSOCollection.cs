@@ -10,48 +10,42 @@ public class UnitDefinitionSOCollection : ScriptableObject
 
     public IReadOnlyDictionary<UnitType, UnitDefinitionSO> ToDictionary()
     {
-        return unitDefinitionSOs.ToDictionary(x => x.UnitType);
-    }
-    private void OnEnable()
-    {
         Cache();
+        return _definitionsByUnitType;
+    }
+
+    public void Add(UnitDefinitionSO unitDefinitionSO)
+    {
+        _definitionsByUnitType.Add(unitDefinitionSO.UnitType, unitDefinitionSO);
     }
 
     private void Cache()
     {
-        _definitionsByUnitType.Clear();
-
         if (_definitionsByUnitType == null)
-            return;
+            _definitionsByUnitType = new();
 
+        if (unitDefinitionSOs == null)
+            return;
         foreach (var definition in unitDefinitionSOs)
         {
             if (definition == null)
                 continue;
 
             var UnitType = definition.UnitType;
-            if (UnitType == UnitType.Archer)
+            if (_definitionsByUnitType.ContainsKey(UnitType))
                 continue;
-
             _definitionsByUnitType[UnitType] = definition;
         }
     }
-    private void EnsureCache()
-    {
-        if (_definitionsByUnitType.Count == (unitDefinitionSOs?.Count ?? 0))
-            return;
-
-        Cache();
-    }
     public bool TryGet(UnitType id, out UnitDefinitionSO item)
     {
-        EnsureCache();
+        Cache();
         return _definitionsByUnitType.TryGetValue(id, out item);
     }
 
     public IReadOnlyList<UnitDefinitionSO> GetAll()
     {
-        EnsureCache();
+        Cache();
         return unitDefinitionSOs;
     }
     //public bool TryGetVisuals(UnitType id, out MushroomViewModel visuals)

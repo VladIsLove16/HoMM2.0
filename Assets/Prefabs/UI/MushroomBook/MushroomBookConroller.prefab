@@ -119,11 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d890d7bcf55d8134cbd96c47972fda89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entrySlots:
-  - {fileID: 5579989135614384611}
-  - {fileID: 7969384210244291751}
-  - {fileID: 4399347914861305500}
-  - {fileID: 5138050192473613846}
+  pageSlots: []
   pageNumberText: {fileID: 3284058425019655320}
   testMushrooms: {fileID: 11400000, guid: 40340ffc2ed77d34eacbaeb7486900af, type: 2}
 --- !u!223 &690125328460009205
@@ -901,17 +897,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
---- !u!114 &4399347914861305500 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3590934536406516906, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
-  m_PrefabInstance: {fileID: 925507804206766646}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb8cbea77b3ae340952813064cf8b0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &5247148089724936060 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4902604781332464970, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
@@ -1063,17 +1048,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4902604781332464970, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
   m_PrefabInstance: {fileID: 6867285024287655949}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7969384210244291751 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3590934536406516906, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
-  m_PrefabInstance: {fileID: 6867285024287655949}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb8cbea77b3ae340952813064cf8b0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &8546577009331217084
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1220,17 +1194,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4902604781332464970, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
   m_PrefabInstance: {fileID: 8546577009331217084}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5138050192473613846 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3590934536406516906, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
-  m_PrefabInstance: {fileID: 8546577009331217084}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb8cbea77b3ae340952813064cf8b0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &8981749277464517961
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1347,10 +1310,6 @@ PrefabInstance:
       propertyPath: m_text
       value: Game Archer
       objectReference: {fileID: 0}
-    - target: {fileID: 7357302903958843458, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
     - target: {fileID: 7405155299931654793, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
       propertyPath: m_Name
       value: BookEntry
@@ -1389,14 +1348,3 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4902604781332464970, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
   m_PrefabInstance: {fileID: 8981749277464517961}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5579989135614384611 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3590934536406516906, guid: bf2f3ad2a74c8cf44a538ae39b764663, type: 3}
-  m_PrefabInstance: {fileID: 8981749277464517961}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb8cbea77b3ae340952813064cf8b0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
