@@ -40,7 +40,7 @@ namespace Tests.EditMode.ActionHandlers
             var moveSys = new MovementSystem();
             _modelFactory = new(new Dictionary<UnitType, UnitDefinitionSO>
             {
-                { UnitType.Archer, new UnitDefinitionSO { Stats = _baseStats } }
+                { UnitType.Archer, new UnitDefinitionSO { UnitStats = _baseStats } }
             });
             _model = new GameModel(_modelFactory, moveSys);
             _model.InitializeGrid(3, 3);

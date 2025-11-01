@@ -15,7 +15,7 @@ namespace Tests.EditMode.GridContents.Units
             def.UnitType = UnitType.Archer;
             var stats = ScriptableObject.CreateInstance<UnitStats>();
             stats.Health = 10; stats.MaxHealth = 10; stats.Damage = 2;
-            def.Stats = stats;
+            def.UnitStats = stats;
 
             var dict = new Dictionary<UnitType, UnitDefinitionSO>() { { UnitType.Archer, def } };
             var factory = new UnitModelFactory(dict);

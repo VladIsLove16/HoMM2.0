@@ -10,7 +10,11 @@ public enum UnitType
 {
     Archer,
     Witch,
-    Warrok
+    Warrok,
+    DoubleMushroom,
+    BlueMushroom,
+    BaseMushroom,
+    HumanizedMushroom,
 }
 
 /// <summary>
@@ -60,6 +64,7 @@ public class UnitViewFactory
         }
 
         Vector3 worldPos = _worldToCellProvider.ToWorld(model.Position.Value.x, model.Position.Value.y);
+    
         var view = _container
             .InstantiatePrefabForComponent<UnitView3D>(
                 prefab,
@@ -67,7 +72,7 @@ public class UnitViewFactory
                 Quaternion.identity,
                 _unitsParent
             );
-
+        view.gameObject.transform.localScale = Vector3.one;
         view.Init(unitVM);
         return view;
     }

@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: PlayerStartArmy
   m_EditorClassIdentifier: 
   playerUnits:
-  - UnitType: 0
+  - UnitType: 3
     Amount: 2
-  - UnitType: 2
-    Amount: 1
+  - UnitType: 5
+    Amount: 4
+  - UnitType: 4
+    Amount: 5
+  - UnitType: 6
+    Amount: 3

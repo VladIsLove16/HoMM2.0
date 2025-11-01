@@ -73,6 +73,7 @@ public sealed class AdventureInputRouter : IDisposable
 
     private void OnOpenSettings()
     {
+        UnityLogger.Log("OnOpenSettings clicked");
         if (menusVM.HasAnyOpen)
             menusVM.CloseFirst();
         else

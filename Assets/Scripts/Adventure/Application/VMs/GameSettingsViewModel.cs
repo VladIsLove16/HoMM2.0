@@ -1,7 +1,8 @@
+using Adventure.Settings.Model;
 using System;
 using UniRx;
-using Adventure.Settings.Model;
 using UnityEngine;
+using UnityEngine.Audio;
 using Zenject;
 
 namespace Adventure.Settings.ViewModel
@@ -12,7 +13,7 @@ namespace Adventure.Settings.ViewModel
         private readonly PauseController _pauseController;
         private readonly IAnimationSpeedSettings _animationSpeedSettings;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
-
+        [Inject] private AudioMixer audioMixer;
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
 
         public AudioSettingsModel Audio => _model.Audio;
@@ -33,19 +34,20 @@ namespace Adventure.Settings.ViewModel
         public void Open()
         {
             if (_isOpen.Value) return;
-            _isOpen.Value = true;
+            _isOpen.SetValueAndForceNotify(true);
             _pauseController.SetPaused(true);
         }
 
         public void Close()
         {
             if (!_isOpen.Value) return;
-            _isOpen.Value = false;
+            _isOpen.SetValueAndForceNotify(false);
             _pauseController.SetPaused(false);
         }
 
         public void Toggle()
         {
+            UnityLogger.Log("GameSettingsViewModel Toggle");
             if (_isOpen.Value)
                 Close();
             else
@@ -74,11 +76,13 @@ namespace Adventure.Settings.ViewModel
 
         internal void SetMusicVolume(float v)
         {
+            audioMixer.SetFloat("Volume (of Music)", Mathf.Log10(v) * 20);
             Audio.MusicVolume = v;
         }
 
-        internal void SetEffectsVolume(float v)
+        internal void SetSoundsVolume(float v)
         {
+            audioMixer.SetFloat("Volume (of Sounds)", Mathf.Log10(v) * 20);
             Audio.EffectsVolume = v;
         }
 

@@ -31,7 +31,7 @@ namespace Tests.EditMode.MushroomBook
             model.Add(UnitType.Witch);
             model.Add(UnitType.Witch, 2);
 
-            Assert.That(model.GetCount(UnitType.Witch), Is.EqualTo(3));
+            Assert.That(model.GetAmount(UnitType.Witch), Is.EqualTo(3));
         }
 
         [Test]

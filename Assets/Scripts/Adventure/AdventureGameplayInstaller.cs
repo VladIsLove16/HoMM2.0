@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using UnityEngine.Audio;
 
 public sealed class AdventureGameplayInstaller : MonoInstaller
 {
@@ -42,6 +43,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private MushroomBookView mushroomBookView;
     [SerializeField] private GameSettingsView gameSettingsView;
     [SerializeField] private HelpMenu helpMenu;
+    [SerializeField] private AudioMixer audioMixer;
     [Header("Blocked & Interaction")]
 
     [SerializeField] private AdventureDevTools devTools;
@@ -68,6 +70,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<MushroomBookViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle();
         Container.BindInterfacesAndSelfTo<GameSettingsViewModel>().AsSingle();
+        Container.Bind<AudioMixer>().FromInstance(audioMixer).AsSingle();
         Container.Bind<MenusCoordinatorViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<Adventure.Infrastructure.Cursor.CursorViewModel>().AsSingle().NonLazy();
     }

@@ -12,10 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e2f2d4e297290f4c99892a15bda553a, type: 3}
   m_Name: New Unit Prefab Manager Config
   m_EditorClassIdentifier: 
-  _prefabVariants:
-  - UnitType: 0
-    prefab: {fileID: 989505003340703680, guid: 7895d8bfdb3487541afce12685f878e6, type: 3}
-  - UnitType: 2
-    prefab: {fileID: 5640353169115779475, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
-  - UnitType: 1
-    prefab: {fileID: 7901827279851771999, guid: cf703134070eed3459f210e7cbdc6039, type: 3}
+  unitDefinitionSOCollection: {fileID: 11400000, guid: 40340ffc2ed77d34eacbaeb7486900af, type: 2}

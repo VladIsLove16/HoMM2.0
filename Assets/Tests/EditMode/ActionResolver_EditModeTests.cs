@@ -20,7 +20,7 @@ namespace Tests.EditMode.Actions
             };
             var factory = new UnitModelFactory(dict);
             var baseStats = ScriptableObject.CreateInstance<UnitStats>();
-            unitDefinitionSO.Stats = baseStats;
+            unitDefinitionSO.UnitStats = baseStats;
 
             _movementSystem = new MovementSystem();
 

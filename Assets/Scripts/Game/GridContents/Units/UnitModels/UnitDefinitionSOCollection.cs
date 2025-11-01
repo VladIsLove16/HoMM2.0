@@ -15,7 +15,7 @@ public class UnitDefinitionSOCollection : ScriptableObject
     }
 
     public void Add(UnitDefinitionSO unitDefinitionSO)
-    {
+    {   
         _definitionsByUnitType.Add(unitDefinitionSO.UnitType, unitDefinitionSO);
     }
 

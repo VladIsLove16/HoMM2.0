@@ -5,6 +5,7 @@ using Adventure.Settings.ViewModel;
 using Zenject;
 using UniRx;
 using TMPro;
+using UnityEngine.Audio;
 
 namespace Adventure.Settings.View
 {
@@ -20,6 +21,8 @@ namespace Adventure.Settings.View
         [SerializeField] private Slider effectsSlider;
         [SerializeField] private TMP_Dropdown qualityDropdown;
         [SerializeField] private TMP_Dropdown animationSpeedDropdown;
+        [SerializeField] AudioMixerGroup MusicGroup;
+        [SerializeField] AudioMixerGroup SoundsGroup;
 
         private readonly CompositeDisposable _bindings = new();
 
@@ -32,8 +35,8 @@ namespace Adventure.Settings.View
             closeButton.onClick.AddListener(() => _vm.Close());
             exitButton.onClick.AddListener(() => _vm.ExitGame());
 
-            musicSlider.onValueChanged.AddListener(v => _vm.SetMusicVolume( v));
-            effectsSlider.onValueChanged.AddListener(v => _vm.SetEffectsVolume (v));
+            musicSlider.onValueChanged.AddListener(v => OnMusicSliderChanged(v));
+            effectsSlider.onValueChanged.AddListener(v => OnSoundsSliderChanged(v));
             qualityDropdown.onValueChanged.AddListener(i =>
             {
                 _vm.SetQualityLevel(i);
@@ -41,8 +44,18 @@ namespace Adventure.Settings.View
             });
         }
 
+        private void OnMusicSliderChanged(float v)
+        {
+            _vm.SetMusicVolume(v);
+        }
+        private void OnSoundsSliderChanged(float v)
+        {
+            _vm.SetSoundsVolume(v);
+        }
+
         private void OnVisibilityChanged(bool visible)
         {
+            UnityLogger.Log("GameSettingsView visibility changed: " + visible);    
             panelRoot.SetActive(visible);
         }
     }

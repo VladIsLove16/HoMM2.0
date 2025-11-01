@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: Warrok
   m_EditorClassIdentifier: 
   UnitType: 2
-  UnitViewPrefab: {fileID: 8504360353631629215, guid: 82af6f0b9488c6b449ece125530f7e72, type: 3}
+  UnitViewPrefab: {fileID: 5985448834381532279, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
+  UnitView3DPrefab: {fileID: 5640353169115779475, guid: 8e5099310b07b0d4cb52130201d4863c, type: 3}
   Icon: {fileID: 21300000, guid: d155d370bcbcb264b955d5b3a6db08ec, type: 3}
   HoveredIcon: {fileID: 21300000, guid: 5734191861eaf7744892e44b331e4a78, type: 3}
   HumanizedIcon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   HumanizedHoveredIcon: {fileID: 21300000, guid: 8433a39cec23667449b85c7fa65ea58a, type: 3}
-  Name: Warrok
   displayName: Warrok Display
   _materialProviderSerialized:
     _blueTeamMaterial: {fileID: 0}
     _hoveredBlueTeamMaterial: {fileID: 0}
     _redTeamMaterial: {fileID: 0}
     _hoveredRedTeamMaterial: {fileID: 0}
-  Stats: {fileID: 11400000, guid: f72e18b3f703ae74484e57bd3aa7ab32, type: 2}
   description: Game Warrok
   startingEffects:
   - {fileID: 11400000, guid: 08440a7316463c044afe6e91c042582a, type: 2}
   invulnerableEffects: []
+  Stats: {fileID: 11400000, guid: f72e18b3f703ae74484e57bd3aa7ab32, type: 2}

@@ -28,7 +28,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     {
         if (meshes == null || meshes.Length == 0)
         {
-            Debug.LogAssertion("meshes have not been setted");
+            Debug.LogWarning("meshes have not been setted");
         }
         if (unitViewUI == null)
         {

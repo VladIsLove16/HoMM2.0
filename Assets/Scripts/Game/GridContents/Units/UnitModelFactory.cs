@@ -39,7 +39,7 @@ public class UnitModelFactory
         {
             throw new InvalidOperationException($"UnitDefinitionSO not found for UnitType {unitSpawnParams.UnitType}");
         }
-        return new UnitModel(unitDefinitionSO.Stats, unitSpawnParams.UnitType, unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.Amount, unitSpawnParams.Team);
+        return new UnitModel(unitDefinitionSO.UnitStats, unitSpawnParams.UnitType, unitSpawnParams.X, unitSpawnParams.Y, unitSpawnParams.Amount, unitSpawnParams.Team);
     }
     //private IReadOnlyDictionary<UnitType, UnitDefinitionSO> DataMapFromResources()
     //{

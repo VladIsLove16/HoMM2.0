@@ -107,6 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _animator: {fileID: 0}
   unitViewUI: {fileID: 6709846972658488106}
   animationMoveSpeed: 3
   meshes:

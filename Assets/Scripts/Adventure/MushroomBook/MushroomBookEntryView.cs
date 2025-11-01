@@ -22,6 +22,7 @@ public class MushroomBookEntryView : MonoBehaviour, IEntryView
 {
     [SerializeField] private MushroomImageController mushroomImageController;
     [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI amountText;
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Transform statsRoot;
     [SerializeField] private UnitSingleStatPanel statItemPrefab;
@@ -107,6 +108,7 @@ public class MushroomBookEntryView : MonoBehaviour, IEntryView
     private void ApplyData()
     {
         SetText(nameText, _viewData.DisplayName);
+        SetText(amountText, _viewData.Amount.ToString());
         SetText(descriptionText, _viewData.Description);
         RenderStats(_viewData.Stats);
         RefreshImage();

@@ -60,7 +60,7 @@ namespace Adventure.Domain.Inventory
             }
             return unitStackDatas;
         }
-        public int GetCount(UnitType mushroomId)
+        public int GetAmount(UnitType mushroomId)
         {
             return _items.TryGetValue(mushroomId, out var value) ? value : 0;
         }

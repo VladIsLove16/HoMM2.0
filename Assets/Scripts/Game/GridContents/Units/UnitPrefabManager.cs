@@ -47,18 +47,4 @@ public class UnitPrefabManager : MonoBehaviour
         
         return _config.HasPrefab(unitType);
     }
-    
-    /// <summary>
-    /// Получает все настроенные типы юнитов
-    /// </summary>
-    public IEnumerable<UnitType> GetAvailableUnitTypes()
-    {
-        if (_config == null)
-        {
-            Debug.LogError("[UnitPrefabManager] Configuration is not assigned!");
-            return new List<UnitType>();
-        }
-        
-        return _config.GetAvailableUnitTypes();
-    }
 }

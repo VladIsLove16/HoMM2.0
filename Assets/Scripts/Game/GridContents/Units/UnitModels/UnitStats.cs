@@ -36,7 +36,7 @@ public class UnitStats : ScriptableObject
     public List<StatusEffectType> InvulnerableEffects
     {
         get {
-            if (invulnerableEffects == null)
+            if (invulnerableEffects == null || invulnerableEffects.Count == 0)
             {
                 invulnerableEffects = new();
             }

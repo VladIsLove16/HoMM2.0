@@ -18,14 +18,14 @@ namespace Tests.EditMode.GridContents.Units
             
             // Устанавливаем базовые параметры
             _unitDefinition.UnitType = UnitType.Archer;
-            _unitDefinition.Name = "Test Archer";
+            _unitDefinition.DisplayName = "Test Archer";
             
             // Создаем тестовые характеристики
             var stats = ScriptableObject.CreateInstance<UnitStats>();
             stats.Health = 100;
             stats.MaxHealth = 100;
             stats.Damage = 25;
-            _unitDefinition.Stats = stats;
+            _unitDefinition.UnitStats = stats;
         }
 
         [TearDown]
@@ -33,9 +33,9 @@ namespace Tests.EditMode.GridContents.Units
         {
             if (_unitDefinition != null)
             {
-                if (_unitDefinition.Stats != null)
+                if (_unitDefinition.UnitStats != null)
                 {
-                    UnityEngine.Object.DestroyImmediate(_unitDefinition.Stats);
+                    UnityEngine.Object.DestroyImmediate(_unitDefinition.UnitStats);
                 }
                 UnityEngine.Object.DestroyImmediate(_unitDefinition);
             }
@@ -46,9 +46,9 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Assert
             Assert.That(_unitDefinition.UnitType, Is.EqualTo(UnitType.Archer));
-            Assert.That(_unitDefinition.Name, Is.EqualTo("Test Archer"));
-            Assert.That(_unitDefinition.Stats, Is.Not.Null);
-            Assert.That(_unitDefinition.Stats.Health, Is.EqualTo(100));
+            Assert.That(_unitDefinition.DisplayName, Is.EqualTo("Test Archer"));
+            Assert.That(_unitDefinition.UnitStats, Is.Not.Null);
+            Assert.That(_unitDefinition.UnitStats.Health, Is.EqualTo(100));
         }
 
         [Test]

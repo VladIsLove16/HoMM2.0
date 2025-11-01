@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: Witch
   m_EditorClassIdentifier: 
   UnitType: 1
-  UnitViewPrefab: {fileID: 7117780627728513641, guid: b1602265030631b47a823cf8a07bad16, type: 3}
+  UnitViewPrefab: {fileID: 7157924015712183769, guid: cf703134070eed3459f210e7cbdc6039, type: 3}
+  UnitView3DPrefab: {fileID: 7901827279851771999, guid: cf703134070eed3459f210e7cbdc6039, type: 3}
   Icon: {fileID: 21300000, guid: 43c5aad02d7ea584fb01d64492e4e151, type: 3}
   HoveredIcon: {fileID: 21300000, guid: da567883eebf21b4aa7fab1fb11f5e8c, type: 3}
   HumanizedIcon: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
   HumanizedHoveredIcon: {fileID: 21300000, guid: 8433a39cec23667449b85c7fa65ea58a, type: 3}
-  Name: Witch
   displayName: Witch Display
   _materialProviderSerialized:
     _blueTeamMaterial: {fileID: 0}
     _hoveredBlueTeamMaterial: {fileID: 0}
     _redTeamMaterial: {fileID: 0}
     _hoveredRedTeamMaterial: {fileID: 0}
-  Stats: {fileID: 11400000, guid: bf37802ac300b134d9d32b7dee178e9d, type: 2}
   description: 'Game Witch '
   startingEffects:
   - {fileID: 11400000, guid: 3d9aa456805570549b796206c2d71cbb, type: 2}
   invulnerableEffects: []
+  Stats: {fileID: 11400000, guid: bf37802ac300b134d9d32b7dee178e9d, type: 2}

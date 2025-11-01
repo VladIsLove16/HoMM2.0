@@ -19,8 +19,8 @@ namespace Tests.EditMode.ActionHandlers
             _moveSys = new MovementSystem();
             var dict =new Dictionary<UnitType, UnitDefinitionSO>();
             var unitdef = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitdef.Stats = ScriptableObject.CreateInstance<UnitStats>();
-            unitdef.Stats.MoveSpeed = 3;
+            unitdef.UnitStats = ScriptableObject.CreateInstance<UnitStats>();
+            unitdef.UnitStats.MoveSpeed = 3;
             dict.Add(UnitType.Archer, unitdef);
              _factory = new UnitModelFactory(dict);
             _model = new GameModel(_factory, _moveSys);

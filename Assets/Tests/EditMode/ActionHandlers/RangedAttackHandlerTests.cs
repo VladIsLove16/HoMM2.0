@@ -23,8 +23,8 @@ namespace Tests.EditMode.ActionHandlers
             var ms = new MovementSystem();
             Dictionary<UnitType, UnitDefinitionSO> unitDatas = new Dictionary<UnitType, UnitDefinitionSO>();
             UnitDefinitionSO unitDefinitionSO = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitDefinitionSO.Stats = new();
-            unitDefinitionSO.Stats.AttackRange = 3;
+            unitDefinitionSO.UnitStats = new();
+            unitDefinitionSO.UnitStats.AttackRange = 3;
             unitDatas.Add(UnitType.Archer, unitDefinitionSO);
             var factory = new UnitModelFactory(unitDatas);
             _model = new GameModel(factory, ms);

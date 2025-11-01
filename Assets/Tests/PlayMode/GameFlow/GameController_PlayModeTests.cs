@@ -169,7 +169,7 @@ namespace Tests.PlayMode.GameFlow
         {
             var definition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
             definition.UnitType = type;
-            definition.Stats = stats;
+            definition.UnitStats = stats;
             _createdAssets.Add(definition);
             return definition;
         }

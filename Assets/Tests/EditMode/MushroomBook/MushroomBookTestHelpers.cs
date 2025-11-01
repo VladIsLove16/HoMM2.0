@@ -14,7 +14,7 @@ namespace Tests.EditMode.MushroomBook
         {
             var definition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
             definition.UnitType = type;
-            definition.Name = name;
+            definition.DisplayName = name;
             configure?.Invoke(definition);
             tracker?.Add(definition);
             return definition;

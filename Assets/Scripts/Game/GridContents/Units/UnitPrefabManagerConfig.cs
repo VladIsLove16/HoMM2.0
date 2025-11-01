@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -7,36 +8,14 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Game/UnitPrefabManagerConfig")]
 public class UnitPrefabManagerConfig : ScriptableObject
 {
-    [System.Serializable]
-    public class UnitPrefabVariant
-    {
-        [Header("Unit Configuration")]
-        public UnitType UnitType;
-        
-        [Header("Prefab Variants")]
-        public UnitView3D prefab;
-    }
-    
-    [Header("Unit Prefab Variants")]
-    [SerializeField] private List<UnitPrefabVariant> _prefabVariants = new();
-    
-    public List<UnitPrefabVariant> PrefabVariants => _prefabVariants;
-    
+    [SerializeField] private UnitDefinitionSOCollection unitDefinitionSOCollection;
     /// <summary>
-    /// Получает префаб для указанного типа юнита и режима игры
+    /// Получает префаб для указанного типа юнита
     /// </summary>
     public UnitView3D GetPrefab(UnitType unitType)
     {
-        foreach (var variant in _prefabVariants)
-        {
-            if (variant.UnitType == unitType)
-            {
-                return variant.prefab;
-            }
-        }
-        
-        Debug.LogError($"[UnitPrefabManagerConfig] Prefab variant not found for unit type: {unitType}");
-        return null;
+        var so = unitDefinitionSOCollection.GetAll().First(x => x.UnitType == unitType);
+        return so.UnitView3DPrefab;
     }
     
     /// <summary>
@@ -44,37 +23,7 @@ public class UnitPrefabManagerConfig : ScriptableObject
     /// </summary>
     public bool HasPrefab(UnitType unitType)
     {
-        foreach (var variant in _prefabVariants)
-        {
-            if (variant.UnitType == unitType)
-            {
-                return true;
-            }
-        }
-        return false;
+        return unitDefinitionSOCollection.GetAll().First(x => x.UnitType == unitType) != null;
     }
-    
-    /// <summary>
-    /// Получает все настроенные типы юнитов
-    /// </summary>
-    public IEnumerable<UnitType> GetAvailableUnitTypes()
-    {
-        foreach (var variant in _prefabVariants)
-        {
-            yield return variant.UnitType;
-        }
-    }
-    
-    ///// <summary>
-    ///// Валидирует все префабы
-    ///// </summary>
-    //[ContextMenu("Validate All Prefabs")]
-    //public void ValidateAllPrefabs()
-    //{
-    //    foreach (var variant in _prefabVariants)
-    //    {
-            
-    //    }
-    //}
 }
 

@@ -149,9 +149,9 @@ namespace Adventure.Presentation.Mushroom
 
         private MushroomBookEntryViewModel CreateEntryViewData(UnitDefinitionSO definition)
         {
-            var stats = BuildStats(definition.Stats);
+            var stats = BuildStats(definition.UnitStats);
 
-            return new MushroomBookEntryViewModel(
+            var vm = new MushroomBookEntryViewModel(
                 definition.UnitType,
                 definition.DisplayName,
                 definition.Description,
@@ -160,6 +160,8 @@ namespace Adventure.Presentation.Mushroom
                 definition.HumanizedIcon,
                 definition.HumanizedHoveredIcon,
                 stats);
+            vm.Amount = _mushroomInventoryModel.GetAmount(definition.UnitType);
+            return vm;
         }
 
         private IReadOnlyList<MushroomStatViewData> BuildStats(UnitStats stats)

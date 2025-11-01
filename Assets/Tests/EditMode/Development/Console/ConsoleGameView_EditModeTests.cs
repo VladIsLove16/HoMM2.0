@@ -94,7 +94,7 @@ public class ConsoleGameView_EditModeTests
             unitStats.Damage = 3;
 
             var unitDefinition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitDefinition.Stats = unitStats;
+            unitDefinition.UnitStats = unitStats;
             unitDefinition.UnitType = UnitType.Archer;
             unitDefinition.name = "Unit_Def";
 

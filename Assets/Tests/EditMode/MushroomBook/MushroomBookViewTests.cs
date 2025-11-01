@@ -123,7 +123,7 @@ namespace Tests.EditMode.MushroomBook
                 var unitType = (UnitType)(200 + i);
                 var definition = MushroomBookTestHelpers.CreateDefinition(unitType, $"Entry {i}", _createdObjects, def =>
                 {
-                    def.Stats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdObjects);
+                    def.UnitStats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdObjects);
                 });
                 defs.Add(definition);
                 stacks.Add(new UnitStackData(unitType, 1));

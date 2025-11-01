@@ -146,6 +146,7 @@ public class MushroomBookView : MonoBehaviour
     {
         Debug.Log("new book state" +  isOpen);
         gameObject.SetActive(isOpen);
+        RenderEntries(_viewModel.CurrentPageEntries);
     }
     private void RefreshPageNumber()
     {

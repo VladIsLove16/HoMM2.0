@@ -31,7 +31,7 @@ namespace Tests.EditMode.MushroomBook
         {
             var definition = MushroomBookTestHelpers.CreateDefinition(UnitType.Witch, "Witch Mushroom", _createdAssets, def =>
             {
-                def.Stats = MushroomBookTestHelpers.CreateStats(10, 20, 5, 3, _createdAssets);
+                def.UnitStats = MushroomBookTestHelpers.CreateStats(10, 20, 5, 3, _createdAssets);
             });
             var catalog = MushroomBookTestHelpers.CreateCatalog(new[] { definition }, _createdAssets);
             var inventory = new MushroomInventoryModel(new List<UnitStackData>());
@@ -40,11 +40,11 @@ namespace Tests.EditMode.MushroomBook
 
             try
             {
-                Assert.That(inventory.GetCount(UnitType.Witch), Is.EqualTo(0));
+                Assert.That(inventory.GetAmount(UnitType.Witch), Is.EqualTo(0));
 
                 viewModel.Collect(UnitType.Witch);
 
-                Assert.That(inventory.GetCount(UnitType.Witch), Is.EqualTo(1));
+                Assert.That(inventory.GetAmount(UnitType.Witch), Is.EqualTo(1));
                 Assert.That(bus.Collected.Count, Is.EqualTo(1));
             }
             finally
@@ -137,7 +137,7 @@ namespace Tests.EditMode.MushroomBook
                 var unitType = (UnitType)(100 + i);
                 var definition = MushroomBookTestHelpers.CreateDefinition(unitType, $"Mushroom #{i}", _createdAssets, def =>
                 {
-                    def.Stats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdAssets);
+                    def.UnitStats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdAssets);
                 });
                 defs.Add(definition);
                 stacks.Add(new UnitStackData(unitType, 1));

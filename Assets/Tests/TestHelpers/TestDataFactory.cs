@@ -13,7 +13,7 @@ public static class TestDataFactory
 
         var def = ScriptableObject.CreateInstance<UnitDefinitionSO>();
         def.UnitType = type;
-        def.Stats = stats;
+        def.UnitStats = stats;
 
         var dict = new Dictionary<UnitType, UnitDefinitionSO>();
         dict[type] = def;

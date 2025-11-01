@@ -41,7 +41,7 @@ namespace Tests.EditMode.ActionHandlers
             var moveSys = new MovementSystem();
             var dict = new Dictionary<UnitType, UnitDefinitionSO>
             {
-                { UnitType.Archer, new UnitDefinitionSO { Stats = _baseStats } }
+                { UnitType.Archer, new UnitDefinitionSO { UnitStats = _baseStats } }
             };
             var modelFactory = new UnitModelFactory(dict);
             _model = new GameModel(modelFactory, moveSys);
