@@ -1,9 +1,9 @@
+using Adventure.Infrastructure.Events;
+using Game.Achievements;
 using System;
 using System.Collections.Generic;
-using Adventure.Infrastructure.Events;
 using UnityEngine;
 using Zenject;
-using Game.Achievements;
 
 public class GameLogicMonoInstaller : MonoInstaller
 {

@@ -2,7 +2,6 @@
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
 using Game.Achievements;
-using Adventure.Infrastructure.Events;
 using NUnit.Framework;
 using UniRx;
 using System;
@@ -12,7 +11,7 @@ using System.Linq;
 namespace Tests.EditMode.MushroomBook
 {
     [TestFixture]
-    public class MushroomBookViewTests
+    public partial class MushroomBookViewTests
     {
         private readonly List<UnityEngine.Object> _createdObjects = new();
         private readonly List<IDisposable> _disposables = new();
@@ -139,28 +138,6 @@ namespace Tests.EditMode.MushroomBook
 
             return viewModel;
         }
-
-                private sealed class StubAchievementEventBus : IGameplayEventBus
-        {
-            public List<MushroomCollectedEvent> Collected { get; } = new();
-            public List<BattleCompletedEvent> Battles { get; } = new();
-
-            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
-            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
-
-            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
-            {
-                Collected.Add(new MushroomCollectedEvent(type, totals));
-            }
-
-            public void PublishBattleCompleted(bool playerWon)
-            {
-                Battles.Add(new BattleCompletedEvent(playerWon));
-            }
-        }
-    }
-
-
     }
 }
 

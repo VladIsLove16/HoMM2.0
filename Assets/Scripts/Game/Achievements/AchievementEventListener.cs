@@ -1,6 +1,6 @@
+using Adventure.Infrastructure.Events;
 using System;
 using System.Linq;
-using Adventure.Infrastructure.Events;
 using UniRx;
 using Zenject;
 

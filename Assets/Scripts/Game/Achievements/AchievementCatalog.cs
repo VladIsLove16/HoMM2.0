@@ -49,8 +49,8 @@ namespace Game.Achievements
             {
                 BuildLookup();
             }
-
-            return _lookup != null && _lookup.TryGetValue(id, out definition);
+            var res = _lookup.TryGetValue(id, out definition);
+            return _lookup != null && res;
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Adventure.Integration.Battle;
 using UniRx;
 
 namespace Adventure.Infrastructure.Events
