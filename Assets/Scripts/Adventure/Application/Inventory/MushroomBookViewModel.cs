@@ -1,12 +1,13 @@
-using Adventure.Domain.Inventory;
+﻿using Adventure.Domain.Inventory;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
-using ModestTree;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using Adventure.Infrastructure.Events;
 
 namespace Adventure.Presentation.Mushroom
 {
@@ -27,6 +28,7 @@ namespace Adventure.Presentation.Mushroom
 
         private readonly MushroomInventoryModel _mushroomInventoryModel;
         private readonly UnitDefinitionSOCollection _catalog;
+        private readonly IGameplayEventBus _gameplayEvents;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
         private readonly List<MushroomBookEntryViewModel> _allEntries = new();
 
@@ -47,10 +49,12 @@ namespace Adventure.Presentation.Mushroom
 
         public MushroomBookViewModel(
             MushroomInventoryModel mushroomInventoryModel,
-            UnitDefinitionSOCollection catalog)
+            UnitDefinitionSOCollection catalog,
+            IGameplayEventBus gameplayEvents)
         {
-            _mushroomInventoryModel = mushroomInventoryModel;
-            _catalog = catalog;
+            _mushroomInventoryModel = mushroomInventoryModel ?? throw new ArgumentNullException(nameof(mushroomInventoryModel));
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _gameplayEvents = gameplayEvents ?? throw new ArgumentNullException(nameof(gameplayEvents));
 
             RebuildEntries();
             UpdateCurrentPage();
@@ -80,6 +84,7 @@ namespace Adventure.Presentation.Mushroom
                 return;
 
             _mushroomInventoryModel.Add(type);
+            _gameplayEvents.PublishMushroomCollected(type, _mushroomInventoryModel.Items);
             RebuildEntries();
         }
         public void SetPageCapacity(int count)
@@ -242,3 +247,13 @@ namespace Adventure.Presentation.Mushroom
 
     }
 }
+
+
+
+
+
+
+
+
+
+

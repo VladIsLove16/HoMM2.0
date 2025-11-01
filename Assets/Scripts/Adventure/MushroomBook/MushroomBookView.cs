@@ -60,6 +60,7 @@ public class MushroomBookView : MonoBehaviour
             .AddTo(_subscriptions);
 
         RefreshPageNumber();
+        ToglePresMode();
     }
 
     [Button("Render Test Page")]

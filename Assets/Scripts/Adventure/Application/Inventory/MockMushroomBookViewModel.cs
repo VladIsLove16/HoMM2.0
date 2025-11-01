@@ -1,10 +1,12 @@
-using Adventure.Domain.Inventory;
+﻿using Adventure.Domain.Inventory;
 using Adventure.Presentation.Mushroom;
 using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Adventure.Integration.Battle;
+using Adventure.Infrastructure.Events;
+
 [CreateAssetMenu(menuName = "MockMushroomBook/MockMushroomBookViewModel", fileName = "MockMushroomBookViewModel")]
 public class MockMushroomBookViewModel : ScriptableObject 
 {
@@ -20,9 +22,18 @@ public class MockMushroomBookViewModel : ScriptableObject
         {
             mushroomInventoryModel.Add(mushroom.UnitType, 2);
         }
-        mushroomBookViewModel = new MushroomBookViewModel(mushroomInventoryModel, catalog);
+        var bus = new GameplayEventBus();
+        mushroomBookViewModel = new MushroomBookViewModel(mushroomInventoryModel, catalog, bus);
         mushroomBookViewModel.SetPresentationMode(PresentationMode.Normal);
         mushroomBookViewModel.GoToPage(0);
     }
-   
 }
+
+
+
+
+
+
+
+
+

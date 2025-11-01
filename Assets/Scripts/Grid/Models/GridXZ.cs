@@ -84,8 +84,8 @@ public partial class GridXZ<TGridObject> {
     public TGridObject GetGridObject(int x, int z)
     {
         if (!IsInBounds(x, z))
-            throw new ArgumentException($" index({ x },{ z}) is out of bounds({ width},{ height}))");
-        if(gridArray[x, z] == null)
+            throw new ArgumentException("check IsInBoundsFirst");
+        if (gridArray[x, z] == null)
         {
            throw new InvalidProgramException(ToString());
         }

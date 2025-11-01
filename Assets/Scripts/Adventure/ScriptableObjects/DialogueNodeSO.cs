@@ -12,6 +12,8 @@ public sealed class DialogueNodeSO : ScriptableObject
         [TextArea] public string Text;
         public DialogueChoiceAction Action;
         public DialogueNodeSO NextNode;
+        public DialogueNodeSO VictoryNode;
+        public DialogueNodeSO DefeatNode;
     }
 
     [SerializeField] private string nodeId;
@@ -27,7 +29,9 @@ public sealed class DialogueNodeSO : ScriptableObject
         foreach (var choice in choices)
         {
             var nextId = choice.NextNode != null ? choice.NextNode.nodeId : null;
-            domainChoices.Add(new DialogueChoice(choice.Id, choice.Text, nextId, choice.Action));
+            var victoryId = choice.VictoryNode != null ? choice.VictoryNode.NodeId : nextId;
+            var defeatId = choice.DefeatNode != null ? choice.DefeatNode.NodeId : victoryId;
+            domainChoices.Add(new DialogueChoice(choice.Id, choice.Text, nextId, choice.Action, victoryId, defeatId));
         }
         return new DialogueNode(nodeId, speaker, text, domainChoices);
     }

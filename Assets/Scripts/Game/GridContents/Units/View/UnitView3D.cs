@@ -15,6 +15,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     [SerializeField] private SkinnedMeshRenderer[] meshes;
     [Inject] private IMaterialProvider _teamMaterials;
     [Inject] IWorldToCellProvider worldToCellProvider;
+    [Inject] private IBattleAnimationGate _animationGate;
+    [Inject] private IAnimationSpeedSettings _animationSpeedSettings;
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
@@ -54,7 +56,12 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         SetMaterial(_teamMaterials.GetTeamMaterial(vm.Team));
         unitViewUI.Init(vm);
         _vm.OnTeamChangedEnum.Subscribe(team => SetMaterial(_teamMaterials.GetTeamMaterial(team))).AddTo(_disposables);
-        _vm.OnMoveByRoute.Subscribe(OnMovedByRoute);
+        _vm.OnMoveByRoute.Subscribe(OnMovedByRoute).AddTo(_disposables);
+        if (_animationSpeedSettings != null)
+        {
+            _animationSpeedSettings.Mode.Subscribe(OnAnimationSpeedChanged).AddTo(_disposables);
+        }
+        ApplyAnimationSpeed();
     }
 
     private void OnMovedByRoute(List<Vector2Int> list)
@@ -123,26 +130,46 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         if (!isExecuting)
             StartCoroutine(ProcessActions());
     }
-
     private IEnumerator ProcessActions()
     {
         isExecuting = true;
         LogDebugEvent("Action Processing Started");
-
-        while (actionQueue.Count > 0)
+        IDisposable gateHandle = _animationGate?.Acquire();
+        try
         {
-            var action = actionQueue.Dequeue();
-            LogDebugEvent($"Executing Action. Remaining: {actionQueue.Count}");
-            yield return StartCoroutine(action);
+            while (actionQueue.Count > 0)
+            {
+                var action = actionQueue.Dequeue();
+                LogDebugEvent($"Executing Action. Remaining: {actionQueue.Count}");
+                yield return StartCoroutine(action);
+            }
         }
-
-        isExecuting = false;
-        LogDebugEvent("Action Processing Finished");
+        finally
+        {
+            gateHandle?.Dispose();
+            isExecuting = false;
+            LogDebugEvent("Action Processing Finished");
+        }
     }
+
+
 
     private IEnumerator MoveAlongRoute(List<Vector3> route)
     {
         LogDebugEvent($"Starting Movement: {route.Count} points");
+        if (_animationSpeedSettings != null && _animationSpeedSettings.IsInstant)
+        {
+            foreach (var point in route)
+            {
+                LogDebugEvent($"Teleporting to: {point}");
+                transform.position = point;
+            }
+            Play(UnitAnimationState.Idle);
+            LogDebugEvent("Movement Finished (instant)");
+            yield return null;
+            yield break;
+        }
+
         Play(UnitAnimationState.Walk);
 
         foreach (var point in route)
@@ -155,16 +182,27 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         Play(UnitAnimationState.Idle);
     }
 
+
     private IEnumerator MoveToPosition(Vector3 worldPos)
     {
+        if (_animationSpeedSettings != null && _animationSpeedSettings.IsInstant)
+        {
+            transform.position = worldPos;
+            yield return null;
+            yield break;
+        }
+
+        var speed = animationMoveSpeed * (_animationSpeedSettings?.PlaybackMultiplier ?? 1f);
+
         while (Vector3.Distance(transform.position, worldPos) > 0.05f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, worldPos, animationMoveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, worldPos, speed * Time.deltaTime);
             yield return null;
         }
 
         transform.position = worldPos;
     }
+
 
     private IEnumerator PlayAnimation(UnitAnimationState state)
     {
@@ -177,14 +215,24 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     {
         LogDebugEvent("Handling Death Animation");
         Play(UnitAnimationState.Die);
-        yield return new WaitForSeconds(1.5f);
+        var waitDuration = ScaleDuration(1.5f);
+        if (waitDuration > 0f)
+        {
+            yield return new WaitForSeconds(waitDuration);
+        }
+        else
+        {
+            yield return null;
+        }
         LogDebugEvent("Unit Deactivated");
         gameObject.SetActive(false);
     }
 
+
     public void Play(UnitAnimationState state)
     {
         if (_animator == null) return;
+        ApplyAnimationSpeed();
 
         string trigger = state switch
         {
@@ -260,6 +308,28 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         SetMaterial(_teamMaterials.GetTeamMaterial(_vm.Team));
     }
     
+    private void OnAnimationSpeedChanged(AnimationSpeedMode mode)
+    {
+        ApplyAnimationSpeed();
+    }
+
+    private void ApplyAnimationSpeed()
+    {
+        if (_animator == null)
+            return;
+        var multiplier = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
+        _animator.speed = _animationSpeedSettings != null && _animationSpeedSettings.IsInstant ? 100f : multiplier;
+    }
+
+    private float ScaleDuration(float baseDuration)
+    {
+        if (_animationSpeedSettings == null)
+            return baseDuration;
+        if (_animationSpeedSettings.IsInstant)
+            return 0f;
+        return baseDuration / _animationSpeedSettings.PlaybackMultiplier;
+    }
+
     private void LogDebugEvent(string eventMessage)
     {
         Debug.Log($"[UnitView3D Debug] {eventMessage}");
@@ -269,3 +339,4 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
 }
  
+

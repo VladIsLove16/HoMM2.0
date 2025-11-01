@@ -136,6 +136,7 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     public bool ToGridPair(Vector3 position,out KeyValuePair<Vector2Int, Vector2Int> coordPair)
     {
         Vector2Int main = grid.GetXY(position);
+        UnityLogger.Log("ToGridPair( ) " + position + "  res: " + main);
         if (!grid.IsInBounds(main))
         {
             coordPair = default;

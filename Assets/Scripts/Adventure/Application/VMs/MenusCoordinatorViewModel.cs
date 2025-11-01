@@ -25,6 +25,11 @@ public class MenusCoordinatorViewModel
             menu.IsOpen
                 .Skip(1)
                 .Subscribe(_ => OnMenuStateChanged(menu));
+
+            if (menu.IsOpen.Value)
+            {
+                OnMenuStateChanged(menu);
+            }
         }
     }
     private void OnMenuStateChanged(IActiveMenu activeMenu)

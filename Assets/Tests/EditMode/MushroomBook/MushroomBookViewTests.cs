@@ -1,7 +1,10 @@
-using Adventure.Domain.Inventory;
+﻿using Adventure.Domain.Inventory;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
+using Game.Achievements;
+using Adventure.Infrastructure.Events;
 using NUnit.Framework;
+using UniRx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,12 +132,40 @@ namespace Tests.EditMode.MushroomBook
 
             var catalog = MushroomBookTestHelpers.CreateCatalog(defs, _createdObjects);
             var inventory = new MushroomInventoryModel(stacks);
-            var viewModel = new MushroomBookViewModel(inventory, catalog);
+            var viewModel = new MushroomBookViewModel(inventory, catalog, new StubAchievementEventBus());
 
             _disposables.Add(viewModel);
             entries = viewModel.CurrentPageEntries.ToArray();
 
             return viewModel;
         }
+
+                private sealed class StubAchievementEventBus : IGameplayEventBus
+        {
+            public List<MushroomCollectedEvent> Collected { get; } = new();
+            public List<BattleCompletedEvent> Battles { get; } = new();
+
+            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
+            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
+
+            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+            {
+                Collected.Add(new MushroomCollectedEvent(type, totals));
+            }
+
+            public void PublishBattleCompleted(bool playerWon)
+            {
+                Battles.Add(new BattleCompletedEvent(playerWon));
+            }
+        }
+    }
+
+
     }
 }
+
+
+
+
+
+

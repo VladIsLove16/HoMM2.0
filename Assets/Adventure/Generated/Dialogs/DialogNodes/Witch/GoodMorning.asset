@@ -20,6 +20,8 @@ MonoBehaviour:
     Text: Let's test our might.
     Action: 1
     NextNode: {fileID: 0}
+    VictoryNode: {fileID: 11400000, guid: 5c61f27c9a8a4f80afbfd7446f0cf76f, type: 2}
+    DefeatNode: {fileID: 11400000, guid: dc7a8824a1254e8f90ab0eadc447adb4, type: 2}
   - Id: leave
     Text: I'll be back later.
     Action: 2

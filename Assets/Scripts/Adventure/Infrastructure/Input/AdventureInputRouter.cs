@@ -18,6 +18,7 @@ public sealed class AdventureInputRouter : IDisposable
     [Inject] private MenusCoordinatorViewModel menusVM;
     [Inject] private GameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
+    [Inject] private HelpMenu helpMenu;
     [Inject]
     private void Construct()
     {
@@ -27,7 +28,10 @@ public sealed class AdventureInputRouter : IDisposable
         adventureCharacterInput.InteractPerformed += OnInteract;
         adventureCharacterInput.OpenSettingsPerformed += OnOpenSettings;
         adventureCharacterInput.OpenMushroomBookPerformed += OnOpenMushroomBook;
+        adventureCharacterInput.OpenHelpMenuPerformed += OnOpenHelpMenu;
     }
+
+   
 
     public void Dispose()
     {
@@ -74,6 +78,9 @@ public sealed class AdventureInputRouter : IDisposable
         else
             settingsVM.Toggle();
     }
-
+    private void OnOpenHelpMenu()
+    {
+        helpMenu.Toggle();
+    }
     private void OnOpenMushroomBook() => bookVM.Toggle();
 }

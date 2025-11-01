@@ -11,6 +11,7 @@ public class GameView3D : MonoBehaviour
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private GameViewModel _gameVM;
     [Inject]private IWorldToCellProvider _worldToCellProvider;
+    [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private UnitView3D _draggedUnit;
 
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
@@ -36,6 +37,8 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
+        if (IsInteractionLocked())
+            return;
         if(Log)
             Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
         if (gameViewObject is IHoverable hoverable)
@@ -49,6 +52,8 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
+        if (IsInteractionLocked())
+            return;
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         TestHandleCellSelected?.Invoke(coords);
         _gameVM?.HandleCellSelected(coords);
@@ -56,6 +61,8 @@ public class GameView3D : MonoBehaviour
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
+        if (IsInteractionLocked())
+            return;
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         _gameVM?.HandleCellActionPerformed(coords);
     }
@@ -66,6 +73,8 @@ public class GameView3D : MonoBehaviour
     }
     public void BeginDrag(UnitView3D unit)
     {
+        if (IsInteractionLocked())
+            return;
         _draggedUnit = unit;
         if(Log)
         Debug.Log(_draggedUnit.gameObject.name);
@@ -81,6 +90,8 @@ public class GameView3D : MonoBehaviour
 
     public void EndDrag(Vector3 worldPos)
     {
+        if (IsInteractionLocked())
+            return;
         if (_draggedUnit == null)
         {
             return;
@@ -118,6 +129,6 @@ public class GameView3D : MonoBehaviour
         }
     }
 
-   
+    private bool IsInteractionLocked() => _animationGate != null && _animationGate.IsLocked;
 }
 

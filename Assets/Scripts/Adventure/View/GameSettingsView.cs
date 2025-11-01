@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using Adventure.Settings.ViewModel;
 using Zenject;
@@ -18,10 +19,15 @@ namespace Adventure.Settings.View
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider effectsSlider;
         [SerializeField] private TMP_Dropdown qualityDropdown;
+        [SerializeField] private TMP_Dropdown animationSpeedDropdown;
+
+        private readonly CompositeDisposable _bindings = new();
 
         private void Start()
         {
-            _vm.IsOpen.Subscribe(OnVisibilityChanged);
+            if (_vm == null)
+                throw new System.Exception();
+            _vm.IsOpen.Subscribe(OnVisibilityChanged).AddTo(_bindings);
 
             closeButton.onClick.AddListener(() => _vm.Close());
             exitButton.onClick.AddListener(() => _vm.ExitGame());
@@ -41,3 +47,4 @@ namespace Adventure.Settings.View
         }
     }
 }
+

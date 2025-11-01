@@ -3,14 +3,17 @@ using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Infrastructure.Interaction;
+using Adventure.Infrastructure.Events;
 using Adventure.Infrastructure.Inventory;
 using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.State;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Dialog;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.Model;
 using Adventure.Settings.View;
 using Adventure.Settings.ViewModel;
+using Game.Achievements;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using System;
 using System.Collections.Generic;
@@ -28,8 +31,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [Header("Battle")]
     [SerializeField] private GridConfigurationGateway gridConfigurationGateway;
     [SerializeField] private ArmyLineupSO playerStartArmy;
-    [SerializeField] private int playerFrontlineX = 1;
-    [SerializeField] private int enemyFrontlineX = 10;
+    [SerializeField] private int playerFrontlineY = 1;
+    [SerializeField] private int enemyFrontlineY = 10;
     [SerializeField] private int rowSpacing = 1;
 
     [Header("Blocked & Interaction")]
@@ -38,6 +41,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private DialogueUIView dialogueUIView;
     [SerializeField] private MushroomBookView mushroomBookView;
     [SerializeField] private GameSettingsView gameSettingsView;
+    [SerializeField] private HelpMenu helpMenu;
     [Header("Blocked & Interaction")]
 
     [SerializeField] private AdventureDevTools devTools;
@@ -70,9 +74,9 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     private void BindViews()
     {
-        Container.Bind<DialogueUIView>().FromInstance(dialogueUIView).AsSingle();
         Container.Bind<MushroomBookView>().FromInstance(mushroomBookView).AsSingle();
-        Container.Bind<GameSettingsView>().FromInstance(gameSettingsView).AsSingle();
+        Container.Bind<DialogueUIView>().FromInstance(dialogueUIView).AsSingle();
+        Container.Bind<GameSettingsView>().FromInstance(gameSettingsView).AsSingle().NonLazy();
         Container.Bind<NpcDialogueTrigger>()
             .FromComponentsInHierarchy()
             .AsTransient();
@@ -80,6 +84,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             .FromComponentsInHierarchy()
             .AsTransient();
         Container.Bind<CursorView>().AsSingle().WithArguments(cursorStateTextures).NonLazy();
+        Container.BindInterfacesAndSelfTo<HelpMenu>().FromInstance(helpMenu).AsSingle().NonLazy();
     }
     private void BindTools()
     {
@@ -88,9 +93,12 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     private void BindServices()
     {
         Container.Bind<PauseController>().AsSingle();
-        var resolver = new ArmyFormationResolver(playerFrontlineX, enemyFrontlineX, rowSpacing);
+        var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, rowSpacing);
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
         Container.Bind<BattleLaunchService>().AsSingle();
+        BindAchievementServices();
+        Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().NonLazy();
+        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle();
 
         if (gridConfigurationGateway != null)
         {
@@ -100,6 +108,23 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         {
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
         }
+    }
+
+    private void BindAchievementServices()
+    {
+        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
+        if (catalog == null)
+        {
+            Debug.LogWarning("AchievementCatalog not found at Resources/Achievements/AchievementCatalog");
+            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+        }
+
+        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
+        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
+        Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
+        Container.Bind<IGameplayEventBus>().To<GameplayEventBus>().AsSingle();
+        Container.BindInterfacesTo<AchievementEventListener>().AsSingle().NonLazy();
     }
 
     private void BindDatabases()
@@ -118,3 +143,5 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<InputModeViewModel>().AsSingle().NonLazy();
     }
 }
+
+

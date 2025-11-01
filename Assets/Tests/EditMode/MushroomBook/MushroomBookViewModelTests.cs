@@ -1,7 +1,11 @@
-using Adventure.Domain.Inventory;
+﻿using Adventure.Domain.Inventory;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
+using Game.Achievements;
+using Adventure.Infrastructure.Events;
 using NUnit.Framework;
+using UniRx;
+using System;
 using System.Collections.Generic;
 
 namespace Tests.EditMode.MushroomBook
@@ -34,7 +38,8 @@ namespace Tests.EditMode.MushroomBook
             });
             var catalog = MushroomBookTestHelpers.CreateCatalog(new[] { definition }, _createdAssets);
             var inventory = new MushroomInventoryModel(new List<UnitStackData>());
-            var viewModel = new MushroomBookViewModel(inventory, catalog);
+            var bus = new StubAchievementEventBus();
+            var viewModel = new MushroomBookViewModel(inventory, catalog, bus);
 
             try
             {
@@ -43,6 +48,7 @@ namespace Tests.EditMode.MushroomBook
                 viewModel.Collect(UnitType.Witch);
 
                 Assert.That(inventory.GetCount(UnitType.Witch), Is.EqualTo(1));
+                Assert.That(bus.Collected.Count, Is.EqualTo(1));
             }
             finally
             {
@@ -53,7 +59,7 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void Constructor_PopulatesInitialPage()
         {
-            var viewModel = CreateViewModel(3, out _, out _, out var definitions);
+            var viewModel = CreateViewModel(3, out _, out _, out var definitions, out _);
 
             try
             {
@@ -69,7 +75,7 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void NextPage_WhenMultiplePages_UpdatesCurrentPage()
         {
-            var viewModel = CreateViewModel(4, out _, out _, out _);
+            var viewModel = CreateViewModel(4, out _, out _, out _, out _);
 
             try
             {
@@ -86,7 +92,7 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void PreviousPage_WhenOnFirstPage_DoesNotGoNegative()
         {
-            var viewModel = CreateViewModel(4, out _, out _, out _);
+            var viewModel = CreateViewModel(4, out _, out _, out _, out _);
             try
             {
                 viewModel.PrevPage();
@@ -101,7 +107,7 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void SetPresentationMode_UpdatesReactiveProperty()
         {
-            var viewModel = CreateViewModel(1, out _, out _, out _);
+            var viewModel = CreateViewModel(1, out _, out _, out _, out _);
 
             try
             {
@@ -123,7 +129,8 @@ namespace Tests.EditMode.MushroomBook
             int entryCount,
             out MushroomInventoryModel inventory,
             out UnitDefinitionSOCollection catalog,
-            out UnitDefinitionSO[] definitions)
+            out UnitDefinitionSO[] definitions,
+            out StubAchievementEventBus bus)
         {
             var defs = new List<UnitDefinitionSO>();
             var stacks = new List<UnitStackData>();
@@ -143,7 +150,38 @@ namespace Tests.EditMode.MushroomBook
             catalog = MushroomBookTestHelpers.CreateCatalog(defs, _createdAssets);
             definitions = defs.ToArray();
 
-            return new MushroomBookViewModel(inventory, catalog);
+            bus = new StubAchievementEventBus();
+            return viewModel;
+        }
+
+        private sealed class StubAchievementEventBus : IGameplayEventBus
+        {
+            public List<MushroomCollectedEvent> Collected { get; } = new();
+            public List<BattleCompletedEvent> Battles { get; } = new();
+
+            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
+            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
+
+            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+            {
+                Collected.Add(new MushroomCollectedEvent(type, totals));
+            }
+
+            public void PublishBattleCompleted(bool playerWon)
+            {
+                Battles.Add(new BattleCompletedEvent(playerWon));
+            }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+

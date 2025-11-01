@@ -5,6 +5,7 @@ using Adventure.Integration.Battle;
 using Adventure.Settings.ViewModel;
 using UniRx;
 using Zenject;
+using System.Linq;
 
 namespace Adventure.Application.Dialog
 {
@@ -34,7 +35,7 @@ namespace Adventure.Application.Dialog
         {
             return _repository.TryGet(dialogId, out var graph);
         }
-        public bool TryStartDialog(string dialogId, ArmyLineupSO armyLineupSO)
+        public bool TryStartDialog(string dialogId, ArmyLineupSO armyLineupSO, string startNodeId = null)
         {
             if (string.IsNullOrEmpty(dialogId))
                 return false;
@@ -44,7 +45,13 @@ namespace Adventure.Application.Dialog
 
             _enenyArmy.SetValueAndForceNotify(armyLineupSO);
             _activeDialogId = dialogId;
-            _session = new DialogueSession(graph);
+
+            if (string.IsNullOrEmpty(startNodeId) && _stateStore != null && _stateStore.TryLoadState(dialogId, out var snapshot) && !string.IsNullOrEmpty(snapshot.CurrentNodeId))
+            {
+                startNodeId = snapshot.CurrentNodeId;
+            }
+
+            _session = new DialogueSession(graph, startNodeId);
             _currentNode.SetValueAndForceNotify(_session.CurrentNode);
             _isOpen.SetValueAndForceNotify(true);
             return true;
@@ -55,10 +62,12 @@ namespace Adventure.Application.Dialog
             if (_session == null)
                 throw new InvalidOperationException("Dialog not started");
            
+            var currentNode = _session.CurrentNode;
+            var selectedChoice = currentNode?.Choices?.FirstOrDefault(c => c.Id == choiceId);
             var action = _session.SelectChoice(choiceId);
             if (action == DialogueChoiceAction.StartBattle)
             {
-                StartBattle();
+                StartBattle(selectedChoice);
             }
             else if (action == DialogueChoiceAction.EndDialogue)
             {
@@ -85,10 +94,14 @@ namespace Adventure.Application.Dialog
             }
         }
 
-        private void StartBattle()
+        private void StartBattle(DialogueChoice selectedChoice)
         {
             _currentNode.SetValueAndForceNotify(null);
-            battleLaunchService.Launch(_enenyArmy.Value);
+            var enemyArmy = _enenyArmy.Value;
+            var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
+            var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
+            var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
+            battleLaunchService.Launch(context);
         }
 
         private void EndDialog()

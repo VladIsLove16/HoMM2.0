@@ -7,34 +7,34 @@ namespace Adventure.Integration.Battle
 {
     public sealed class ArmyFormationResolver
     {
-        private readonly int _playerFrontlineX;
-        private readonly int _enemyFrontlineX;
+        private readonly int _playerFrontlineY;
+        private readonly int _enemyFrontlineY;
         private readonly int _rowSpacing;
 
         public ArmyFormationResolver(int playerFrontlineX, int enemyFrontlineX, int rowSpacing)
         {
-            _playerFrontlineX = playerFrontlineX;
-            _enemyFrontlineX = enemyFrontlineX;
+            _playerFrontlineY = playerFrontlineX;
+            _enemyFrontlineY = enemyFrontlineX;
             _rowSpacing = rowSpacing;
             if(playerFrontlineX == enemyFrontlineX)
             {
-                throw new ArgumentException("playerFrontlineX cant be equal enemyFrontlineX. Value: " + playerFrontlineX);
+                throw new ArgumentException("playerFrontlineY cant be equal enemyFrontlineY. Value: " + playerFrontlineX);
             }
         }
 
-        public ArmyFormation ResolveForPlayer(IReadOnlyList<UnitStackData> lineup) => Resolve(lineup, _playerFrontlineX, Team.Blue);
-        public ArmyFormation ResolveForEnemy(IReadOnlyList<UnitStackData> lineup) => Resolve(lineup, _enemyFrontlineX, Team.Red);
+        public ArmyFormation ResolveForPlayer(IReadOnlyList<UnitStackData> lineup) => Resolve(lineup, _playerFrontlineY, Team.Blue);
+        public ArmyFormation ResolveForEnemy(IReadOnlyList<UnitStackData> lineup) => Resolve(lineup, _enemyFrontlineY, Team.Red);
 
-        private ArmyFormation Resolve(IReadOnlyList<UnitStackData> lineup, int baseX, Team team)
+        private ArmyFormation Resolve(IReadOnlyList<UnitStackData> lineup, int baseY, Team team)
         {
             if(lineup == null || lineup.Count == 0)
                 throw new ArgumentException("lineup is null or empty");
             var result = new ArmyFormation();
-            var y = 0;
+            var x = 0;
             foreach (var stack in lineup)
             {
-                result.Add(new GridSlot(baseX, y, stack.UnitType, stack.Amount, team));
-                y += _rowSpacing;
+                result.Add(new GridSlot(x, baseY, stack.UnitType, stack.Amount, team));
+                x += _rowSpacing;
             }
             return result;
         }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Adventure.Infrastructure.Events;
 using UnityEngine;
 using Zenject;
+using Game.Achievements;
 
 public class GameLogicMonoInstaller : MonoInstaller
 {
@@ -40,6 +42,26 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
+        Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
+        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle();
+        BindAchievementServices();
+    }
+
+    private void BindAchievementServices()
+    {
+        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
+        if (catalog == null)
+        {
+            Debug.LogWarning("AchievementCatalog not found at Resources/Achievements/AchievementCatalog");
+            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+        }
+
+        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
+        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
+        Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
+        Container.Bind<IGameplayEventBus>().To<GameplayEventBus>().AsSingle();
+        Container.BindInterfacesTo<AchievementEventListener>().AsSingle().NonLazy();
     }
 
     private void BindModels()
@@ -80,3 +102,4 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameController>().FromInstance(gameController).AsSingle().NonLazy();
     }
 }
+

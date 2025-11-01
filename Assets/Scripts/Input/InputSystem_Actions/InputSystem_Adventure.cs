@@ -262,6 +262,15 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenHelpMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""3d2c03f6-e73f-4b6e-ab2f-8096df113a54"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -284,6 +293,17 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""OpenSettings"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""80693c0b-d6ca-4083-9427-a10fbd46bc62"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenHelpMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -364,6 +384,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
         m_Menus = asset.FindActionMap("Menus", throwIfNotFound: true);
         m_Menus_OpenMushroomBook = m_Menus.FindAction("OpenMushroomBook", throwIfNotFound: true);
         m_Menus_OpenSettings = m_Menus.FindAction("OpenSettings", throwIfNotFound: true);
+        m_Menus_OpenHelpMenu = m_Menus.FindAction("OpenHelpMenu", throwIfNotFound: true);
     }
 
     ~@InputSystem_Adventure()
@@ -511,12 +532,14 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
     private List<IMenusActions> m_MenusActionsCallbackInterfaces = new List<IMenusActions>();
     private readonly InputAction m_Menus_OpenMushroomBook;
     private readonly InputAction m_Menus_OpenSettings;
+    private readonly InputAction m_Menus_OpenHelpMenu;
     public struct MenusActions
     {
         private @InputSystem_Adventure m_Wrapper;
         public MenusActions(@InputSystem_Adventure wrapper) { m_Wrapper = wrapper; }
         public InputAction @OpenMushroomBook => m_Wrapper.m_Menus_OpenMushroomBook;
         public InputAction @OpenSettings => m_Wrapper.m_Menus_OpenSettings;
+        public InputAction @OpenHelpMenu => m_Wrapper.m_Menus_OpenHelpMenu;
         public InputActionMap Get() { return m_Wrapper.m_Menus; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -532,6 +555,9 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             @OpenSettings.started += instance.OnOpenSettings;
             @OpenSettings.performed += instance.OnOpenSettings;
             @OpenSettings.canceled += instance.OnOpenSettings;
+            @OpenHelpMenu.started += instance.OnOpenHelpMenu;
+            @OpenHelpMenu.performed += instance.OnOpenHelpMenu;
+            @OpenHelpMenu.canceled += instance.OnOpenHelpMenu;
         }
 
         private void UnregisterCallbacks(IMenusActions instance)
@@ -542,6 +568,9 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
             @OpenSettings.started -= instance.OnOpenSettings;
             @OpenSettings.performed -= instance.OnOpenSettings;
             @OpenSettings.canceled -= instance.OnOpenSettings;
+            @OpenHelpMenu.started -= instance.OnOpenHelpMenu;
+            @OpenHelpMenu.performed -= instance.OnOpenHelpMenu;
+            @OpenHelpMenu.canceled -= instance.OnOpenHelpMenu;
         }
 
         public void RemoveCallbacks(IMenusActions instance)
@@ -616,5 +645,6 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
     {
         void OnOpenMushroomBook(InputAction.CallbackContext context);
         void OnOpenSettings(InputAction.CallbackContext context);
+        void OnOpenHelpMenu(InputAction.CallbackContext context);
     }
 }

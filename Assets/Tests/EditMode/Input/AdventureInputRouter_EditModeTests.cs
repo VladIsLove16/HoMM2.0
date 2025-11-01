@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Adventure.Domain.Inventory;
@@ -6,6 +6,9 @@ using Adventure.Infrastructure.Interaction;
 using Adventure.Infrastructure.Movement;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
+using Game.Achievements;
+using Adventure.Infrastructure.Events;
+using UniRx;
 using Adventure.Settings.Model;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
@@ -40,9 +43,9 @@ namespace Tests.EditMode.Input
             _inputMode = new InputModeStub();
             _menu = new TestActiveMenu(InputMode.Blocked);
             _menus = new MenusCoordinatorViewModel(_inputMode, new[] { _menu });
-            _settings = new GameSettingsViewModel(new GameSettingsModel(), new PauseController());
+            _settings = new GameSettingsViewModel(new GameSettingsModel(), new PauseController(), new AnimationSpeedSettings());
             _catalog = ScriptableObject.CreateInstance<UnitDefinitionSOCollection>();
-            _book = new MushroomBookViewModel(new MushroomInventoryModel(new List<UnitStackData>()), _catalog);
+            _book = new MushroomBookViewModel(new MushroomInventoryModel(new List<UnitStackData>()), _catalog, new StubAchievementEventBus());
             _movementController = CreateMovementController(out _movementGO);
             _interactionController = CreateInteractionController(out _interactionGO, _input);
             Time.timeScale = 1f;
@@ -396,5 +399,31 @@ namespace Tests.EditMode.Input
                 _isOpen.SetValueAndForceNotify(false);
             }
         }
+
+        private sealed class StubAchievementEventBus : IGameplayEventBus
+        {
+            public List<MushroomCollectedEvent> Collected { get; } = new();
+            public List<BattleCompletedEvent> Battles { get; } = new();
+
+            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
+            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
+
+            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+            {
+                Collected.Add(new MushroomCollectedEvent(type, totals));
+            }
+
+            public void PublishBattleCompleted(bool playerWon)
+            {
+                Battles.Add(new BattleCompletedEvent(playerWon));
+            }
+        }
     }
 }
+
+
+
+
+
+
+

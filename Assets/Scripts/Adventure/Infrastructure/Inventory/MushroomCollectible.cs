@@ -1,5 +1,6 @@
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Interaction;
+using Adventure.Infrastructure.State;
 using Adventure.Presentation.Mushroom;
 using UnityEngine;
 using Zenject;
@@ -15,6 +16,23 @@ namespace Adventure.Infrastructure.Inventory
         public UnitType Type => UnitType;
         public bool CanCollect { get; private set; } = true;
         private MushroomBookViewModel _mushroomCollectionViewModel;
+
+        private void Awake()
+        {
+            if (AdventureStateCache.IsMushroomCollected(transform.position))
+            {
+                CanCollect = false;
+                if (destroyOnCollect && gameObject != null)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    gameObject.SetActive(false);
+                }
+            }
+        }
+
         [Inject]
         public void Construct(MushroomBookViewModel mushroomCollectionvm)
         {
@@ -32,6 +50,7 @@ namespace Adventure.Infrastructure.Inventory
                 return;
 
             CanCollect = false;
+            AdventureStateCache.RegisterCollectedMushroom(transform.position);
 
             if (destroyOnCollect && gameObject != null)
             {

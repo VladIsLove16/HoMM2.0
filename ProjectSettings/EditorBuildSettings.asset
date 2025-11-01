@@ -6,11 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Adventure.unity
+    guid: 9a721fc475f4fc34c82009ffd3e4bf77
+  - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: b8ffd2fb24e634b41b2e3ea7db4d2bb1
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/GridFight.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Loading.unity
+    guid: e1f1ca9b437dc5f41ab3ea6795cdc2ed
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: f824c7cce5550104981ad2ad71810bbe
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: f5661b7a776a97f45ae0b19bbf3e2d0a, type: 3}
   m_UseUCBPForAssetBundles: 0

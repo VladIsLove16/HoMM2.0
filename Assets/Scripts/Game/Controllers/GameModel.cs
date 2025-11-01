@@ -85,8 +85,15 @@ public class GameModel
         return (0, 0); // fallback
     }
 
-    public IGridCell GetCell(Vector2Int pos) => _grid.GetGridObject(pos.x, pos.y);
-
+    public IGridCell GetCell(Vector2Int pos)
+    {
+        if(!_grid.IsInBounds(pos.x,pos.y))
+        {
+            return new GameCell(null,0,0);
+        }
+        return _grid.GetGridObject(pos.x, pos.y);
+    }
+   
     public void ClearGrid()
     {
         for(int i = 0; i < _grid.GetHeight(); i++)

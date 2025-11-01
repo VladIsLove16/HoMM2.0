@@ -17,6 +17,7 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         private InputAction _showHintAction;
         private InputAction _openSettingsAction;
         private InputAction _openBookAction;
+        private InputAction _openHelpMenu;
 
         public event Action<Vector2> MoveChanged;
         public event Action<Vector2> LookChanged;
@@ -25,6 +26,7 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         public event Action ShowHintPerformed;
         public event Action OpenSettingsPerformed;
         public event Action OpenMushroomBookPerformed;
+        public event Action OpenHelpMenuPerformed;
 
         public Vector2 Move => _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
         public Vector2 Look => _lookAction != null ? _lookAction.ReadValue<Vector2>() : Vector2.zero;
@@ -41,6 +43,7 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             _showHintAction = _playerMap.Character.ShowHint;
             _openSettingsAction = _playerMap.Menus.OpenSettings;
             _openBookAction = _playerMap.Menus.OpenMushroomBook;
+            _openHelpMenu = _playerMap.Menus.OpenHelpMenu;
             SubscribeActionCallbacks();
         }
 
@@ -96,7 +99,13 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             {
                 _openBookAction.performed += OnOpenBookPerformed;
             }
+            if (_openBookAction != null)
+            {
+                _openHelpMenu.performed += OnOpenHelpMenuPerformed;
+            }
         }
+
+       
 
         private void UnsubscribeActionCallbacks()
         {
@@ -137,6 +146,10 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             if (_openBookAction != null)
             {
                 _openBookAction.performed -= OnOpenBookPerformed;
+            }
+            if (_openHelpMenu != null)
+            {
+                _openHelpMenu.performed -= OnOpenHelpMenuPerformed;
             }
         }
 
@@ -199,7 +212,10 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
                 OpenMushroomBookPerformed?.Invoke();
             }
         }
-
+        private void OnOpenHelpMenuPerformed(InputAction.CallbackContext context)
+        {
+            OpenHelpMenuPerformed?.Invoke();
+        }
         public void Dispose()
         {
             UnsubscribeActionCallbacks();

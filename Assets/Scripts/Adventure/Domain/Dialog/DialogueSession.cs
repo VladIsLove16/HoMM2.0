@@ -7,12 +7,16 @@ namespace Adventure.Domain.Dialog
         private readonly DialogueGraph _graph;
         private DialogueNode _currentNode;
 
-        public DialogueSession(DialogueGraph graph)
+        public DialogueSession(DialogueGraph graph, string startNodeId = null)
         {
             _graph = graph ?? throw new ArgumentNullException(nameof(graph));
-            if (!_graph.TryGetNode(graph.StartNodeId, out _currentNode))
+            var nodeId = string.IsNullOrEmpty(startNodeId) ? graph.StartNodeId : startNodeId;
+            if (!_graph.TryGetNode(nodeId, out _currentNode))
             {
-                throw new InvalidOperationException($"Invalid start node id '{graph.StartNodeId}'");
+                if (!_graph.TryGetNode(graph.StartNodeId, out _currentNode))
+                {
+                    throw new InvalidOperationException($"Invalid start node id '{nodeId}'");
+                }
             }
         }
 

@@ -16,8 +16,12 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
 
     private void OnActionPreviewChanged(DamageContextPreview preview)
     {
-        if (preview.Damage == null)
+        if (preview?.Damage == null)
+        {
+            Hide();
             return;
+        }
+
         Show(preview);
     }
 
@@ -37,6 +41,7 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     {
         if (_gameViewModel != null)
         {
+            _gameViewModel.DamageContextPreviewChanged -= OnActionPreviewChanged;
         }
     }
 }

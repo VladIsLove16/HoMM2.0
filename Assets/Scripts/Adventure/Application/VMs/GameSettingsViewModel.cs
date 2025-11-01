@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using UniRx;
 using Adventure.Settings.Model;
 using UnityEngine;
+using Zenject;
 
 namespace Adventure.Settings.ViewModel
 {
@@ -9,20 +10,24 @@ namespace Adventure.Settings.ViewModel
     {
         private readonly GameSettingsModel _model;
         private readonly PauseController _pauseController;
+        private readonly IAnimationSpeedSettings _animationSpeedSettings;
+        private readonly ReactiveProperty<bool> _isOpen = new(false);
 
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
-        private readonly ReactiveProperty<bool> _isOpen = new(false);
 
         public AudioSettingsModel Audio => _model.Audio;
         public GraphicsSettingsModel Graphics => _model.Graphics;
         public ControlSettingsModel Controls => _model.Controls;
+        public IReadOnlyReactiveProperty<AnimationSpeedMode> AnimationSpeed => _animationSpeedSettings.Mode;
 
         public InputMode InputMode => InputMode.Blocked;
 
-        public GameSettingsViewModel(GameSettingsModel model, PauseController pauseController)
+        [Inject]
+        public GameSettingsViewModel(GameSettingsModel model, PauseController pauseController, IAnimationSpeedSettings animationSpeedSettings)
         {
-            _model = model;
-            _pauseController = pauseController;
+            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _pauseController = pauseController ?? throw new ArgumentNullException(nameof(pauseController));
+            _animationSpeedSettings = animationSpeedSettings ?? throw new ArgumentNullException(nameof(animationSpeedSettings));
         }
 
         public void Open()
@@ -75,6 +80,11 @@ namespace Adventure.Settings.ViewModel
         internal void SetEffectsVolume(float v)
         {
             Audio.EffectsVolume = v;
+        }
+
+        internal void SetAnimationSpeed(AnimationSpeedMode mode)
+        {
+            _animationSpeedSettings.SetMode(mode);
         }
     }
 }

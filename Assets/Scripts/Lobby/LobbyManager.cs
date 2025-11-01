@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Менеджер лобби для управления подключениями игроков и настройками игры.
@@ -8,6 +10,8 @@ using UnityEngine;
 /// </summary>
 public class LobbyManager : NetworkBehaviour
 {
+    private const string GameSceneName = "GridFight";
+
     [Header("Game Configuration")]
     // Ссылка на ScriptableObject (назначать в инспекторе у префаба/объекта на сцене)
     [SerializeField] private GameConfigurationService GameConfigurationService;
@@ -91,7 +95,7 @@ public class LobbyManager : NetworkBehaviour
             GameConfigurationService.SetTeam(Team.Blue);
             ApplyConfigurationToService(); // локально
         }
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        Loader.Load(Loader.Scene.GridFight);
     }
 
     private void AddPlayerToLobby()
@@ -212,12 +216,12 @@ public class LobbyManager : NetworkBehaviour
         // Загружаем игровую сцену через Netcode (чтобы синхронизировать сцену между игроками)
         if (IsHost)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            Loader.Load(Loader.Scene.GridFight, HostLoadRoutine);
         }
         else
         {
             // Клиенты просто дождутся команды с сервера/Netcode, но на всякий случай можно использовать обычную загрузку если не сетевой режим
-            UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            Loader.Load(Loader.Scene.GridFight, ClientWaitRoutine);
         }
     }
 
@@ -276,6 +280,31 @@ public class LobbyManager : NetworkBehaviour
             return GameConfigurationService.AvailableConfigs[index];
         }
         return null;
+    }
+
+    private IEnumerator HostLoadRoutine()
+    {
+        yield return null;
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(GameSceneName, LoadSceneMode.Single);
+        }
+
+        while (SceneManager.GetActiveScene().name != GameSceneName)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator ClientWaitRoutine()
+    {
+        yield return null;
+
+        while (SceneManager.GetActiveScene().name != GameSceneName)
+        {
+            yield return null;
+        }
     }
 
     internal void SetGameModeMode(GameMode gameMode)
