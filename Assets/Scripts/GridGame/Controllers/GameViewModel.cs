@@ -64,7 +64,7 @@ public class GameViewModel : IDisposable, IGridViewModel
                 previewResult.Add(actionHandler.GetPreview(actionContext).ToDictionary());
                 if (actionHandler is IAttackActionHandler attackHandler)
                 {
-                    DamageContextPreviewChanged?.Invoke(attackHandler.GetDamagePreview(actionContext));
+                    DamageContextPreviewChanged?.Invoke(attackHandler.GetDamageContext(actionContext));
                 }
                 else
                 {

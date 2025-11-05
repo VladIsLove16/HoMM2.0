@@ -7,9 +7,8 @@
         "Zenject",
         "Unity.TextMeshPro",
         "UnityEngine.UI",
-        "GameAssembly",
         "NaughtyAttributes.Core",
-        "Shared"
+        "Infrastucture"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

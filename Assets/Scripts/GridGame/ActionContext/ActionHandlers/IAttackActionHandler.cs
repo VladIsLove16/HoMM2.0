@@ -1,4 +1,4 @@
 ﻿public interface IAttackActionHandler
 {
-    DamageContextPreview GetDamagePreview(ActionContext ctx);
+    DamageContext GetDamageContext(ActionContext ctx);
 }
