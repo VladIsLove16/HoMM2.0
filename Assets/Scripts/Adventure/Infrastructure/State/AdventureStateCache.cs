@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Adventure.Infrastructure.Persistence;
 using Adventure.Integration.Battle;
 using UnityEngine;
 
@@ -20,6 +22,7 @@ namespace Adventure.Infrastructure.State
         private static Vector3? _playerPosition;
         private static Quaternion? _playerRotation;
         private static Loader.Scene? _returnScene;
+        private static IDataRepository<GameStateSaveData> _gameStateRepository;
 
         private static string _pendingDialogId;
         private static ArmyLineupSO _pendingDialogLineup;
@@ -56,6 +59,7 @@ namespace Adventure.Infrastructure.State
             if (units == null)
             {
                 _inventorySnapshot = null;
+                PersistGameState();
                 return;
             }
 
@@ -65,6 +69,8 @@ namespace Adventure.Infrastructure.State
                 var stack = units[i];
                 _inventorySnapshot.Add(new UnitStackData(stack.UnitType, stack.Amount));
             }
+
+            PersistGameState();
         }
 
         public static bool TryGetInventorySnapshot(out IReadOnlyList<UnitStackData> units)
@@ -76,6 +82,7 @@ namespace Adventure.Infrastructure.State
         public static void RegisterCollectedMushroom(Vector3 position)
         {
             _collectedMushrooms.Add(Quantize(position));
+            PersistGameState();
         }
 
         public static bool IsMushroomCollected(Vector3 position)
@@ -133,6 +140,62 @@ namespace Adventure.Infrastructure.State
             _pendingResumeNodeId = null;
             _pendingOutcome = BattleOutcome.Unknown;
             return true;
+        }
+
+        internal static void ConfigurePersistence(IDataRepository<GameStateSaveData> repository)
+        {
+            _gameStateRepository = repository;
+            LoadGameState();
+        }
+
+        private static void LoadGameState()
+        {
+            if (_gameStateRepository == null)
+                return;
+
+            var data = _gameStateRepository.Load() ?? new GameStateSaveData();
+
+            _collectedMushrooms.Clear();
+            if (data.CollectedMushrooms != null)
+            {
+                foreach (var record in data.CollectedMushrooms)
+                {
+                    _collectedMushrooms.Add(new Vector3Int(record.X, record.Y, record.Z));
+                }
+            }
+
+            if (data.Inventory != null && data.Inventory.Count > 0)
+            {
+                _inventorySnapshot = data.Inventory
+                    .Select(record => new UnitStackData(record.UnitType, record.Amount))
+                    .ToList();
+            }
+            else
+            {
+                _inventorySnapshot = null;
+            }
+        }
+
+        private static void PersistGameState()
+        {
+            if (_gameStateRepository == null)
+                return;
+
+            var snapshot = new GameStateSaveData
+            {
+                Inventory = _inventorySnapshot != null
+                    ? _inventorySnapshot.Select(stack => new UnitStackRecord
+                    {
+                        UnitType = stack.UnitType,
+                        Amount = stack.Amount
+                    }).ToList()
+                    : new List<UnitStackRecord>(),
+                CollectedMushrooms = _collectedMushrooms
+                    .Select(Vector3IntRecord.From)
+                    .ToList()
+            };
+
+            _gameStateRepository.Save(snapshot);
         }
 
         private static Vector3Int Quantize(Vector3 position)

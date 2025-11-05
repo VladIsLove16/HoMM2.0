@@ -1,4 +1,6 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -18,6 +20,34 @@ public class DeveloperConsoleView : MonoBehaviour
     private bool _scrollToBottom;
     private bool _shouldFocusInput;
     private int _historyIndex = -1;
+    private readonly List<IDeveloperConsoleCommand> _suggestions = new();
+    private int _suggestionIndex = -1;
+    private static readonly IDeveloperConsoleCommand[] BuiltInCommands =
+    {
+        new BuiltInCommand("help", "Введите help для вывода всех комманд", "help [command]"),
+        new BuiltInCommand("clear", "Введите clear, чтобы очистить консоль", "clear")
+    };
+
+    private sealed class BuiltInCommand : IDeveloperConsoleCommand
+    {
+        public BuiltInCommand(string key, string description, string usage)
+        {
+            Key = key;
+            Description = description;
+            Usage = usage;
+            Aliases = Array.Empty<string>();
+        }
+
+        public string Key { get; }
+        public string Description { get; }
+        public string Usage { get; }
+        public IReadOnlyList<string> Aliases { get; }
+
+        public void Execute(DeveloperConsoleCommandContext context, IReadOnlyList<string> args, IDeveloperConsoleOutput output)
+        {
+            throw new NotSupportedException("Built-in commands are handled directly by DeveloperConsoleService.");
+        }
+    }
 
     [Inject]
     public void Construct(DeveloperConsoleService service)
@@ -51,6 +81,11 @@ public class DeveloperConsoleView : MonoBehaviour
 
         var newState = !_service.IsVisible;
         _service.SetVisibility(newState);
+        if (!newState)
+        {
+            ClearSuggestions();
+            _currentInput = string.Empty;
+        }
         if (newState && focusInputOnOpen)
         {
             _shouldFocusInput = true;
@@ -91,7 +126,13 @@ public class DeveloperConsoleView : MonoBehaviour
         GUILayout.Space(4f);
 
         GUI.SetNextControlName("DeveloperConsoleInput");
+        var previousInput = _currentInput;
         _currentInput = GUILayout.TextField(_currentInput, GUILayout.ExpandWidth(true));
+
+        if (!string.Equals(previousInput, _currentInput, StringComparison.Ordinal))
+        {
+            UpdateSuggestions();
+        }
 
         if (_shouldFocusInput)
         {
@@ -99,7 +140,19 @@ public class DeveloperConsoleView : MonoBehaviour
             _shouldFocusInput = false;
         }
 
+        var inputBeforeHandling = _currentInput;
         HandleKeyboardInput();
+        if (!string.Equals(inputBeforeHandling, _currentInput, StringComparison.Ordinal))
+        {
+            UpdateSuggestions();
+        }
+
+        var inputRect = GUILayoutUtility.GetLastRect();
+        var suggestionHeight = DrawSuggestionPopup(inputRect);
+        if (suggestionHeight > 0f)
+        {
+            GUILayout.Space(suggestionHeight);
+        }
 
         GUILayout.Space(4f);
 
@@ -134,6 +187,7 @@ public class DeveloperConsoleView : MonoBehaviour
         _currentInput = string.Empty;
         _historyIndex = -1;
         _shouldFocusInput = true;
+        ClearSuggestions();
     }
 
     private void HandleKeyboardInput()
@@ -146,6 +200,12 @@ public class DeveloperConsoleView : MonoBehaviour
 
         switch (evt.keyCode)
         {
+            case KeyCode.Tab:
+                if (TryAcceptSuggestion())
+                {
+                    evt.Use();
+                }
+                break;
             case KeyCode.Return:
             case KeyCode.KeypadEnter:
                 SubmitCurrentInput();
@@ -191,6 +251,7 @@ public class DeveloperConsoleView : MonoBehaviour
             // ensure caret at end
             GUI.SetNextControlName("DeveloperConsoleInput");
         }
+        UpdateSuggestions();
     }
 
     private static void DrawLogEntry(DeveloperConsoleLogEntry entry)
@@ -210,4 +271,146 @@ public class DeveloperConsoleView : MonoBehaviour
     {
         _scrollToBottom = true;
     }
+
+    private void UpdateSuggestions()
+    {
+        if (_service == null)
+        {
+            ClearSuggestions();
+            return;
+        }
+
+        var trimmed = (_currentInput ?? string.Empty).TrimStart();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            ClearSuggestions();
+            return;
+        }
+
+        var delimiterIndex = trimmed.IndexOfAny(new[] { ' ', '\t' });
+        var prefix = delimiterIndex >= 0 ? trimmed.Substring(0, delimiterIndex) : trimmed;
+        if (string.IsNullOrEmpty(prefix))
+        {
+            ClearSuggestions();
+            return;
+        }
+
+        var matches = _service.RegisteredCommands
+            .Where(command => MatchesPrefix(command, prefix))
+            .OrderBy(command => command.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var builtIn in BuiltInCommands)
+        {
+            if (MatchesPrefix(builtIn, prefix))
+            {
+                matches.Add(builtIn);
+            }
+        }
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        _suggestions.Clear();
+        foreach (var command in matches)
+        {
+            if (seen.Add(command.Key))
+            {
+                _suggestions.Add(command);
+            }
+
+            if (_suggestions.Count >= 8)
+            {
+                break;
+            }
+        }
+
+        _suggestionIndex = _suggestions.Count > 0 ? 0 : -1;
+    }
+
+    private float DrawSuggestionPopup(Rect inputRect)
+    {
+        if (_suggestions.Count == 0)
+        {
+            return 0f;
+        }
+
+        var visibleCount = Mathf.Min(6, _suggestions.Count);
+        var lineHeight = (GUI.skin.label?.lineHeight ?? 16f) + 4f;
+        var height = visibleCount * lineHeight + 4f;
+
+        var rect = new Rect(inputRect.x, inputRect.yMax + 2f, inputRect.width, height);
+        GUI.BeginGroup(rect, GUIContent.none, GUI.skin.box);
+        for (int i = 0; i < visibleCount; i++)
+        {
+            var item = _suggestions[i];
+            var rowRect = new Rect(4f, 2f + i * lineHeight, rect.width - 8f, lineHeight);
+            if (i == _suggestionIndex)
+            {
+                var highlightRect = new Rect(2f, rowRect.y - 1f, rect.width - 4f, lineHeight + 2f);
+                var previousColor = GUI.color;
+                GUI.color = new Color(0.2f, 0.5f, 0.9f, 0.25f);
+                GUI.DrawTexture(highlightRect, Texture2D.whiteTexture);
+                GUI.color = previousColor;
+            }
+
+            var description = string.IsNullOrEmpty(item.Description) ? string.Empty : $" вЂ” {item.Description}";
+            GUI.Label(rowRect, $"{item.Key}{description}");
+        }
+        GUI.EndGroup();
+        return rect.height + 2f;
+    }
+
+    private bool TryAcceptSuggestion()
+    {
+        if (_suggestions.Count == 0 || _suggestionIndex < 0 || _suggestionIndex >= _suggestions.Count)
+        {
+            return false;
+        }
+
+        var suggestion = _suggestions[_suggestionIndex];
+        var trimmed = (_currentInput ?? string.Empty).TrimStart();
+        var delimiterIndex = trimmed.IndexOfAny(new[] { ' ', '\t' });
+        var remainder = delimiterIndex >= 0 ? trimmed.Substring(delimiterIndex) : string.Empty;
+
+        _currentInput = suggestion.Key;
+        if (string.IsNullOrWhiteSpace(remainder))
+        {
+            _currentInput += " ";
+        }
+        else
+        {
+            _currentInput += remainder;
+        }
+
+        _shouldFocusInput = true;
+        UpdateSuggestions();
+        return true;
+    }
+
+    private void ClearSuggestions()
+    {
+        _suggestions.Clear();
+        _suggestionIndex = -1;
+    }
+
+    private static bool MatchesPrefix(IDeveloperConsoleCommand command, string prefix)
+    {
+        if (command == null || string.IsNullOrEmpty(prefix))
+        {
+            return false;
+        }
+
+        if (command.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (command.Aliases == null)
+        {
+            return false;
+        }
+
+        return command.Aliases.Any(alias => !string.IsNullOrEmpty(alias) && alias.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    }
 }
+
+

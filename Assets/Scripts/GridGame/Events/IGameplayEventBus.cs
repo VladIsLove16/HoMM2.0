@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace Adventure.Infrastructure.Events
+namespace Game.Events
 {
     public interface IGameplayEventBus
     {
         IObservable<MushroomCollectedEvent> MushroomCollectedStream { get; }
         IObservable<BattleCompletedEvent> BattleCompletedStream { get; }
 
-        void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals);
+        void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals);
         void PublishBattleCompleted(bool playerWon);
     }
 }

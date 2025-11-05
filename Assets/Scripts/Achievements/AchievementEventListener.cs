@@ -1,4 +1,4 @@
-using Adventure.Infrastructure.Events;
+using Game.Events;
 using System;
 using System.Linq;
 using UniRx;

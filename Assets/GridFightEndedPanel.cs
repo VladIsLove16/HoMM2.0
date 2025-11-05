@@ -1,5 +1,5 @@
 using System;
-using Adventure.Infrastructure.Events;
+using Game.Events;
 using Adventure.Infrastructure.State;
 using TMPro;
 using UniRx;

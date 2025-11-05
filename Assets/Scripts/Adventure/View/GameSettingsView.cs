@@ -42,6 +42,16 @@ namespace Adventure.Settings.View
                 _vm.SetQualityLevel(i);
                 _vm.ApplyGraphics();
             });
+
+            if (musicSlider != null)
+            {
+                musicSlider.SetValueWithoutNotify(_vm.Audio.MusicVolume);
+            }
+
+            if (effectsSlider != null)
+            {
+                effectsSlider.SetValueWithoutNotify(_vm.Audio.EffectsVolume);
+            }
         }
 
         private void OnMusicSliderChanged(float v)

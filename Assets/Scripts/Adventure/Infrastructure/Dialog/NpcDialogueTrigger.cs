@@ -35,6 +35,11 @@ namespace Adventure.Infrastructure.Dialog
             }
         }
 
+        public void SetLineup(ArmyLineupSO newLineup)
+        {
+            lineup = newLineup;
+        }
+
         public string GetPrompt() => "Talk with " + Name;
     }
 }

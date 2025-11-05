@@ -3,9 +3,9 @@ using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Infrastructure.Interaction;
-using Adventure.Infrastructure.Events;
 using Adventure.Infrastructure.Inventory;
 using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Persistence;
 using Adventure.Infrastructure.State;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Dialog;
@@ -14,6 +14,7 @@ using Adventure.Settings.Model;
 using Adventure.Settings.View;
 using Adventure.Settings.ViewModel;
 using Game.Achievements;
+using Game.Events;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,6 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         BindsVMS();
         BindViews();
         BindTools();
-        
     }
 
     private void BindsModels()
@@ -67,10 +67,10 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     }
     private void BindsVMS()
     {
+        Container.Bind<AudioMixer>().FromInstance(audioMixer).AsSingle();
         Container.BindInterfacesAndSelfTo<MushroomBookViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle();
         Container.BindInterfacesAndSelfTo<GameSettingsViewModel>().AsSingle();
-        Container.Bind<AudioMixer>().FromInstance(audioMixer).AsSingle();
         Container.Bind<MenusCoordinatorViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<Adventure.Infrastructure.Cursor.CursorViewModel>().AsSingle().NonLazy();
     }
@@ -95,6 +95,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     }
     private void BindServices()
     {
+        BindPersistence();
         Container.Bind<PauseController>().AsSingle();
         var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, rowSpacing);
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
@@ -111,6 +112,22 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         {
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
         }
+    }
+
+    private void BindPersistence()
+    {
+        Container.Bind<IJsonFileStorage>().To<JsonFileStorage>().AsSingle().IfNotBound();
+        Container.Bind<IDataRepository<GameSettingsSaveData>>()
+            .To<JsonDataRepository<GameSettingsSaveData>>()
+            .AsSingle()
+            .IfNotBound()
+            .WithArguments("game-settings");
+        Container.Bind<IDataRepository<GameStateSaveData>>()
+            .To<JsonDataRepository<GameStateSaveData>>()
+            .AsSingle()
+            .IfNotBound()
+            .WithArguments("game-state");
+        Container.BindInterfacesTo<AdventureStatePersistenceInitializer>().AsSingle().IfNotBound().NonLazy();
     }
 
     private void BindAchievementServices()

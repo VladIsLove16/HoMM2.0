@@ -1,11 +1,13 @@
-using Adventure.Infrastructure.Events;
+﻿using Game.Events;
+using Adventure.Infrastructure.Persistence;
+using Adventure.Infrastructure.State;
 using Game.Achievements;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class GameLogicMonoInstaller : MonoInstaller
+public class GridGameMonoInstaller : MonoInstaller
 {
     [Header("Gameplay References")]
     [SerializeField] private GameController gameController;
@@ -39,6 +41,7 @@ public class GameLogicMonoInstaller : MonoInstaller
 
     private void BindServices()
     {
+        BindPersistenceServices();
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<UnitPrefabManager>().FromInstance(unitPrefabManager).AsSingle();
@@ -47,6 +50,21 @@ public class GameLogicMonoInstaller : MonoInstaller
         BindAchievementServices();
     }
 
+    private void BindPersistenceServices()
+    {
+        Container.Bind<IJsonFileStorage>().To<JsonFileStorage>().AsSingle().IfNotBound();
+        Container.Bind<IDataRepository<GameSettingsSaveData>>()
+            .To<JsonDataRepository<GameSettingsSaveData>>()
+            .AsSingle()
+            .IfNotBound()
+            .WithArguments("game-settings");
+        Container.Bind<IDataRepository<GameStateSaveData>>()
+            .To<JsonDataRepository<GameStateSaveData>>()
+            .AsSingle()
+            .IfNotBound()
+            .WithArguments("game-state");
+        Container.BindInterfacesTo<AdventureStatePersistenceInitializer>().AsSingle().IfNotBound().NonLazy();
+    }
     private void BindAchievementServices()
     {
         var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
@@ -102,4 +120,7 @@ public class GameLogicMonoInstaller : MonoInstaller
         Container.Bind<GameController>().FromInstance(gameController).AsSingle().NonLazy();
     }
 }
+
+
+
 

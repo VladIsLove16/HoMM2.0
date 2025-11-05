@@ -62,5 +62,26 @@ namespace Adventure.Infrastructure.Inventory
         {
             return "Collect " + UnitType.ToString();
         }
+
+        public void Configure(UnitType type, bool destroyOnPickup = true)
+        {
+            UnitType = type;
+            destroyOnCollect = destroyOnPickup;
+            CanCollect = true;
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+        }
+
+        public void SetDestroyOnCollect(bool value)
+        {
+            destroyOnCollect = value;
+        }
+
+        public void SetUnitType(UnitType type)
+        {
+            UnitType = type;
+        }
     }
 }

@@ -37,8 +37,6 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
-        if (IsInteractionLocked())
-            return;
         if(Log)
             Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
         if (gameViewObject is IHoverable hoverable)
@@ -61,8 +59,6 @@ public class GameView3D : MonoBehaviour
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
-        if (IsInteractionLocked())
-            return;
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         _gameVM?.HandleCellActionPerformed(coords);
     }

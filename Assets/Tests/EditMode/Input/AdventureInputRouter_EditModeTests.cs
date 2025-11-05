@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Adventure.Domain.Inventory;
+using Game.Events;
 using Adventure.Infrastructure.Interaction;
 using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Persistence;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
-using Game.Achievements;
-using Adventure.Infrastructure.Events;
-using UniRx;
 using Adventure.Settings.Model;
+using Game.Achievements;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using NUnit.Framework;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
-
 namespace Tests.EditMode.Input
 {
     [TestFixture]
@@ -28,6 +28,7 @@ namespace Tests.EditMode.Input
         private TestActiveMenu _menu;
         private MenusCoordinatorViewModel _menus;
         private GameSettingsViewModel _settings;
+        private InMemorySettingsRepository _settingsRepository;
         private MushroomBookViewModel _book;
         private UnitDefinitionSOCollection _catalog;
         private PlayerMovementController _movementController;
@@ -35,7 +36,6 @@ namespace Tests.EditMode.Input
         private MovementSettingsSO _movementSettings;
         private GameObject _movementGO;
         private GameObject _interactionGO;
-
         [SetUp]
         public void SetUp()
         {
@@ -43,14 +43,19 @@ namespace Tests.EditMode.Input
             _inputMode = new InputModeStub();
             _menu = new TestActiveMenu(InputMode.Blocked);
             _menus = new MenusCoordinatorViewModel(_inputMode, new[] { _menu });
-            _settings = new GameSettingsViewModel(new GameSettingsModel(), new PauseController(), new AnimationSpeedSettings());
+            _settingsRepository = new InMemorySettingsRepository();
+            _settings = new GameSettingsViewModel(
+                new GameSettingsModel(),
+                new PauseController(),
+                new AnimationSpeedSettings(),
+                new AudioMixer(),
+                _settingsRepository);
             _catalog = ScriptableObject.CreateInstance<UnitDefinitionSOCollection>();
             _book = new MushroomBookViewModel(new MushroomInventoryModel(new List<UnitStackData>()), _catalog, new StubAchievementEventBus());
             _movementController = CreateMovementController(out _movementGO);
             _interactionController = CreateInteractionController(out _interactionGO, _input);
             Time.timeScale = 1f;
         }
-
         [TearDown]
         public void TearDown()
         {
@@ -61,7 +66,6 @@ namespace Tests.EditMode.Input
             _book?.Dispose();
             Time.timeScale = 1f;
         }
-
         [Test]
         public void MoveChanged_WhenMovementAllowed_UpdatesMovementInput()
         {
@@ -69,9 +73,7 @@ namespace Tests.EditMode.Input
             try
             {
                 var expected = new Vector2(0.5f, -1f);
-
                 RaiseMove(_input, expected);
-
                 Assert.That(GetMovementField<Vector2>("_moveInput"), Is.EqualTo(expected));
             }
             finally
@@ -79,7 +81,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void MoveChanged_WhenMovementBlocked_DoesNotUpdate()
         {
@@ -88,7 +89,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseMove(_input, new Vector2(1f, 0f));
-
                 Assert.That(GetMovementField<Vector2>("_moveInput"), Is.EqualTo(Vector2.zero));
             }
             finally
@@ -96,7 +96,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void LookChanged_WhenLookAllowed_AccumulatesDelta()
         {
@@ -104,9 +103,7 @@ namespace Tests.EditMode.Input
             try
             {
                 var delta = new Vector2(-2f, 4f);
-
                 RaiseLook(_input, delta);
-
                 Assert.That(GetMovementField<Vector2>("_pendingLookInput"), Is.EqualTo(delta));
             }
             finally
@@ -114,7 +111,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void LookChanged_WhenLookBlocked_DoesNothing()
         {
@@ -123,7 +119,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseLook(_input, new Vector2(3f, 1f));
-
                 Assert.That(GetMovementField<Vector2>("_pendingLookInput"), Is.EqualTo(Vector2.zero));
             }
             finally
@@ -131,7 +126,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void SprintChanged_WhenMovementAllowed_UpdatesSprintFlag()
         {
@@ -139,7 +133,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseSprint(_input, true);
-
                 Assert.That(GetMovementField<bool>("_sprintInput"), Is.True);
             }
             finally
@@ -147,7 +140,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void SprintChanged_WhenMovementBlocked_DoesNothing()
         {
@@ -156,7 +148,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseSprint(_input, true);
-
                 Assert.That(GetMovementField<bool>("_sprintInput"), Is.False);
             }
             finally
@@ -164,7 +155,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void Interact_WhenMovementAllowed_InvokesController()
         {
@@ -173,7 +163,6 @@ namespace Tests.EditMode.Input
             {
                 LogAssert.Expect(LogType.Log, "interaction performed");
                 LogAssert.Expect(LogType.Warning, "PlayerInteractionController not enabled!");
-
                 RaiseInteract(_input);
             }
             finally
@@ -181,7 +170,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void Interact_WhenMovementBlocked_SuppressesInteraction()
         {
@@ -190,7 +178,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseInteract(_input);
-
                 LogAssert.NoUnexpectedReceived();
             }
             finally
@@ -198,7 +185,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void OpenSettings_WhenMenuOpen_ClosesFirstMenu()
         {
@@ -206,9 +192,7 @@ namespace Tests.EditMode.Input
             try
             {
                 _menu.Open();
-
                 RaiseOpenSettings(_input);
-
                 Assert.That(_menu.CloseCount, Is.EqualTo(1));
                 Assert.That(_settings.IsOpen.Value, Is.False);
             }
@@ -217,7 +201,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void OpenSettings_WhenNoMenuOpen_TogglesSettingsMenu()
         {
@@ -225,7 +208,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseOpenSettings(_input);
-
                 Assert.That(_settings.IsOpen.Value, Is.True);
                 Assert.That(Time.timeScale, Is.EqualTo(0f));
             }
@@ -234,7 +216,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void OpenMushroomBook_TogglesBookMenu()
         {
@@ -242,7 +223,6 @@ namespace Tests.EditMode.Input
             try
             {
                 RaiseOpenBook(_input);
-
                 Assert.That(_book.IsOpen.Value, Is.True);
             }
             finally
@@ -250,7 +230,6 @@ namespace Tests.EditMode.Input
                 router.Dispose();
             }
         }
-
         [Test]
         public void Dispose_UnsubscribesFromAdventureInput()
         {
@@ -259,12 +238,9 @@ namespace Tests.EditMode.Input
             {
                 RaiseMove(_input, new Vector2(1f, 1f));
                 _movementController.ResetExternalInput();
-
                 router.Dispose();
                 router = null;
-
                 RaiseMove(_input, new Vector2(0.25f, 0.75f));
-
                 Assert.That(GetMovementField<Vector2>("_moveInput"), Is.EqualTo(Vector2.zero));
             }
             finally
@@ -272,7 +248,6 @@ namespace Tests.EditMode.Input
                 router?.Dispose();
             }
         }
-
         private AdventureInputRouter CreateRouter()
         {
             var router = new AdventureInputRouter();
@@ -286,7 +261,6 @@ namespace Tests.EditMode.Input
             InvokeMethod(router, "Construct");
             return router;
         }
-
         private PlayerMovementController CreateMovementController(out GameObject go)
         {
             go = new GameObject("MovementController");
@@ -299,7 +273,6 @@ namespace Tests.EditMode.Input
             InvokeMethod(controller, "Awake");
             return controller;
         }
-
         private static PlayerInteractionController CreateInteractionController(out GameObject go, AdventureInput input)
         {
             go = new GameObject("InteractionController");
@@ -308,49 +281,37 @@ namespace Tests.EditMode.Input
             SetField(controller, "playerInput", input);
             return controller;
         }
-
         private T GetMovementField<T>(string name)
         {
             return (T)_movementController.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(_movementController);
         }
-
         private static void SetField(object target, string name, object value)
         {
             target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(target, value);
         }
-
         private static void InvokeMethod(object target, string name)
         {
             target.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)!
                 .Invoke(target, null);
         }
-
         private static void RaiseMove(AdventureInput input, Vector2 value) => Raise(input, "MoveChanged", value);
-
         private static void RaiseLook(AdventureInput input, Vector2 value) => Raise(input, "LookChanged", value);
-
         private static void RaiseSprint(AdventureInput input, bool value) => Raise(input, "SprintChanged", value);
-
         private static void RaiseInteract(AdventureInput input) => Raise(input, "InteractPerformed");
-
         private static void RaiseOpenSettings(AdventureInput input) => Raise(input, "OpenSettingsPerformed");
-
         private static void RaiseOpenBook(AdventureInput input) => Raise(input, "OpenMushroomBookPerformed");
-
         private static void Raise<T>(AdventureInput input, string fieldName, T arg)
         {
             var field = typeof(AdventureInput).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
             var action = field?.GetValue(input) as Action<T>;
             action?.Invoke(arg);
         }
-
         private static void Raise(AdventureInput input, string fieldName)
         {
             var field = typeof(AdventureInput).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
             var action = field?.GetValue(input) as Action;
             action?.Invoke();
         }
-
         private sealed class InputModeStub : IInputModeVM
         {
             public InputMode Current { get; private set; } = InputMode.Enabled;
@@ -358,13 +319,11 @@ namespace Tests.EditMode.Input
             public bool CanLook { get; set; } = true;
             public bool IsCursorVisible => false;
             public event Action<InputMode> OnModeChanged;
-
             public void PushMode(InputMode mode)
             {
                 Current = mode;
                 OnModeChanged?.Invoke(Current);
             }
-
             public void PopMode(InputMode mode)
             {
                 if (Current == mode)
@@ -374,56 +333,55 @@ namespace Tests.EditMode.Input
                 }
             }
         }
-
         private sealed class TestActiveMenu : IActiveMenu
         {
             private readonly ReactiveProperty<bool> _isOpen = new(false);
-
             public TestActiveMenu(InputMode inputMode)
             {
                 InputMode = inputMode;
             }
-
             public int CloseCount { get; private set; }
             public InputMode InputMode { get; }
             public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
-
             public void Open()
             {
                 _isOpen.SetValueAndForceNotify(true);
             }
-
             public void Close()
             {
                 CloseCount++;
                 _isOpen.SetValueAndForceNotify(false);
             }
         }
-
         private sealed class StubAchievementEventBus : IGameplayEventBus
         {
             public List<MushroomCollectedEvent> Collected { get; } = new();
             public List<BattleCompletedEvent> Battles { get; } = new();
-
             public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
             public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
-
-            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+            public void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals)
             {
-                Collected.Add(new MushroomCollectedEvent(type, totals));
+                                Collected.Add(new MushroomCollectedEvent(itemId, totals));
             }
-
             public void PublishBattleCompleted(bool playerWon)
             {
                 Battles.Add(new BattleCompletedEvent(playerWon));
             }
         }
+        private sealed class InMemorySettingsRepository : IDataRepository<GameSettingsSaveData>
+        {
+            public GameSettingsSaveData Data = new GameSettingsSaveData();
+            public GameSettingsSaveData Load() => Data;
+            public void Save(GameSettingsSaveData data)
+            {
+                Data = data ?? new GameSettingsSaveData();
+            }
+            public void Delete()
+            {
+                Data = new GameSettingsSaveData();
+            }
+        }
     }
 }
-
-
-
-
-
 
 

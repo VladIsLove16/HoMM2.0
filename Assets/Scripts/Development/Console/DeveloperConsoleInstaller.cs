@@ -12,6 +12,8 @@ public class DeveloperConsoleInstaller : MonoInstaller
     public override void InstallBindings()
     {
         BindCommands();
+        Container.Bind<AdventureCommander>().AsSingle();
+        Container.Bind<GridCommander>().AsSingle();
         Container.BindInterfacesAndSelfTo<DeveloperConsoleService>().AsSingle();
 
         if (consoleView != null)
@@ -30,5 +32,11 @@ public class DeveloperConsoleInstaller : MonoInstaller
         Container.Bind<IDeveloperConsoleCommand>().To<StartBattleConsoleCommand>().AsTransient();
         Container.Bind<IDeveloperConsoleCommand>().To<EndTurnConsoleCommand>().AsTransient();
         Container.Bind<IDeveloperConsoleCommand>().To<InspectCellConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<AdventureCreateNpcConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<AdventureAddNpcArmyConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<AdventureAddPlayerArmyConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<AdventureSpawnFungusConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<GridSpawnFungusConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<GridKillFungusConsoleCommand>().AsTransient();
     }
 }

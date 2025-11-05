@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 
-namespace Adventure.Infrastructure.Events
+namespace Game.Events
 {
     public sealed class GameplayEventBus : IGameplayEventBus
     {
@@ -12,9 +12,9 @@ namespace Adventure.Infrastructure.Events
         public IObservable<MushroomCollectedEvent> MushroomCollectedStream => _mushroomCollected;
         public IObservable<BattleCompletedEvent> BattleCompletedStream => _battleCompleted;
 
-        public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+        public void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals)
         {
-            _mushroomCollected.OnNext(new MushroomCollectedEvent(type, totals));
+            _mushroomCollected.OnNext(new MushroomCollectedEvent(itemId, totals));
         }
 
         public void PublishBattleCompleted(bool playerWon)

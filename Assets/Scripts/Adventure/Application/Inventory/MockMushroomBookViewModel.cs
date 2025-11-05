@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Adventure.Integration.Battle;
-using Adventure.Infrastructure.Events;
+using Game.Events;
 
 [CreateAssetMenu(menuName = "MockMushroomBook/MockMushroomBookViewModel", fileName = "MockMushroomBookViewModel")]
 public class MockMushroomBookViewModel : ScriptableObject 
@@ -28,6 +28,7 @@ public class MockMushroomBookViewModel : ScriptableObject
         mushroomBookViewModel.GoToPage(0);
     }
 }
+
 
 
 

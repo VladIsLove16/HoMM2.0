@@ -7,7 +7,7 @@ using System.Linq;
 using UniRx;
 using UnityEngine;
 using Zenject;
-using Adventure.Infrastructure.Events;
+using Game.Events;
 
 namespace Adventure.Presentation.Mushroom
 {
@@ -84,7 +84,8 @@ namespace Adventure.Presentation.Mushroom
                 return;
 
             _mushroomInventoryModel.Add(type);
-            _gameplayEvents.PublishMushroomCollected(type, _mushroomInventoryModel.Items);
+                        var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
+            _gameplayEvents.PublishMushroomCollected(type.ToString(), totals);
             RebuildEntries();
         }
         public void SetPageCapacity(int count)
@@ -249,6 +250,8 @@ namespace Adventure.Presentation.Mushroom
 
     }
 }
+
+
 
 
 

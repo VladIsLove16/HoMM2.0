@@ -1,4 +1,4 @@
-﻿using Adventure.Infrastructure.Events;
+﻿using Game.Events;
 using UniRx;
 using System;
 using System.Collections.Generic;
@@ -15,9 +15,9 @@ namespace Tests.EditMode.MushroomBook
             public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
             public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
 
-            public void PublishMushroomCollected(UnitType type, IReadOnlyDictionary<UnitType, int> totals)
+            public void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals)
             {
-                Collected.Add(new MushroomCollectedEvent(type, totals));
+                Collected.Add(new MushroomCollectedEvent(itemId, totals));
             }
 
             public void PublishBattleCompleted(bool playerWon)
@@ -27,6 +27,7 @@ namespace Tests.EditMode.MushroomBook
         }
     }
 }
+
 
 
 

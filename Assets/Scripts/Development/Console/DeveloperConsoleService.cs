@@ -19,6 +19,8 @@ public class DeveloperConsoleService : IDeveloperConsoleOutput
     private readonly IGameCommandExecutor _commandExecutor;
     private readonly ITurnService _turnService;
     private readonly ActionResolver _actionResolver;
+    private readonly AdventureCommander _adventureCommander;
+    private readonly GridCommander _gridCommander;
 
     public event Action LogUpdated;
 
@@ -34,13 +36,17 @@ public class DeveloperConsoleService : IDeveloperConsoleOutput
         GameViewModel gameViewModel,
         IGameCommandExecutor commandExecutor,
         ITurnService turnService,
-        ActionResolver actionResolver)
+        ActionResolver actionResolver,
+        AdventureCommander adventureCommander = null,
+        GridCommander gridCommander = null)
     {
         _gameModel = gameModel ?? throw new ArgumentNullException(nameof(gameModel));
         _gameViewModel = gameViewModel ?? throw new ArgumentNullException(nameof(gameViewModel));
         _commandExecutor = commandExecutor ?? throw new ArgumentNullException(nameof(commandExecutor));
         _turnService = turnService ?? throw new ArgumentNullException(nameof(turnService));
         _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
+        _adventureCommander = adventureCommander;
+        _gridCommander = gridCommander;
 
         if (commands != null)
         {
@@ -50,7 +56,7 @@ public class DeveloperConsoleService : IDeveloperConsoleOutput
             }
         }
 
-        AppendLine("Developer console ready. Type 'help' to list commands.");
+        AppendLine("Консоль разработчика готова. Введите 'help' для отображения доступных команд.");
     }
 
     public void RegisterCommand(IDeveloperConsoleCommand command)
@@ -147,7 +153,9 @@ public class DeveloperConsoleService : IDeveloperConsoleOutput
                 _gameViewModel,
                 _commandExecutor,
                 _turnService,
-                _actionResolver);
+                _actionResolver,
+                _adventureCommander,
+                _gridCommander);
             command.Execute(context, args, this);
         }
         catch (Exception ex)

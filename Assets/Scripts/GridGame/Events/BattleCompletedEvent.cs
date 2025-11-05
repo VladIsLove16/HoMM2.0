@@ -1,4 +1,4 @@
-namespace Adventure.Infrastructure.Events
+namespace Game.Events
 {
     public readonly struct BattleCompletedEvent
     {

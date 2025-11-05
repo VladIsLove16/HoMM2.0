@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Adventure.Integration.Battle;
 using Game.Achievements;
-using Adventure.Infrastructure.Events;
+using Game.Events;
 using NUnit.Framework;
 using UniRx;
 
@@ -27,10 +26,10 @@ namespace Tests.EditMode.Achievements
             var listener = new AchievementEventListener(bus, service);
             listener.Initialize();
 
-            bus.PublishMushroomCollected(UnitType.Witch, new Dictionary<UnitType, int> { { UnitType.Witch, 1 } });
+            bus.PublishMushroomCollected("Witch", new Dictionary<string, int> { { "Witch", 1 } });
             Assert.That(service.IsUnlocked(AchievementIds.FirstMushroom), Is.True);
 
-            bus.PublishMushroomCollected(UnitType.Witch, new Dictionary<UnitType, int> { { UnitType.Witch, 9 }, { UnitType.Archer, 1 } });
+            bus.PublishMushroomCollected("Witch", new Dictionary<string, int> { { "Witch", 9 }, { "Archer", 1 } });
             Assert.That(service.IsUnlocked(AchievementIds.MushroomCollector), Is.True);
 
             listener.Dispose();
@@ -101,4 +100,5 @@ namespace Tests.EditMode.Achievements
         }
     }
 }
+
 

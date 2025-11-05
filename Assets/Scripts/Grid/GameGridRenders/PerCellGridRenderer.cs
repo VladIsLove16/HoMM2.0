@@ -27,9 +27,17 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     [SerializeField] private float padding = 0.4f;
     [SerializeField] List<CellMaterial> Materials;
     [Inject] private IGridViewModel _vm;
+    [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private Grid<CellView> grid;
     private Dictionary<CellState, CellMaterial> materialsDict = new();
     private Dictionary<CellState, List<Vector2Int>> _cellStates = new();
+    private readonly Dictionary<CellState, HashSet<Vector2Int>> _hiddenStates = new();
+    private static readonly HashSet<CellState> StatesHiddenWhileLocked = new()
+    {
+        CellState.reachableCell,
+        CellState.accessibleRoutePoint,
+        CellState.inaccessibleRoutePoint
+    };
     private void Awake()
     {
         if (Materials == null)
@@ -41,18 +49,38 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
             materialsDict = Materials.ToDictionary(x => x.CellState);
         }
     }
+
+    private void OnEnable()
+    {
+        if (_animationGate != null)
+        {
+            _animationGate.LockStateChanged += OnAnimationLockStateChanged;
+            if (_animationGate.IsLocked)
+            {
+                SuppressVisibleStates();
+            }
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_animationGate != null)
+        {
+            _animationGate.LockStateChanged -= OnAnimationLockStateChanged;
+        }
+    }
     public void Clear()
     {
-        if (grid == null)
-            return;
-        
-        foreach (CellView child in grid.GetGridObjects())
+        if (grid != null)
         {
-            GameObject.Destroy(child.gameObject);
+            foreach (CellView child in grid.GetGridObjects())
+            {
+                GameObject.Destroy(child.gameObject);
+            }
         }
-        if (_cellStates == null)
-            return;
+
         _cellStates.Clear();
+        _hiddenStates.Clear();
     }
     [Button]
     public void Render()
@@ -175,20 +203,33 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     }
     public void RemoveStates(CellState state)
     {
+        HashSet<Vector2Int> coords = new HashSet<Vector2Int>();
+        if (_cellStates.TryGetValue(state, out var visible))
+        {
+            coords.UnionWith(visible);
+        }
+        if (_hiddenStates.TryGetValue(state, out var hidden))
+        {
+            coords.UnionWith(hidden);
+        }
 
-        if (!_cellStates.ContainsKey(state))
+        if (coords.Count == 0)
         {
             return;
         }
-        var states = _cellStates[state].ToList();
-        foreach (var c in states)
+
+        foreach (var c in coords)
         {
             RemoveState(c, state);
         }
     }
     public void ClearAllStates()
     {
-        var keys = _cellStates.Keys.ToList();
+        var keys = _cellStates.Keys
+            .Concat(_hiddenStates.Keys)
+            .Distinct()
+            .ToList();
+
         foreach (var k in keys)
         {
             RemoveStates(k);
@@ -196,31 +237,148 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     }
     public void AddState(Vector2Int coords, CellState state)
     {
+        if (ShouldHideState(state) && IsControlLocked())
+        {
+            CacheHiddenState(coords, state);
+            return;
+        }
+
         if (TryGetCellView(coords, out CellView cellView))
         {
             cellView.AddState(state);
         }
         else
             throw new Exception(" no value for " + state);
+
         if (!_cellStates.ContainsKey(state))
         {
             _cellStates[state] = new List<Vector2Int>();
         }
-        _cellStates[state].Add(coords);
+        if (!_cellStates[state].Contains(coords))
+        {
+            _cellStates[state].Add(coords);
+        }
+
+        RemoveHiddenState(coords, state);
     }
 
     public void RemoveState(Vector2Int coords, CellState state)
     {
-        if(TryGetCellView(coords,out CellView cellView))
+        bool wasVisible = _cellStates.TryGetValue(state, out var visibleList) && visibleList.Contains(coords);
+        if (wasVisible && TryGetCellView(coords, out CellView cellView))
         {
             cellView.RemoveState(state);
         }
-        _cellStates[state].Remove(coords);
+
+        if (wasVisible)
+        {
+            visibleList.Remove(coords);
+            if (visibleList.Count == 0)
+            {
+                _cellStates.Remove(state);
+            }
+        }
+
+        if (_hiddenStates.TryGetValue(state, out var hidden))
+        {
+            hidden.Remove(coords);
+            if (hidden.Count == 0)
+            {
+                _hiddenStates.Remove(state);
+            }
+        }
     }
 
     public List<Vector2Int> GetCells( CellState state)
     {
-        return _cellStates[state];
+        List<Vector2Int> result = new List<Vector2Int>();
+        if (_cellStates.TryGetValue(state, out var visible))
+        {
+            result.AddRange(visible);
+        }
+        if (_hiddenStates.TryGetValue(state, out var hidden))
+        {
+            result.AddRange(hidden);
+        }
+
+        return result;
+    }
+
+    private bool ShouldHideState(CellState state) => StatesHiddenWhileLocked.Contains(state);
+
+    private bool IsControlLocked() => _animationGate != null && _animationGate.IsLocked;
+
+    private void CacheHiddenState(Vector2Int coords, CellState state)
+    {
+        if (!_hiddenStates.TryGetValue(state, out var set))
+        {
+            set = new HashSet<Vector2Int>();
+            _hiddenStates[state] = set;
+        }
+
+        set.Add(coords);
+    }
+
+    private void RemoveHiddenState(Vector2Int coords, CellState state)
+    {
+        if (_hiddenStates.TryGetValue(state, out var set))
+        {
+            set.Remove(coords);
+            if (set.Count == 0)
+            {
+                _hiddenStates.Remove(state);
+            }
+        }
+    }
+
+    private void OnAnimationLockStateChanged(bool isLocked)
+    {
+        if (isLocked)
+        {
+            SuppressVisibleStates();
+        }
+        else
+        {
+            RestoreHiddenStates();
+        }
+    }
+
+    private void SuppressVisibleStates()
+    {
+        foreach (var state in StatesHiddenWhileLocked)
+        {
+            if (!_cellStates.TryGetValue(state, out var coords))
+                continue;
+
+            foreach (var coord in coords.ToList())
+            {
+                CacheHiddenState(coord, state);
+                if (TryGetCellView(coord, out var cellView))
+                {
+                    cellView.RemoveState(state);
+                }
+            }
+
+            _cellStates.Remove(state);
+        }
+    }
+
+    private void RestoreHiddenStates()
+    {
+        var snapshot = _hiddenStates
+            .Where(kvp => StatesHiddenWhileLocked.Contains(kvp.Key))
+            .Select(kvp => (State: kvp.Key, Coords: kvp.Value.ToList()))
+            .ToList();
+
+        foreach (var entry in snapshot)
+        {
+            foreach (var coord in entry.Coords)
+            {
+                AddState(coord, entry.State);
+            }
+
+            _hiddenStates.Remove(entry.State);
+        }
     }
     private bool TryGetCellView(Vector2Int coords, out CellView cellView)
     {
