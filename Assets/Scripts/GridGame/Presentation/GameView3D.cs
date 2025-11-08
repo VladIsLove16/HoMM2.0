@@ -20,14 +20,21 @@ public class GameView3D : MonoBehaviour
     public void SetWorldToCellProvider(IWorldToCellProvider provider) => _worldToCellProvider = provider;
 
     [Inject]
-    public void Construct(GameViewModel gameVM, UnitViewFactory unitViewFactory)
+    public void Construct(
+        [InjectOptional] GameViewModel gameVM,
+        [InjectOptional] UnitViewFactory unitViewFactory)
     {
-        Debug.Log("GameView3D inject");
-
         _gameVM = gameVM;
         _factory = unitViewFactory;
 
-        gameVM.UnitSpawned += OnGameVM_UnitSpawned;
+        if (_gameVM == null || _factory == null)
+        {
+            Debug.LogError($"[GameView3D] Missing dependencies. GameViewModel: {_gameVM != null}, UnitViewFactory: {_factory != null}. Component disabled.", this);
+            enabled = false;
+            return;
+        }
+
+        _gameVM.UnitSpawned += OnGameVM_UnitSpawned;
     }
     private void OnGameVM_UnitSpawned(UnitViewModel model)
     {

@@ -1,14 +1,13 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using Zenject;
-[RequireComponent(typeof(Animator))]
 public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObject
 {
     private CompositeDisposable _disposables = new();
-    [SerializeField]private Animator _animator;
+    [SerializeField] private UnitAnimatorController _animationController;
 
     [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
@@ -35,12 +34,12 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             Debug.LogWarning("unitViewUI null ref");
             return;
         }
-        if (_animator == null)
+        if (_animationController == null)
         {
-            _animator = GetComponent<Animator>();
-            if (_animator == null)
+            _animationController = GetComponent<UnitAnimatorController>();
+            if (_animationController == null)
             {
-                Debug.LogWarning("Animator component not found");
+                Debug.LogError("[UnitView3D] UnitAnimatorController component not found");
                 return;
             }
         }
@@ -89,7 +88,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     }
     
     /// <summary>
-    /// Внутренний метод для выполнения перемещения (вызывается из сетевых команд)
+    /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
     /// </summary>
     private void ExecuteMove(List<Vector3> route)
     {
@@ -99,7 +98,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     
     private void HandleAttackCommand(ulong targetUnitId)
     {
-        // Здесь будет логика атаки
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         LogDebugEvent($"Unit attacking target: {targetUnitId}");
         // TODO: Implement attack logic
     }
@@ -231,24 +230,10 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
     public void Play(UnitAnimationState state)
     {
-        if (_animator == null) return;
+        if (_animationController == null) return;
         ApplyAnimationSpeed();
-
-        string trigger = state switch
-        {
-            UnitAnimationState.Idle => "Idle",
-            UnitAnimationState.Walk => "Walk",
-            UnitAnimationState.Attack => "DealDamage",
-            UnitAnimationState.Hit => "Hit",
-            UnitAnimationState.Die => "Die",
-            _ => ""
-        };
-
-        if (!string.IsNullOrEmpty(trigger))
-        {
-            _animator.SetTrigger(trigger);
-            LogDebugEvent($"Animation Trigger Set: {trigger}");
-        }
+        _animationController.PlayAnimation(state);
+        LogDebugEvent($"Animation Trigger Set: {state}");
     }
 
     public void Dispose()
@@ -315,10 +300,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
     private void ApplyAnimationSpeed()
     {
-        if (_animator == null)
+        if (_animationController == null)
             return;
         var multiplier = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
-        _animator.speed = _animationSpeedSettings != null && _animationSpeedSettings.IsInstant ? 100f : multiplier;
+        var isInstant = _animationSpeedSettings?.IsInstant ?? false;
+        _animationController.SetPlaybackSpeed(multiplier, isInstant);
     }
 
     private float ScaleDuration(float baseDuration)

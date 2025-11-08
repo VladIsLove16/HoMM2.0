@@ -15,6 +15,6 @@ namespace Adventure.Infrastructure.Persistence
 
         public bool Fullscreen = true;
 
-        public AnimationSpeedMode AnimationSpeed = AnimationSpeedMode.Normal;
+        public AnimationSpeedMode AnimationSpeed = AnimationSpeedMode.Fast;
     }
 }

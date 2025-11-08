@@ -9,11 +9,14 @@ public class GridCursorViewModel : ICursorViewModel
 
     public IReadOnlyReactiveProperty<bool> IsLocked => _isLocked;
     private readonly ReactiveProperty<bool> _isLocked = new(true);
-    [Inject] private ActionResolver _actionResolver;
+    private ActionResolver _actionResolver;
+
     [Inject]
-    void Construct()
+    void Construct(ActionResolver actionResolver)
     {
+        _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
         _actionResolver.ActionResolved += OnActionPreviewChanged;
+        _actionResolver.ActionNotResolved += OnActionNotResolved;
     }
 
     private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
@@ -33,6 +36,14 @@ public class GridCursorViewModel : ICursorViewModel
         _isLocked.Value = false;
         _cursorState.Value = visual;
     }
+    private void OnActionNotResolved()
+    {
+        if (_isLocked.Value)
+            return;
+
+        _cursorState.SetValueAndForceNotify(CursorVisualState.NotAvailable);
+    }
+
     private CursorVisualState GetCursorStateByActionHandler(IActionHandler actionHandler)
     {
         switch (actionHandler.ActionType)

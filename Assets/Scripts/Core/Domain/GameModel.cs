@@ -52,7 +52,6 @@ public class GameModel
         //unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
         var unitModelCreatedParams = new UnitModelCreatedParams(unit);
         GameChange_UnitSpawned?.Invoke(unitModelCreatedParams);
-        Debug.Log("unit spawned " + new Vector2Int(spawnParams.X, spawnParams.Y));
         return new(true);
     }
 

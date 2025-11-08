@@ -8,9 +8,17 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     private GameViewModel _gameViewModel;
 
     [Inject]
-    public void Construct(GameViewModel gameViewModel)
+    public void Construct([InjectOptional] GameViewModel gameViewModel)
     {
         _gameViewModel = gameViewModel;
+        if (_gameViewModel == null)
+        {
+            Debug.LogError("[AttackActionPanel] Missing GameViewModel binding. Panel disabled.", this);
+            enabled = false;
+            if (panelRoot != null) panelRoot.SetActive(false);
+            return;
+        }
+
         _gameViewModel.DamageContextPreviewChanged += OnActionPreviewChanged;
     }
 

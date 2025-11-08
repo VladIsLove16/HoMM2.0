@@ -173,6 +173,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Warrok
       objectReference: {fileID: 0}
+    - target: {fileID: 1096695464039504049, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 5465940246521907071, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.26
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -186,6 +194,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3227793144902242822}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8780794816447475737}
   m_SourcePrefab: {fileID: 100100000, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
 --- !u!1 &5985448834381532279 stripped
 GameObject:
@@ -204,6 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _animationController: {fileID: 0}
   unitViewUI: {fileID: 808697485568916980}
   animationMoveSpeed: 3
   meshes:
@@ -231,6 +243,24 @@ CapsuleCollider:
   m_Height: 2.84
   m_Direction: 1
   m_Center: {x: 0, y: 1.05, z: 0}
+--- !u!114 &8780794816447475737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5985448834381532279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ba7f811bc493a43984e5ee4b9020af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  idleTrigger: Idle
+  walkTrigger: Walk
+  attackTrigger: DealDamage
+  hitTrigger: Hit
+  dieTrigger: Die
 --- !u!4 &6366760203574449869 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}

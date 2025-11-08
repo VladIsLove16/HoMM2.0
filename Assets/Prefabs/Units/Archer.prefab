@@ -59,7 +59,7 @@ PrefabInstance:
     - target: {fileID: 592890220700019360, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
+      objectReference: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
     - target: {fileID: 919132149155446097, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
       propertyPath: m_Name
       value: Archer
@@ -71,7 +71,7 @@ PrefabInstance:
     - target: {fileID: 3707983018852226925, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
+      objectReference: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
     - target: {fileID: 4936884950917866777, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -89,6 +89,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3335139802788012367}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3845077051129859868}
   m_SourcePrefab: {fileID: 100100000, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
 --- !u!1 &160728551508680894 stripped
 GameObject:
@@ -107,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 0}
+  _animationController: {fileID: 0}
   unitViewUI: {fileID: 6709846972658488106}
   animationMoveSpeed: 3
   meshes:
@@ -136,6 +139,25 @@ CapsuleCollider:
   m_Height: 1.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.78, z: 0}
+--- !u!114 &3845077051129859868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 160728551508680894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ba7f811bc493a43984e5ee4b9020af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  idleTrigger: Idle
+  walkTrigger: Walk
+  attackTrigger: DealDamage
+  hitTrigger: Hit
+  dieTrigger: Die
+  animationTrigger: 0
 --- !u!137 &486444380897261391 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 592890220700019360, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
@@ -159,6 +181,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 680278188588300804}
     m_Modifications:
+    - target: {fileID: 2765759853331752386, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_text
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -205,11 +231,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.8870109
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.46174863
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalRotation.y
@@ -242,6 +268,10 @@ PrefabInstance:
     - target: {fileID: 5747227902412815696, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8411989273149192596, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_text
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8504360353631629215, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_Name

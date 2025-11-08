@@ -32,6 +32,11 @@ public class GridGameMonoInstaller : MonoInstaller
         BindModels();
         BindViewModels();
         BindGameController();
+        BindView();
+    }
+
+    private void BindView()
+    {
         if (_presentationInstaller is IGamePresentationInstaller gamePresentationInstaller)
             gamePresentationInstaller.Install(Container);
         else
@@ -49,7 +54,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
-        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle();
+        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle().WithArguments(AnimationSpeedMode.Fast);
         Container.Bind<EventBus>().AsSingle();
         Container.Bind<PauseController>().AsSingle();
         Container.Bind<AudioMixer>().AsSingle();
@@ -128,9 +133,9 @@ public class GridGameMonoInstaller : MonoInstaller
 
     private void BindViewModels()
     {
-        Container.BindInterfacesTo<TurnStateViewModel>().AsSingle().NonLazy();
-        Container.BindInterfacesTo<GridViewModel>().AsSingle().NonLazy();
-        Container.BindInterfacesTo<GameViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<TurnStateViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<GridViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();
         Container.Bind<GridCursorViewModel>().AsSingle().NonLazy();

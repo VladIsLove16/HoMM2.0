@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4130385944054562711
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8111639078677853470}
+  - component: {fileID: 8043361845219645272}
+  m_Layer: 0
+  m_Name: PerCellGridRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8111639078677853470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4130385944054562711}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8043361845219645272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4130385944054562711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705821aaa1643834188903b532ce45a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 8007041704186792435, guid: 03f33b930472f244bae4ae4f515dd136, type: 3}
+  parent: {fileID: 4130385944054562711}
+  ySize: 1
+  cellSize: 3
+  padding: 0.4
+  Materials:
+  - CellState: 0
+    Material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+  - CellState: 1
+    Material: {fileID: 2100000, guid: 8d59494cf0bd6664f8bbab2f50e22a22, type: 2}
+  - CellState: 2
+    Material: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
+  - CellState: 3
+    Material: {fileID: 2100000, guid: f12defa7b0f54b4438a8b031dfeec605, type: 2}
+  - CellState: 4
+    Material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+  - CellState: 5
+    Material: {fileID: -523080999425300915, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
+  - CellState: 6
+    Material: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - CellState: 7
+    Material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+  - CellState: 8
+    Material: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
+  - CellState: 9
+    Material: {fileID: 2100000, guid: 56da8c67f17f42d41bfda2cdbb278c87, type: 2}
+  - CellState: 10
+    Material: {fileID: 2100000, guid: 8531f0db72cb14d45b68cafc0a668240, type: 2}

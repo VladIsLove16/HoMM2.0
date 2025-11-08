@@ -115,7 +115,6 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
         _vm.PreviewChanged += OnPreviewChanged;
         _vm.PreviewUpdated += OnPreviewUpdated;
         _vm.GridInited+=OnVM_GridInited;
-        Debug.Log("binded");
     }
 
     public void Unbind(IGridViewModel viewModel)
@@ -131,7 +130,6 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     }
     private void OnPreviewUpdated(PreviewResult result)
     {
-        Debug.Log("preview changed");
         string previewString = string.Empty;
         Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
         foreach (var stateCells in cells)
@@ -145,11 +143,9 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
             }
             previewString += stateCells.Key + " " + coordsString;
         }
-        Debug.Log("new preview " + previewString);
     }
     private void OnPreviewChanged(PreviewResult result)
     {
-        Debug.Log("preview changed");
         string previewString = string.Empty;
         Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
         ClearAllStates();
@@ -163,7 +159,6 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
             }
             previewString += stateCells.Key + " " + coordsString;
         }
-        Debug.Log("new preview " + previewString);
     }
 
     public bool ToGrid(Vector3 position,out Vector2Int coords)
@@ -178,7 +173,6 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
     public bool ToGridPair(Vector3 position,out KeyValuePair<Vector2Int, Vector2Int> coordPair)
     {
         Vector2Int main = grid.GetXY(position);
-        UnityLogger.Log("ToGridPair( ) " + position + "  res: " + main);
         if (!grid.IsInBounds(main))
         {
             coordPair = default;

@@ -51,6 +51,10 @@ public class GameViewModel : IDisposable, IGridViewModel
 
         _data[CellState.hovered] = new List<Vector2Int> { coords.Key };
         var previewResult = new PreviewResult();
+        if (_data.TryGetValue(CellState.reachableCell, out var reachableCells) && reachableCells != null && reachableCells.Count > 0)
+        {
+            previewResult.Add(CellState.reachableCell, reachableCells);
+        }
         previewResult.Add(CellState.hovered, new[] { coords.Key });
 
         if (_turnState.IsMyTurn)
@@ -73,7 +77,6 @@ public class GameViewModel : IDisposable, IGridViewModel
             }
             else
             {
-                previewResult.Add(CellState.reachableCell, Array.Empty<Vector2Int>());
                 previewResult.Add(CellState.accessibleRoutePoint, Array.Empty<Vector2Int>());
                 previewResult.Add(CellState.inaccessibleRoutePoint, Array.Empty<Vector2Int>());
                 DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);

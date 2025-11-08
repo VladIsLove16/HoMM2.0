@@ -9,9 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6317304210986613343}
-  - component: {fileID: 5413244464807152272}
   - component: {fileID: -2304992214994921025}
   - component: {fileID: 3445798776585249478}
+  - component: {fileID: 445596867956305123}
+  - component: {fileID: 5413244464807152272}
   m_Layer: 0
   m_Name: Hbase_grib
   m_TagString: Untagged
@@ -36,28 +37,6 @@ Transform:
   - {fileID: 2769673461086698097}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &5413244464807152272
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1401948534389163973}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &-2304992214994921025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 5413244464807152272}
+  _animationController: {fileID: 445596867956305123}
   unitViewUI: {fileID: 6209569021479764463}
   animationMoveSpeed: 3
   meshes: []
@@ -96,7 +75,48 @@ CapsuleCollider:
   m_Radius: 0.87
   m_Height: 2.65
   m_Direction: 1
-  m_Center: {x: 0, y: 0.79, z: 0}
+  m_Center: {x: 0, y: 2.16, z: 0}
+--- !u!114 &445596867956305123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401948534389163973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ba7f811bc493a43984e5ee4b9020af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 5413244464807152272}
+  idleTrigger: Idle
+  walkTrigger: Walk
+  attackTrigger: DealDamage
+  hitTrigger: Hit
+  dieTrigger: Die
+  animationTrigger: 0
+--- !u!95 &5413244464807152272
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401948534389163973}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: d5ca3761906895147973281d7fa929d1, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5624209819202973773
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 5624209819202973773}
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000021855694, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.28, z: 0}
   m_LocalScale: {x: 25, y: 25, z: 25}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -234,7 +254,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalRotation.w
@@ -258,7 +278,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.485
+      value: 1.93
       objectReference: {fileID: 0}
     - target: {fileID: 3710840757688828102, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

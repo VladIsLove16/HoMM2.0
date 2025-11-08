@@ -98,10 +98,16 @@ public class MoveActionHandler : IActionHandler
             result = _movementSystem.GetRoute(moveable.Position, targetCell, out route);
         return result;
     }
-    private bool GetAccessibleRoute(IMoveable moveable, Vector2Int targetCell, out List<Vector2Int> route)
+    private bool GetAccessibleRoute(IMoveable moveable, Vector2Int targetCell, out List<Vector2Int> accessibleRoute)
     {
-        var result = GetRoute(moveable, targetCell,out route);
-        var moveRoute = _movementSystem.GetAccessibleRoutePoints(route, moveable.MoveSpeed);
-        return result;
+        accessibleRoute = new List<Vector2Int>();
+
+        if (!GetRoute(moveable, targetCell, out var route))
+        {
+            return false;
+        }
+
+        accessibleRoute = _movementSystem.GetAccessibleRoutePoints(route, moveable.MoveSpeed);
+        return accessibleRoute.Count > 0;
     }
 }

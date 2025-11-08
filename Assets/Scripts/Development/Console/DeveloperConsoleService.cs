@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Zenject;
 
 public class DeveloperConsoleService : IDeveloperConsoleOutput
 {
@@ -29,7 +30,7 @@ public class DeveloperConsoleService : IDeveloperConsoleOutput
     public IReadOnlyList<DeveloperConsoleLogEntry> Log => _log;
     public IReadOnlyList<string> History => _history;
     public IEnumerable<IDeveloperConsoleCommand> RegisteredCommands => _commands.Values.Distinct();
-
+    [Inject]
     public DeveloperConsoleService(
         IEnumerable<IDeveloperConsoleCommand> commands,
         GameModel gameModel,

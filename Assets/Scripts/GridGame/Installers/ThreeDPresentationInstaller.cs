@@ -19,6 +19,13 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
 
     public void Install(DiContainer container)
     {
+        if (!container.HasBinding<GameViewModel>())
+        {
+            Debug.LogWarning("[ThreeDPresentationInstaller] GameViewModel binding is missing in this scene. Grid presentation will be skipped.", this);
+            DisableBoundObjects();
+            return;
+        }
+
         if (gameView3D != null)
         {
             gameView3D.gameObject.SetActive(true);
@@ -89,6 +96,17 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         }
 
         return null;
+    }
+
+    private void DisableBoundObjects()
+    {
+        if (gameView3D != null) gameView3D.gameObject.SetActive(false);
+        if (cellInputHandler != null) cellInputHandler.gameObject.SetActive(false);
+        if (attackActionPanel != null) attackActionPanel.gameObject.SetActive(false);
+        if (unitTurnPanel != null) unitTurnPanel.gameObject.SetActive(false);
+        if (inGameUI != null) inGameUI.gameObject.SetActive(false);
+        if (unitStatsPanel != null) unitStatsPanel.gameObject.SetActive(false);
+        if (perCellGridRenderer != null) perCellGridRenderer.gameObject.SetActive(false);
     }
 
     private void BindGridRenderer(DiContainer container)
