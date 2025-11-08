@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// ОШИБОЧНЫЙ КОД! Переписать на MVVM
 /// </summary>
-public class HelpMenu : MonoBehaviour, IActiveMenu
+public class HelpMenu : MonoBehaviour, IAdventureGameActiveMenu
 {
     private ReactiveProperty<bool> isOpen = new(false);
     public InputMode InputMode => InputMode.Enabled;

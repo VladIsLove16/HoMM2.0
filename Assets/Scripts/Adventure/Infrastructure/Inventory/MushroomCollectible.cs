@@ -19,7 +19,7 @@ namespace Adventure.Infrastructure.Inventory
 
         private void Awake()
         {
-            if (AdventureStateCache.IsMushroomCollected(transform.position))
+            if (BattleStateCache.IsMushroomCollected(transform.position))
             {
                 CanCollect = false;
                 if (destroyOnCollect && gameObject != null)
@@ -50,7 +50,7 @@ namespace Adventure.Infrastructure.Inventory
                 return;
 
             CanCollect = false;
-            AdventureStateCache.RegisterCollectedMushroom(transform.position);
+            BattleStateCache.RegisterCollectedMushroom(transform.position);
 
             if (destroyOnCollect && gameObject != null)
             {

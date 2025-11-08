@@ -27,7 +27,7 @@
 //            _mockAnimator = _gameObject.AddComponent<MockAnimator>();
 
 //            // Создаем базовые характеристики для тестов
-//            var baseStats = ScriptableObject.CreateInstance<UnitStats>();
+//            var baseStats = ScriptableObject.CreateInstance<UnitStatsSource>();
 //            baseStats.Health = 100;
 //            baseStats.MaxHealth = 100;
 //            baseStats.Damage = 25;

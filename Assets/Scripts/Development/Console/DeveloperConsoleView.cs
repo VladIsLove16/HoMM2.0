@@ -8,9 +8,8 @@ using Zenject;
 /// Simple in-game developer console that mirrors classic Source engine consoles.
 /// Provides scrolling output, input submission, and history navigation.
 /// </summary>
-public class DeveloperConsoleView : MonoBehaviour
+public partial class DeveloperConsoleView : MonoBehaviour
 {
-    [SerializeField] private KeyCode toggleKey = KeyCode.BackQuote;
     [SerializeField] private bool focusInputOnOpen = true;
     [SerializeField] private float windowHeightFraction = 0.5f;
 
@@ -28,27 +27,6 @@ public class DeveloperConsoleView : MonoBehaviour
         new BuiltInCommand("clear", "Введите clear, чтобы очистить консоль", "clear")
     };
 
-    private sealed class BuiltInCommand : IDeveloperConsoleCommand
-    {
-        public BuiltInCommand(string key, string description, string usage)
-        {
-            Key = key;
-            Description = description;
-            Usage = usage;
-            Aliases = Array.Empty<string>();
-        }
-
-        public string Key { get; }
-        public string Description { get; }
-        public string Usage { get; }
-        public IReadOnlyList<string> Aliases { get; }
-
-        public void Execute(DeveloperConsoleCommandContext context, IReadOnlyList<string> args, IDeveloperConsoleOutput output)
-        {
-            throw new NotSupportedException("Built-in commands are handled directly by DeveloperConsoleService.");
-        }
-    }
-
     [Inject]
     public void Construct(DeveloperConsoleService service)
     {
@@ -64,15 +42,7 @@ public class DeveloperConsoleView : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(toggleKey))
-        {
-            ToggleVisibility();
-        }
-    }
-
-    private void ToggleVisibility()
+    public void ToggleVisibility()
     {
         if (_service == null)
         {
@@ -189,6 +159,13 @@ public class DeveloperConsoleView : MonoBehaviour
         _shouldFocusInput = true;
         ClearSuggestions();
     }
+
+    // Expose minimal control for InputSystem routing
+    public void SubmitFromInputActions() => SubmitCurrentInput();
+    public void HistoryUp() => NavigateHistory(-1);
+    public void HistoryDown() => NavigateHistory(1);
+    public void Close() => _service?.SetVisibility(false);
+    public void Open() => _service?.SetVisibility(true);
 
     private void HandleKeyboardInput()
     {

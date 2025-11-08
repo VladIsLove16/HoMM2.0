@@ -17,12 +17,11 @@ namespace Tests.EditMode.ActionHandlers
         public void SetUp()
         {
             _moveSys = new MovementSystem();
-            var dict =new Dictionary<UnitType, UnitDefinitionSO>();
-            var unitdef = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitdef.UnitStats = ScriptableObject.CreateInstance<UnitStats>();
-            unitdef.UnitStats.MoveSpeed = 3;
-            dict.Add(UnitType.Archer, unitdef);
-             _factory = new UnitModelFactory(dict);
+            var UnitStats = ScriptableObject.CreateInstance<UnitStats>();
+            UnitStats.MoveSpeed = 3;
+            var statsProvider = new MockUnitStatsProviderInline();
+            statsProvider.SetData(UnitType.Archer,UnitStats);
+            _factory = new UnitModelFactory(statsProvider);
             _model = new GameModel(_factory, _moveSys);
             _model.InitializeGrid(3, 3);
             _model.SpawnUnit(new(unitPos.x, unitPos.y, UnitType.Archer, 1, Team.Blue));

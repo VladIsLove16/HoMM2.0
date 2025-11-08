@@ -13,15 +13,10 @@ namespace Tests.EditMode.Actions
         [SetUp]
         public void Setup()
         {
-            UnitDefinitionSO unitDefinitionSO = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            var dict = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, unitDefinitionSO }
-            };
-            var factory = new UnitModelFactory(dict);
+            var UnitStatsProvider = new MockUnitStatsProviderInline();
+            UnitStatsProvider.SetData(UnitType.Archer, ScriptableObject.CreateInstance<UnitStats>());
+            var factory = new UnitModelFactory(UnitStatsProvider);
             var baseStats = ScriptableObject.CreateInstance<UnitStats>();
-            unitDefinitionSO.UnitStats = baseStats;
-
             _movementSystem = new MovementSystem();
 
             _model = new(factory, _movementSystem);
@@ -53,6 +48,21 @@ namespace Tests.EditMode.Actions
 
             Assert.That(result, Is.False, "Не должен быть найден обработчик для некорректного действия");
             Assert.That(handler, Is.Null, "Обработчик должен быть null");
+        }
+    }
+    public class MockUnitStatsProviderInline : IUnitStatsProvider
+    {
+        private Dictionary<UnitType, UnitStats> _inlineStats = new Dictionary<UnitType, UnitStats>();
+
+        public IEnumerable<UnitType> Types => throw new System.NotImplementedException();
+
+        public bool TryGetBaseStats(UnitType type, out UnitStats stats)
+        {
+            return _inlineStats.TryGetValue(type, out stats);
+        }
+        public void SetData(UnitType type, UnitStats stats)
+        {
+            _inlineStats[type] = stats;
         }
     }
 }

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78a0f741d3dcce948853c0ad5c723e65, type: 3}
+  m_Name: StatusEffectDataIncreaseDamage
+  m_EditorClassIdentifier: 
+  EffectName: IncreasedDamage
+  sprite: {fileID: 21300000, guid: 4a5d5dd8b6a787c4db7eca03c7e9b783, type: 3}
+  type: 8
+  ExpirationConditions: []
+  OnApply: []
+  OnTurnStart: []
+  OnTurnEnd: []
+  OnInDamage: []
+  OnOutDamage: []
+  OnRemove: []

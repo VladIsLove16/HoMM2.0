@@ -9,18 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8314611435984354e89be16a8073d662, type: 3}
+  m_Script: {fileID: 11500000, guid: 78a0f741d3dcce948853c0ad5c723e65, type: 3}
   m_Name: StatusEffectDataArmor
   m_EditorClassIdentifier: 
-  EffectName: Armor
+  EffectName: "\u0411\u0440\u043E\u043D\u044F"
   sprite: {fileID: 21300000, guid: 5d812fcac8d5216449d2d792eeecd63a, type: 3}
   type: 5
-  ExpirationConditions:
-  - {fileID: 11400000, guid: ef4002c3809aed04296b63fa64629c1c, type: 2}
+  ExpirationConditions: []
   OnApply: []
   OnTurnStart: []
   OnTurnEnd: []
-  OnInDamage:
-  - {fileID: 11400000, guid: 010471d5233a1e24488b3e516371ea81, type: 2}
+  OnInDamage: []
   OnOutDamage: []
   OnRemove: []

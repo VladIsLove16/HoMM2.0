@@ -8,7 +8,10 @@
         "Unity.TextMeshPro",
         "UnityEngine.UI",
         "NaughtyAttributes.Core",
-        "Infrastucture"
+        "Utils",
+        "GameCore",
+        "SharedView",
+        "SharedVMs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

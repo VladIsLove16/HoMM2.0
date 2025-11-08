@@ -1,9 +1,11 @@
-﻿using Adventure.Domain.Inventory;
+using Adventure.Domain.Inventory;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
+using Adventure.Settings.ViewModel;
 using Game.Achievements;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tests.EditMode.MushroomBook
 {
@@ -29,11 +31,7 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void Collect_AddsNewItemToInventory()
         {
-            var definition = MushroomBookTestHelpers.CreateDefinition(UnitType.Witch, "Witch Mushroom", _createdAssets, def =>
-            {
-                def.UnitStats = MushroomBookTestHelpers.CreateStats(10, 20, 5, 3, _createdAssets);
-            });
-            var catalog = MushroomBookTestHelpers.CreateCatalog(new[] { definition }, _createdAssets);
+            var catalog = TestDataFactory.CreateSingleAdventureMushroom(_createdAssets, UnitType.Witch, moveSpeed: 3, health: 10);
             var inventory = new MushroomInventoryModel(new List<UnitStackData>());
             var bus = new StubAchievementEventBus();
             var viewModel = new MushroomBookViewModel(inventory, catalog, bus);
@@ -56,12 +54,12 @@ namespace Tests.EditMode.MushroomBook
         [Test]
         public void Constructor_PopulatesInitialPage()
         {
-            var viewModel = CreateViewModel(3, out _, out _, out var definitions, out _);
+            var viewModel = CreateViewModel(3, out _, out _, out var displayNames, out _);
 
             try
             {
                 Assert.That(viewModel.CurrentPageEntries.Count, Is.EqualTo(3));
-                Assert.That(viewModel.CurrentPageEntries[0].DisplayName, Is.EqualTo(definitions[0].DisplayName));
+                Assert.That(viewModel.CurrentPageEntries[0].DisplayName, Is.EqualTo(displayNames[0]));
             }
             finally
             {
@@ -125,33 +123,41 @@ namespace Tests.EditMode.MushroomBook
         private MushroomBookViewModel CreateViewModel(
             int entryCount,
             out MushroomInventoryModel inventory,
-            out UnitDefinitionSOCollection catalog,
-            out UnitDefinitionSO[] definitions,
+            out AdventureMushroomAssetMap catalog,
+            out string[] displayNames,
             out StubAchievementEventBus bus)
         {
-            var defs = new List<UnitDefinitionSO>();
+            var names = new List<string>();
             var stacks = new List<UnitStackData>();
+            var entries = new List<(UnitType type, string displayName, UnitStatsInline stats)>();
 
             for (int i = 0; i < entryCount; i++)
             {
                 var unitType = (UnitType)(100 + i);
-                var definition = MushroomBookTestHelpers.CreateDefinition(unitType, $"Mushroom #{i}", _createdAssets, def =>
-                {
-                    def.UnitStats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdAssets);
-                });
-                defs.Add(definition);
+                var name = $"Mushroom #{i}";
+                names.Add(name);
                 stacks.Add(new UnitStackData(unitType, 1));
+                entries.Add((unitType, name, new UnitStatsInline
+                {
+                    Health = 10 + i,
+                    MaxHealth = 20 + i,
+                    Damage = 5 + i,
+                    MoveSpeed = 3 + i
+                }));
             }
 
             inventory = new MushroomInventoryModel(stacks);
-            catalog = MushroomBookTestHelpers.CreateCatalog(defs, _createdAssets);
-            definitions = defs.ToArray();
+            catalog = TestDataFactory.CreateAdventureMushroomMap(
+                _createdAssets,
+                entries.ToArray());
+            displayNames = names.ToArray();
 
             bus = new StubAchievementEventBus();
-            return new MushroomBookViewModel(inventory,catalog,bus);
+            return new MushroomBookViewModel(inventory, catalog, bus);
         }
     }
 }
+
 
 
 

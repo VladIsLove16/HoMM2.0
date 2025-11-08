@@ -22,7 +22,7 @@ namespace Tests.EditMode.Input
         }
 
         [TearDown]
-        public void TearDown()
+        public override void TearDown()
         {
             _input.Dispose();
             base.TearDown();

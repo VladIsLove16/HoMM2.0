@@ -15,8 +15,8 @@ public sealed class AdventureInputRouter : IDisposable
     [Inject] private PlayerInteractionController interactionController;
 
     [Inject] private IInputModeVM inputModeVM;
-    [Inject] private MenusCoordinatorViewModel menusVM;
-    [Inject] private GameSettingsViewModel settingsVM;
+    [Inject] private AdventureMenusCoordinatorViewModel menusVM;
+    [Inject] private AdventureGameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
     [Inject] private HelpMenu helpMenu;
     [Inject]

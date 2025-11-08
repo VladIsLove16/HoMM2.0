@@ -38,10 +38,9 @@ namespace Tests.EditMode.ActionHandlers
             _baseStats.InvulnerableEffects = new List<StatusEffectType>();
 
             var moveSys = new MovementSystem();
-            _modelFactory = new(new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, new UnitDefinitionSO { UnitStats = _baseStats } }
-            });
+            var statsProvider = new MockUnitStatsProviderInline();
+            statsProvider.SetData(UnitType.Archer, _baseStats);
+            _modelFactory = new(statsProvider);
             _model = new GameModel(_modelFactory, moveSys);
             _model.InitializeGrid(3, 3);
             _model.SpawnUnit(new UnitSpawnParams(attackerX, attackerY, UnitType.Archer, TestAmount, Team.Blue));

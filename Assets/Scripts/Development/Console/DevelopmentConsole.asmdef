@@ -1,0 +1,24 @@
+{
+    "name": "DevelopmentConsole",
+    "rootNamespace": "",
+    "references": [
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:54c7bef1210f94b478f4e42eb5ecf9af",
+        "GUID:d385fcd99249ddc43986bea0e93af5ca",
+        "GUID:6c18917549f31c442926e2569e8818c8",
+        "GUID:09dcc9c0126b6b34ab2a877b8f2277f5",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:5867dd2bc7474d51a2c7f51411b41483",
+        "GUID:1c2a9d77c12a4e6ab41a3d162229a08d",
+        "GUID:ee5ed074ae628da4796a0375a08e13cb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

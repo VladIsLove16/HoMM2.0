@@ -2,29 +2,17 @@
 using UniRx;
 using System;
 using System.Collections.Generic;
+using CustomEventBus;
 
 namespace Tests.EditMode.MushroomBook
 {
-    public partial class MushroomBookViewTests
+    public sealed class StubAchievementEventBus : EventBus
     {
-        private sealed class StubAchievementEventBus : IGameplayEventBus
-        {
-            public List<MushroomCollectedEvent> Collected { get; } = new();
-            public List<BattleCompletedEvent> Battles { get; } = new();
+        public List<MushroomCollectedCustomEvent> Collected { get; } = new();
+        public List<BattleCompletedCustomEvent> Battles { get; } = new();
 
-            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
-            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
-
-            public void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals)
-            {
-                Collected.Add(new MushroomCollectedEvent(itemId, totals));
-            }
-
-            public void PublishBattleCompleted(bool playerWon)
-            {
-                Battles.Add(new BattleCompletedEvent(playerWon));
-            }
-        }
+        public IObservable<MushroomCollectedCustomEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedCustomEvent>();
+        public IObservable<BattleCompletedCustomEvent> BattleCompletedStream => Observable.Empty<BattleCompletedCustomEvent>();
     }
 }
 

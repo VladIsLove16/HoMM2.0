@@ -9,13 +9,11 @@ using Zenject;
 public class ConsoleGridRenderer : IGridCellRenderer, IWorldToCellProvider
 {
     private readonly ConsoleGridState _gridState;
-    private readonly IDeveloperConsoleOutput _output;
     private IGridViewModel _viewModel;
 
-    public ConsoleGridRenderer(ConsoleGridState gridState, [Inject(Optional = true)] IDeveloperConsoleOutput output = null)
+    public ConsoleGridRenderer(ConsoleGridState gridState)
     {
         _gridState = gridState;
-        _output = output;
     }
 
     public void Clear()
@@ -70,19 +68,7 @@ public class ConsoleGridRenderer : IGridCellRenderer, IWorldToCellProvider
 
     private void Log(string message)
     {
-        if (string.IsNullOrEmpty(message))
-        {
-            return;
-        }
-
-        if (_output != null)
-        {
-            _output.AppendLine(message);
-        }
-        else
-        {
-            Debug.Log(message);
-        }
+        Debug.Log(message);
     }
 }
 

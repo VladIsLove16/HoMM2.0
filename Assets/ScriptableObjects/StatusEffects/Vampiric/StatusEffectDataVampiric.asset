@@ -9,18 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8314611435984354e89be16a8073d662, type: 3}
+  m_Script: {fileID: 11500000, guid: 78a0f741d3dcce948853c0ad5c723e65, type: 3}
   m_Name: StatusEffectDataVampiric
   m_EditorClassIdentifier: 
   EffectName: Vampirism
   sprite: {fileID: 21300000, guid: 94bf2d7f1f4d5f2418edc0831b425bdc, type: 3}
   type: 10
-  ExpirationConditions:
-  - {fileID: 11400000, guid: a545c60d2eb6c1a4a90bae29a62f9dfc, type: 2}
+  ExpirationConditions: []
   OnApply: []
   OnTurnStart: []
   OnTurnEnd: []
   OnInDamage: []
-  OnOutDamage:
-  - {fileID: 11400000, guid: 6e6e9aad4bdb1e742b828405b3b84bd4, type: 2}
+  OnOutDamage: []
   OnRemove: []

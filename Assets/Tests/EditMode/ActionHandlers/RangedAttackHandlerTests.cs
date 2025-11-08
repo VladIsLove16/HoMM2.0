@@ -21,12 +21,12 @@ namespace Tests.EditMode.ActionHandlers
         {
 
             var ms = new MovementSystem();
-            Dictionary<UnitType, UnitDefinitionSO> unitDatas = new Dictionary<UnitType, UnitDefinitionSO>();
-            UnitDefinitionSO unitDefinitionSO = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitDefinitionSO.UnitStats = new();
-            unitDefinitionSO.UnitStats.AttackRange = 3;
-            unitDatas.Add(UnitType.Archer, unitDefinitionSO);
-            var factory = new UnitModelFactory(unitDatas);
+            var provider = new MockUnitStatsProviderInline();
+            var stats = ScriptableObject.CreateInstance<UnitStats>();
+            stats = new();
+            stats.AttackRange = 3;
+            provider.SetData(UnitType.Archer, stats);
+            var factory = new UnitModelFactory(provider);
             _model = new GameModel(factory, ms);
             _model.InitializeGrid(5, 5);
             _model.SpawnUnit(new UnitSpawnParams(fromCell.x, fromCell.y, UnitType.Archer, 1, Team.Blue));

@@ -1,0 +1,21 @@
+{
+    "name": "SharedView",
+    "rootNamespace": "",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:87548d82472c2994e961059f457f7fcd",
+        "GUID:5867dd2bc7474d51a2c7f51411b41483",
+        "GUID:1c2a9d77c12a4e6ab41a3d162229a08d",
+        "GUID:b93f844d45cfcc44fa2b0eed5c9ec6bb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

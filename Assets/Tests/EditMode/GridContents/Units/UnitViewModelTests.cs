@@ -534,21 +534,6 @@ namespace Tests.EditMode.GridContents.Units
             public void SimulateRecieveDamage(DamageContext ctx) { }
         }
 
-        private class MockUnitDefinitionSO : UnitDefinitionSO
-        {
-            public Material BlueTeamMaterial => CreateMockMaterial("BlueTeam");
-            public Material HoveredBlueTeamMaterial => CreateMockMaterial("HoveredBlueTeam");
-            public Material RedTeamMaterial => CreateMockMaterial("RedTeam");
-            public Material HoveredRedTeamMaterial => CreateMockMaterial("HoveredRedTeam");
-
-            private Material CreateMockMaterial(string name)
-            {
-                var material = new Material(Shader.Find("Standard"));
-                material.name = name;
-                return material;
-            }
-        }
-
         private class MockWorldToCellProvider : IWorldToCellProvider
         {
             public Vector3 ToWorld(int x, int y)

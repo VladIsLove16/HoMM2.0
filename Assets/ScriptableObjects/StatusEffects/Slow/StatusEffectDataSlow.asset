@@ -9,16 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8314611435984354e89be16a8073d662, type: 3}
+  m_Script: {fileID: 11500000, guid: 78a0f741d3dcce948853c0ad5c723e65, type: 3}
   m_Name: StatusEffectDataSlow
   m_EditorClassIdentifier: 
   EffectName: Slow
   sprite: {fileID: 21300000, guid: 5734191861eaf7744892e44b331e4a78, type: 3}
   type: 7
-  ExpirationConditions:
-  - {fileID: 11400000, guid: 1fce325810ddea84a89a7772dbefe3d8, type: 2}
-  OnApply:
-  - {fileID: 11400000, guid: db5c2e32cfe916942aade514eb9eb7a4, type: 2}
+  ExpirationConditions: []
+  OnApply: []
   OnTurnStart: []
   OnTurnEnd: []
   OnInDamage: []

@@ -29,7 +29,7 @@ namespace Adventure.Infrastructure.State
                 return;
             }
 
-            if (AdventureStateCache.TryGetPlayerTransform(out var position, out var rotation))
+            if (BattleStateCache.TryGetPlayerTransform(out var position, out var rotation))
             {
                 var controller = _playerMovementController.GetComponent<UnityEngine.CharacterController>();
                 if (controller != null)
@@ -48,7 +48,7 @@ namespace Adventure.Infrastructure.State
 
         private void ResumePendingDialog()
         {
-            if (!AdventureStateCache.TryConsumePendingDialog(out var dialogId, out var resumeNodeId, out ArmyLineupSO lineup, out var _))
+            if (!BattleStateCache.TryConsumePendingDialog(out var dialogId, out var resumeNodeId, out ArmyLineupSO lineup, out var _))
             {
                 return;
             }

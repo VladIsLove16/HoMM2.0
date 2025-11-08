@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Adventure.Application.Dialog
 {
-    public sealed class DialogVM : IActiveMenu
+    public sealed class DialogVM : IAdventureGameActiveMenu
     {
         private readonly IDialogRepository _repository;
         private readonly IDialogStateStore _stateStore;
@@ -27,7 +27,6 @@ namespace Adventure.Application.Dialog
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
         public IReadOnlyReactiveProperty<ArmyLineupSO> EnemyArmy => _enenyArmy;
-
         public InputMode InputMode => InputMode.Blocked;
 
         public event Action<DialogueChoiceAction> ChoiceActionTriggered;

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -10,33 +9,6 @@ namespace Tests.EditMode.MushroomBook
 {
     internal static class MushroomBookTestHelpers
     {
-        public static UnitDefinitionSO CreateDefinition(UnitType type, string name, IList<UnityEngine.Object> tracker, Action<UnitDefinitionSO> configure = null)
-        {
-            var definition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            definition.UnitType = type;
-            definition.DisplayName = name;
-            configure?.Invoke(definition);
-            tracker?.Add(definition);
-            return definition;
-        }
-
-        public static UnitDefinitionSOCollection CreateCatalog(IEnumerable<UnitDefinitionSO> definitions, IList<UnityEngine.Object> tracker)
-        {
-            var catalog = ScriptableObject.CreateInstance<UnitDefinitionSOCollection>();
-            var serialized = new SerializedObject(catalog);
-            var property = RequireProperty(serialized, "unitDefinitionSOs");
-            var items = definitions?.ToList() ?? new List<UnitDefinitionSO>();
-
-            property.arraySize = items.Count;
-            for (var i = 0; i < items.Count; i++)
-            {
-                property.GetArrayElementAtIndex(i).objectReferenceValue = items[i];
-            }
-
-            serialized.ApplyModifiedProperties();
-            tracker?.Add(catalog);
-            return catalog;
-        }
 
         public static UnitStats CreateStats(int health, int maxHealth, int damage, int moveSpeed, IList<UnityEngine.Object> tracker)
         {

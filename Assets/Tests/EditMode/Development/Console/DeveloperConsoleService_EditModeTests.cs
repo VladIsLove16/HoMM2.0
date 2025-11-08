@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Tests.EditMode.ActionHandlers;
 using UnityEngine;
 
 public class DeveloperConsoleService_EditModeTests
@@ -116,17 +117,9 @@ public class DeveloperConsoleService_EditModeTests
             unitStats.AttackRange = 1;
             unitStats.Damage = 3;
 
-            var unitDefinition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitDefinition.UnitStats = unitStats;
-            unitDefinition.UnitType = UnitType.Archer;
-            unitDefinition.name = "Unit_Def";
-
-            var dataMap = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, unitDefinition }
-            };
-
-            var unitFactory = new UnitModelFactory(dataMap);
+            var provider = new MockUnitStatsProviderInline();   
+            provider.SetData(UnitType.Archer, unitStats);   
+            var unitFactory = new UnitModelFactory(provider);
             GameModel = new GameModel(unitFactory, MovementSystem);
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
             ConcreteTurnService = new TurnService(new TurnQueue());

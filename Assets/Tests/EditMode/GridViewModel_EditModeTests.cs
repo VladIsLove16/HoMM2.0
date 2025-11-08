@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
+using Tests.EditMode.ActionHandlers;
 using UnityEngine;
 
 namespace Tests.EditMode.ViewModels
@@ -17,9 +18,12 @@ namespace Tests.EditMode.ViewModels
         [SetUp]
         public void SetUp()
         {
-            var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
+            var stats = ScriptableObject.CreateInstance<UnitStats>();
+            stats.MaxHealth = 10; stats.Health = 10; stats.MoveSpeed = 3; stats.Damage = 1;
             _movement = new MovementSystem();
-            _model = new GameModel(new UnitModelFactory(dict), _movement);
+            var provider = new MockUnitStatsProviderInline();
+            provider.SetData(UnitType.Archer, stats);
+            _model = new GameModel(new UnitModelFactory(provider), _movement);
             _resolver = new ActionResolver(_model, _movement);
             var turnService = new TurnService(new TurnQueue());
             _turnState = new TurnStateViewModel(turnService);

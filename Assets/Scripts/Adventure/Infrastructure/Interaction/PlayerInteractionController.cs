@@ -20,7 +20,7 @@ namespace Adventure.Infrastructure.Interaction
         //[SerializeField] private string hintBinding = "RMB";
         [SerializeField, Range(0.25f, 5f)] private float hintDisplayDuration = 2f;
 
-        private IInteractable? _currentInteractable;
+        private IInteractable _currentInteractable;
         private bool _hintVisible;
         private float _hintExpiresAt;
 

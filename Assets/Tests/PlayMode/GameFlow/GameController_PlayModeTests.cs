@@ -143,12 +143,9 @@ namespace Tests.PlayMode.GameFlow
         private SpyGameModel CreateSpyGameModel()
         {
             var stats = CreateStats();
-            var definition = CreateDefinition(UnitType.Archer, stats);
-            var dict = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, definition }
-            };
-            var factory = new UnitModelFactory(dict);
+            MockUnitStatsProviderInline unitStatsProvider = new MockUnitStatsProviderInline();
+            unitStatsProvider.SetData(UnitType.Archer, stats);
+            var factory = new UnitModelFactory(unitStatsProvider);
             var movement = new MovementSystem();
             return new SpyGameModel(factory, movement);
         }
@@ -163,15 +160,6 @@ namespace Tests.PlayMode.GameFlow
             stats.InvulnerableEffects = new List<StatusEffectType>();
             _createdAssets.Add(stats);
             return stats;
-        }
-
-        private UnitDefinitionSO CreateDefinition(UnitType type, UnitStats stats)
-        {
-            var definition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            definition.UnitType = type;
-            definition.UnitStats = stats;
-            _createdAssets.Add(definition);
-            return definition;
         }
 
         private GridContentEntrySO.UnitContent CreateContent(UnitType type, int x, int y, Team team)
@@ -224,6 +212,21 @@ namespace Tests.PlayMode.GameFlow
                 SpawnUnitCalls++;
                 return base.SpawnUnit(spawnParams);
             }
+        }
+    }
+    public class MockUnitStatsProviderInline : IUnitStatsProvider
+    {
+        private Dictionary<UnitType, UnitStats> _inlineStats = new Dictionary<UnitType, UnitStats>();
+
+        public IEnumerable<UnitType> Types => throw new System.NotImplementedException();
+
+        public bool TryGetBaseStats(UnitType type, out UnitStats stats)
+        {
+            return _inlineStats.TryGetValue(type, out stats);
+        }
+        public void SetData(UnitType type, UnitStats stats)
+        {
+            _inlineStats[type] = stats;
         }
     }
 }

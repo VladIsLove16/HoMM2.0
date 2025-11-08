@@ -14,14 +14,14 @@ public sealed class AdventureCommander
     private readonly DiContainer _container;
     private readonly PlayerMovementController _playerController;
     private readonly MushroomInventoryModel _inventoryModel;
-    private readonly UnitDefinitionSOCollection _catalog;
+    private readonly AdventureMushroomAssetMap _assets;
 
     public AdventureCommander(DiContainer container)
     {
         _container = container ?? throw new ArgumentNullException(nameof(container));
         _playerController = container.TryResolve<PlayerMovementController>();
         _inventoryModel = container.TryResolve<MushroomInventoryModel>();
-        _catalog = container.TryResolve<UnitDefinitionSOCollection>();
+        _assets = container.TryResolve<AdventureMushroomAssetMap>();
     }
 
     public void CreateNpc(IDeveloperConsoleOutput output)
@@ -62,7 +62,7 @@ public sealed class AdventureCommander
             return;
         }
 
-        var npcTriggers = UnityEngine.Object.FindObjectsByType<NpcDialogueTrigger>(FindObjectsInactive.Include);
+        var npcTriggers = UnityEngine.Object.FindObjectsByType<NpcDialogueTrigger>(FindObjectsSortMode.None);
         if (npcTriggers == null || npcTriggers.Length == 0)
         {
             output.AppendError("No NPCs found in the scene.");
@@ -113,7 +113,7 @@ public sealed class AdventureCommander
             return;
         }
 
-        if (_catalog != null && !_catalog.TryGet(unitType, out _))
+        if (_assets != null && !_assets.TryGetDefinition(unitType, out _))
         {
             output.AppendError($"Unit type '{unitType}' is not present in the catalog.");
             return;
@@ -208,7 +208,7 @@ public sealed class AdventureCommander
 
     private NpcDialogueTrigger FindNpcTemplate()
     {
-        var triggers = UnityEngine.Object.FindObjectsOfType<NpcDialogueTrigger>();
+        var triggers = UnityEngine.Object.FindObjectsByType<NpcDialogueTrigger>(FindObjectsSortMode.None);
         if (triggers == null || triggers.Length == 0)
         {
             return null;
@@ -273,7 +273,7 @@ public sealed class AdventureCommander
 
     private MushroomCollectible FindMushroomTemplate()
     {
-        var collectibles = UnityEngine.Object.FindObjectsOfType<MushroomCollectible>();
+        var collectibles = UnityEngine.Object.FindObjectsByType<MushroomCollectible>(FindObjectsSortMode.None);
         if (collectibles == null || collectibles.Length == 0)
         {
             return null;

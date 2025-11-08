@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using Tests.TestHelpers;
+using Tests.EditMode.ActionHandlers;
 
 public class ConsoleGameView_EditModeTests
 {
@@ -26,7 +27,7 @@ public class ConsoleGameView_EditModeTests
         var harness = new GameModelBuilder();
         var output = new TestConsoleOutput();
         var gridState = new ConsoleGridState();
-        var consoleView = new ConsoleGameView(harness.GameViewModel, harness.TurnStateViewModel, gridState, output);
+        var consoleView = new ConsoleGameView(harness.GameViewModel, harness.TurnStateViewModel, gridState);
         consoleView.Initialize();
 
         harness.GameModel.InitializeGrid(3, 3);
@@ -52,7 +53,7 @@ public class ConsoleGameView_EditModeTests
     {
         var gridState = new ConsoleGridState();
         var output = new TestConsoleOutput();
-        var renderer = new ConsoleGridRenderer(gridState, output);
+        var renderer = new ConsoleGridRenderer(gridState);
 
         renderer.Render(2, 2, 1f, Vector3.zero, 0f);
         var world = renderer.ToWorld(1, 0);
@@ -93,17 +94,9 @@ public class ConsoleGameView_EditModeTests
             unitStats.AttackRange = 1;
             unitStats.Damage = 3;
 
-            var unitDefinition = ScriptableObject.CreateInstance<UnitDefinitionSO>();
-            unitDefinition.UnitStats = unitStats;
-            unitDefinition.UnitType = UnitType.Archer;
-            unitDefinition.name = "Unit_Def";
-
-            var dataMap = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, unitDefinition }
-            };
-
-            var unitFactory = new UnitModelFactory(dataMap);
+            var provider = new MockUnitStatsProviderInline();   
+            provider.SetData(UnitType.Archer, unitStats);
+            var unitFactory = new UnitModelFactory(unitStats);
             GameModel = new GameModel(unitFactory, MovementSystem);
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
             ConcreteTurnService = new TurnService(new TurnQueue());

@@ -1,6 +1,7 @@
-﻿using Adventure.Domain.Inventory;
+using Adventure.Domain.Inventory;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
+using Adventure.Settings.ViewModel;
 using Game.Achievements;
 using NUnit.Framework;
 using UniRx;
@@ -41,12 +42,12 @@ namespace Tests.EditMode.MushroomBook
         public void Construct_WithViewModel_PopulatesSlotsAndPageNumber()
         {
             var harness = MushroomBookViewHarness.Create(2, _createdObjects);
-            var viewModel = CreateViewModel(1, out var definitions);
+            var viewModel = CreateViewModel(1, out var entryNames);
 
             harness.View.Construct(viewModel);
 
             Assert.That(harness.View.PageCapacity, Is.EqualTo(2));
-            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(definitions[0].DisplayName));
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(entryNames[0]));
             Assert.That(harness.View.Slots[1].Title, Is.EqualTo(string.Empty));
             Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("1"));
             Assert.That(harness.View.Slots[0].StatItemCount, Is.GreaterThan(0));
@@ -56,10 +57,10 @@ namespace Tests.EditMode.MushroomBook
         public void Construct_NullViewModel_ClearsSlotsAndResetsPageNumber()
         {
             var harness = MushroomBookViewHarness.Create(2, _createdObjects);
-            var viewModel = CreateViewModel(1, out var definitions);
+            var viewModel = CreateViewModel(1, out var entryNames);
 
             harness.View.Construct(viewModel);
-            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(definitions[0].DisplayName));
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(entryNames[0]));
 
             harness.View.Construct(null);
 
@@ -76,11 +77,11 @@ namespace Tests.EditMode.MushroomBook
             var secondViewModel = CreateViewModel(1, out var secondDefinitions);
 
             harness.View.Construct(firstViewModel);
-            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(firstDefinitions[0].DisplayName));
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(firstDefinitions[0]));
 
             harness.View.Construct(secondViewModel);
 
-            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(secondDefinitions[0].DisplayName));
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(secondDefinitions[0]));
         }
 
         [Test]
@@ -113,33 +114,39 @@ namespace Tests.EditMode.MushroomBook
             Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("2"));
         }
 
-        private MushroomBookViewModel CreateViewModel(int entryCount, out MushroomBookEntryViewModel[] entries)
+        private MushroomBookViewModel CreateViewModel(int entryCount, out string[] entryNames)
         {
-            var defs = new List<UnitDefinitionSO>();
+            var names = new List<string>();
             var stacks = new List<UnitStackData>();
+            var entries = new List<(UnitType type, string displayName, UnitStatsInline stats)>();
 
             for (int i = 0; i < entryCount; i++)
             {
                 var unitType = (UnitType)(200 + i);
-                var definition = MushroomBookTestHelpers.CreateDefinition(unitType, $"Entry {i}", _createdObjects, def =>
-                {
-                    def.UnitStats = MushroomBookTestHelpers.CreateStats(10 + i, 20 + i, 5 + i, 3 + i, _createdObjects);
-                });
-                defs.Add(definition);
+                var name = $"Entry {i}";
+                names.Add(name);
                 stacks.Add(new UnitStackData(unitType, 1));
+                entries.Add((unitType, name, new UnitStatsInline
+                {
+                    Health = 10 + i,
+                    MaxHealth = 20 + i,
+                    Damage = 5 + i,
+                    MoveSpeed = 3 + i
+                }));
             }
 
-            var catalog = MushroomBookTestHelpers.CreateCatalog(defs, _createdObjects);
+            var catalog = TestDataFactory.CreateAdventureMushroomMap(_createdObjects, entries.ToArray());
             var inventory = new MushroomInventoryModel(stacks);
             var viewModel = new MushroomBookViewModel(inventory, catalog, new StubAchievementEventBus());
 
             _disposables.Add(viewModel);
-            entries = viewModel.CurrentPageEntries.ToArray();
+            entryNames = names.ToArray();
 
             return viewModel;
         }
     }
 }
+
 
 
 

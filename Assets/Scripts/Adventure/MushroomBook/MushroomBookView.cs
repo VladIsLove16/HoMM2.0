@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UniRx;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -15,7 +16,7 @@ public class MushroomBookView : MonoBehaviour
     [Header("Blocked")]
     [SerializeField] private List<MushroomBookEntryView> pageSlots = new List<MushroomBookEntryView>();
     [SerializeField] private TextMeshProUGUI pageNumberText;
-    [SerializeField] private UnitDefinitionSOCollection testMushrooms;
+    [SerializeField] private AdventureMushroomAssetMap testDefinitions;
     private MushroomBookViewModel _viewModel;
     private CompositeDisposable _subscriptions = new CompositeDisposable();
     private readonly ReactiveCollection<MushroomBookEntryViewModel> _reactiveEntries = new();
@@ -67,23 +68,30 @@ public class MushroomBookView : MonoBehaviour
     private void RenderTestPage()
     {
         _reactiveEntries.Clear();
-        foreach (var mushroom in testMushrooms.GetAll())
+        if (testDefinitions != null)
         {
-            _reactiveEntries.Add(new MushroomBookEntryViewModel(
-                mushroom.UnitType,
-                mushroom.DisplayName,
-                mushroom.Description,
-                mushroom.Icon,
-                mushroom.HoveredIcon,
-                mushroom.HumanizedIcon,
-                mushroom.HumanizedHoveredIcon,
-                Array.Empty<MushroomStatViewData>()));
+            foreach (var type in testDefinitions.Types)
+            {
+                if (!testDefinitions.TryGetDefinition(type, out var definition))
+                    continue;
+
+                var shared = definition.SharedData;
+                _reactiveEntries.Add(new MushroomBookEntryViewModel(
+                    type,
+                    string.IsNullOrWhiteSpace(definition.SharedData.DisplayName) ? type.ToString() : definition.SharedData.DisplayName,
+                    definition.SharedData.Description,
+                    shared?.Icon,
+                    shared?.HoveredIcon,
+                    shared?.HumanizedIcon,
+                    shared?.HumanizedHoveredIcon,
+                    Array.Empty<MushroomStatViewData>()));
+            }
         }
 
         RenderEntries(_reactiveEntries);
         UpdatePageNumber(0, 1);
 
-        Debug.Log($"[MushroomBookView] Rendered {testMushrooms.GetAll()} test entries.");
+        Debug.Log($"[MushroomBookView] Rendered test entries.");
     }
     [Button("ToglePresMode")]
     private void ToglePresMode()

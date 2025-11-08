@@ -1,6 +1,7 @@
 using NUnit.Framework;
-using UnityEngine;
+using System.Collections.Generic;
 using Tests.EditMode.Units;
+using UnityEngine;
 namespace Tests.EditMode.ActionHandlers
 {
     [TestFixture]
@@ -13,8 +14,8 @@ namespace Tests.EditMode.ActionHandlers
         public void SetUp()
         {
             MovementSystem movementSystem = new MovementSystem();
-             var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
-            _model = new GameModel(new UnitModelFactory(dict), movementSystem);
+            var provider = new MockUnitStatsProviderInline();
+            _model = new GameModel(new UnitModelFactory(provider), movementSystem);
             _model.InitializeGrid(3, 3);
             _handler = new SpellActionHandler(movementSystem, _model);
         }
@@ -40,6 +41,21 @@ namespace Tests.EditMode.ActionHandlers
             PreviewResult preview = _handler.GetPreview(ctx);
             //Assert.That(preview.ToDictionary(), Contains.Item(new Vector2Int(1, 1)));
             Assert.IsTrue(true);
+        }
+    }
+    public class MockUnitStatsProviderInline : IUnitStatsProvider
+    {
+        private Dictionary<UnitType, UnitStats> _inlineStats = new Dictionary<UnitType, UnitStats>();
+
+        public IEnumerable<UnitType> Types => throw new System.NotImplementedException();
+
+        public bool TryGetBaseStats(UnitType type, out UnitStats stats)
+        {
+            return _inlineStats.TryGetValue(type, out stats);
+        }
+        public void SetData(UnitType type, UnitStats stats)
+        {
+            _inlineStats[type] = stats;
         }
     }
 }

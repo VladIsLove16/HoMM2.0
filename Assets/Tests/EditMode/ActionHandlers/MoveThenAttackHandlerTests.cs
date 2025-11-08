@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Tests.EditMode.ActionHandlers
@@ -39,12 +40,10 @@ namespace Tests.EditMode.ActionHandlers
             _baseStats.InvulnerableEffects = new List<StatusEffectType>();
 
             var moveSys = new MovementSystem();
-            var dict = new Dictionary<UnitType, UnitDefinitionSO>
-            {
-                { UnitType.Archer, new UnitDefinitionSO { UnitStats = _baseStats } }
-            };
-            var modelFactory = new UnitModelFactory(dict);
-            _model = new GameModel(modelFactory, moveSys);
+            var provider = new MockUnitStatsProviderInline();
+            provider.SetData(UnitType.Archer, _baseStats);
+            var unitFactory = new UnitModelFactory(provider);
+            _model = new GameModel(unitFactory, moveSys);
             _model.InitializeGrid(3, 3);
             _model.SpawnUnit(new UnitSpawnParams(attackerX, attackerY, UnitType.Archer, TestAmount, Team.Blue));
             _model.SpawnUnit(new UnitSpawnParams(damageableX, damageableY , UnitType.Archer, TestAmount, Team.Red));

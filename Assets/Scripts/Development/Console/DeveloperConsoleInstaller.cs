@@ -18,8 +18,13 @@ public class DeveloperConsoleInstaller : MonoInstaller
 
         if (consoleView != null)
         {
+            Container.Bind<DeveloperConsoleView>().FromInstance(consoleView).AsSingle();
             Container.QueueForInject(consoleView);
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Container.BindInterfacesTo<DeveloperConsoleInput>().AsSingle();
+#endif
     }
 
     private void BindCommands()

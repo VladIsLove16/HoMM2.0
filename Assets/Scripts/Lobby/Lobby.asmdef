@@ -1,0 +1,19 @@
+{
+    "name": "Lobby",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1491147abca9d7d4bb7105af628b223e",
+        "GUID:54c7bef1210f94b478f4e42eb5ecf9af",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GameCore"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

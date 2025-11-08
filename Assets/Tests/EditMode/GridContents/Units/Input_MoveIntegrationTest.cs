@@ -6,6 +6,7 @@ using UnityEngine;
 using Tests.EditMode.Units;
 using UniRx;
 using UnityEditor;
+using Tests.EditMode.ActionHandlers;
 
 namespace Tests.EditMode.GridContents.Input
 {
@@ -19,8 +20,11 @@ namespace Tests.EditMode.GridContents.Input
         [SetUp]
         public void SetUp()
         {
-            var dataMap = TestDataFactory.CreateSingleUnitData(UnitType.Archer, moveSpeed:3);
-            _unitModelFactory = new UnitModelFactory(dataMap);
+            var stats = ScriptableObject.CreateInstance<UnitStats>();
+            stats.MoveSpeed = 3; stats.MaxHealth = 10; stats.Health = 10;
+            var provider = new MockUnitStatsProviderInline();
+            provider.SetData(UnitType.Archer, stats);
+            var unitFactory = new UnitModelFactory(provider);
             _movement = new MovementSystem();
             _model = new GameModel(_unitModelFactory, _movement);
 

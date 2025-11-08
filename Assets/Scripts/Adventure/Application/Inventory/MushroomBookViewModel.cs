@@ -1,17 +1,18 @@
-﻿using Adventure.Domain.Inventory;
+using Adventure.Domain.Inventory;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
+using CustomEventBus;
+using Game.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
 using Zenject;
-using Game.Events;
 
 namespace Adventure.Presentation.Mushroom
 {
-    public class MushroomBookViewModel : IDisposable, IActiveMenu
+    public class MushroomBookViewModel : IDisposable, IAdventureGameActiveMenu
     {
         private int _entriesPerPage = 4;
         private static readonly UnitStatType[] _statOrder =
@@ -27,8 +28,8 @@ namespace Adventure.Presentation.Mushroom
         };
 
         private readonly MushroomInventoryModel _mushroomInventoryModel;
-        private readonly UnitDefinitionSOCollection _catalog;
-        private readonly IGameplayEventBus _gameplayEvents;
+        private readonly AdventureMushroomAssetMap _definitions;
+        private readonly EventBus _gameplayEvents;
         private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
         private readonly List<MushroomBookEntryViewModel> _allEntries = new();
 
@@ -42,29 +43,28 @@ namespace Adventure.Presentation.Mushroom
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         public IReadOnlyReactiveCollection<MushroomBookEntryViewModel> CurrentPageEntries => _currentPageEntries;
         public IReadOnlyReactiveProperty<int> CurrentPage => _currentPageIndex;
-        public int TotalPages => (_allEntries.Count  + _entriesPerPage -1) / _entriesPerPage;
+        public int TotalPages => (_allEntries.Count + _entriesPerPage - 1) / _entriesPerPage;
         public IReadOnlyReactiveProperty<PresentationMode> PresentationMode => _presentationMode;
-
         public InputMode InputMode => InputMode.Blocked;
 
         public MushroomBookViewModel(
             MushroomInventoryModel mushroomInventoryModel,
-            UnitDefinitionSOCollection catalog,
-            IGameplayEventBus gameplayEvents)
+            AdventureMushroomAssetMap definitions,
+            EventBus gameplayEvents)
         {
             _mushroomInventoryModel = mushroomInventoryModel ?? throw new ArgumentNullException(nameof(mushroomInventoryModel));
-            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _definitions = definitions ?? throw new ArgumentNullException(nameof(definitions));
             _gameplayEvents = gameplayEvents ?? throw new ArgumentNullException(nameof(gameplayEvents));
 
             RebuildEntries();
             UpdateCurrentPage();
         }
+
         public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
         public void PrevPage() => GoToPage(_currentPageIndex.Value - 1);
 
         public void Toggle()
         {
-            UnityLogger.Log("book toggle");
             if (_isOpen.Value)
                 Close();
             else
@@ -78,27 +78,31 @@ namespace Adventure.Presentation.Mushroom
 
             _isOpen.SetValueAndForceNotify(true);
         }
+
         public void Collect(UnitType type)
         {
             if (_mushroomInventoryModel == null)
                 return;
 
             _mushroomInventoryModel.Add(type);
-                        var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
-            _gameplayEvents.PublishMushroomCollected(type.ToString(), totals);
+            var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
+            _gameplayEvents.Invoke(new MushroomCollectedCustomEvent(type.ToString(), totals));
             RebuildEntries();
         }
+
         public void SetPageCapacity(int count)
         {
             _entriesPerPage = count;
             UpdateCurrentPage();
         }
+
         public void Close()
         {
             if (!_isOpen.Value)
                 return;
             _isOpen.SetValueAndForceNotify(false);
         }
+
         public void GoToPage(int pageIndex)
         {
             var clamped = Mathf.Clamp(pageIndex, 0, TotalPages);
@@ -122,11 +126,11 @@ namespace Adventure.Presentation.Mushroom
             _allEntries.Clear();
             foreach (var entry in _mushroomInventoryModel.Items)
             {
-                if (!_catalog.TryGet(entry.Key, out var definition) || definition == null)
-                    continue;
-
-                var viewData = CreateEntryViewData(definition);
-                _allEntries.Add(viewData);
+                var viewData = CreateEntryViewData(entry.Key, entry.Value);
+                if (viewData != null)
+                {
+                    _allEntries.Add(viewData);
+                }
             }
         }
 
@@ -144,24 +148,26 @@ namespace Adventure.Presentation.Mushroom
             {
                 _currentPageEntries.Add(_allEntries[i]);
             }
-            UnityLogger.Log("new _currentPageEntries " + _currentPageEntries.Count);
-
         }
 
-        private MushroomBookEntryViewModel CreateEntryViewData(UnitDefinitionSO definition)
+        private MushroomBookEntryViewModel CreateEntryViewData(UnitType unitType, int amount)
         {
-            var stats = BuildStats(definition.UnitStats);
+            if (_definitions == null || !_definitions.TryGetDefinition(unitType, out var definition))
+                return null;
+
+            _definitions.TryGetBaseStats(unitType, out var statsForView);
+            var shared = definition.SharedData;
 
             var vm = new MushroomBookEntryViewModel(
-                definition.UnitType,
-                definition.DisplayName,
-                definition.Description,
-                definition.Icon,
-                definition.HoveredIcon,
-                definition.HumanizedIcon,
-                definition.HumanizedHoveredIcon,
-                stats);
-            vm.Amount = _mushroomInventoryModel.GetAmount(definition.UnitType);
+                unitType,
+                string.IsNullOrWhiteSpace(definition.SharedData.DisplayName) ? unitType.ToString() : definition.SharedData.DisplayName,
+                definition.SharedData.Description,
+                shared?.Icon,
+                shared?.HoveredIcon,
+                shared?.HumanizedIcon,
+                shared?.HumanizedHoveredIcon,
+                BuildStats(statsForView));
+            vm.Amount = amount;
             return vm;
         }
 
@@ -225,40 +231,25 @@ namespace Adventure.Presentation.Mushroom
 
         private static string GetLabel(UnitStatType statType)
         {
-            switch (statType)
+            return statType switch
             {
-                case UnitStatType.MaxHealth:
-                    return "Max Health";
-                case UnitStatType.MoveSpeed:
-                    return "Move Speed";
-                case UnitStatType.AttackRange:
-                    return "Attack Range";
-                case UnitStatType.CanFly:
-                    return "Can Fly";
-                default:
-                    return statType.ToString();
-            }
+                UnitStatType.Health => "Health",
+                UnitStatType.MaxHealth => "Max Health",
+                UnitStatType.Damage => "Damage",
+                UnitStatType.SpellPower => "Spell Power",
+                UnitStatType.Offense => "Offense",
+                UnitStatType.Defense => "Defense",
+                UnitStatType.MoveSpeed => "Move Speed",
+                UnitStatType.AttackRange => "Attack Range",
+                UnitStatType.CanFly => "Can Fly",
+                _ => statType.ToString()
+            };
         }
 
         public void Dispose()
         {
+            Close();
             _subscriptions.Dispose();
-            _currentPageEntries?.Dispose();
-            _currentPageIndex?.Dispose();
-            _presentationMode?.Dispose();
         }
-
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

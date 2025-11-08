@@ -74,12 +74,12 @@ public class AttackActionHandler : IActionHandler, IAttackActionHandler
         return previewResult;
     }
 
-    public DamageContextPreview GetDamageContext(ActionContext ctx)
+    public DamageContext GetDamageContext(ActionContext ctx)
     {
         IDamagable damagable = _gameModel.GetCell(ctx.TargetCell).Unit;
         IDamageSource damageSource = _gameModel.GetCell(ctx.FromCell).Unit;
         AttackContext attackContext = new(damagable, false);
         DamageContext damageContext = damageSource.SimulateSendDamage(attackContext);
-        return new(damageContext);
+        return damageContext;
     }
 }

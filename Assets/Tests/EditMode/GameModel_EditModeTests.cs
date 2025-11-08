@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using Tests.EditMode.Units;
+using Tests.EditMode.ActionHandlers;
 
 namespace Tests.EditMode.Model
 {
@@ -16,8 +17,11 @@ namespace Tests.EditMode.Model
 		public void SetUp()
 		{
 			_movement = new MovementSystem();
-			var dict = TestDataFactory.CreateSingleUnitData(UnitType.Archer);
-			_factory = new UnitModelFactory(dict);
+			var stats = ScriptableObject.CreateInstance<UnitStats>();
+			stats.MaxHealth = 10; stats.Health = 10; stats.MoveSpeed = 3; stats.Damage = 1;
+			var provider = new MockUnitStatsProviderInline();
+            provider.SetData(UnitType.Archer, stats);	
+            _factory = new UnitModelFactory(provider);
 			_model = new GameModel(_factory, _movement);
 			_model.InitializeGrid(4, 3);
 		}

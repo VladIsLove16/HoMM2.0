@@ -6,7 +6,7 @@ using Zenject;
 public class GameController : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [Inject] private IGameConfigurationService _configurationService;
+    [SerializeField] private GameConfigurationService _configurationService;
     private GameModel _gameModel;
     private ITurnService _turnService;
 
@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
     {
         _gameModel = model;
         _turnService = turnService;
+        UnityLogger.Log("GameController inited with " + model.ToString());
     }
 
     private void Start()
@@ -43,6 +44,11 @@ public class GameController : MonoBehaviour
     public void CreateGridContent()
     {
         var config = _configurationService.GetSelectedConfiguration();
+        if (config == null)
+        {
+            Debug.LogWarning("CreateGridContent called with null configuration. Skipping grid setup.");
+            return;
+        }
         CreateGridContent(config);
     }
 

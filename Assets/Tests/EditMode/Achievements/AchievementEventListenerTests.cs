@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CustomEventBus;
 using Game.Achievements;
 using Game.Events;
 using NUnit.Framework;
@@ -22,14 +23,14 @@ namespace Tests.EditMode.Achievements
 
             var storage = new InMemoryAchievementStorage();
             var service = new AchievementService(new InMemoryDefinitionProvider(definitions), storage);
-            var bus = new GameplayEventBus();
+            var bus = new EventBus();
             var listener = new AchievementEventListener(bus, service);
             listener.Initialize();
 
-            bus.PublishMushroomCollected("Witch", new Dictionary<string, int> { { "Witch", 1 } });
+            bus.Invoke(new MushroomCollectedCustomEvent( "Witch", new Dictionary<string, int> { { "Witch", 1 } }));
             Assert.That(service.IsUnlocked(AchievementIds.FirstMushroom), Is.True);
 
-            bus.PublishMushroomCollected("Witch", new Dictionary<string, int> { { "Witch", 9 }, { "Archer", 1 } });
+            bus.Invoke((new MushroomCollectedCustomEvent("Witch", new Dictionary<string, int> { { "Witch", 9 }, { "Archer", 1 } })));
             Assert.That(service.IsUnlocked(AchievementIds.MushroomCollector), Is.True);
 
             listener.Dispose();
@@ -45,11 +46,11 @@ namespace Tests.EditMode.Achievements
 
             var storage = new InMemoryAchievementStorage();
             var service = new AchievementService(new InMemoryDefinitionProvider(definitions), storage);
-            var bus = new GameplayEventBus();
+            var bus = new EventBus();
             var listener = new AchievementEventListener(bus, service);
             listener.Initialize();
 
-            bus.PublishBattleCompleted(playerWon: true);
+            bus.Invoke(new BattleCompletedCustomEvent( true));
             Assert.That(service.IsUnlocked(AchievementIds.FirstBattleWin), Is.True);
 
             listener.Dispose();

@@ -1,6 +1,6 @@
 using System;
-using Unity.Collections;
 using Unity.Netcode;
+using Unity.Collections;
 /// <summary>
 /// Данные игрока в лобби
 /// </summary>

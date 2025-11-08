@@ -13,20 +13,17 @@ public class ConsoleGameView : IInitializable, IDisposable
     private readonly GameViewModel _gameViewModel;
     private readonly ITurnStateViewModel _turnState;
     private readonly ConsoleGridState _gridState;
-    private readonly IDeveloperConsoleOutput _consoleOutput;
     private readonly Dictionary<UnitViewModel, UnitBinding> _unitBindings = new();
     private readonly CompositeDisposable _disposables = new();
 
     public ConsoleGameView(
         GameViewModel gameViewModel,
         ITurnStateViewModel turnState,
-        ConsoleGridState gridState,
-        [Inject(Optional = true)] IDeveloperConsoleOutput consoleOutput = null)
+        ConsoleGridState gridState)
     {
         _gameViewModel = gameViewModel ?? throw new ArgumentNullException(nameof(gameViewModel));
         _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
         _gridState = gridState ?? throw new ArgumentNullException(nameof(gridState));
-        _consoleOutput = consoleOutput;
     }
 
     public void Initialize()
@@ -139,15 +136,7 @@ public class ConsoleGameView : IInitializable, IDisposable
         {
             return;
         }
-
-        if (_consoleOutput != null)
-        {
-            _consoleOutput.AppendLine(message);
-        }
-        else
-        {
-            Debug.Log(message);
-        }
+        Debug.Log(message);
     }
 
     public void Dispose()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Adventure.Domain.Inventory;
@@ -18,6 +18,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
+using Tests.EditMode.MushroomBook;
 namespace Tests.EditMode.Input
 {
     [TestFixture]
@@ -26,11 +27,11 @@ namespace Tests.EditMode.Input
         private AdventureInput _input;
         private InputModeStub _inputMode;
         private TestActiveMenu _menu;
-        private MenusCoordinatorViewModel _menus;
-        private GameSettingsViewModel _settings;
+        private AdventureMenusCoordinatorViewModel _menus;
+        private AdventureGameSettingsViewModel _settings;
         private InMemorySettingsRepository _settingsRepository;
         private MushroomBookViewModel _book;
-        private UnitDefinitionSOCollection _catalog;
+        private AdventureMushroomAssetMap _mushroomMap;
         private PlayerMovementController _movementController;
         private PlayerInteractionController _interactionController;
         private MovementSettingsSO _movementSettings;
@@ -42,16 +43,18 @@ namespace Tests.EditMode.Input
             _input = new AdventureInput();
             _inputMode = new InputModeStub();
             _menu = new TestActiveMenu(InputMode.Blocked);
-            _menus = new MenusCoordinatorViewModel(_inputMode, new[] { _menu });
+            _menus = new AdventureMenusCoordinatorViewModel(_inputMode, new[] { _menu });
             _settingsRepository = new InMemorySettingsRepository();
-            _settings = new GameSettingsViewModel(
+            _settings = new AdventureGameSettingsViewModel(
                 new GameSettingsModel(),
                 new PauseController(),
-                new AnimationSpeedSettings(),
-                new AudioMixer(),
-                _settingsRepository);
-            _catalog = ScriptableObject.CreateInstance<UnitDefinitionSOCollection>();
-            _book = new MushroomBookViewModel(new MushroomInventoryModel(new List<UnitStackData>()), _catalog, new StubAchievementEventBus());
+                _settingsRepository,
+                null);
+            _mushroomMap = TestDataFactory.CreateSingleAdventureMushroom(UnitType.Archer);
+            _book = new MushroomBookViewModel(
+                new MushroomInventoryModel(new List<UnitStackData>()),
+                _mushroomMap,
+                new StubAchievementEventBus());
             _movementController = CreateMovementController(out _movementGO);
             _interactionController = CreateInteractionController(out _interactionGO, _input);
             Time.timeScale = 1f;
@@ -62,7 +65,7 @@ namespace Tests.EditMode.Input
             if (_movementGO != null) Object.DestroyImmediate(_movementGO);
             if (_interactionGO != null) Object.DestroyImmediate(_interactionGO);
             if (_movementSettings != null) Object.DestroyImmediate(_movementSettings);
-            if (_catalog != null) Object.DestroyImmediate(_catalog);
+            if (_mushroomMap != null) Object.DestroyImmediate(_mushroomMap);
             _book?.Dispose();
             Time.timeScale = 1f;
         }
@@ -333,7 +336,7 @@ namespace Tests.EditMode.Input
                 }
             }
         }
-        private sealed class TestActiveMenu : IActiveMenu
+        private sealed class TestActiveMenu : IAdventureGameActiveMenu
         {
             private readonly ReactiveProperty<bool> _isOpen = new(false);
             public TestActiveMenu(InputMode inputMode)
@@ -353,21 +356,6 @@ namespace Tests.EditMode.Input
                 _isOpen.SetValueAndForceNotify(false);
             }
         }
-        private sealed class StubAchievementEventBus : IGameplayEventBus
-        {
-            public List<MushroomCollectedEvent> Collected { get; } = new();
-            public List<BattleCompletedEvent> Battles { get; } = new();
-            public IObservable<MushroomCollectedEvent> MushroomCollectedStream => Observable.Empty<MushroomCollectedEvent>();
-            public IObservable<BattleCompletedEvent> BattleCompletedStream => Observable.Empty<BattleCompletedEvent>();
-            public void PublishMushroomCollected(string itemId, IReadOnlyDictionary<string, int> totals)
-            {
-                                Collected.Add(new MushroomCollectedEvent(itemId, totals));
-            }
-            public void PublishBattleCompleted(bool playerWon)
-            {
-                Battles.Add(new BattleCompletedEvent(playerWon));
-            }
-        }
         private sealed class InMemorySettingsRepository : IDataRepository<GameSettingsSaveData>
         {
             public GameSettingsSaveData Data = new GameSettingsSaveData();
@@ -383,5 +371,6 @@ namespace Tests.EditMode.Input
         }
     }
 }
+
 
 

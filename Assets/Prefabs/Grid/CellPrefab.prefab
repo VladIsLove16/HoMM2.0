@@ -98,7 +98,7 @@ GameObject:
   - component: {fileID: 2851112579813113758}
   - component: {fileID: 5952328620544462706}
   - component: {fileID: 6570779767429208341}
-  - component: {fileID: 6718948771117235691}
+  - component: {fileID: 8007041704186792435}
   m_Layer: 0
   m_Name: CellPrefab
   m_TagString: Untagged
@@ -197,7 +197,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6718948771117235691
+--- !u!114 &8007041704186792435
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1404112009169814697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bca93afd52d257b40abce568a9881c42, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c5cb377d05973645b8ff726fc68cd90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _hoverRenderer: {fileID: 7523268397797985888}
