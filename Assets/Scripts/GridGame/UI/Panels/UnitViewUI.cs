@@ -51,7 +51,7 @@ public class UnitViewUI : MonoBehaviour, IDisposable
         var health = _unitViewModel.Health;
         var maxHealth = _unitViewModel.MaxHealth;
 
-        healthAmountText.text = health.ToString();
+        healthAmountText.text = $"{health}/{maxHealth}";
 
         float ratio = maxHealth > 0 ? (float)health / maxHealth : 0f;
         healthBar.SetRatio(ratio);

@@ -28,7 +28,7 @@ namespace Adventure.Integration.Battle
             _formationResolver = formationResolver ?? throw new ArgumentNullException(nameof(formationResolver));
         }
 
-        public void Launch(BattleLaunchContext context)
+        public Action PrepareLaunch(BattleLaunchContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -52,7 +52,13 @@ namespace Adventure.Integration.Battle
 
             _gridGateway.PrepareBattle(payload, _formationResolver);
 
-            Loader.Load(_gridGateway.BattleScene);
+            return () => Loader.Load(_gridGateway.BattleScene);
+        }
+
+        public void Launch(BattleLaunchContext context)
+        {
+            var finalize = PrepareLaunch(context);
+            finalize?.Invoke();
         }
     }
 }

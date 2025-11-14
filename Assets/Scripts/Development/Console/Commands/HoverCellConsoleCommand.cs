@@ -12,7 +12,7 @@ public class HoverCellConsoleCommand : IDeveloperConsoleCommand
 
     public void Execute(DeveloperConsoleCommandContext context, IReadOnlyList<string> args, IDeveloperConsoleOutput output)
     {
-        if (context.GameViewModel == null)
+        if (context.GridViewModel == null)
         {
             output.AppendError("Game view model is not available.");
             return;
@@ -41,7 +41,7 @@ public class HoverCellConsoleCommand : IDeveloperConsoleCommand
         }
 
         var pair = new KeyValuePair<Vector2Int, Vector2Int>(target, attackFrom);
-        context.GameViewModel.HandleCellHovered(pair);
+        context.GridViewModel.HandleCellHovered(target, attackFrom);
         output.AppendLine($"Hovered cell ({target.x},{target.y}) with attack-from ({attackFrom.x},{attackFrom.y}).");
     }
 }

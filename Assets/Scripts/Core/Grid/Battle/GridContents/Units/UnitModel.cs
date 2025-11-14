@@ -125,6 +125,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             throw new ArgumentException("Damage cannot be negative", nameof(ModifiedStats.Damage));
             
         DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
+        damageContext.Target = ctx.Target;
         _statusEffectManager.HandleOutDamage(damageContext);
         _appliedEffects.AddRange(damageContext.AppliedEffects);
         ctx.Target.RecieveDamage(damageContext);
@@ -140,6 +141,7 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             throw new ArgumentException("Damage cannot be negative", nameof(ModifiedStats.Damage));
             
         DamageContext damageContext = new(ModifiedStats.Damage * Amount.Value, DamageType.physical, this);
+        damageContext.Target = defender.Target;
         _statusEffectManager.HandleOutDamage(damageContext, true);
         defender.Target.SimulateRecieveDamage(damageContext);
         return damageContext;

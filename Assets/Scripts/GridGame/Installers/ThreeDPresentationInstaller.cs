@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -12,6 +13,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
     [SerializeField] private UnitStatsPanel unitStatsPanel;
     [SerializeField] private MaterialProvider materialProvider;
     [SerializeField] private PerCellGridRenderer perCellGridRenderer;
+    [SerializeField] private TileGridRenderer tileGridRenderer;
     [SerializeField] private Transform unitsParent;
 
     [Header("Grid Rendering")]
@@ -107,6 +109,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         if (inGameUI != null) inGameUI.gameObject.SetActive(false);
         if (unitStatsPanel != null) unitStatsPanel.gameObject.SetActive(false);
         if (perCellGridRenderer != null) perCellGridRenderer.gameObject.SetActive(false);
+        if (tileGridRenderer != null) tileGridRenderer.gameObject.SetActive(false);
     }
 
     private void BindGridRenderer(DiContainer container)
@@ -114,12 +117,35 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         switch (gridRenderStrategy)
         {
             case GridRenderStrategy.Single:
-                container.BindInterfacesAndSelfTo<SingleGridRenderer>().AsSingle();
-                break;
+                throw new NotImplementedException();
+                //container.BindInterfacesAndSelfTo<SingleGridRenderer>().AsSingle();
             case GridRenderStrategy.PerCell:
-                container.BindInterfacesAndSelfTo<PerCellGridRenderer>()
-                         .FromInstance(perCellGridRenderer)
-                         .AsSingle();
+                if (perCellGridRenderer != null)
+                {
+                    container.BindInterfacesAndSelfTo<PerCellGridRenderer>()
+                             .FromInstance(perCellGridRenderer)
+                             .AsSingle();
+
+                    Debug.LogWarning("[ThreeDPresentationInstaller] PerCellGridRenderer is assigned.", this);
+                }
+                else
+                {
+                    Debug.LogWarning("[ThreeDPresentationInstaller] PerCellGridRenderer is not assigned.", this);
+                }
+                break;
+            case GridRenderStrategy.Tile:
+                if (tileGridRenderer != null)
+                {
+                    container.BindInterfacesAndSelfTo<TileGridRenderer>()
+                             .FromInstance(tileGridRenderer)
+                             .AsSingle();
+
+                    Debug.LogWarning("[ThreeDPresentationInstaller] TileGridRenderer is assigned.", this);
+                }
+                else
+                {
+                    Debug.LogWarning("[ThreeDPresentationInstaller] TileGridRenderer is not assigned.", this);
+                }
                 break;
         }
     }

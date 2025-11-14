@@ -12,7 +12,7 @@ public class SelectCellConsoleCommand : IDeveloperConsoleCommand
 
     public void Execute(DeveloperConsoleCommandContext context, IReadOnlyList<string> args, IDeveloperConsoleOutput output)
     {
-        if (context.GameViewModel == null)
+        if (context.GridViewModel == null)
         {
             output.AppendError("Game view model is not available.");
             return;
@@ -41,7 +41,7 @@ public class SelectCellConsoleCommand : IDeveloperConsoleCommand
         }
 
         var pair = new KeyValuePair<Vector2Int, Vector2Int>(target, attackFrom);
-        context.GameViewModel.HandleCellSelected(pair);
+        context.GridViewModel.HandleCellSelected(pair);
         output.AppendLine($"Selected cell ({target.x},{target.y}) from ({attackFrom.x},{attackFrom.y}).");
     }
 }

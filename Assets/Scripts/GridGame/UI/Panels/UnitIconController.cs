@@ -1,56 +1,160 @@
-using System;
+using System.Collections;
 using TMPro;
+using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UnitIconController : MonoBehaviour
+public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    [SerializeField] Image UnitIcon;
-    [SerializeField] Image UnitTeamBorder;
-    [SerializeField] Color BlueTeamColor;
-    [SerializeField] Color RedTeamColor;
-    [SerializeField] UnitType unitType;
-    [SerializeField] TextMeshProUGUI turnText;
+    [Header("Visuals")]
+    [SerializeField] private Image unitIcon;
+    [SerializeField] private Image unitTeamBorder;
+    [SerializeField] private Color blueTeamColor = Color.blue;
+    [SerializeField] private Color redTeamColor = Color.red;
+    [SerializeField] private TextMeshProUGUI turnText;
+    [SerializeField] private Animator portraitAnimator;
+    [SerializeField] private string damageTriggerName = "Damage";
 
-    public Sprite Sprite => UnitIcon.sprite;
-    public Team Team { get; internal set; }
-    public ICombatObject CombatUnit { get; internal set; }
+    [Header("Damage Popup")]
+    [SerializeField] private TextMeshProUGUI damagePopupText;
+    [SerializeField] private float damagePopupDuration = 1.25f;
 
-    public void SetInfo(Sprite sprite, Team team)
+    private UnitPortraitViewModel _viewModel;
+    private readonly CompositeDisposable _bindings = new();
+    private Coroutine _damageRoutine;
+
+    private void Awake()
     {
-        SetUnitIcon(sprite);
-        SetTeamColor(team);
+        ClearDamagePopup();
+        ClearVisuals();
     }
 
-    private void SetUnitIcon(Sprite sprite)
+    public void Bind(UnitPortraitViewModel viewModel)
     {
-        UnitIcon.sprite = sprite;
-    }
-
-    private void SetTeamColor(Team team)
-    {
-        Team = team;
-        UnitTeamBorder.color = team == Team.Blue ? BlueTeamColor : RedTeamColor;
-    }
-
-    private void SetInfo(UnitIconController unitIconController)
-    {
-        SetInfo(unitIconController.Sprite, unitIconController.Team);
-        Link(unitIconController.CombatUnit);
-    }
-
-    public void Link(ICombatObject model, int turn = 0)
-    {
-        if (model != null)
+        if (_viewModel == viewModel)
         {
-            CombatUnit = model;
-            unitType = model.UnitType;
+            return;
         }
-        turnText.text = turn.ToString();
+
+        Unbind();
+        _viewModel = viewModel;
+        if (_viewModel == null)
+        {
+            ClearVisuals();
+            return;
+        }
+
+        ApplySprite(_viewModel.Icon);
+        UpdateTeam(_viewModel.Team);
+        UpdateTurnText(_viewModel.TurnOrder);
+
+        _bindings.Add(_viewModel.TeamObservable.Subscribe(UpdateTeam));
+        _bindings.Add(_viewModel.TurnOrderObservable.Subscribe(UpdateTurnText));
+        _bindings.Add(_viewModel.DamageTaken.Subscribe(OnDamageTaken));
     }
 
-    internal void Clear()
+    public void Unbind()
     {
-        SetUnitIcon(null);
+        _viewModel?.ReleaseFocus();
+        _bindings.Clear();
+        _viewModel = null;
+        ClearDamagePopup();
+        ClearVisuals();
+    }
+
+    private void ApplySprite(Sprite sprite)
+    {
+        if (unitIcon != null)
+        {
+            unitIcon.sprite = sprite;
+            unitIcon.enabled = sprite != null;
+        }
+    }
+
+    private void UpdateTeam(Team team)
+    {
+        if (unitTeamBorder != null)
+        {
+            unitTeamBorder.color = team == Team.Blue ? blueTeamColor : redTeamColor;
+        }
+    }
+
+    private void UpdateTurnText(int turnIndex)
+    {
+        if (turnText != null)
+        {
+            turnText.text = turnIndex.ToString();
+        }
+    }
+
+    private void OnDamageTaken(UnitPortraitDamageEvent evt)
+    {
+        if (damagePopupText != null)
+        {
+            damagePopupText.gameObject.SetActive(true);
+            damagePopupText.text = $"-{evt.Amount}";
+            if (_damageRoutine != null)
+            {
+                StopCoroutine(_damageRoutine);
+            }
+            _damageRoutine = StartCoroutine(HideDamagePopup());
+        }
+
+        if (portraitAnimator != null && !string.IsNullOrEmpty(damageTriggerName))
+        {
+            portraitAnimator.SetTrigger(damageTriggerName);
+        }
+    }
+
+    private IEnumerator HideDamagePopup()
+    {
+        yield return new WaitForSeconds(damagePopupDuration);
+        ClearDamagePopup();
+        _damageRoutine = null;
+    }
+
+    private void ClearDamagePopup()
+    {
+        if (_damageRoutine != null)
+        {
+            StopCoroutine(_damageRoutine);
+            _damageRoutine = null;
+        }
+
+        if (damagePopupText != null)
+        {
+            damagePopupText.gameObject.SetActive(false);
+        }
+    }
+
+    private void ClearVisuals()
+    {
+        ApplySprite(null);
+        if (turnText != null)
+        {
+            turnText.text = string.Empty;
+        }
+        ClearDamagePopup();
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        _viewModel?.RequestFocus();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        _viewModel?.ReleaseFocus();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        _viewModel?.SelectUnit();
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
     }
 }

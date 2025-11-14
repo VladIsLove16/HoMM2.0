@@ -17,11 +17,14 @@ public class GridGameMonoInstaller : MonoInstaller
     [Header("Gameplay References")]
     [SerializeField] private GameController gameController;
     [SerializeField] private GameNetworkCommandGateway networkCommandGateway;
-    [SerializeField] private GridUnitAssetMap gridUnitAssets;
-    [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
-    [SerializeField] private GameConfigurationService gameConfigurationService;
     [SerializeField] private AudioMixer audioMixer;
+    [Header("View model dependencies")]
+    [SerializeField] private GridUnitAssetMap gridUnitAssets;
+    [SerializeField] private GridRenderSettingsSO gridRenderSettings;
+    [Header("Model dependencies")]
+    [SerializeField] private StatusEffectDatas statusEffectDatas;
+    [SerializeField] private GameConfigurationService gameConfigurationService;
     [Header("Presentation")]
     [SerializeField] private MonoBehaviour _presentationInstaller;
     public override void InstallBindings()
@@ -55,6 +58,16 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
         Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle().WithArguments(AnimationSpeedMode.Fast);
+        if (gridRenderSettings == null)
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] GridRenderSettings is not assigned. Using default settings.");
+            var runtimeSettings = ScriptableObject.CreateInstance<GridRenderSettingsSO>();
+            Container.Bind<IGridRenderSettings>().FromInstance(runtimeSettings).AsSingle();
+        }
+        else
+        {
+            Container.Bind<IGridRenderSettings>().FromInstance(gridRenderSettings).AsSingle();
+        }
         Container.Bind<EventBus>().AsSingle();
         Container.Bind<PauseController>().AsSingle();
         Container.Bind<AudioMixer>().AsSingle();
@@ -134,7 +147,6 @@ public class GridGameMonoInstaller : MonoInstaller
     private void BindViewModels()
     {
         Container.BindInterfacesAndSelfTo<TurnStateViewModel>().AsSingle().NonLazy();
-        Container.BindInterfacesAndSelfTo<GridViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();

@@ -5,6 +5,7 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Tests.Common;
 
 namespace Tests.PlayMode.Units
 {
@@ -78,7 +79,8 @@ namespace Tests.PlayMode.Units
         public IEnumerator HandleHit_CompletesQueuedAnimation()
         {
             var fixture = CreateViewFixture();
-            fixture.View.HandleHit(new DamageContext(10, DamageType.physical, null));
+            fixture.View.HandleHit(Vector3.forward);
+            CompleteAnimation(fixture.View, UnitAnimationEvent.HitFinished);
 
             Assert.That(GetIsExecuting(fixture.View), Is.True);
             yield return WaitForQueueToDrain(fixture.View);
@@ -89,7 +91,8 @@ namespace Tests.PlayMode.Units
         public IEnumerator HandleAttack_CompletesQueuedAnimation()
         {
             var fixture = CreateViewFixture();
-            fixture.View.HandleAttack(new DamageContext(5, DamageType.physical, null));
+            fixture.View.HandleAttack(Vector3.forward);
+            CompleteAnimation(fixture.View, UnitAnimationEvent.AttackFinished);
 
             Assert.That(GetIsExecuting(fixture.View), Is.True);
             yield return WaitForQueueToDrain(fixture.View);
@@ -118,6 +121,7 @@ namespace Tests.PlayMode.Units
             var fixture = CreateViewFixture(amount: 2);
             fixture.Model.RecieveDamage(new DamageContext(150, DamageType.physical, null));
             fixture.View.HandleDeath();
+            CompleteAnimation(fixture.View, UnitAnimationEvent.HitFinished);
 
             yield return WaitForQueueToDrain(fixture.View);
             Assert.That(fixture.View.gameObject.activeSelf, Is.True);
@@ -166,7 +170,8 @@ namespace Tests.PlayMode.Units
             _assets.Add(stats);
 
             var model = new UnitModel(stats, UnitType.Archer, 0, 0, amount, Team.Blue);
-            var viewModel = new UnitViewModel(model);
+            var worldProvider = new TestWorldToCellProvider();
+            var viewModel = new UnitViewModel(model, worldProvider);
 
             var go = new GameObject("UnitView3D", typeof(Animator));
             var renderer = go.AddComponent<SkinnedMeshRenderer>();
@@ -224,6 +229,12 @@ namespace Tests.PlayMode.Units
                 var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard") ?? Shader.Find("Sprites/Default");
                 return new Material(shader) { name = name };
             }
+        }
+
+        private static void CompleteAnimation(UnitView3D view, UnitAnimationEvent evt)
+        {
+            var controller = view.GetComponent<UnitAnimatorController>();
+            controller?.DispatchAnimationEvent((int)evt);
         }
     }
 }

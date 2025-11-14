@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _configs:
   - {fileID: 11400000, guid: 439c7162533bc6e4981605a051622295, type: 2}
+  PlayerStartArmy: {fileID: 11400000, guid: d653ab32bb8777d49ac339d04f5aca1b, type: 2}
   _selectedIndex: 0
   _team: 0
   _mode: 0

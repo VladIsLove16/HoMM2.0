@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Tests.TestHelpers;
 using Tests.EditMode.ActionHandlers;
+using Tests.Common;
 
 public class ConsoleGameView_EditModeTests
 {
@@ -49,21 +50,20 @@ public class ConsoleGameView_EditModeTests
     }
 
     [Test]
-    public void ConsoleGridRenderer_ProvidesWorldConversionsAndState()
+    public void ConsoleGridRenderer_BindsGridInitialization()
     {
         var gridState = new ConsoleGridState();
-        var output = new TestConsoleOutput();
         var renderer = new ConsoleGridRenderer(gridState);
+        var viewModel = new Tests.EditMode.Input.CellInputHandler_EditModeIntegrationTests.TestGridViewModel();
 
-        renderer.Render(2, 2, 1f, Vector3.zero, 0f);
-        var world = renderer.ToWorld(1, 0);
-        Assert.That(world, Is.EqualTo(new Vector3(1f, 0f, 0f)));
+        renderer.Bind(viewModel);
+        viewModel.SimulateGridInit(2, 2);
 
-        Assert.That(renderer.ToGrid(new Vector3(1.4f, 0f, 0.49f), out var coords), Is.True);
-        Assert.That(coords, Is.EqualTo(new Vector2Int(1, 0)));
+        var representation = gridState.BuildRepresentation();
+        Assert.That(representation, Does.Contain("00"));
 
-        Assert.That(renderer.GetCellStates(new Vector2Int(0, 0)), Is.Empty);
-        Assert.That(output.Messages, Has.Some.Contains("Console grid render width=2"));
+        renderer.Clear();
+        renderer.Unbind(viewModel);
     }
 
     private sealed class TestConsoleOutput : IDeveloperConsoleOutput
@@ -82,6 +82,7 @@ public class ConsoleGameView_EditModeTests
         public TurnStateViewModel TurnStateViewModel { get; }
         public ITurnService TurnService => ConcreteTurnService;
         public MovementSystem MovementSystem { get; } = new();
+        public IGridRenderSettings GridSettings { get; } = new TestGridRenderSettings();
         public ActionResolver ActionResolver { get; }
         public IGameCommandExecutor CommandExecutor { get; } = new NullCommandExecutor();
 
@@ -101,7 +102,7 @@ public class ConsoleGameView_EditModeTests
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
             ConcreteTurnService = new TurnService(new TurnQueue());
             TurnStateViewModel = new TurnStateViewModel(ConcreteTurnService);
-            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnStateViewModel, ActionResolver);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnStateViewModel, ActionResolver, GridSettings);
         }
     }
 

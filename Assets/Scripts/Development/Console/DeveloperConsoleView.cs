@@ -28,9 +28,16 @@ public partial class DeveloperConsoleView : MonoBehaviour
     };
 
     [Inject]
-    public void Construct(DeveloperConsoleService service)
+    public void Construct([InjectOptional] DeveloperConsoleService service)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
+        if (service == null)
+        {
+            Debug.LogWarning("[DeveloperConsoleView] DeveloperConsoleService is not bound in this scene. Console view will be disabled.", this);
+            enabled = false;
+            return;
+        }
+
+        _service = service;
         _service.LogUpdated += OnLogUpdated;
     }
 

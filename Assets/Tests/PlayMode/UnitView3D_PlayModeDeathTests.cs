@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Tests.Common;
 
 namespace Tests.PlayMode.Units
 {
@@ -14,7 +15,7 @@ namespace Tests.PlayMode.Units
         {
             var stats = CreateStats();
             var model = new UnitModel(stats, UnitType.Archer, 0, 0, 1, true);
-            var viewModel = new UnitViewModel(model);
+            var viewModel = new UnitViewModel(model, new TestWorldToCellProvider());
             var go = new GameObject("UnitView3D_PlayMode", typeof(Animator));
             var view = go.AddComponent<UnitView3D>();
             InjectMaterialProvider(view);
@@ -22,8 +23,8 @@ namespace Tests.PlayMode.Units
 
             model.RecieveDamage(new DamageContext(999, DamageType.physical, null));
             view.HandleDeath();
-
-            yield return new WaitForSeconds(1.6f);
+            CompleteAnimation(view, UnitAnimationEvent.DieFinished);
+            yield return null;
 
             Assert.That(go.activeSelf, Is.False);
 
@@ -36,7 +37,7 @@ namespace Tests.PlayMode.Units
         {
             var stats = CreateStats();
             var model = new UnitModel(stats, UnitType.Archer, 0, 0, 2, true);
-            var viewModel = new UnitViewModel(model);
+            var viewModel = new UnitViewModel(model, new TestWorldToCellProvider());
             var go = new GameObject("UnitView3D_PlayMode_Remaining", typeof(Animator));
             var view = go.AddComponent<UnitView3D>();
             InjectMaterialProvider(view);
@@ -44,7 +45,7 @@ namespace Tests.PlayMode.Units
 
             model.RecieveDamage(new DamageContext(150, DamageType.physical, null));
             view.HandleDeath();
-
+            CompleteAnimation(view, UnitAnimationEvent.HitFinished);
             yield return null;
 
             Assert.That(go.activeSelf, Is.True);
@@ -84,6 +85,13 @@ namespace Tests.PlayMode.Units
                 var shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Sprites/Default");
                 return new Material(shader) { name = name };
             }
+        }
+
+
+        private static void CompleteAnimation(UnitView3D view, UnitAnimationEvent evt)
+        {
+            var controller = view.GetComponent<UnitAnimatorController>();
+            controller?.DispatchAnimationEvent((int)evt);
         }
     }
 }

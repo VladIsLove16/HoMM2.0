@@ -1,69 +1,63 @@
-using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 
 /// <summary>
-/// Lightweight grid renderer that delegates to ConsoleGridState, logs grid changes,
-/// and provides a simple world-to-cell conversion suitable for console scenarios.
+/// Console-friendly implementation of <see cref="IGridCellRenderer"/> that keeps the
+/// <see cref="ConsoleGridState"/> in sync with the current <see cref="IGridViewModel"/>.
+/// Instead of spawning GameObjects it logs updates and relies on textual output.
 /// </summary>
-public class ConsoleGridRenderer : IGridCellRenderer, IWorldToCellProvider
+public class ConsoleGridRenderer : IGridCellRenderer
 {
     private readonly ConsoleGridState _gridState;
     private IGridViewModel _viewModel;
+    private int _width;
+    private int _height;
 
     public ConsoleGridRenderer(ConsoleGridState gridState)
     {
         _gridState = gridState;
     }
 
+    public void Bind(IGridViewModel viewModel)
+    {
+        if (_viewModel == viewModel)
+            return;
+
+        if (_viewModel != null)
+        {
+            Unbind(_viewModel);
+        }
+
+        _viewModel = viewModel;
+        if (_viewModel == null)
+            return;
+
+        _viewModel.GridInited += OnGridInited;
+    }
+
+    public void Unbind(IGridViewModel viewModel)
+    {
+        if (_viewModel != viewModel || _viewModel == null)
+            return;
+
+        _viewModel.GridInited -= OnGridInited;
+        _viewModel = null;
+    }
+
     public void Clear()
     {
-        Log("Console grid cleared.");
-    }
-
-    public void Render(int width, int height, float cellSize, Vector3 origin, float padding)
-    {
-        _gridState.Initialize(width, height);
-        Log($"Console grid render width={width} height={height} cellSize={cellSize} origin={origin} padding={padding}");
-        Log(_gridState.BuildRepresentation());
-    }
-
-    public CellState[] GetCellStates(Vector2Int coords)
-    {
-        return _gridState.GetCellStates(coords);
-    }
-
-    public void Bind(IGridViewModel gameViewModel)
-    {
-        _viewModel = gameViewModel;
-        Log("Console grid renderer bound to view model.");
-    }
-
-    public void Unbind(IGridViewModel gameViewModel)
-    {
-        if (_viewModel == gameViewModel)
+        if (_width > 0 && _height > 0)
         {
-            _viewModel = null;
+            _gridState.Initialize(_width, _height);
+            Log("Console grid cleared.");
         }
-        Log("Console grid renderer unbound.");
     }
 
-    public Vector3 ToWorld(int x, int y)
+    private void OnGridInited(int width, int height)
     {
-        return new Vector3(x, 0f, y);
-    }
-
-    public bool ToGrid(Vector3 position, out Vector2Int coords)
-    {
-        coords = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
-        return true;
-    }
-
-    public bool ToGridPair(Vector3 position, out KeyValuePair<Vector2Int, Vector2Int> coords)
-    {
-        var main = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
-        coords = new KeyValuePair<Vector2Int, Vector2Int>(main, main);
-        return true;
+        _width = width;
+        _height = height;
+        _gridState.Initialize(width, height);
+        Log($"Console grid initialized {width}x{height}");
     }
 
     private void Log(string message)
@@ -71,4 +65,3 @@ public class ConsoleGridRenderer : IGridCellRenderer, IWorldToCellProvider
         Debug.Log(message);
     }
 }
-

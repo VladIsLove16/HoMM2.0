@@ -1,6 +1,7 @@
 public enum GridRenderStrategy
 {
     PerCell,
-    Single
+    Single,
+    Tile
 }
 

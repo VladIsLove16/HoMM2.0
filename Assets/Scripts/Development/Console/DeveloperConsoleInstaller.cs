@@ -12,12 +12,6 @@ public class DeveloperConsoleInstaller : MonoInstaller
     public override void InstallBindings()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (!HasRequiredBindings())
-        {
-            Debug.LogWarning("[DeveloperConsoleInstaller] Skipping console setup - required gameplay services are missing in this scene.");
-            return;
-        }
-
         BindCommands();
         Container.Bind<AdventureCommander>().AsSingle();
         Container.Bind<GridCommander>().AsSingle();
@@ -53,14 +47,4 @@ public class DeveloperConsoleInstaller : MonoInstaller
         Container.Bind<IDeveloperConsoleCommand>().To<GridKillFungusConsoleCommand>().AsTransient();
     }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-    private bool HasRequiredBindings()
-    {
-        return Container.HasBinding<GameModel>()
-            && Container.HasBinding<GameViewModel>()
-            && Container.HasBinding<IGameCommandExecutor>()
-            && Container.HasBinding<ITurnService>()
-            && Container.HasBinding<ActionResolver>();
-    }
-#endif
 }

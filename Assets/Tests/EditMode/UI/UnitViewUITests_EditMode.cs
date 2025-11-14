@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UniRx;
+using Tests.Common;
 
 namespace Tests.EditMode.UI
 {
@@ -13,6 +14,7 @@ namespace Tests.EditMode.UI
         private UnitViewModel _unitViewModel;
         private UnitStats _baseStats;
         private MaterialProvider _materialProvider;
+        private IWorldToCellProvider _worldProvider;
 
         [SetUp]
         public void SetUp()
@@ -31,7 +33,8 @@ namespace Tests.EditMode.UI
             _materialProvider = new MaterialProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel);
+            _worldProvider = new TestWorldToCellProvider();
+            _unitViewModel = new UnitViewModel(_unitModel, _worldProvider);
         }
 
         [TearDown]
@@ -170,3 +173,7 @@ namespace Tests.EditMode.UI
         }
     }
 }
+
+
+
+

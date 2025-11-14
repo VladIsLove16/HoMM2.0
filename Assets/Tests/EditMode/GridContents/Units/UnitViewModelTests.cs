@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UniRx;
 using Zenject;
+using Tests.Common;
 
 namespace Tests.EditMode.GridContents.Units
 {
@@ -31,12 +32,8 @@ namespace Tests.EditMode.GridContents.Units
             _worldToCellProvider = new MockWorldToCellProvider();
 
             // Создаем ViewModel
-            _unitViewModel = new UnitViewModel(_unitModel);
+            _unitViewModel = new UnitViewModel(_unitModel, _worldToCellProvider);
             
-            // Инжектируем зависимости через reflection (для тестов)
-            var field = typeof(UnitViewModel).GetField("_worldToCellProvider", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field?.SetValue(_unitViewModel, _worldToCellProvider);
         }
 
         [TearDown]
@@ -62,7 +59,7 @@ namespace Tests.EditMode.GridContents.Units
             var blueTeamStats = ScriptableObject.CreateInstance<UnitStats>();
             blueTeamStats.InvulnerableEffects = new List<StatusEffectType>();
             var blueTeamModel = new UnitModel(blueTeamStats, UnitType.Archer, 0, 0, 1, true);
-            var blueTeamViewModel = new UnitViewModel(blueTeamModel);
+            var blueTeamViewModel = new UnitViewModel(blueTeamModel, new MockWorldToCellProvider());
 
             // Assert
             Assert.That(blueTeamViewModel.Model, Is.EqualTo(blueTeamModel));
@@ -75,41 +72,54 @@ namespace Tests.EditMode.GridContents.Units
             var redTeamStats = ScriptableObject.CreateInstance<UnitStats>();
             redTeamStats.InvulnerableEffects = new List<StatusEffectType>();
             var redTeamModel = new UnitModel(redTeamStats, UnitType.Archer, 0, 0, 1, false);
-            var redTeamViewModel = new UnitViewModel(redTeamModel);
+            var redTeamViewModel = new UnitViewModel(redTeamModel, new MockWorldToCellProvider());
 
             // Assert
             Assert.That(redTeamViewModel.Model, Is.EqualTo(redTeamModel));
         }
 
         [Test]
-        public void OnAttacked_WhenModelAttacked_EmitsEvent()
+        public void OnAttackedWorld_WhenModelAttacked_EmitsEvent()
         {
             // Arrange
             var eventReceived = false;
-            _unitViewModel.OnAttacked.Subscribe(_ => eventReceived = true);
+            Vector3 receivedPosition = default;
+            _unitViewModel.OnAttackedWorld.Subscribe(pos =>
+            {
+                eventReceived = true;
+                receivedPosition = pos;
+            });
 
             // Act
-            var mockTarget = new MockDamagable();
+            var mockTarget = new MockDamagable { Position = new Vector2Int(2, 1) };
             var attackContext = new AttackContext(mockTarget);
             _unitModel.SendDamage(attackContext);
 
             // Assert
             Assert.That(eventReceived, Is.True);
+            Assert.That(receivedPosition, Is.EqualTo(_worldToCellProvider.ToWorld(mockTarget.Position.x, mockTarget.Position.y)));
         }
 
         [Test]
-        public void OnHit_WhenModelHit_EmitsEvent()
+        public void OnHitWorld_WhenModelHit_EmitsEvent()
         {
             // Arrange
             var eventReceived = false;
-            _unitViewModel.OnHit.Subscribe(_ => eventReceived = true);
+            Vector3 receivedPosition = default;
+            _unitViewModel.OnHitWorld.Subscribe(pos =>
+            {
+                eventReceived = true;
+                receivedPosition = pos;
+            });
 
             // Act
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var attacker = new MockDamageSource { Position = new Vector2Int(4, 2) };
+            var damageContext = new DamageContext(50, DamageType.physical, attacker);
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
             Assert.That(eventReceived, Is.True);
+            Assert.That(receivedPosition, Is.EqualTo(_worldToCellProvider.ToWorld(attacker.Position.x, attacker.Position.y)));
         }
 
         [Test]
@@ -120,7 +130,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnDeath.Subscribe(_ => eventReceived = true);
 
             // Act
-            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var damageContext = new DamageContext(1000, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -149,7 +159,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnHealthChanged.Subscribe(_ => eventReceived = true);
 
             // Act
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -157,19 +167,19 @@ namespace Tests.EditMode.GridContents.Units
         }
 
         [Test]
-        public void OnAttacked_WithMultipleSubscribers_NotifiesAllSubscribers()
+        public void OnAttackedWorld_WithMultipleSubscribers_NotifiesAllSubscribers()
         {
             // Arrange
             var event1Received = false;
             var event2Received = false;
             var event3Received = false;
 
-            _unitViewModel.OnAttacked.Subscribe(_ => event1Received = true);
-            _unitViewModel.OnAttacked.Subscribe(_ => event2Received = true);
-            _unitViewModel.OnAttacked.Subscribe(_ => event3Received = true);
+            _unitViewModel.OnAttackedWorld.Subscribe(_ => event1Received = true);
+            _unitViewModel.OnAttackedWorld.Subscribe(_ => event2Received = true);
+            _unitViewModel.OnAttackedWorld.Subscribe(_ => event3Received = true);
 
             // Act
-            var mockTarget = new MockDamagable();
+            var mockTarget = new MockDamagable { Position = new Vector2Int(3, 0) };
             var attackContext = new AttackContext(mockTarget);
             _unitModel.SendDamage(attackContext);
 
@@ -180,17 +190,18 @@ namespace Tests.EditMode.GridContents.Units
         }
 
         [Test]
-        public void OnHit_WithMultipleSubscribers_NotifiesAllSubscribers()
+        public void OnHitWorld_WithMultipleSubscribers_NotifiesAllSubscribers()
         {
             // Arrange
             var event1Received = false;
             var event2Received = false;
 
-            _unitViewModel.OnHit.Subscribe(_ => event1Received = true);
-            _unitViewModel.OnHit.Subscribe(_ => event2Received = true);
+            _unitViewModel.OnHitWorld.Subscribe(_ => event1Received = true);
+            _unitViewModel.OnHitWorld.Subscribe(_ => event2Received = true);
 
             // Act
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var attacker = new MockDamageSource { Position = new Vector2Int(1, 5) };
+            var damageContext = new DamageContext(50, DamageType.physical, attacker);
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -209,7 +220,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnDeath.Subscribe(_ => event2Received = true);
 
             // Act
-            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var damageContext = new DamageContext(1000, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -246,7 +257,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnHealthChanged.Subscribe(_ => event2Received = true);
 
             // Act
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -258,8 +269,8 @@ namespace Tests.EditMode.GridContents.Units
         public void Events_AreUniRxObservables()
         {
             // Assert
-            Assert.That(_unitViewModel.OnAttacked, Is.InstanceOf<IObservable<Unit>>());
-            Assert.That(_unitViewModel.OnHit, Is.InstanceOf<IObservable<Unit>>());
+            Assert.That(_unitViewModel.OnAttackedWorld, Is.InstanceOf<IObservable<Vector3>>());
+            Assert.That(_unitViewModel.OnHitWorld, Is.InstanceOf<IObservable<Vector3>>());
             Assert.That(_unitViewModel.OnDeath, Is.InstanceOf<IObservable<Unit>>());
             Assert.That(_unitViewModel.OnTurnStarted, Is.InstanceOf<IObservable<Unit>>());
             Assert.That(_unitViewModel.OnHealthChanged, Is.InstanceOf<IObservable<Unit>>());
@@ -284,7 +295,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnDeath.Subscribe(_ => eventReceived = true);
 
             // Act - Урон меньше здоровья, не убивает юнита
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -299,7 +310,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnDeath.Subscribe(_ => eventReceived = true);
 
             // Act - Смертельный урон
-            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var damageContext = new DamageContext(1000, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -307,18 +318,18 @@ namespace Tests.EditMode.GridContents.Units
         }
 
         [Test]
-        public void OnHit_WhenModelDamaged_AlwaysEmitsEvent()
+        public void OnHitWorld_WhenModelDamaged_AlwaysEmitsEvent()
         {
             // Arrange
             var eventReceived = false;
-            _unitViewModel.OnHit.Subscribe(_ => eventReceived = true);
+            _unitViewModel.OnHitWorld.Subscribe(_ => eventReceived = true);
 
             // Act - Любой урон
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
-            Assert.That(eventReceived, Is.True, "OnHit should always be emitted when damage is received");
+            Assert.That(eventReceived, Is.True, "OnHitWorld should always be emitted when damage is received");
         }
 
         [Test]
@@ -329,7 +340,7 @@ namespace Tests.EditMode.GridContents.Units
             _unitViewModel.OnHealthChanged.Subscribe(_ => eventReceived = true);
 
             // Act - Любой урон
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert
@@ -343,17 +354,17 @@ namespace Tests.EditMode.GridContents.Units
             var eventSequence = new List<string>();
             
             _unitViewModel.OnHealthChanged.Subscribe(_ => eventSequence.Add("OnHealthChanged"));
-            _unitViewModel.OnHit.Subscribe(_ => eventSequence.Add("OnHit"));
+            _unitViewModel.OnHitWorld.Subscribe(_ => eventSequence.Add("OnHitWorld"));
             _unitViewModel.OnDeath.Subscribe(_ => eventSequence.Add("OnDeath"));
 
             // Act - Урон меньше здоровья
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert - События должны вызываться в правильном порядке
             Assert.That(eventSequence.Count, Is.EqualTo(2), "Should emit 2 events for non-lethal damage");
             Assert.That(eventSequence[0], Is.EqualTo("OnHealthChanged"), "OnHealthChanged should be first");
-            Assert.That(eventSequence[1], Is.EqualTo("OnHit"), "OnHit should be second");
+            Assert.That(eventSequence[1], Is.EqualTo("OnHitWorld"), "OnHitWorld should be second");
         }
 
         [Test]
@@ -363,17 +374,17 @@ namespace Tests.EditMode.GridContents.Units
             var eventSequence = new List<string>();
             
             _unitViewModel.OnHealthChanged.Subscribe(_ => eventSequence.Add("OnHealthChanged"));
-            _unitViewModel.OnHit.Subscribe(_ => eventSequence.Add("OnHit"));
+            _unitViewModel.OnHitWorld.Subscribe(_ => eventSequence.Add("OnHitWorld"));
             _unitViewModel.OnDeath.Subscribe(_ => eventSequence.Add("OnDeath"));
 
             // Act - Смертельный урон
-            var damageContext = new DamageContext(1000, DamageType.physical, null);
+            var damageContext = new DamageContext(1000, DamageType.physical, new MockDamageSource());
             _unitModel.RecieveDamage(damageContext);
 
             // Assert - События должны вызываться в правильном порядке
             Assert.That(eventSequence.Count, Is.EqualTo(3), "Should emit 3 events for lethal damage");
             Assert.That(eventSequence[0], Is.EqualTo("OnHealthChanged"), "OnHealthChanged should be first");
-            Assert.That(eventSequence[1], Is.EqualTo("OnHit"), "OnHit should be second");
+            Assert.That(eventSequence[1], Is.EqualTo("OnHitWorld"), "OnHitWorld should be second");
             Assert.That(eventSequence[2], Is.EqualTo("OnDeath"), "OnDeath should be last");
         }
 
@@ -399,7 +410,7 @@ namespace Tests.EditMode.GridContents.Units
         public void HealthRatio_AfterPartialDamage_CalculatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
             var initialHealth = _unitModel.ModifiedStats.Health;
 
             // Act
@@ -418,7 +429,7 @@ namespace Tests.EditMode.GridContents.Units
         public void HealthRatio_AfterUnitDeath_CalculatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var damageContext = new DamageContext(100, DamageType.physical, new MockDamageSource());
             var initialAmount = _unitModel.Amount.Value;
 
             // Act
@@ -439,7 +450,7 @@ namespace Tests.EditMode.GridContents.Units
         public void HealthRatio_WithMultipleUnitDeaths_CalculatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(150, DamageType.physical, null);
+            var damageContext = new DamageContext(150, DamageType.physical, new MockDamageSource());
             var initialAmount = _unitModel.Amount.Value;
 
             // Act - Убиваем одного юнита и повреждаем второго
@@ -460,7 +471,7 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Arrange
             var initialAmount = _unitModel.Amount.Value;
-            var damageContext = new DamageContext(100, DamageType.physical, null);
+            var damageContext = new DamageContext(100, DamageType.physical, new MockDamageSource());
 
             // Act
             _unitModel.RecieveDamage(damageContext);
@@ -475,7 +486,7 @@ namespace Tests.EditMode.GridContents.Units
         {
             // Arrange
             var initialAmount = _unitModel.Amount.Value;
-            var damageContext = new DamageContext(250, DamageType.physical, null);
+            var damageContext = new DamageContext(250, DamageType.physical, new MockDamageSource());
 
             // Act - Убиваем 2 юнита (100 + 100 = 200) и повреждаем третьего на 50
             _unitModel.RecieveDamage(damageContext);
@@ -491,7 +502,7 @@ namespace Tests.EditMode.GridContents.Units
         public void HealthRatio_WithStatusEffects_CalculatesCorrectly()
         {
             // Arrange
-            var damageContext = new DamageContext(50, DamageType.physical, null);
+            var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
 
             // Act
             _unitModel.RecieveDamage(damageContext);
@@ -509,7 +520,7 @@ namespace Tests.EditMode.GridContents.Units
         //public void HealthRatio_WithHealing_CalculatesCorrectly()
         //{
         //    // Arrange
-        //    var damageContext = new DamageContext(50, DamageType.physical, null);
+        //    var damageContext = new DamageContext(50, DamageType.physical, new MockDamageSource());
         //    _unitModel.RecieveDamage(damageContext);
         //    var ratioAfterDamage = _unitViewModel.HealthRatio;
 
@@ -532,6 +543,16 @@ namespace Tests.EditMode.GridContents.Units
 
             public void RecieveDamage(DamageContext ctx) { }
             public void SimulateRecieveDamage(DamageContext ctx) { }
+        }
+
+        private class MockDamageSource : IDamageSource, IGridContent
+        {
+            public Vector2Int Position { get; set; } = Vector2Int.zero;
+            public Team Team => Team.Red;
+            public GridContentType GridContentType => GridContentType.unit;
+
+            public DamageContext SendDamage(AttackContext ctx) => throw new NotImplementedException();
+            public DamageContext SimulateSendDamage(AttackContext ctx) => throw new NotImplementedException();
         }
 
         private class MockWorldToCellProvider : IWorldToCellProvider
@@ -557,3 +578,6 @@ namespace Tests.EditMode.GridContents.Units
         }
     }
 }
+
+
+

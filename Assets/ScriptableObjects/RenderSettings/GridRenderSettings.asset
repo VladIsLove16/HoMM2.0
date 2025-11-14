@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8836c6a9509c4ca3bb355b5f724d71a3, type: 3}
+  m_Name: GridRenderSettings
+  m_EditorClassIdentifier: 
+  cellSize: 2.5
+  cellHeight: 1
+  cellPadding: 0.4
+  materials:
+  - cellState: 0
+    material: {fileID: 2100000, guid: 8d59494cf0bd6664f8bbab2f50e22a22, type: 2}
+  - cellState: 1
+    material: {fileID: 2100000, guid: 8d59494cf0bd6664f8bbab2f50e22a22, type: 2}
+  - cellState: 2
+    material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+  - cellState: 3
+    material: {fileID: 2100000, guid: f12defa7b0f54b4438a8b031dfeec605, type: 2}
+  - cellState: 4
+    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+  - cellState: 5
+    material: {fileID: 1165080902808173757, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
+  - cellState: 6
+    material: {fileID: 2100000, guid: 60b6b9410963f4c4f9df4f80b7b08571, type: 2}
+  - cellState: 7
+    material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+  - cellState: 8
+    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+  - cellState: 9
+    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+  - cellState: 10
+    material: {fileID: 2100000, guid: 8531f0db72cb14d45b68cafc0a668240, type: 2}

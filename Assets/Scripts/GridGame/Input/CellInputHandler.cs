@@ -50,7 +50,6 @@ public class CellInputHandler : MonoBehaviour
         _currentPointerPosition = screenPosition;
     }
 
-    // Called by GridInputRouter
     public void HandleMouseMoved()
     {
         if (TryGetHit(out var hit))

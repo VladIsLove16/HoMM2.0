@@ -5,14 +5,16 @@ using NaughtyAttributes;
 using System;
 using UnityEngine;
 using Zenject;
+using static Adventure.Infrastructure.Dialog.NpcBattleAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
     public sealed class NpcDialogueTrigger : MonoBehaviour, IInteractable
     {
-        [SerializeField] private string dialogueId;
+        [SerializeField] private DialogueGraphSO dialogue;
         [SerializeField] ArmyLineupSO lineup;
         [SerializeField] string Name;
+        [SerializeField] private NpcBattleAnimationController battleAnimationController;
         private DialogVM _dialogVM;
         [Inject]
         public void Construct(DialogVM dialogVM)
@@ -22,16 +24,17 @@ namespace Adventure.Infrastructure.Dialog
         }
         private void EnsureDialogIDExist()
         {
-            if (!_dialogVM.DialogExist(dialogueId))
-                Debug.LogWarning("Dialog wih id " + dialogueId + " doesn not exist on go " + name);
+            if (!_dialogVM.DialogExist(dialogue.Id))
+                Debug.LogWarning("Dialog wih id " + dialogue.Id+ " doesn not exist on go " + name);
         }
 
         public void Interact(PlayerInteractionContext context)
         {
-            bool isDialogStarted = _dialogVM.TryStartDialog(dialogueId, lineup);
+            battleAnimationController?.PlayAnimation(NpcAnimationType.Greeting);
+            bool isDialogStarted = _dialogVM.TryStartDialog(dialogue.Id, lineup);
             if (!isDialogStarted)
             {
-                Debug.LogWarning($"Dialogue '{dialogueId}' could not be started");
+                Debug.LogWarning($"Dialogue '{dialogue.Id}' could not be started");
             }
         }
 

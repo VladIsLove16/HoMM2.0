@@ -3,57 +3,39 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Zenject;
-using static UnityEngine.UI.Image;
-[Serializable]
-public class CellMaterial
-{
-    public CellMaterial(CellState cellState, Material material)
-    {
-        CellState = cellState;
-        Material = material;
-    }
-    public CellState CellState;
-    public Material Material;
 
-}
-public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCellProvider
+public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
 {
     [SerializeField] private CellView prefab;
     [SerializeField] private GameObject parent;
-    [SerializeField] private float ySize = 1f;
-    [SerializeField] private float cellSize = 1f;
-    [SerializeField] private float padding = 0.4f;
-    [SerializeField] List<CellMaterial> Materials;
-    [Inject] private IGridViewModel _vm;
-    [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
-    private Grid<CellView> grid;
-    private Dictionary<CellState, CellMaterial> materialsDict = new();
-    private Dictionary<CellState, List<Vector2Int>> _cellStates = new();
+    [SerializeField] private GridRenderSettingsSO editorRenderSettings;
+
+    private Grid<CellView> _grid;
+    private IGridViewModel _viewModel;
+    private IBattleAnimationGate _animationGate;
+
+    private readonly Dictionary<CellState, List<Vector2Int>> _cellStates = new();
     private readonly Dictionary<CellState, HashSet<Vector2Int>> _hiddenStates = new();
+    private IReadOnlyDictionary<CellState, CellMaterial> _settingsMaterials = new Dictionary<CellState, CellMaterial>();
+    private Dictionary<CellState, CellMaterial> _overrideMaterials;
+
     private static readonly HashSet<CellState> StatesHiddenWhileLocked = new()
     {
         CellState.reachableCell,
         CellState.accessibleRoutePoint,
         CellState.inaccessibleRoutePoint
     };
-    private void Awake()
-    {
-        if (Materials == null)
-        {
-            materialsDict = new Dictionary<CellState, CellMaterial>();
-        }
-        else
-        {
-            materialsDict = Materials.ToDictionary(x => x.CellState);
-        }
-    }
 
     [Inject]
-    private void Initialize(IGridViewModel viewModel)
+    private void Construct(
+        IGridViewModel viewModel,
+        [InjectOptional] IBattleAnimationGate animationGate = null)
     {
+        ApplyRenderSettings(viewModel.RenderSettings);
+        _animationGate = animationGate;
         Bind(viewModel);
+        UnityLogger.Log("[PerCellGridRenderer] Constructed and bound to ViewModel.");
     }
 
     private void OnEnable()
@@ -78,243 +60,241 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
 
     private void OnDestroy()
     {
-        if (_vm != null)
+        if (_viewModel != null)
         {
-            Unbind(_vm);
+            Unbind(_viewModel);
         }
-    }
-    public void Clear()
-    {
-        if (grid != null)
-        {
-            foreach (CellView child in grid.GetGridObjects())
-            {
-                GameObject.Destroy(child.gameObject);
-            }
-        }
-
-        _cellStates.Clear();
-        _hiddenStates.Clear();
-    }
-    [Button]
-    public void Render()
-    {
-        Render(10, 10, cellSize, transform.position, padding);
-    }
-    public void Render(int width, int height, float cellSize, Vector3 origin, float padding)
-    {
         Clear();
-        grid = new Grid<CellView>(width, height, cellSize, origin, padding, CreateCellView);
     }
 
     public void Bind(IGridViewModel viewModel)
     {
-        if (_vm != null) Unbind(_vm);
-        _vm = viewModel;
-        if (_vm == null) return;
-        _vm.PreviewChanged += OnPreviewChanged;
-        _vm.PreviewUpdated += OnPreviewUpdated;
-        _vm.GridInited+=OnVM_GridInited;
+        if (_viewModel == viewModel)
+            return;
+
+        if (_viewModel != null)
+        {
+            Unbind(_viewModel);
+        }
+
+        _viewModel = viewModel;
+        if (_viewModel == null)
+            return;
+
+        if (_viewModel.RenderSettings != null)
+        {
+            ApplyRenderSettings(_viewModel.RenderSettings);
+        }
+
+        _viewModel.GridInited += OnGridInited;
+        _viewModel.PreviewChanged += OnPreviewChanged;
+        _viewModel.PreviewUpdated += OnPreviewUpdated;
+
+        if (_viewModel.Width > 0 && _viewModel.Height > 0)
+        {
+            BuildGrid(_viewModel.Width, _viewModel.Height);
+        }
     }
 
     public void Unbind(IGridViewModel viewModel)
     {
-        if (_vm == null) return;
-        _vm.PreviewChanged -= OnPreviewChanged;
-        _vm.GridInited -= OnVM_GridInited;
-        _vm = null;
+        if (_viewModel != viewModel || _viewModel == null)
+            return;
+
+        _viewModel.GridInited -= OnGridInited;
+        _viewModel.PreviewChanged -= OnPreviewChanged;
+        _viewModel.PreviewUpdated -= OnPreviewUpdated;
+        _viewModel = null;
     }
-    private void OnVM_GridInited(int x,int y)
+
+    public void Clear()
     {
-        Render(x, y, cellSize,transform.position, padding);
-    }
-    private void OnPreviewUpdated(PreviewResult result)
-    {
-        string previewString = string.Empty;
-        Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
-        foreach (var stateCells in cells)
+        if (_grid != null)
         {
-            RemoveStates(stateCells.Key);
-            AddStates(stateCells.Value, stateCells.Key);
-            string coordsString = string.Empty;
-            foreach(var  cell in stateCells.Value)
+            foreach (var cell in _grid.GetGridObjects())
             {
-                coordsString += cell + " "; 
+                if (cell != null)
+                {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        DestroyImmediate(cell.gameObject);
+                    }
+                    else
+#endif
+                    {
+                        Destroy(cell.gameObject);
+                    }
+                }
             }
-            previewString += stateCells.Key + " " + coordsString;
-        }
-    }
-    private void OnPreviewChanged(PreviewResult result)
-    {
-        string previewString = string.Empty;
-        Dictionary<CellState, List<Vector2Int>> cells = result.ToDictionary();
-        ClearAllStates();
-        foreach (var stateCells in cells)
-        {
-            AddStates(stateCells.Value, stateCells.Key);
-            string coordsString = string.Empty;
-            foreach(var  cell in stateCells.Value)
-            {
-                coordsString += cell + " "; 
-            }
-            previewString += stateCells.Key + " " + coordsString;
-        }
-    }
-
-    public bool ToGrid(Vector3 position,out Vector2Int coords)
-    {
-        coords = grid.GetXY(position);
-        if (grid.IsInBounds(coords))
-            return true;
-        else
-            return false;
-    }
-
-    public bool ToGridPair(Vector3 position,out KeyValuePair<Vector2Int, Vector2Int> coordPair)
-    {
-        Vector2Int main = grid.GetXY(position);
-        if (!grid.IsInBounds(main))
-        {
-            coordPair = default;
-            return false;
-        }
-        Vector2Int mainClosestNeighbour = grid.GetClosestNeighbor(position,true);
-        coordPair = new(main, mainClosestNeighbour);
-        return true;
-    }
-
-    public Vector3 ToWorld(int x, int y)
-    {
-        if(grid == null)
-        {
-            Debug.LogError("Grid is null");
-            return Vector3.zero;
-        }
-        return grid.GetWorldPosition(x, y);
-    }
-
-    public CellState[] GetCellStates(Vector2Int coords)
-    {
-       if( TryGetCellView(coords, out var cell))
-        {
-           return cell.GetStates();
-        }
-       else
-            return null;
-    }
-    public void AddStates(List<Vector2Int> points, CellState state)
-    {
-        foreach (var point in points)
-        {
-            AddState(point, state);
-        }
-    }
-    public void SetStates(List<Vector2Int> points, CellState state)
-    {
-        RemoveStates(state);
-        AddStates(points, state);
-    }
-    public void RemoveStates(CellState state)
-    {
-        HashSet<Vector2Int> coords = new HashSet<Vector2Int>();
-        if (_cellStates.TryGetValue(state, out var visible))
-        {
-            coords.UnionWith(visible);
-        }
-        if (_hiddenStates.TryGetValue(state, out var hidden))
-        {
-            coords.UnionWith(hidden);
         }
 
-        if (coords.Count == 0)
+        _grid = null;
+        _cellStates.Clear();
+        _hiddenStates.Clear();
+    }
+
+    [Button("Render Preview")]
+    public void Render()
+    {
+        var width = Mathf.Max(1, _viewModel?.Width ?? 10);
+        var height = Mathf.Max(1, _viewModel?.Height ?? 10);
+        BuildGrid(width, height);
+    }
+
+    private void OnGridInited(int width, int height)
+    {
+        BuildGrid(width, height);
+    }
+
+    private void BuildGrid(int width, int height)
+    {
+        var settings = ResolveSettings();
+        if (prefab == null)
         {
+            Debug.LogError("[PerCellGridRenderer] Cell prefab is not assigned.", this);
             return;
         }
 
-        foreach (var c in coords)
+        if (width <= 0 || height <= 0)
         {
-            RemoveState(c, state);
+            Debug.LogWarning("[PerCellGridRenderer] Grid dimensions must be greater than zero.", this);
+            Clear();
+            return;
         }
-    }
-    public void ClearAllStates()
-    {
-        var keys = _cellStates.Keys
-            .Concat(_hiddenStates.Keys)
-            .Distinct()
-            .ToList();
 
-        foreach (var k in keys)
+        Clear();
+
+        var parentTransform = parent != null ? parent.transform : transform;
+        _grid = new Grid<CellView>(
+            width,
+            height,
+            settings.CellSize,
+            transform.position,
+            settings.CellPadding,
+            (grid, x, y) => CreateCellView(grid, x, y, parentTransform));
+
+        ApplyMaterialsToCells();
+        ReapplyStates();
+    }
+
+    private CellView CreateCellView(Grid<CellView> grid, int x, int y, Transform parentTransform)
+    {
+        var cellView = Instantiate(prefab, grid.GetWorldPosition(x, y), Quaternion.identity, parentTransform);
+        cellView.name += $" {x} {y}";
+
+        var settings = ResolveSettings();
+        cellView.transform.localScale = new Vector3(grid.GetCellSize(), settings.CellHeight, grid.GetCellSize());
+        cellView.Init(GetCurrentMaterials());
+
+        return cellView;
+    }
+
+    private void OnPreviewChanged(PreviewResult result)
+    {
+        ClearAllStatesInternal();
+        foreach (var stateCells in result.ToDictionary())
         {
-            RemoveStates(k);
+            AddStatesInternal(stateCells.Value, stateCells.Key);
         }
     }
-    public void AddState(Vector2Int coords, CellState state)
+
+    private void OnPreviewUpdated(PreviewResult result)
     {
+        var dict = result.ToDictionary();
+        foreach (var stateCells in dict)
+        {
+            RemoveStatesInternal(stateCells.Key);
+            AddStatesInternal(stateCells.Value, stateCells.Key);
+        }
+    }
+
+    private void AddStatesInternal(IEnumerable<Vector2Int> coords, CellState state)
+    {
+        if (coords == null)
+            return;
+
+        foreach (var coord in coords)
+        {
+            AddStateInternal(coord, state);
+        }
+    }
+
+    private void AddStateInternal(Vector2Int coords, CellState state)
+    {
+        if (!_cellStates.TryGetValue(state, out var list))
+        {
+            list = new List<Vector2Int>();
+            _cellStates[state] = list;
+        }
+
+        if (!list.Contains(coords))
+        {
+            list.Add(coords);
+        }
+
+        RemoveHiddenState(coords, state);
+
         if (ShouldHideState(state) && IsControlLocked())
         {
             CacheHiddenState(coords, state);
             return;
         }
 
-        if (TryGetCellView(coords, out CellView cellView))
+        if (TryGetCellView(coords, out var cell))
         {
-            cellView.AddState(state);
-        }
-        else
-            throw new Exception(" no value for " + state);
-
-        if (!_cellStates.ContainsKey(state))
-        {
-            _cellStates[state] = new List<Vector2Int>();
-        }
-        if (!_cellStates[state].Contains(coords))
-        {
-            _cellStates[state].Add(coords);
-        }
-
-        RemoveHiddenState(coords, state);
-    }
-
-    public void RemoveState(Vector2Int coords, CellState state)
-    {
-        bool wasVisible = _cellStates.TryGetValue(state, out var visibleList) && visibleList.Contains(coords);
-        if (wasVisible && TryGetCellView(coords, out CellView cellView))
-        {
-            cellView.RemoveState(state);
-        }
-
-        if (wasVisible)
-        {
-            visibleList.Remove(coords);
-            if (visibleList.Count == 0)
-            {
-                _cellStates.Remove(state);
-            }
-        }
-
-        if (_hiddenStates.TryGetValue(state, out var hidden))
-        {
-            hidden.Remove(coords);
-            if (hidden.Count == 0)
-            {
-                _hiddenStates.Remove(state);
-            }
+            cell.AddState(state);
         }
     }
 
-    public List<Vector2Int> GetCells( CellState state)
+    private void RemoveStatesInternal(CellState state)
     {
-        List<Vector2Int> result = new List<Vector2Int>();
-        if (_cellStates.TryGetValue(state, out var visible))
+        if (_cellStates.TryGetValue(state, out var coords))
         {
-            result.AddRange(visible);
-        }
-        if (_hiddenStates.TryGetValue(state, out var hidden))
-        {
-            result.AddRange(hidden);
+            foreach (var coord in coords.ToList())
+            {
+                RemoveStateInternal(coord, state);
+            }
+            _cellStates.Remove(state);
         }
 
-        return result;
+        if (_hiddenStates.Remove(state))
+        {
+            // hidden state cache removed
+        }
+    }
+
+    private void RemoveStateInternal(Vector2Int coords, CellState state)
+    {
+        if (_cellStates.TryGetValue(state, out var list))
+        {
+            list.Remove(coords);
+        }
+
+        if (TryGetCellView(coords, out var cell))
+        {
+            cell.RemoveState(state);
+        }
+    }
+
+    private void ClearAllStatesInternal()
+    {
+        foreach (var state in _cellStates.Keys.ToList())
+        {
+            RemoveStatesInternal(state);
+        }
+        _cellStates.Clear();
+        _hiddenStates.Clear();
+    }
+
+    private bool TryGetCellView(Vector2Int coords, out CellView cellView)
+    {
+        cellView = null;
+        if (_grid == null || !_grid.IsInBounds(coords))
+            return false;
+
+        cellView = _grid.GetGridObject(coords.x, coords.y);
+        return cellView != null;
     }
 
     private bool ShouldHideState(CellState state) => StatesHiddenWhileLocked.Contains(state);
@@ -387,51 +367,115 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer, IWorldToCel
         {
             foreach (var coord in entry.Coords)
             {
-                AddState(coord, entry.State);
+                AddStateInternal(coord, entry.State);
             }
 
             _hiddenStates.Remove(entry.State);
         }
     }
-    private bool TryGetCellView(Vector2Int coords, out CellView cellView)
-    {
-        if(!grid.IsInBounds(coords))
-        {
-            cellView = null;
-            return false;
-        }
-        cellView = grid.GetGridObject(coords.x, coords.y);
-        return true;
-    }
 
-    private CellView CreateCellView(Grid<CellView> grid, int x,int y)
-    {
-        CellView cellView =  GameObject.Instantiate(prefab, grid.GetWorldPosition(x, y), Quaternion.identity, parent.transform);
-        cellView.name += $"{x} {y}";
-        cellView.transform.localScale = new Vector3(grid.GetCellSize(), ySize, grid.GetCellSize());
-        cellView.Init(materialsDict);
-        return cellView;
-    }
+    public void SetPrefab(CellView value) => prefab = value;
 
-    // Public setters to allow tests and other runtime code to inject dependencies without reflection
-    public void SetPrefab(CellView p)
-    {
-        prefab = p;
-    }
+    public void SetParent(GameObject newParent) => parent = newParent;
 
-    public void SetParent(GameObject p)
-    {
-        parent = p;
-    }
+    public void SetRenderSettings(IGridRenderSettings settings) => ApplyRenderSettings(settings);
 
     public void SetMaterials(List<CellMaterial> materials)
     {
-        Materials = materials;
-        // reinitialize materials dictionary if Awake already ran
-        if (materialsDict != null)
+        _overrideMaterials = materials?.ToDictionary(m => m.CellState);
+        ApplyMaterialsToCells();
+    }
+
+    private void ApplyRenderSettings(IGridRenderSettings settings)
+    {
+        if (settings == null)
         {
-            materialsDict = Materials.ToDictionary(x => x.CellState);
+            Debug.LogError("_renderSettings is null. Resolving default");
+            settings = ResolveSettings();
+            return;
+        }
+        _settingsMaterials = settings?.Materials?.ToDictionary(m => m.CellState)
+                            ?? new Dictionary<CellState, CellMaterial>();
+        if (_overrideMaterials == null)
+        {
+            ApplyMaterialsToCells();
         }
     }
-   
+
+    private void ApplyMaterialsToCells()
+    {
+        if (_grid == null)
+            return;
+
+        foreach (var cell in _grid.GetGridObjects())
+        {
+            cell?.SetMaterialsDictionary(GetCurrentMaterials());
+        }
+    }
+
+    private void ReapplyStates()
+    {
+        if (_grid == null)
+            return;
+
+        foreach (var kvp in _cellStates)
+        {
+            foreach (var coord in kvp.Value)
+            {
+                if (TryGetCellView(coord, out var cell))
+                {
+                    cell.AddState(kvp.Key);
+                }
+            }
+        }
+    }
+
+    private IReadOnlyDictionary<CellState, CellMaterial> GetCurrentMaterials()
+    {
+        return _overrideMaterials ?? _settingsMaterials;
+    }
+
+    private IGridRenderSettings ResolveSettings()
+    {
+        if(_viewModel.RenderSettings == null)
+        {
+            Debug.LogError("_renderSettings is null");
+            _viewModel.RenderSettings =  RuntimeGridRenderSettings.Default;
+        }
+        return _viewModel.RenderSettings;
+    }
+
+    private sealed class RuntimeGridRenderSettings : IGridRenderSettings
+    {
+        public static readonly RuntimeGridRenderSettings Default = new();
+
+        public float CellSize { get; set; } = 1f;
+        public float CellHeight { get; set; } = 1f;
+        public float CellPadding { get; set; } = 0.1f;
+        public IReadOnlyList<CellMaterial> Materials { get; set; } = Array.Empty<CellMaterial>();
+    }
+
+    public List<Vector2Int> GetCells(CellState state)
+    {
+        var result = new List<Vector2Int>();
+        if (_cellStates.TryGetValue(state, out var visible))
+        {
+            result.AddRange(visible);
+        }
+
+        if (_hiddenStates.TryGetValue(state, out var hidden))
+        {
+            result.AddRange(hidden);
+        }
+
+        return result;
+    }
+
+#if UNITY_INCLUDE_TESTS
+    public void AddState(Vector2Int coords, CellState state) => AddStateInternal(coords, state);
+    public void AddStates(IEnumerable<Vector2Int> coords, CellState state) => AddStatesInternal(coords, state);
+    public void RemoveState(Vector2Int coords, CellState state) => RemoveStateInternal(coords, state);
+    public void RemoveStates(CellState state) => RemoveStatesInternal(state);
+    public void ClearAllStates() => ClearAllStatesInternal();
+#endif
 }

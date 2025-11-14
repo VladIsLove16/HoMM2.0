@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.EditMode.ActionHandlers;
 using UnityEngine;
+using Tests.Common;
 
 public class DeveloperConsoleService_EditModeTests
 {
@@ -55,7 +56,7 @@ public class DeveloperConsoleService_EditModeTests
 
         Assert.That(stubCommand.Invocations, Has.Count.EqualTo(1));
         var invocation = stubCommand.Invocations[0];
-        Assert.That(invocation.context.GameViewModel, Is.SameAs(harness.GameViewModel));
+        Assert.That(invocation.context.GridViewModel, Is.SameAs(harness.GameViewModel));
         Assert.That(invocation.args, Is.EqualTo(new[] { "hello", "world" }));
         Assert.That(service.Log, Has.Some.Matches<DeveloperConsoleLogEntry>(entry => entry.Message.Contains("hello world")));
     }
@@ -106,6 +107,7 @@ public class DeveloperConsoleService_EditModeTests
         public ITurnService TurnService => ConcreteTurnService;
         public TurnStateViewModel TurnState { get; }
         public MovementSystem MovementSystem { get; } = new();
+        public IGridRenderSettings GridSettings { get; } = new TestGridRenderSettings();
         public ActionResolver ActionResolver { get; }
 
         public GameModelBuilder()
@@ -124,7 +126,7 @@ public class DeveloperConsoleService_EditModeTests
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
             ConcreteTurnService = new TurnService(new TurnQueue());
             TurnState = new TurnStateViewModel(ConcreteTurnService);
-            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnState, ActionResolver);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnState, ActionResolver, GridSettings);
         }
     }
 }

@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using Tests.Common;
 
 namespace Tests.EditMode.GridContents.Units
 {
@@ -12,6 +15,7 @@ namespace Tests.EditMode.GridContents.Units
         private UnitStats _stats;
         private UnitModel _model;
         private UnitViewModel _viewModel;
+        private IWorldToCellProvider _worldProvider;
         private UnitView3D _view;
         private GameObject _viewGO;
         private StubMaterialProvider _materialProvider;
@@ -26,7 +30,8 @@ namespace Tests.EditMode.GridContents.Units
             _stats.InvulnerableEffects = new List<StatusEffectType>();
 
             _model = new UnitModel(_stats, UnitType.Archer, 0, 0, 1, true);
-            _viewModel = new UnitViewModel(_model);
+            _worldProvider = new TestWorldToCellProvider();
+            _viewModel = new UnitViewModel(_model, _worldProvider);
 
             _viewGO = new GameObject("UnitView3D", typeof(Animator));
             _view = _viewGO.AddComponent<UnitView3D>();
@@ -70,7 +75,7 @@ namespace Tests.EditMode.GridContents.Units
             queue.Clear();
 
             SetIsExecuting(_view, true);
-            _view.HandleHit(new DamageContext(10, DamageType.physical, null));
+            _view.HandleHit(Vector3.forward);
 
             Assert.That(queue.Count, Is.EqualTo(1));
         }
@@ -88,7 +93,15 @@ namespace Tests.EditMode.GridContents.Units
             Assert.That(queue.Count, Is.EqualTo(1), "Death action should be enqueued");
 
             var action = queue.Dequeue();
-            RunEnumerator(action);
+            var dispatched = false;
+            RunEnumerator(action, () =>
+            {
+                if (!dispatched)
+                {
+                    CompleteAnimation(_view, UnitAnimationEvent.DieFinished);
+                    dispatched = true;
+                }
+            });
 
             Assert.That(_view.gameObject.activeSelf, Is.False);
         }
@@ -103,7 +116,7 @@ namespace Tests.EditMode.GridContents.Units
             stats.InvulnerableEffects = new List<StatusEffectType>();
 
             var model = new UnitModel(stats, UnitType.Archer, 0, 0, 2, true);
-            var vm = new UnitViewModel(model);
+            var vm = new UnitViewModel(model, new TestWorldToCellProvider());
             var go = new GameObject("UnitView3D_Remaining", typeof(Animator));
             var view = go.AddComponent<UnitView3D>();
             var provider = new StubMaterialProvider();
@@ -122,7 +135,15 @@ namespace Tests.EditMode.GridContents.Units
                 Assert.That(queue.Count, Is.EqualTo(1));
 
                 var action = queue.Dequeue();
-                RunEnumerator(action);
+                var dispatched = false;
+                RunEnumerator(action, () =>
+                {
+                    if (!dispatched)
+                    {
+                        CompleteAnimation(view, UnitAnimationEvent.HitFinished);
+                        dispatched = true;
+                    }
+                });
 
                 Assert.That(view.gameObject.activeSelf, Is.True);
                 Assert.That(model.Amount.Value, Is.EqualTo(1));
@@ -153,12 +174,18 @@ namespace Tests.EditMode.GridContents.Units
             field?.SetValue(view, value);
         }
 
-        private static void RunEnumerator(IEnumerator enumerator)
+        private static void RunEnumerator(IEnumerator enumerator, System.Action onYield = null)
         {
             while (enumerator.MoveNext())
             {
-                // Skip yielded instructions (e.g., WaitForSeconds)
+                onYield?.Invoke();
             }
+        }
+
+        private static void CompleteAnimation(UnitView3D view, UnitAnimationEvent evt)
+        {
+            var controller = view.GetComponent<UnitAnimatorController>();
+            controller?.DispatchAnimationEvent((int)evt);
         }
 
         private class StubMaterialProvider : IMaterialProvider

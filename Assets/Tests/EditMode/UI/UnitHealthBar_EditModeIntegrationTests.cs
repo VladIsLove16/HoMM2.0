@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Tests.Common;
 
 namespace Tests.EditMode.UI
 {
@@ -71,7 +72,7 @@ namespace Tests.EditMode.UI
             _stats.InvulnerableEffects = new System.Collections.Generic.List<StatusEffectType>();
 
             _unitModel = new UnitModel(_stats, UnitType.Archer, 0, 0, 10, true);
-            _unitViewModel = new UnitViewModel(_unitModel);
+            _unitViewModel = new UnitViewModel(_unitModel, new TestWorldToCellProvider());
         }
 
         [TearDown]
@@ -89,7 +90,7 @@ namespace Tests.EditMode.UI
             _unitViewUI.Init(_unitViewModel);
 
             Assert.That(_amountText.text, Is.EqualTo("10"));
-            Assert.That(_healthAmountText.text, Is.EqualTo("100"));
+            Assert.That(_healthAmountText.text, Is.EqualTo("100/100"));
             Assert.That(_healthBar.GetComponentInChildren<Image>().fillAmount, Is.EqualTo(1f));
         }
 
@@ -100,7 +101,7 @@ namespace Tests.EditMode.UI
 
             _unitModel.RecieveDamage(new DamageContext(30, DamageType.physical, null));
 
-            Assert.That(_healthAmountText.text, Is.EqualTo("70"));
+            Assert.That(_healthAmountText.text, Is.EqualTo("70/100"));
             Assert.That(_amountText.text, Is.EqualTo("10"));
             Assert.That(_healthBar.GetComponentInChildren<Image>().fillAmount, Is.EqualTo(0.7f).Within(0.0001f));
         }

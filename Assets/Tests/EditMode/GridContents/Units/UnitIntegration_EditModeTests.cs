@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using Tests.Common;
 
 namespace Tests.EditMode.GridContents.Units
 {
@@ -21,7 +22,7 @@ namespace Tests.EditMode.GridContents.Units
             _stats.InvulnerableEffects = new List<StatusEffectType>();
 
             _model = new UnitModel(_stats, UnitType.Archer, 0, 0, 3, true);
-            _viewModel = new UnitViewModel(_model);
+            _viewModel = new UnitViewModel(_model, new TestWorldToCellProvider());
         }
 
         [TearDown]

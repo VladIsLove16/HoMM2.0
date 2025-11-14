@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 
 namespace Adventure.Domain.Dialog
 {
@@ -21,11 +22,11 @@ namespace Adventure.Domain.Dialog
         }
 
         public DialogueNode CurrentNode => _currentNode;
-        public bool IsCompleted { get; private set; }
+        public ReactiveProperty<bool> IsCompleted = new(false);
 
         public DialogueChoiceAction SelectChoice(string choiceId)
         {
-            if (_currentNode == null)
+            if (IsCompleted.Value)
                 throw new InvalidOperationException("Dialogue already completed");
 
             var choice = FindChoice(choiceId);
@@ -33,13 +34,23 @@ namespace Adventure.Domain.Dialog
                 throw new InvalidOperationException($"Choice '{choiceId}' not found");
             if (FindNextNode(choice, out DialogueNode next))
             {
-                _currentNode = next;
-                return choice.Action;
+                return ProceedNextNode(choice, next);
             }
 
-            IsCompleted = true;
-            _currentNode = null;
+            CompleteSession();
             return choice.Action;
+        }
+
+        private DialogueChoiceAction ProceedNextNode(DialogueChoice choice, DialogueNode next)
+        {
+            _currentNode = next;
+            return choice.Action;
+        }
+
+        private void CompleteSession()
+        {
+            IsCompleted.SetValueAndForceNotify(true);
+            _currentNode = null;
         }
 
         private bool FindNextNode(DialogueChoice choice, out DialogueNode next)

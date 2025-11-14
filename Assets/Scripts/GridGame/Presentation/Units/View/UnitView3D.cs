@@ -8,21 +8,20 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 {
     private CompositeDisposable _disposables = new();
     [SerializeField] private UnitAnimatorController _animationController;
-
     [SerializeField] private UnitViewUI unitViewUI;
     [SerializeField] private float animationMoveSpeed = 3f;
     [SerializeField] private SkinnedMeshRenderer[] meshes;
     [Inject] private IMaterialProvider _teamMaterials;
-    [Inject] IWorldToCellProvider worldToCellProvider;
     [Inject] private IBattleAnimationGate _animationGate;
     [Inject] private IAnimationSpeedSettings _animationSpeedSettings;
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
+    private UnitViewModel _vm;
+    private bool _disposed;
     public bool IsHoverable => true;
     public bool IsSelectable => true;
 
-    private UnitViewModel _vm;
     private void Awake()
     {
         if (meshes == null || meshes.Length == 0)
@@ -51,24 +50,24 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     /// <param name="vm"></param>
     public void Init(UnitViewModel vm)
     {
+        if (vm == null)
+            throw new ArgumentNullException(nameof(vm));
+
+        _disposables.Clear();
         _vm = vm;
-        SetMaterial(_teamMaterials.GetTeamMaterial(vm.Team));
+        SetupMaterial(vm);
         unitViewUI.Init(vm);
-        _vm.OnTeamChangedEnum.Subscribe(team => SetMaterial(_teamMaterials.GetTeamMaterial(team))).AddTo(_disposables);
-        _vm.OnMoveByRoute.Subscribe(OnMovedByRoute).AddTo(_disposables);
-        if (_animationSpeedSettings != null)
-        {
-            _animationSpeedSettings.Mode.Subscribe(OnAnimationSpeedChanged).AddTo(_disposables);
-        }
+        SubscribeToViewModel(vm);
         ApplyAnimationSpeed();
     }
 
-    private void OnMovedByRoute(List<Vector2Int> list)
+    private void SetupMaterial(UnitViewModel vm)
     {
-        List<Vector3> worldRoute = new();
-        foreach (var cell in list)
-            worldRoute.Add(worldToCellProvider.ToWorld(cell.x,cell.y));
-        Move(worldRoute);
+        var mat = _teamMaterials.GetTeamMaterial(vm.Team);
+        if (mat != null)
+        {
+            SetMaterial(mat);
+        }
     }
 
     public void SnapToCell(Vector3 worldPosition)
@@ -110,8 +109,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             Debug.LogWarning("[UnitView3D] 'meshes' not assigned and no SkinnedMeshRenderer found. Skipping material set.");
             return;
         }
-        string oldMaterialName = meshes.Length > 0 ? meshes[0].material?.name ?? "null" : "null";
-        string newMaterialName = material?.name ?? "null";
+        string oldMaterialName = meshes[0].material?.name;
+        string newMaterialName = material?.name;
         
         foreach (var mesh in meshes)
         {
@@ -174,6 +173,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         foreach (var point in route)
         {
             LogDebugEvent($"Moving to: {point}");
+            FaceTowards(point);
+            if (!IsInstantMode())
+            {
+                yield return null;
+            }
             yield return MoveToPosition(point);
         }
 
@@ -203,26 +207,25 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     }
 
 
-    private IEnumerator PlayAnimation(UnitAnimationState state)
+    private IEnumerator PlayAnimationRoutine(UnitAnimationState state, UnitAnimationEvent? completionEvent = null)
     {
         LogDebugEvent($"Playing Animation: {state}");
         Play(state);
-        yield return null;
-    }
 
-    private IEnumerator HandleDeathAction()
-    {
-        LogDebugEvent("Handling Death Animation");
-        Play(UnitAnimationState.Die);
-        var waitDuration = ScaleDuration(1.5f);
-        if (waitDuration > 0f)
+        if (completionEvent.HasValue && !IsInstantMode())
         {
-            yield return new WaitForSeconds(waitDuration);
+            yield return WaitForAnimationEvent(completionEvent.Value);
         }
         else
         {
             yield return null;
         }
+    }
+
+    private IEnumerator HandleDeathAction()
+    {
+        LogDebugEvent("Handling Death Animation");
+        yield return PlayAnimationRoutine(UnitAnimationState.Die, UnitAnimationEvent.DieFinished);
         LogDebugEvent("Unit Deactivated");
         gameObject.SetActive(false);
     }
@@ -238,24 +241,28 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
+        _disposed = true;
         _disposables.Dispose();
         StopAllCoroutines();
         actionQueue.Clear();
         isExecuting = false;
     }
     
-    public void HandleAttack(DamageContext context)
+    public void HandleAttack(Vector3? targetWorldPosition = null)
     {
         LogDebugEvent("Unit Attacked");
-        EnqueueAction(PlayAnimation(UnitAnimationState.Attack));
+        EnqueueAction(PlayAttackRoutine(targetWorldPosition));
     }
-    
-    public void HandleHit(DamageContext context)
+
+    public void HandleHit(Vector3? attackerWorldPosition = null)
     {
         LogDebugEvent("Unit Hit");
-        EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
+        EnqueueAction(PlayHitRoutine(attackerWorldPosition));
     }
-    
+
     public void HandleDeath()
     {
         LogDebugEvent("Unit Death");
@@ -266,14 +273,14 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         else
         {
             LogDebugEvent("Unit not fully dead, just playing hit animation");
-            EnqueueAction(PlayAnimation(UnitAnimationState.Hit));
+            EnqueueAction(PlayAnimationRoutine(UnitAnimationState.Hit, UnitAnimationEvent.HitFinished));
         }
     }
-    
+
     public void HandleTurnStarted()
     {
         LogDebugEvent("Unit Turn Started");
-        EnqueueAction(PlayAnimation(UnitAnimationState.Idle));
+        EnqueueAction(PlayAnimationRoutine(UnitAnimationState.Idle));
     }
     
     public void HandleHealthChanged()
@@ -321,8 +328,117 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         Debug.Log($"[UnitView3D Debug] {eventMessage}");
     }
 
-    
+    private void SubscribeToViewModel(UnitViewModel viewModel)
+    {
+        viewModel.OnTeamChangedEnum
+            .Subscribe(team => SetMaterial(_teamMaterials.GetTeamMaterial(team)))
+            .AddTo(_disposables);
 
+        viewModel.OnMoveByWorldRoute
+            .Subscribe(OnWorldRouteReceived)
+            .AddTo(_disposables);
+
+        viewModel.OnAttackedWorld
+            .Subscribe(position => HandleAttack(position))
+            .AddTo(_disposables);
+
+        viewModel.OnHitWorld
+            .Subscribe(position => HandleHit(position))
+            .AddTo(_disposables);
+
+        viewModel.OnDeath
+            .Subscribe(_ => HandleDeath())
+            .AddTo(_disposables);
+
+        viewModel.OnTurnStarted
+            .Subscribe(_ => HandleTurnStarted())
+            .AddTo(_disposables);
+
+        viewModel.OnHealthChanged
+            .Subscribe(_ => HandleHealthChanged())
+            .AddTo(_disposables);
+
+        if (_animationSpeedSettings != null)
+        {
+            _animationSpeedSettings.Mode.Subscribe(OnAnimationSpeedChanged).AddTo(_disposables);
+        }
+    }
+
+    private void OnWorldRouteReceived(IReadOnlyList<Vector3> route)
+    {
+        if (route == null || route.Count == 0)
+            return;
+
+        Move(new List<Vector3>(route));
+    }
+
+    private IEnumerator PlayAttackRoutine(Vector3? targetWorldPosition)
+    {
+        if (targetWorldPosition.HasValue)
+        {
+            FaceTowards(targetWorldPosition.Value);
+        }
+        yield return PlayAnimationRoutine(UnitAnimationState.Attack, UnitAnimationEvent.AttackFinished);
+    }
+
+    private IEnumerator PlayHitRoutine(Vector3? attackerWorldPosition)
+    {
+        if (attackerWorldPosition.HasValue)
+        {
+            FaceTowards(attackerWorldPosition.Value);
+        }
+        yield return PlayAnimationRoutine(UnitAnimationState.Hit, UnitAnimationEvent.HitFinished);
+    }
+
+    private void FaceTowards(Vector3 worldTarget)
+    {
+        var direction = worldTarget - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        var lookRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        transform.rotation = lookRotation;
+    }
+
+    private IEnumerator WaitForAnimationEvent(UnitAnimationEvent eventId)
+    {
+        if (_animationController == null)
+            yield break;
+
+        var completed = false;
+        void Handler(UnitAnimationEvent evt)
+        {
+            if (evt == eventId)
+            {
+                completed = true;
+            }
+        }
+
+        _animationController.AnimationEventRaised += Handler;
+        var safety = 5f;
+        var iterationBudget = 2000;
+        try
+        {
+            while (!completed && safety > 0f && iterationBudget-- > 0)
+            {
+                var delta = Application.isPlaying ? Time.deltaTime : 0.02f;
+                safety -= delta;
+                yield return null;
+            }
+        }
+        finally
+        {
+            _animationController.AnimationEventRaised -= Handler;
+        }
+    }
+
+    private bool IsInstantMode() => _animationSpeedSettings != null && _animationSpeedSettings.IsInstant;
+
+    private void OnDestroy()
+    {
+        Dispose();
+    }
 }
  
 

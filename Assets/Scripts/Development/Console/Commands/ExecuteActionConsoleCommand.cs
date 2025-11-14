@@ -12,7 +12,7 @@ public class ExecuteActionConsoleCommand : IDeveloperConsoleCommand
 
     public void Execute(DeveloperConsoleCommandContext context, IReadOnlyList<string> args, IDeveloperConsoleOutput output)
     {
-        if (context.GameViewModel == null || context.CommandExecutor == null)
+        if (context.GridViewModel == null || context.CommandExecutor == null)
         {
             output.AppendError("Required systems are not available.");
             return;
@@ -54,7 +54,7 @@ public class ExecuteActionConsoleCommand : IDeveloperConsoleCommand
 
         var actionContext = new ActionContext(from, target, SpellType.None, attackFrom);
 
-        if (!context.GameViewModel.CanExecute(actionType, actionContext))
+        if (!context.GridViewModel.CanExecute(actionType, actionContext))
         {
             output.AppendError($"Action {actionType} cannot be executed with the provided context.");
             return;

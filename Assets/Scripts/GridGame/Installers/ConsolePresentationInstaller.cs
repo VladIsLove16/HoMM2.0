@@ -23,7 +23,6 @@ public class ConsolePresentationInstaller : MonoBehaviour, IGamePresentationInst
         container.Bind<ConsoleGridState>().AsSingle();
         container.Bind<ConsoleGridRenderer>().AsSingle();
         container.Bind<IGridCellRenderer>().To<ConsoleGridRenderer>().FromResolve().AsSingle();
-        container.Bind<IWorldToCellProvider>().To<ConsoleGridRenderer>().FromResolve().AsSingle();
         container.BindInterfacesTo<ConsoleGameView>().AsSingle();
     }
 }

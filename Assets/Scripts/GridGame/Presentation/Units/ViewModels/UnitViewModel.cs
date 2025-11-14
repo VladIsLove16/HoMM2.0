@@ -1,9 +1,8 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
-using Zenject;
 
 public class UnitViewModel : IViewModel
 {
@@ -13,8 +12,6 @@ public class UnitViewModel : IViewModel
     public IReadOnlyReactiveProperty<Team> TeamObservable => Model.Team;
     public IReadOnlyReactiveProperty<int> AmountObservable => Model.Amount;
 
-    public IObservable<Unit> OnAttacked => _onAttacked;
-    public IObservable<Unit> OnHit => _onHit;
     public IObservable<Unit> OnDeath => _onDeath;
     public IObservable<Unit> OnTurnStarted => _onTurnStarted;
     public IObservable<Unit> OnHealthChanged => _onHealthChanged;
@@ -24,47 +21,97 @@ public class UnitViewModel : IViewModel
     public IObservable<Vector2Int> OnPosChanged => _onPosChanged;
     public IObservable<List<Vector2Int>> OnMoveByRoute => _onMovedByRoute;
 
-    public float HealthRatio => Model.ModifiedStats.MaxHealth > 0 ? (float)Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth : 0f;
+    public IObservable<Vector3> OnWorldPositionChanged => _onWorldPositionChanged;
+    public IObservable<IReadOnlyList<Vector3>> OnMoveByWorldRoute => _onMovedByWorldRoute;
+    public IObservable<Vector3> OnAttackedWorld => _onAttackedWorld;
+    public IObservable<Vector3> OnHitWorld => _onHitWorld;
+
+    public float HealthRatio => Model.ModifiedStats.MaxHealth > 0
+        ? (float)Model.ModifiedStats.Health / Model.ModifiedStats.MaxHealth
+        : 0f;
 
     public int Health => Model.ModifiedStats.Health;
-
     public int MaxHealth => Model.ModifiedStats.MaxHealth;
-
     public int Amount => Model.Amount.Value;
 
-    private Subject<List<Vector2Int>> _onMovedByRoute = new();
-    private Subject<Unit> _onAttacked = new();
-    private Subject<Unit> _onHit = new();
-    private Subject<Unit> _onDeath = new();
-    private Subject<Unit> _onTurnStarted = new();
-    private Subject<Unit> _onHealthChanged = new();
-    private Subject<bool> _onTeamChanged = new();
-    private Subject<Team> _onTeamChangedEnum = new();
-    private Subject<int> _onAmountChanged = new();
-    private Subject<Vector2Int> _onPosChanged = new();
-    public UnitViewModel(UnitModel model)
+    private readonly IWorldToCellProvider _worldToCellProvider;
+
+    private readonly Subject<Unit> _onDeath = new();
+    private readonly Subject<Unit> _onTurnStarted = new();
+    private readonly Subject<Unit> _onHealthChanged = new();
+    private readonly Subject<bool> _onTeamChanged = new();
+    private readonly Subject<Team> _onTeamChangedEnum = new();
+    private readonly Subject<int> _onAmountChanged = new();
+    private readonly Subject<Vector2Int> _onPosChanged = new();
+    private readonly Subject<List<Vector2Int>> _onMovedByRoute = new();
+
+    private readonly Subject<Vector3> _onWorldPositionChanged = new();
+    private readonly Subject<IReadOnlyList<Vector3>> _onMovedByWorldRoute = new();
+    private readonly Subject<Vector3> _onAttackedWorld = new();
+    private readonly Subject<Vector3> _onHitWorld = new();
+
+    public UnitViewModel(UnitModel model, IWorldToCellProvider worldToCellProvider)
     {
-        Model = model;
+        Model = model ?? throw new ArgumentNullException(nameof(model));
+        _worldToCellProvider = worldToCellProvider ?? throw new ArgumentNullException(nameof(worldToCellProvider));
 
         SubscribeToModel();
     }
 
     private void SubscribeToModel()
     {
-        // Пробрасываем события модели во ViewModel (MVVM)
-        if (Model == null) return;
+        Model.Attacked += ctx =>
+        {
+            EmitWorldPosition(ctx?.Target as IGridContent, _onAttackedWorld);
+        };
 
-        Model.Attacked += _ => _onAttacked.OnNext(Unit.Default);
-        Model.Hitted += _ => _onHit.OnNext(Unit.Default);
+        Model.Hitted += ctx =>
+        {
+            EmitWorldPosition(ctx?.Source as IGridContent, _onHitWorld);
+        };
+
         Model.Died += () => _onDeath.OnNext(Unit.Default);
         Model.TurnStarted += () => _onTurnStarted.OnNext(Unit.Default);
         Model.HealthChanged += () => _onHealthChanged.OnNext(Unit.Default);
-        Model.Amount.Subscribe(v => _onAmountChanged.OnNext(v));
+
+        Model.Amount.Subscribe(value => _onAmountChanged.OnNext(value));
         Model.Team.Subscribe(team =>
         {
             _onTeamChanged.OnNext(team == Team.Blue);
             _onTeamChangedEnum.OnNext(team);
         });
-        Model.MovedByRoute+= (route) => _onMovedByRoute.OnNext(route); ;
+
+        Model.Position.Subscribe(position =>
+        {
+            _onPosChanged.OnNext(position);
+            _onWorldPositionChanged.OnNext(ToWorldPosition(position));
+        });
+
+        Model.MovedByRoute += route =>
+        {
+            if (route == null)
+            {
+                return;
+            }
+
+            _onMovedByRoute.OnNext(route);
+            var worldRoute = route.Select(ToWorldPosition).ToList();
+            _onMovedByWorldRoute.OnNext(worldRoute);
+        };
+    }
+
+    private Vector3 ToWorldPosition(Vector2Int coords)
+    {
+        return _worldToCellProvider?.ToWorld(coords.x, coords.y) ?? new Vector3(coords.x, 0f, coords.y);
+    }
+
+    private void EmitWorldPosition(IGridContent content, IObserver<Vector3> observer)
+    {
+        if (content == null || observer == null)
+        {
+            return;
+        }
+
+        observer.OnNext(ToWorldPosition(content.Position));
     }
 }

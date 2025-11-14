@@ -1,6 +1,7 @@
 using System;
 using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
+using Adventure.Infrastructure.Dialog;
 using Adventure.Integration.Battle;
 using Adventure.Settings.ViewModel;
 using UniRx;
@@ -34,6 +35,7 @@ namespace Adventure.Application.Dialog
         {
             return _repository.TryGet(dialogId, out var graph);
         }
+
         public bool TryStartDialog(string dialogId, ArmyLineupSO armyLineupSO, string startNodeId = null)
         {
             if (string.IsNullOrEmpty(dialogId))
@@ -51,9 +53,17 @@ namespace Adventure.Application.Dialog
             }
 
             _session = new DialogueSession(graph, startNodeId);
+            _session.IsCompleted.Subscribe(OnSessionStateChanged);
             _currentNode.SetValueAndForceNotify(_session.CurrentNode);
             _isOpen.SetValueAndForceNotify(true);
             return true;
+        }
+
+        private void OnSessionStateChanged(bool state)
+        {
+            if (!state)
+                return; 
+            Close();
         }
 
         public void SelectChoice(string choiceId)
@@ -81,7 +91,7 @@ namespace Adventure.Application.Dialog
 
         private void ContinueDialog()
         {
-            if (_session.IsCompleted)
+            if (_session.IsCompleted.Value)
             {
                 _stateStore?.ClearState(_activeDialogId);
                 _currentNode.Value = null;
@@ -100,7 +110,7 @@ namespace Adventure.Application.Dialog
             var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
             var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
             var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
-            battleLaunchService.Launch(context);
+            var finalize = battleLaunchService.PrepareLaunch(context);
         }
 
         private void EndDialog()

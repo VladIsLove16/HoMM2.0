@@ -6,7 +6,6 @@ namespace Adventure.Domain.Dialog
     public sealed class DialogueDatabaseSO : ScriptableObject, IDialogRepository
     {
         [SerializeField] private List<DialogueGraphSO> graphs = new List<DialogueGraphSO>();
-
         public bool TryGet(string dialogId, out DialogueGraph graph)
         {
             foreach (var g in graphs)

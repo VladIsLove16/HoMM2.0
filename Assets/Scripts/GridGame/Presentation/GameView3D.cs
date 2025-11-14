@@ -9,15 +9,18 @@ public class GameView3D : MonoBehaviour
     [SerializeField] bool Log;
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
-    private GameViewModel _gameVM;
-    [Inject]private IWorldToCellProvider _worldToCellProvider;
+    private IGridViewModel _gameVM;
+    private IWorldToCellProvider _worldToCellProvider;
     [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private UnitView3D _draggedUnit;
 
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellSelected;
 
-    public void SetWorldToCellProvider(IWorldToCellProvider provider) => _worldToCellProvider = provider;
+    public void SetWorldToCellProvider(IWorldToCellProvider provider)
+    {
+        _worldToCellProvider = provider;
+    }
 
     [Inject]
     public void Construct(
@@ -52,7 +55,7 @@ public class GameView3D : MonoBehaviour
         }
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         TestHandleCellHovered?.Invoke(coords);
-        _gameVM?.HandleCellHovered(coords);
+        _gameVM?.HandleCellHovered(coords.Key,coords.Value);
     }
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
@@ -61,13 +64,13 @@ public class GameView3D : MonoBehaviour
             return;
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
         TestHandleCellSelected?.Invoke(coords);
-        _gameVM?.HandleCellSelected(coords);
+        _gameVM?.HandleCellHovered(coords.Key, coords.Value);
     }
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
         _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
-        _gameVM?.HandleCellActionPerformed(coords);
+        _gameVM?.HandleCellActionPerformed(coords.Key,coords.Value);
     }
     public void SnapUnitToCell(UnitView3D unitView, Vector2Int cell)
     {
@@ -112,7 +115,7 @@ public class GameView3D : MonoBehaviour
                 {
                     if (entry.Value == _draggedUnit)
                     {
-                        _gameVM.SnapToCell(entry.Key as UnitViewModel, coords);
+                        _gameVM.SetCell(entry.Key as UnitViewModel, coords);
                         entry.Value.SnapToCell(resolvedWorldPos);
                         _draggedUnit = null;
                         return;

@@ -1,12 +1,14 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using Tests.Common;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 namespace Tests.EditMode.Input
 {
     [TestFixture]
-    public class CellInputHandler_EditModeIntegrationTests
+    public partial class CellInputHandler_EditModeIntegrationTests
     {
         private GameObject _rendererGO;
         private PerCellGridRenderer _renderer;
@@ -50,12 +52,17 @@ namespace Tests.EditMode.Input
                 MakeMaterial(CellState.selected, "selected"),
                 MakeMaterial(CellState.reachableCell, "reachable"),
             };
-            _renderer.SetMaterials(materials);
-
-            _renderer.Render(3, 3, 1f, Vector3.zero, 0.4f);
+            TestGridRenderSettings gridRenderSettings = new TestGridRenderSettings();
+            gridRenderSettings.CellHeight = 1;
+            gridRenderSettings.CellPadding = 0.4f;
+            gridRenderSettings.CellSize = 2.5f;
+            _renderer.SetRenderSettings(gridRenderSettings);
 
             _gridVM = new TestGridViewModel();
             _renderer.Bind(_gridVM);
+            _gridVM.SimulateGridInit(3, 3);
+
+            
         }
 
         [TearDown]
@@ -141,15 +148,6 @@ namespace Tests.EditMode.Input
             var shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Sprites/Default");
             var material = new Material(shader) { name = name };
             return new CellMaterial(state,material);
-        }
-
-        private class TestGridViewModel : IGridViewModel
-        {
-            public event System.Action<int,int> GridInited;
-            public event System.Action<PreviewResult> PreviewChanged;
-            public event System.Action<PreviewResult> PreviewUpdated;
-
-            public void RaisePreview(PreviewResult result) => PreviewChanged?.Invoke(result);
         }
 
         private class WorldToCellStub : IWorldToCellProvider

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using TMPro;
+using Tests.Common;
 
 namespace Tests.PlayMode.UI
 {
@@ -45,7 +46,7 @@ namespace Tests.PlayMode.UI
             yield return null;
 
             Assert.That(fixture.AmountText.text, Is.EqualTo("3"));
-            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("100"));
+            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("100/100"));
         }
 
         [UnityTest]
@@ -58,7 +59,7 @@ namespace Tests.PlayMode.UI
             fixture.Model.RecieveDamage(new DamageContext(30, DamageType.physical, null));
             yield return null;
 
-            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("70"));
+            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("70/100"));
             Assert.That(fixture.HealthBarImage.fillAmount, Is.EqualTo(0.7f).Within(0.01f));
         }
 
@@ -103,7 +104,7 @@ namespace Tests.PlayMode.UI
             fixture.Model.RecieveDamage(new DamageContext(70, DamageType.physical, null));
             yield return null;
 
-            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("90"));
+            Assert.That(fixture.HealthAmountText.text, Is.EqualTo("90/100"));
             Assert.That(fixture.AmountText.text, Is.EqualTo("2"));
         }
 
@@ -162,7 +163,7 @@ namespace Tests.PlayMode.UI
             _assets.Add(stats);
 
             var model = new UnitModel(stats, UnitType.Archer, 0, 0, amount, Team.Blue);
-            var viewModel = new UnitViewModel(model);
+            var viewModel = new UnitViewModel(model, new TestWorldToCellProvider());
 
             return new UITestFixture(unitViewUI, viewModel, model, amountText, healthAmountText, healthImage);
         }

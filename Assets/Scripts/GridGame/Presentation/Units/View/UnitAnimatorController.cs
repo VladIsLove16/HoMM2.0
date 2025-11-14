@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class UnitAnimatorController : MonoBehaviour
 {
     [SerializeField] private Animator animator;
@@ -9,19 +10,30 @@ public class UnitAnimatorController : MonoBehaviour
     [SerializeField] private string attackTrigger = "Attacking";
     [SerializeField] private string hitTrigger = "Hitted";
     [SerializeField] private string dieTrigger = "Die";
-    [SerializeField] private UnitAnimationState animationTrigger;
+    [SerializeField] private bool logEvents;
+    [SerializeField] private UnitAnimationState previewState = UnitAnimationState.Idle;
+
+    public event Action<UnitAnimationEvent> AnimationEventRaised;
+
     private void Awake()
     {
         if (animator == null)
         {
             animator = GetComponent<Animator>();
         }
+
+        if (animator == null)
+        {
+            Debug.LogError("[UnitAnimatorController] Animator is missing", this);
+        }
     }
-    [ContextMenu("Play Animation")] 
-    public void PlayAnimation()
+
+    [ContextMenu("Play Animation")]
+    private void PlayAnimationInEditor()
     {
-        PlayAnimation(animationTrigger);
+        PlayAnimation(previewState);
     }
+
     public void PlayAnimation(UnitAnimationState state)
     {
         if (animator == null)
@@ -40,10 +52,11 @@ public class UnitAnimatorController : MonoBehaviour
         if (!string.IsNullOrEmpty(trigger))
         {
             animator.SetTrigger(trigger);
-            Debug.Log($"Playing animation: {trigger}");
-            return;
         }
-        Debug.LogError($"No trigger found for animation state: {trigger}");
+        else
+        {
+            Debug.LogWarning($"[UnitAnimatorController] Trigger not configured for {state}", this);
+        }
     }
 
     public void SetPlaybackSpeed(float multiplier, bool instant)
@@ -58,5 +71,45 @@ public class UnitAnimatorController : MonoBehaviour
         }
 
         animator.speed = Mathf.Max(0.01f, multiplier);
+    }
+
+    /// <summary>
+    /// Called via Animation Event (string parameter) to raise strongly typed events.
+    /// </summary>
+    public void DispatchAnimationEvent(string eventName)
+    {
+        if (Enum.TryParse<UnitAnimationEvent>(eventName, true, out var evt))
+        {
+            RaiseAnimationEvent(evt);
+        }
+        else
+        {
+            Debug.LogWarning($"[UnitAnimatorController] Unknown animation event '{eventName}' on {name}", this);
+        }
+    }
+
+    /// <summary>
+    /// Optional int overload for Animation Event (int) usage.
+    /// </summary>
+    public void DispatchAnimationEvent(int eventId)
+    {
+        if (Enum.IsDefined(typeof(UnitAnimationEvent), eventId))
+        {
+            RaiseAnimationEvent((UnitAnimationEvent)eventId);
+        }
+        else
+        {
+            Debug.LogWarning($"[UnitAnimatorController] Unknown animation event id '{eventId}' on {name}", this);
+        }
+    }
+
+    private void RaiseAnimationEvent(UnitAnimationEvent evt)
+    {
+        if (logEvents)
+        {
+            Debug.Log($"[UnitAnimatorController] Event {evt} raised on {name}", this);
+        }
+
+        AnimationEventRaised?.Invoke(evt);
     }
 }
