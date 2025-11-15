@@ -57,10 +57,11 @@ public class InGameUI_TurnState_EditModeTests
         public ActionType? LastType { get; private set; }
         public ActionContext LastContext { get; private set; }
 
-        public void Execute(ActionType type, ActionContext ctx)
+        public bool Execute(ActionType type, ActionContext ctx)
         {
             LastType = type;
             LastContext = ctx;
+            return true;
         }
 
         public void StartBattle()

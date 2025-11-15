@@ -17,14 +17,7 @@ public class CellView : MonoBehaviour, IGameViewObject
 
     private void Awake()
     {
-        _baseRenderer = GetComponent<Renderer>();
-        _appearance = new CellAppearanceController(
-            () => _baseRenderer,
-            () => _hoverRenderer,
-            () => _routePointRenderer,
-            () => _materials);
-
-        _states.Changed += OnStatesChanged;
+        EnsureInitialized();
     }
 
     private void Start()
@@ -39,6 +32,7 @@ public class CellView : MonoBehaviour, IGameViewObject
 
     internal void Init(IReadOnlyDictionary<CellState, CellMaterial> materials)
     {
+        EnsureInitialized();
         _materials = new CellMaterialRegistry(materials);
         _appearance.Apply(_states);
     }
@@ -57,6 +51,7 @@ public class CellView : MonoBehaviour, IGameViewObject
 
     public void SetMaterialsDictionary(IReadOnlyDictionary<CellState, CellMaterial> materials)
     {
+        EnsureInitialized();
         _materials = new CellMaterialRegistry(materials);
         _appearance.Apply(_states);
     }
@@ -85,6 +80,21 @@ public class CellView : MonoBehaviour, IGameViewObject
     private void OnStatesChanged()
     {
         _appearance.Apply(_states);
+    }
+
+    private void EnsureInitialized()
+    {
+        if (_appearance != null)
+            return;
+
+        _baseRenderer = GetComponent<Renderer>();
+        _appearance = new CellAppearanceController(
+            () => _baseRenderer,
+            () => _hoverRenderer,
+            () => _routePointRenderer,
+            () => _materials);
+
+        _states.Changed += OnStatesChanged;
     }
 
     private sealed class CellStateCollection

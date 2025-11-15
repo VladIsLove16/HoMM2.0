@@ -11,24 +11,25 @@ public class ActionPipeline
         _turnSystem = turnSystem;
     }
 
-    public void Execute(ActionType type, ActionContext ctx)
+    public bool Execute(ActionType type, ActionContext ctx)
     {
         var handler = _resolver.Resolve(type, ctx);
         Debug.Log("ActionPipeline  " + type);
         if (handler == null)
         {
             Debug.LogWarning($"[Pipeline] No handler for {type}");
-            return;
+            return false;
         }
 
         if (!handler.CanExecute(ctx))
         {
             Debug.LogWarning($"[Pipeline] Handler cannot execute {type} for ctx " + ctx.ToString());
-            return;
+            return false;
         }
 
         handler.Execute(ctx);
         _turnSystem.EndTurn();
+        return true;
     }
 
     public void StartBattle()

@@ -27,6 +27,7 @@ public class CellInputHandler : MonoBehaviour
 
     private readonly List<RaycastResult> _uiRaycastResults = new List<RaycastResult>(8);
     private Collider _lastHoveredCollider;
+    private Vector2Int? _lastHoveredCell;
     private Vector2 _currentPointerPosition;
     private bool _pointerInitialized;
 
@@ -52,14 +53,32 @@ public class CellInputHandler : MonoBehaviour
 
     public void HandleMouseMoved()
     {
-        if (TryGetHit(out var hit))
+        if (!TryGetHit(out var hit))
+        {
+            _lastHoveredCollider = null;
+            _lastHoveredCell = null;
+            return;
+        }
+
+        var obj = hit.collider.GetComponent<IGameViewObject>();
+        if (obj != null && obj.IsHoverable)
         {
             if (_lastHoveredCollider == hit.collider)
                 return;
-            var obj = hit.collider.GetComponent<IGameViewObject>();
-            if (obj != null && obj.IsHoverable)
-                _gameView3D?.HandleGameViewObjectHovered(obj);
+
+            _gameView3D?.HandleGameViewObjectHovered(obj);
             _lastHoveredCollider = hit.collider;
+            _lastHoveredCell = null;
+            return;
+        }
+
+        if (_gameView3D != null && _gameView3D.HandleGridHover(hit.point, out var cell))
+        {
+            if (_lastHoveredCollider == hit.collider && _lastHoveredCell.HasValue && _lastHoveredCell.Value == cell)
+                return;
+
+            _lastHoveredCollider = hit.collider;
+            _lastHoveredCell = cell;
         }
     }
 
@@ -69,18 +88,35 @@ public class CellInputHandler : MonoBehaviour
         if (!TryGetHit(out var hit)) return;
         var obj = hit.collider.GetComponent<IGameViewObject>();
         if (obj != null && obj.IsSelectable)
+        {
             _gameView3D?.HandleGameViewObjectSelected(obj);
+        }
+        else
+        {
+            _gameView3D?.HandleGridSelect(hit.point);
+        }
     }
 
     public void HandleAction()
     {
         if (IsPointerOverUI()) return;
-        if (!TryGetHit(out var hit)) { ActionCanceled?.Invoke(); return; }
+        if (!TryGetHit(out var hit))
+        {
+            ActionCanceled?.Invoke();
+            return;
+        }
+
         var obj = hit.collider.GetComponent<IGameViewObject>();
         if (obj != null)
+        {
             _gameView3D?.HandleActionPerformed(obj);
-        else
+            return;
+        }
+
+        if (!(_gameView3D?.HandleGridAction(hit.point) ?? false))
+        {
             ActionCanceled?.Invoke();
+        }
     }
 
     public void HandleDragStart()

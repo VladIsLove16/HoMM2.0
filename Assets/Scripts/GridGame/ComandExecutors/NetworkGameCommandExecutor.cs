@@ -11,12 +11,20 @@ public class NetworkGameCommandExecutor : IGameCommandExecutor
 
     public void StartBattle()
     {
-        _gateway.RequestStartBattle();
+        if (!_gateway.RequestStartBattle())
+        {
+            Debug.LogWarning("[NetworkGameCommandExecutor] Unable to send StartBattle request.");
+        }
     }
 
-    public void Execute(ActionType type, ActionContext ctx)
+    public bool Execute(ActionType type, ActionContext ctx)
     {
         Debug.Log("Execute " + type);
-        _gateway.RequestExecuteAction(type, ctx);
+        if (!_gateway.RequestExecuteAction(type, ctx))
+        {
+            Debug.LogWarning($"[NetworkGameCommandExecutor] Unable to send action {type}.");
+            return false;
+        }
+        return true;
     }
 }

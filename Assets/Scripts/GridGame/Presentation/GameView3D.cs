@@ -10,7 +10,7 @@ public class GameView3D : MonoBehaviour
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
     private IGridViewModel _gameVM;
-    private IWorldToCellProvider _worldToCellProvider;
+    [Inject] private IWorldToCellProvider _worldToCellProvider;
     [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private UnitView3D _draggedUnit;
 
@@ -24,7 +24,7 @@ public class GameView3D : MonoBehaviour
 
     [Inject]
     public void Construct(
-        [InjectOptional] GameViewModel gameVM,
+        [InjectOptional] IGridViewModel gameVM,
         [InjectOptional] UnitViewFactory unitViewFactory)
     {
         _gameVM = gameVM;
@@ -47,30 +47,75 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
-        if(Log)
+        if (gameViewObject == null)
+            return;
+
+        if (Log)
             Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
+
         if (gameViewObject is IHoverable hoverable)
         {
             hoverable.Hover();
         }
-        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
-        TestHandleCellHovered?.Invoke(coords);
-        _gameVM?.HandleCellHovered(coords.Key,coords.Value);
+
+        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        {
+            ProcessCellHover(coords);
+        }
     }
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
-        if (IsInteractionLocked())
+        if (gameViewObject == null || IsInteractionLocked())
             return;
-        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
-        TestHandleCellSelected?.Invoke(coords);
-        _gameVM?.HandleCellHovered(coords.Key, coords.Value);
+
+        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        {
+            ProcessCellSelected(coords);
+        }
     }
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
-        _worldToCellProvider.ToGridPair(gameViewObject.transform.position, out var coords);
-        _gameVM?.HandleCellActionPerformed(coords.Key,coords.Value);
+        if (gameViewObject == null)
+            return;
+
+        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        {
+            ProcessCellAction(coords);
+        }
+    }
+
+    public bool HandleGridHover(Vector3 worldPosition, out Vector2Int cell)
+    {
+        cell = default;
+        if (!TryResolveCoords(worldPosition, out var coords))
+            return false;
+
+        cell = coords.Key;
+        ProcessCellHover(coords);
+        return true;
+    }
+
+    public bool HandleGridSelect(Vector3 worldPosition)
+    {
+        if (IsInteractionLocked())
+            return false;
+
+        if (!TryResolveCoords(worldPosition, out var coords))
+            return false;
+
+        ProcessCellSelected(coords);
+        return true;
+    }
+
+    public bool HandleGridAction(Vector3 worldPosition)
+    {
+        if (!TryResolveCoords(worldPosition, out var coords))
+            return false;
+
+        ProcessCellAction(coords);
+        return true;
     }
     public void SnapUnitToCell(UnitView3D unitView, Vector2Int cell)
     {
@@ -126,6 +171,32 @@ public class GameView3D : MonoBehaviour
 
         _draggedUnit.transform.position = resolvedWorldPos;
         _draggedUnit = null;
+    }
+
+    private bool TryResolveCoords(Vector3 worldPosition, out KeyValuePair<Vector2Int, Vector2Int> coords)
+    {
+        coords = default;
+        if (_worldToCellProvider == null)
+            return false;
+
+        return _worldToCellProvider.ToGridPair(worldPosition, out coords);
+    }
+
+    private void ProcessCellHover(KeyValuePair<Vector2Int, Vector2Int> coords)
+    {
+        TestHandleCellHovered?.Invoke(coords);
+        _gameVM?.HandleCellHovered(coords.Key, coords.Value);
+    }
+
+    private void ProcessCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords)
+    {
+        TestHandleCellSelected?.Invoke(coords);
+        _gameVM?.HandleCellSelected(coords);
+    }
+
+    private void ProcessCellAction(KeyValuePair<Vector2Int, Vector2Int> coords)
+    {
+        _gameVM?.HandleCellActionPerformed(coords.Key, coords.Value);
     }
 
     private void OnDestroy()

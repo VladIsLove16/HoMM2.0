@@ -120,13 +120,13 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
                 throw new NotImplementedException();
                 //container.BindInterfacesAndSelfTo<SingleGridRenderer>().AsSingle();
             case GridRenderStrategy.PerCell:
+                ActivateRenderer(perCellGridRenderer, true);
+                ActivateRenderer(tileGridRenderer, false);
                 if (perCellGridRenderer != null)
                 {
                     container.BindInterfacesAndSelfTo<PerCellGridRenderer>()
                              .FromInstance(perCellGridRenderer)
                              .AsSingle();
-
-                    Debug.LogWarning("[ThreeDPresentationInstaller] PerCellGridRenderer is assigned.", this);
                 }
                 else
                 {
@@ -134,13 +134,13 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
                 }
                 break;
             case GridRenderStrategy.Tile:
+                ActivateRenderer(perCellGridRenderer, false);
+                ActivateRenderer(tileGridRenderer, true);
                 if (tileGridRenderer != null)
                 {
                     container.BindInterfacesAndSelfTo<TileGridRenderer>()
                              .FromInstance(tileGridRenderer)
                              .AsSingle();
-
-                    Debug.LogWarning("[ThreeDPresentationInstaller] TileGridRenderer is assigned.", this);
                 }
                 else
                 {
@@ -148,6 +148,18 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
                 }
                 break;
         }
+    }
+
+    private static void ActivateRenderer(MonoBehaviour renderer, bool active)
+    {
+        if (renderer == null)
+            return;
+
+        if (renderer.gameObject.activeSelf != active)
+        {
+            renderer.gameObject.SetActive(active);
+        }
+        renderer.enabled = active;
     }
 }
 

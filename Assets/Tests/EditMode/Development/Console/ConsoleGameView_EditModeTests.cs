@@ -108,8 +108,9 @@ public class ConsoleGameView_EditModeTests
 
     private sealed class NullCommandExecutor : IGameCommandExecutor
     {
-        public void Execute(ActionType type, ActionContext ctx)
+        public bool Execute(ActionType type, ActionContext ctx)
         {
+            return true;
         }
 
         public void StartBattle()

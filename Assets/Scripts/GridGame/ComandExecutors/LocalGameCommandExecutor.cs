@@ -12,8 +12,8 @@ public class LocalGameCommandExecutor : IGameCommandExecutor
         _pipeline.StartBattle();
     }
 
-    public void Execute(ActionType type, ActionContext ctx)
+    public bool Execute(ActionType type, ActionContext ctx)
     {
-        _pipeline.Execute(type, ctx);
+        return _pipeline.Execute(type, ctx);
     }
 }

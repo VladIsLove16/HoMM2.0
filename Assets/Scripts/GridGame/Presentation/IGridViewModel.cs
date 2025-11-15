@@ -13,11 +13,10 @@ public interface IGridViewModel
     IGridRenderSettings RenderSettings { get; set; }
     Action<UnitViewModel> UnitSpawned { get; set; }
 
-    /// <summary>
-    /// Allows UI layers (e.g., portrait hovers) to override the hovered cell highlight.
-    /// Pass <c>null</c> to release the override and resume normal cursor hover.
-    /// </summary>
+    void HandleCellHovered(Vector2Int? cell);
     void HandleCellHovered(Vector2Int cell, Vector2Int nearestCell);
+    void HandleCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords);
     void HandleCellActionPerformed(Vector2Int cell, Vector2Int nearestCell);
-    public void SetCell(UnitViewModel unitViewModel, Vector2Int cell);
+    void SetCell(UnitViewModel unitViewModel, Vector2Int cell);
+    bool CanExecute(ActionType actionType, ActionContext actionContext);
 }

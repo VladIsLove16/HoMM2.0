@@ -62,12 +62,12 @@ public sealed class UnitPortraitViewModel : IDisposable
 
     public void RequestFocus()
     {
-        _gridViewModel?.HandleCellHovered(_cellPosition.Value, _turnQueue.PeekNext().Position);
+        _gridViewModel?.HandleCellHovered((Vector2Int?)_cellPosition.Value);
     }
 
     public void ReleaseFocus()
     {
-        _gridViewModel?.HandleCellHovered(-Vector2Int.one, -Vector2Int.one);
+        _gridViewModel?.HandleCellHovered((Vector2Int?)null);
     }
 
     public void SelectUnit()

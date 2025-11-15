@@ -16,7 +16,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void ExecuteActionServerRpc(ActionType type, ActionContext ctx, ServerRpcParams rpcParams = default)
     {
-        _pipeline.Execute(type, ctx);
+         _pipeline.Execute(type, ctx);
         BroadcastActionClientRpc(type, ctx);
     }
 
@@ -42,6 +42,39 @@ public class GameNetworkCommandGateway : NetworkBehaviour
         _pipeline.StartBattle();
     }
 
-    public void RequestExecuteAction(ActionType type, ActionContext ctx) => ExecuteActionServerRpc(type, ctx);
-    public void RequestStartBattle() => StartBattleServerRpc();
+    private bool CanSendRequest()
+    {
+        if (!isActiveAndEnabled)
+        {
+            Debug.LogWarning("[GameNetworkCommandGateway] Gateway is disabled.");
+            return false;
+        }
+
+        var netObj = GetComponent<NetworkObject>();
+        if (netObj == null || !netObj.IsSpawned)
+        {
+            Debug.LogWarning("[GameNetworkCommandGateway] NetworkObject is not spawned yet.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool RequestExecuteAction(ActionType type, ActionContext ctx)
+    {
+        if (!CanSendRequest())
+            return false;
+
+        ExecuteActionServerRpc(type, ctx);
+        return true;
+    }
+
+    public bool RequestStartBattle()
+    {
+        if (!CanSendRequest())
+            return false;
+
+        StartBattleServerRpc();
+        return true;
+    }
 }

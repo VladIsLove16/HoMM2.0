@@ -48,6 +48,22 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             .Subscribe(OnActiveUnitChanged)
             .AddTo(_subscriptions);
     }
+    public void HandleCellHovered(Vector2Int? cell)
+    {
+        if (cell.HasValue)
+        {
+            _hoverOverride = cell;
+            UpdateHoverState(cell);
+        }
+        else
+        {
+            _hoverOverride = null;
+            UpdateHoverState(null);
+        }
+
+        PreviewUpdated?.Invoke(new PreviewResult(_data));
+    }
+
     public void HandleCellHovered(Vector2Int cell)
     {
         HandleCellHovered(cell, -Vector2Int.one);
@@ -69,6 +85,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         UpdateHoverState(cell);
 
         var previewResult = new PreviewResult();
+        var enemyPreviewAdded = TryAddEnemyReachablePreview(previewResult, cell);
         if (_data.TryGetValue(CellState.reachableCell, out var reachableCells) && reachableCells != null && reachableCells.Count > 0)
         {
             previewResult.Add(CellState.reachableCell, reachableCells);
@@ -102,17 +119,22 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         }
         else
         {
-            var fromCell = activeUnit.Position;
-            var unit = _gameModel.GetCell(fromCell).Unit;
-            if (unit != null)
+            if (!enemyPreviewAdded)
             {
-                var cells = _movementSystem.GetReachableCells(fromCell, unit.ModifiedStats.MoveSpeed);
-                previewResult.Add(CellState.enemyReachableCell, cells);
+                var fromCell = activeUnit.Position;
+                var unit = _gameModel.GetCell(fromCell).Unit;
+                if (unit != null)
+                {
+                    var cells = _movementSystem.GetReachableCells(fromCell, unit.ModifiedStats.MoveSpeed);
+                    previewResult.Add(CellState.enemyReachableCell, cells);
+                    enemyPreviewAdded = true;
+                }
             }
-            else
-            {
-                previewResult.Add(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
-            }
+        }
+
+        if (!enemyPreviewAdded)
+        {
+            previewResult.Add(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
         }
 
         PreviewUpdated?.Invoke(previewResult);
@@ -130,7 +152,22 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         var fromCell = activeUnit.Position;
         var actionContext = new ActionContext(fromCell, coords.Key, SpellType.None, coords.Value);
         _actionResolver.Resolve(actionContext, out var actionHandler);
-        _gameCommandExecutor.Execute(actionHandler.ActionType, actionContext);
+        if (actionHandler == null)
+        {
+            Debug.LogWarning($"[GameViewModel] No action handler for {coords.Key}");
+            return;
+        }
+
+        if (!actionHandler.CanExecute(actionContext))
+        {
+            Debug.LogWarning($"[GameViewModel] Action {actionHandler.ActionType} rejected locally for context {actionContext}");
+            return;
+        }
+
+        if (!_gameCommandExecutor.Execute(actionHandler.ActionType, actionContext))
+        {
+            Debug.LogWarning($"[GameViewModel] Command executor declined {actionHandler.ActionType}");
+        }
     }
 
     public void HandleCellActionPerformed(KeyValuePair<Vector2Int, Vector2Int> coords)
@@ -143,6 +180,10 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         }
     }
 
+    public void HandleCellActionPerformed(Vector2Int cell, Vector2Int nearestCell)
+    {
+        HandleCellActionPerformed(new KeyValuePair<Vector2Int, Vector2Int>(cell, nearestCell));
+    }
     protected virtual void OnGameModelUnitSpawned(UnitModelCreatedParams @params)
     {
         var unitVM = new UnitViewModel(@params.UnitModel, this);
@@ -241,9 +282,19 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         coords = new KeyValuePair<Vector2Int, Vector2Int>(main, main);
         return success;
     }
-
-    public void HandleCellActionPerformed(Vector2Int cell, Vector2Int nearestCell)
+    private bool TryAddEnemyReachablePreview(PreviewResult preview, Vector2Int cell)
     {
-        throw new NotImplementedException();
+        var gridCell = _gameModel.GetCell(cell);
+        if (gridCell == null)
+            return false;
+
+        var unit = gridCell.Unit as UnitModel;
+        if (unit == null || unit.Team.Value == _turnState.LocalTeam)
+            return false;
+
+        var cells = _movementSystem.GetReachableCells(unit.Position.Value, unit.ModifiedStats.MoveSpeed);
+        preview.Add(CellState.enemyReachableCell, cells);
+        return true;
     }
 }
+   
