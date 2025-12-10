@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: base_grib
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 861ce37ce374e9d4fb1dd9eb8a56be10, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 16
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -117,10 +121,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db10afb8362ab646b250d80bb39d912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 6282496318822915426}
+  _animationController: {fileID: 0}
   unitViewUI: {fileID: 2813919399654117338}
-  animationMoveSpeed: 3
   meshes: []
+  blueDefaultForward: {x: 0, y: 0, z: 1}
+  redDefaultForward: {x: 0, y: 0, z: -1}
 --- !u!4 &2976755002409143367 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 861ce37ce374e9d4fb1dd9eb8a56be10, type: 3}
@@ -134,6 +139,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2976755002409143367}
     m_Modifications:
+    - target: {fileID: 721276633390807590, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 807891832239024436, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_RenderMode
       value: 2
@@ -230,13 +239,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5369487525753609957, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 5747227902412815696, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7543327227613830319, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 8504360353631629215, guid: fa1fd189575f02f449b9e95676163446, type: 3}
       propertyPath: m_Name
       value: UnitViewUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 8504360353631629215, guid: fa1fd189575f02f449b9e95676163446, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 16
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -45,6 +45,9 @@ public class DeveloperConsoleInstaller : MonoInstaller
         Container.Bind<IDeveloperConsoleCommand>().To<AdventureSpawnFungusConsoleCommand>().AsTransient();
         Container.Bind<IDeveloperConsoleCommand>().To<GridSpawnFungusConsoleCommand>().AsTransient();
         Container.Bind<IDeveloperConsoleCommand>().To<GridKillFungusConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<LightRotationSpeedConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<GridKillEnemyUnitsConsoleCommand>().AsTransient();
+        Container.Bind<IDeveloperConsoleCommand>().To<GridKillMyUnitsConsoleCommand>().AsTransient();
     }
 
 }

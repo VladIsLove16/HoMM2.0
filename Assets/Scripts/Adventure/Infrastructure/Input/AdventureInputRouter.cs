@@ -18,7 +18,7 @@ public sealed class AdventureInputRouter : IDisposable
     [Inject] private AdventureMenusCoordinatorViewModel menusVM;
     [Inject] private AdventureGameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
-    [Inject] private HelpMenu helpMenu;
+    [InjectOptional] private HelpMenu helpMenu;
     [Inject]
     private void Construct()
     {
@@ -41,34 +41,49 @@ public sealed class AdventureInputRouter : IDisposable
         adventureCharacterInput.InteractPerformed -= OnInteract;
         adventureCharacterInput.OpenSettingsPerformed -= OnOpenSettings;
         adventureCharacterInput.OpenMushroomBookPerformed -= OnOpenMushroomBook;
+        adventureCharacterInput.OpenHelpMenuPerformed -= OnOpenHelpMenu;
     }
 
     private void OnMoveChanged(Vector2 move)
     {
+        if (movementController == null)
+            return;
+
         if (inputModeVM.CanMove)
-            movementController?.SetMoveInput(move);
+            movementController.SetMoveInput(move);
         else
-            movementController?.SetMoveInput(Vector2.zero);
+            movementController.SetMoveInput(Vector2.zero);
     }
 
     private void OnLookChanged(Vector2 delta)
     {
+        if (movementController == null)
+            return;
+
         if (inputModeVM.CanLook)
         {
-            movementController?.EnqueueLookDelta(delta);
+            movementController.EnqueueLookDelta(delta);
         }
     }
 
     private void OnSprintChanged(bool sprint)
     {
+        if (movementController == null)
+            return;
+
         if (inputModeVM.CanMove)
-            movementController?.SetSprintInput(sprint);
+            movementController.SetSprintInput(sprint);
     }
 
     private void OnInteract()
     {
-        if (inputModeVM.CanMove)
-            interactionController?.PerformInteract();
+        if (!inputModeVM.CanMove)
+            return;
+
+        if (interactionController == null)
+            return;
+
+        interactionController.PerformInteract();
     }
 
     private void OnOpenSettings()
@@ -81,6 +96,11 @@ public sealed class AdventureInputRouter : IDisposable
     }
     private void OnOpenHelpMenu()
     {
+        if(helpMenu == null)
+        {
+            UnityLogger.Log("HelpMenu is not injected in AdventureInputRouter");
+            return;
+        }
         helpMenu.Toggle();
     }
     private void OnOpenMushroomBook() => bookVM.Toggle();

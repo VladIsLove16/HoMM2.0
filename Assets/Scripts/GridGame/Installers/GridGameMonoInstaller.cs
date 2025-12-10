@@ -22,11 +22,14 @@ public class GridGameMonoInstaller : MonoInstaller
     [Header("View model dependencies")]
     [SerializeField] private GridUnitAssetMap gridUnitAssets;
     [SerializeField] private GridRenderSettingsSO gridRenderSettings;
+    [SerializeField] private AnimationSpeedSettings animationSpeedSettings;
     [Header("Model dependencies")]
     [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private GameConfigurationService gameConfigurationService;
     [Header("Presentation")]
     [SerializeField] private MonoBehaviour _presentationInstaller;
+    [Header("Cursor")]
+    [SerializeField] private List<CursorStateTexture> cursorStateTextures;
     public override void InstallBindings()
     {
 
@@ -40,10 +43,23 @@ public class GridGameMonoInstaller : MonoInstaller
 
     private void BindView()
     {
+        BindCursor();
         if (_presentationInstaller is IGamePresentationInstaller gamePresentationInstaller)
             gamePresentationInstaller.Install(Container);
         else
             throw new ArgumentException();
+    }
+
+    private void BindCursor()
+    {
+        var textures = cursorStateTextures;
+        if (textures == null || textures.Count == 0)
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] CursorStateTextures are not assigned. Using default cursor.");
+            textures = new List<CursorStateTexture>();
+        }
+
+        Container.BindInterfacesAndSelfTo<CursorView>().AsSingle().WithArguments(textures).NonLazy();
     }
 
     private void BindConfigurationService()
@@ -57,7 +73,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
-        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().AsSingle().WithArguments(AnimationSpeedMode.Fast);
+        Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().FromInstance(animationSpeedSettings).AsSingle().WithArguments(AnimationSpeedMode.Fast);
         if (gridRenderSettings == null)
         {
             Debug.LogWarning("[GridGameMonoInstaller] GridRenderSettings is not assigned. Using default settings.");
@@ -150,7 +166,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();
-        Container.Bind<GridCursorViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<GridCursorViewModel>().AsSingle().NonLazy();
     }
 
     private void BindGameController()

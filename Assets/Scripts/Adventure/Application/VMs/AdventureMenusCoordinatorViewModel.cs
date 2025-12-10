@@ -24,6 +24,10 @@ public class AdventureMenusCoordinatorViewModel
 
         foreach (var menu in menus)
         {
+            if(menu == null)
+                throw new ArgumentException("Null menu registered in AdventureMenusCoordinatorViewModel");
+            if (menu.IsOpen == null)
+                throw new ArgumentException($"Menu {menu.GetType().Name} has null IsOpen property");
             menu.IsOpen
                 .Skip(1)
                 .Subscribe(_ => OnMenuStateChanged(menu));

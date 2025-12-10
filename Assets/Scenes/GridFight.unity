@@ -290,6 +290,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1504876790}
     m_Modifications:
+    - target: {fileID: 58218463020207810, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 58218463020207810, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 58218463020207810, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -90
+      objectReference: {fileID: 0}
     - target: {fileID: 297782355732953100, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -352,7 +364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2165579622500305470, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2165579622500305470, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -402,9 +414,41 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5367014970178602735, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5367014970178602735, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5367014970178602735, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -25
+      objectReference: {fileID: 0}
     - target: {fileID: 5681960485334387708, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_Name
       value: GameSettings
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789157311009322205, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789157311009322205, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789157311009322205, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789157311009322205, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789157311009322205, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5974469691649133859, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchorMax.y
@@ -432,7 +476,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6104644676620894739, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6104644676620894739, guid: b219ab93b681e7949ae106c958b0f57b, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2365,9 +2409,11 @@ MonoBehaviour:
   audioMixer: {fileID: 24100000, guid: 2e62866bfcccc384e88b37af4e90671c, type: 2}
   gridUnitAssets: {fileID: 11400000, guid: 9628c36796f336d4f9fe196e59a05b35, type: 2}
   gridRenderSettings: {fileID: 11400000, guid: 8d1b105e239017443b2d9bfa3c827b50, type: 2}
+  animationSpeedSettings: {fileID: 11400000, guid: 9628c510ba077dc48be261f02ef6568d, type: 2}
   statusEffectDatas: {fileID: 11400000, guid: df78dfafd95445e4b839a87d9897cbcc, type: 2}
   gameConfigurationService: {fileID: 11400000, guid: 826b593e69c0a7e45b2b2b78633b385b, type: 2}
   _presentationInstaller: {fileID: 752650013}
+  cursorStateTextures: []
 --- !u!1 &985392986
 GameObject:
   m_ObjectHideFlags: 0
@@ -3824,7 +3870,7 @@ Transform:
   m_GameObject: {fileID: 1807175100}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3851,7 +3897,11 @@ MonoBehaviour:
   createSurfaceCollider: 1
   colliderThickness: 0.05
   highlightYOffset: 0.02
+  routeInset: 0.15
+  borderInset: 0.08
+  borderThickness: 0.08
   editorRenderSettings: {fileID: 11400000, guid: 8d1b105e239017443b2d9bfa3c827b50, type: 2}
+  fallbackHoverMaterial: {fileID: 0}
 --- !u!23 &1807175103
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4441,7 +4491,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6434663030312703941, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 6434663030312703941, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5528,7 +5578,7 @@ PrefabInstance:
       objectReference: {fileID: 47613583}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: gridRenderStrategy
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: perCellGridRenderer

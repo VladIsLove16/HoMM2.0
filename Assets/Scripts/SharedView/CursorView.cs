@@ -5,17 +5,26 @@ using UniRx;
 using UnityEngine;
 using Zenject;
 
-public sealed class CursorView
+public sealed class CursorView : IDisposable
 {
     private ICursorViewModel _vm;
     private Dictionary<CursorVisualState, Texture2D> _cursorTextrures;
+    private CompositeDisposable _subscriptions;
+    private readonly HashSet<CursorVisualState> _missingStates = new();
+
     [Inject]
     public void Construct(List<CursorStateTexture> cursorStateTextures, ICursorViewModel cursorViewModel)
     {
+        if (cursorStateTextures == null)
+        {
+            throw new ArgumentNullException(nameof(cursorStateTextures));
+        }
+
         _cursorTextrures = cursorStateTextures.ToDictionary(x => x.state, y => y.texture);
         _vm = cursorViewModel;
-        _vm.CursorState.Subscribe(OnCursorStateChanged);
-        _vm.IsLocked.Subscribe(OnLockChanged);
+        _subscriptions = new CompositeDisposable();
+        _vm.CursorState.Subscribe(OnCursorStateChanged).AddTo(_subscriptions);
+        _vm.IsLocked.Subscribe(OnLockChanged).AddTo(_subscriptions);
         OnCursorStateChanged(_vm.CursorState.Value);
         OnLockChanged(_vm.IsLocked.Value);
     }
@@ -28,7 +37,13 @@ public sealed class CursorView
         }
         else
         {
-            var texture = _cursorTextrures[state];
+            if (!_cursorTextrures.TryGetValue(state, out var texture))
+            {
+                if (_missingStates.Add(state))
+                {
+                    Debug.LogWarning($"Cursor texture for state '{state}' is not configured. Using default cursor.");
+                }
+            }
             Cursor.visible = true;
             SetCursor(texture);
         }
@@ -59,5 +74,13 @@ public sealed class CursorView
             return;
         }
         Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);
+    }
+
+    public void Dispose()
+    {
+        _subscriptions?.Dispose();
+        _subscriptions = null;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 }

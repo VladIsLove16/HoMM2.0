@@ -45,7 +45,7 @@ public class ActionResolver
         if (resolvedHandlers.Count > 0)
         {
             handler = resolvedHandlers[0];
-            Debug.Log("action resolver Invoke");
+            UnityLogger.Log("action resolver Invoke",LogCategory.ActionResolver);
             ActionResolved?.Invoke((handler,ctx));
             return true;
         }
@@ -80,7 +80,7 @@ public class ActionResolver
         }
         if (resolvedHandlers.Count > 1)
             Debug.LogWarning("resolved handlers count > 1" );
-        Debug.Log("resolved handlers: " + stringBuilder.ToString());
+       UnityLogger.Log("resolved handlers: " + stringBuilder.ToString(), LogCategory.ActionResolver);
     }
 
 }

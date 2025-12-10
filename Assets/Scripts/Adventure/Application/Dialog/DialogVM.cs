@@ -110,7 +110,7 @@ namespace Adventure.Application.Dialog
             var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
             var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
             var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
-            var finalize = battleLaunchService.PrepareLaunch(context);
+            battleLaunchService.Launch(context);
         }
 
         private void EndDialog()

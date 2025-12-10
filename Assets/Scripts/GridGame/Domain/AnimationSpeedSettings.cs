@@ -1,26 +1,24 @@
 using System;
 using UniRx;
-
-public sealed class AnimationSpeedSettings : IAnimationSpeedSettings, IDisposable
+using UnityEngine;
+[CreateAssetMenu(menuName = "GridGame/Animation Speed Settings", fileName = "AnimationSpeedSettings")]
+public sealed class AnimationSpeedSettings : ScriptableObject, IAnimationSpeedSettings, IDisposable
 {
-    private readonly ReactiveProperty<AnimationSpeedMode> _mode;
-
-    public AnimationSpeedSettings(AnimationSpeedMode defaultMode = AnimationSpeedMode.Normal)
-    {
-        _mode = new ReactiveProperty<AnimationSpeedMode>(defaultMode);
-    }
-
+    private ReactiveProperty<AnimationSpeedMode> _mode = new();
+    [SerializeField] private AnimationSpeedMode mode = AnimationSpeedMode.Normal;
     public IReadOnlyReactiveProperty<AnimationSpeedMode> Mode => _mode;
-
     public float PlaybackMultiplier => _mode.Value switch
     {
         AnimationSpeedMode.Normal => 1f,
         AnimationSpeedMode.Fast => 2f,
-        AnimationSpeedMode.Instant => float.PositiveInfinity,
+        AnimationSpeedMode.VeryFast => 4f,
         _ => 1f
     };
-
-    public bool IsInstant => _mode.Value == AnimationSpeedMode.Instant;
+    private void Awake()
+    {
+        _mode.SetValueAndForceNotify(mode);
+    }
+    public bool IsInstant => _mode.Value == AnimationSpeedMode.VeryFast;
 
     public void SetMode(AnimationSpeedMode mode)
     {
@@ -32,6 +30,10 @@ public sealed class AnimationSpeedSettings : IAnimationSpeedSettings, IDisposabl
     public void Dispose()
     {
         _mode?.Dispose();
+    }
+    private void OnValidate()
+    {
+        _mode?.SetValueAndForceNotify(mode);
     }
 }
 

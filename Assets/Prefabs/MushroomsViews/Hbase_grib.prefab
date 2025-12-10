@@ -51,7 +51,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animationController: {fileID: 445596867956305123}
   unitViewUI: {fileID: 6209569021479764463}
-  animationMoveSpeed: 1
   meshes:
   - {fileID: 516934325475626625}
 --- !u!136 &3445798776585249478
@@ -91,10 +90,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 5413244464807152272}
   idleTrigger: Idle
-  walkTrigger: Walk
-  attackTrigger: DealDamage
-  hitTrigger: Hit
+  attackTrigger: Attacking
+  hitTrigger: Hitted
   dieTrigger: Die
+  walkingBool: IsWalking
   logEvents: 0
   previewState: 0
 --- !u!95 &5413244464807152272

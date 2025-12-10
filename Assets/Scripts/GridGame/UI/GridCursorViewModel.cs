@@ -2,14 +2,15 @@
 using UniRx;
 using Zenject;
 
-public class GridCursorViewModel : ICursorViewModel
+public class GridCursorViewModel : ICursorViewModel, IDisposable
 {
     public IReadOnlyReactiveProperty<CursorVisualState> CursorState => _cursorState;
-    private readonly ReactiveProperty<CursorVisualState> _cursorState = new(CursorVisualState.Hidden);
+    private readonly ReactiveProperty<CursorVisualState> _cursorState = new(CursorVisualState.Default);
 
     public IReadOnlyReactiveProperty<bool> IsLocked => _isLocked;
-    private readonly ReactiveProperty<bool> _isLocked = new(true);
+    private readonly ReactiveProperty<bool> _isLocked = new(false);
     private ActionResolver _actionResolver;
+    private bool _isDisposed;
 
     [Inject]
     void Construct(ActionResolver actionResolver)
@@ -57,6 +58,21 @@ public class GridCursorViewModel : ICursorViewModel
                 return CursorVisualState.RangedAttack;
             default:
                 return CursorVisualState.Default;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
+
+        if (_actionResolver != null)
+        {
+            _actionResolver.ActionResolved -= OnActionPreviewChanged;
+            _actionResolver.ActionNotResolved -= OnActionNotResolved;
+            _actionResolver = null;
         }
     }
 }

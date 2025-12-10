@@ -25,6 +25,7 @@ public sealed class GridInputRouter : ITickable, IDisposable
     private Vector2 _navigationVector;
     private bool _pointerInitialized;
     private bool _useVirtualPointer;
+    private bool _isDisposed;
 
     [Inject]
     public GridInputRouter(
@@ -64,9 +65,23 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     public void Dispose()
     {
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
         UnwireInput();
         _stateSubscription?.Dispose();
-        _input?.Dispose();
+        _stateSubscription = null;
+
+        if (_input != null)
+        {
+            _input.Grid.Disable();
+            _input.GridPlacement.Disable();
+            _input.Menus.Disable();
+            _input.Disable();
+            _input.Dispose();
+            _input = null;
+        }
     }
 
     private void WireInput()

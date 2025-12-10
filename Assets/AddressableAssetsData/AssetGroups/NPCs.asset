@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: NPCs
+  m_EditorClassIdentifier: 
+  m_GroupName: NPCs
+  m_GUID: 87fee52bcdee54044989a74b59c14295
+  m_SerializeEntries:
+  - m_GUID: 67f57e4331440694bb1b6e0ebd93150a
+    m_Address: NPC/Witch
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - NPC
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c575b29c96580a4f9a630be62057616
+    m_Address: NPC/Archer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - NPC
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 8e2ec8d3984db1a4eae3cc48da738b59, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9f8253f537b7304499bf08a4d5647bb1, type: 2}
+    - {fileID: 11400000, guid: c12e7a8a84236834492e75ce4601eaf7, type: 2}

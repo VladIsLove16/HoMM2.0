@@ -83,7 +83,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.Bind<MushroomCollectible>()
             .FromComponentsInHierarchy()
             .AsTransient();
-        Container.Bind<CursorView>().AsSingle().WithArguments(cursorStateTextures).NonLazy();
+        Container.BindInterfacesAndSelfTo<CursorView>().AsSingle().WithArguments(cursorStateTextures).NonLazy();
         Container.BindInterfacesAndSelfTo<HelpMenu>().FromInstance(helpMenu).AsSingle().NonLazy();
     }
     private void BindTools()
@@ -152,8 +152,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     {
         Container.Bind<PlayerMovementController>().FromInstance(playerMovementController).AsSingle().NonLazy();
         Container.Bind<PlayerInteractionController>().FromInstance(interactionController).AsSingle().NonLazy();
-        Container.Bind<AdventureInput>(). AsSingle().NonLazy();
-        Container.Bind<AdventureInputRouter>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<AdventureInput>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<AdventureInputRouter>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<InputModeViewModel>().AsSingle().NonLazy();
     }
 

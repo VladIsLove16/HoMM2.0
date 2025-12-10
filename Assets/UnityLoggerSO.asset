@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15328877607f29a44ad0cc85a878b8db, type: 3}
+  m_Name: UnityLoggerSO
+  m_EditorClassIdentifier: 
+  Categories:
+  - Category: 0
+    Enabled: 1
+  - Category: 1
+    Enabled: 1
+  - Category: 2
+    Enabled: 1
+  - Category: 3
+    Enabled: 1
+  - Category: 4
+    Enabled: 1
+  - Category: 5
+    Enabled: 1
+  - Category: 6
+    Enabled: 1

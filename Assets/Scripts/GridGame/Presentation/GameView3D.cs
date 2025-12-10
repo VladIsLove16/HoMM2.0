@@ -9,7 +9,7 @@ public class GameView3D : MonoBehaviour
     [SerializeField] bool Log;
     private UnitViewFactory _factory;
     private Dictionary<IViewModel, UnitView3D> _views = new();
-    private IGridViewModel _gameVM;
+    private GameViewModel _gameVM;
     [Inject] private IWorldToCellProvider _worldToCellProvider;
     [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private UnitView3D _draggedUnit;
@@ -24,7 +24,7 @@ public class GameView3D : MonoBehaviour
 
     [Inject]
     public void Construct(
-        [InjectOptional] IGridViewModel gameVM,
+        [InjectOptional] GameViewModel gameVM,
         [InjectOptional] UnitViewFactory unitViewFactory)
     {
         _gameVM = gameVM;
@@ -38,11 +38,27 @@ public class GameView3D : MonoBehaviour
         }
 
         _gameVM.UnitSpawned += OnGameVM_UnitSpawned;
+        _gameVM.AttackAnimationRequested += OnAttackAnimationRequested;
     }
     private void OnGameVM_UnitSpawned(UnitViewModel model)
     {
        var view =  _factory.Create(model);
         _views[model] = view;
+    }
+
+    private void OnAttackAnimationRequested(UnitViewModel attackerVm, UnitViewModel defenderVm)
+    {
+        if (attackerVm == null || defenderVm == null)
+            return;
+
+        if (!_views.TryGetValue(attackerVm, out var attackerView))
+            return;
+
+        if (!_views.TryGetValue(defenderVm, out var defenderView))
+            return;
+
+        attackerView?.PlayCoordinatedAttack(defenderView);
+        defenderView?.PlayCoordinatedHit(attackerView);
     }
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
@@ -203,9 +219,10 @@ public class GameView3D : MonoBehaviour
     {
         if (_gameVM != null)
         {
+            _gameVM.AttackAnimationRequested -= OnAttackAnimationRequested;
+            _gameVM.UnitSpawned -= OnGameVM_UnitSpawned;
         }
     }
 
     private bool IsInteractionLocked() => _animationGate != null && _animationGate.IsLocked;
 }
-

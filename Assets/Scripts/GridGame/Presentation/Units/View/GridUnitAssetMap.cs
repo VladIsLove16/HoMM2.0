@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 [CreateAssetMenu(menuName = "Units/Grid Unit Map")]
 public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D>, IUnitStatsProvider
@@ -11,6 +12,8 @@ public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D
     {
         public UnitDataSO UnitDataSO;
         public UnitView3D Prefab;
+        public bool UseAddressables;
+        public AssetReferenceGameObject PrefabReference;
     }
 
     [SerializeField] private List<Entry> entries = new();
@@ -24,7 +27,7 @@ public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D
     private void Rebuild()
     {
         _lookup = entries
-            .Where(e => e.Prefab != null)
+            .Where(e => e.UnitDataSO != null)
             .GroupBy(e => e.UnitDataSO.Type)
             .ToDictionary(g => g.Key, g => g.Last());
     }
@@ -55,6 +58,19 @@ public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D
     {
         shared = null;
         return _lookup != null && _lookup.TryGetValue(type, out var entry) && (shared = entry.UnitDataSO.SharedData) != null;
+    }
+
+    public bool TryGetAssetReference(UnitType type, out AssetReferenceGameObject prefabReference)
+    {
+        prefabReference = null;
+
+        if (_lookup == null || !_lookup.TryGetValue(type, out var entry))
+            return false;
+
+        if (!entry.UseAddressables || entry.PrefabReference == null)
+            return false;
+
+        return entry.PrefabReference.RuntimeKeyIsValid() && (prefabReference = entry.PrefabReference) != null;
     }
 
 #if UNITY_INCLUDE_TESTS

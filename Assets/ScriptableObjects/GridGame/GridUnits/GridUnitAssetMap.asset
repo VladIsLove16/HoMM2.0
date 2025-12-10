@@ -15,15 +15,29 @@ MonoBehaviour:
   entries:
   - UnitDataSO: {fileID: 11400000, guid: 8154cf9b09adc8645b4e99bb25893f21, type: 2}
     Prefab: {fileID: 2371054322920611259, guid: 3ac69256cc824134f86d9396a7906e2c, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Archer
   - UnitDataSO: {fileID: 11400000, guid: ed7e5de1520ffba45adbb1982b2b45b1, type: 2}
     Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Hbase
   - UnitDataSO: {fileID: 11400000, guid: 69f2f0667563b8a49a939c5c37fdea61, type: 2}
     Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Hbase
   - UnitDataSO: {fileID: 11400000, guid: 73eb43bb44a8e324c977fee44e6afdbb, type: 2}
     Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Hbase
   - UnitDataSO: {fileID: 11400000, guid: ec3bcd6b99b4ae047b7d1196987f9614, type: 2}
-    Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    Prefab: {fileID: 7778539934929134094, guid: a9b47a90793137a40bb9290638a6ea56, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Double
   - UnitDataSO: {fileID: 11400000, guid: 0060cb8f62b47074782e9ffc1eab249c, type: 2}
-    Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    Prefab: {fileID: 4268904073332211211, guid: b734e9ff996770c498e7b9def3600594, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Base
   - UnitDataSO: {fileID: 11400000, guid: 465a505b002d1404e96de287c4480b31, type: 2}
-    Prefab: {fileID: -2304992214994921025, guid: 79ce0228e3900b54e882091d8528335c, type: 3}
+    Prefab: {fileID: -3490561474814604847, guid: 0f79eb4a7b23e6241b4ebc0a15e43b3d, type: 3}
+    UseAddressables: 1
+    AddressKey: Unit/Blue

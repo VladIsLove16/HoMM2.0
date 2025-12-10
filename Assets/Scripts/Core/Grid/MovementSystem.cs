@@ -2,12 +2,21 @@
 using System.Linq;
 using UnityEngine;
 
+public enum PathfindingMethod
+{
+    Legacy,
+    Dijkstra,
+    AStar
+}
+
 public class MovementSystem
 {
     private GridXZ<GameCell> _grid;
+    private PathfindingMethod _pathfindingMethod = PathfindingMethod.Legacy;
     private Dictionary<Vector2Int, List<Vector2Int>> reachableCellsCache = new();
     private Dictionary<(Vector2Int,Vector2Int), List<Vector2Int>> routesCache = new();
     private Dictionary<(Vector2Int,Vector2Int), List<Vector2Int>> ignoreObstaclesRoutesCache = new();
+    private Dictionary<Vector2Int, Vector2Int[]> neighborsCache;
     public void Init(GridXZ<GameCell> grid)
     {
         _grid = grid;
@@ -23,6 +32,41 @@ public class MovementSystem
         reachableCellsCache.Clear();
         routesCache.Clear();
         ignoreObstaclesRoutesCache.Clear();
+    }
+
+    private void EnsureNeighborsCache()
+    {
+        if (neighborsCache != null || _grid == null)
+            return;
+
+        neighborsCache = new Dictionary<Vector2Int, Vector2Int[]>();
+
+        int width = _grid.GetWidth();
+        int height = _grid.GetHeight();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                var cell = new Vector2Int(x, y);
+                neighborsCache[cell] = GetNeighbors(cell);
+            }
+        }
+    }
+
+    private Vector2Int[] GetNeighborsFromCache(Vector2Int cell)
+    {
+        if (neighborsCache != null && neighborsCache.TryGetValue(cell, out var neighbors))
+        {
+            return neighbors;
+        }
+
+        return GetNeighbors(cell);
+    }
+
+    public void SetPathfindingMethod(PathfindingMethod method)
+    {
+        _pathfindingMethod = method;
     }
 
     public List<Vector2Int> GetReachableCells(Vector2Int startCell, int movementRange)
@@ -71,7 +115,9 @@ public class MovementSystem
         Vector2Int? targetCell,
         out List<Vector2Int> reachableCells,
         out List<Vector2Int> route,
-        bool ignoreOstacles = false)
+        bool ignoreOstacles = false,
+        bool skipReachableCollection = false,
+        bool useNeighborPrecomputation = false)
     {
         reachableCells = new List<Vector2Int>();
         route = new List<Vector2Int>();
@@ -80,9 +126,17 @@ public class MovementSystem
         Dictionary<Vector2Int, Vector2Int> cameFrom = new();
         Queue<Vector2Int> open = new();
 
+        if (useNeighborPrecomputation)
+        {
+            EnsureNeighborsCache();
+        }
+
         moveCosts[startCell] = 0;
         open.Enqueue(startCell);
-        reachableCells.Add(startCell);
+        if (!skipReachableCollection)
+        {
+            reachableCells.Add(startCell);
+        }
 
         while (open.Count > 0)
         {
@@ -106,7 +160,8 @@ public class MovementSystem
                 return true;
             }
 
-            foreach (var neighbor in GetNeighbors(current))
+            var neighbors = useNeighborPrecomputation ? GetNeighborsFromCache(current) : GetNeighbors(current);
+            foreach (var neighbor in neighbors)
             {
                 if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell))
                     continue;
@@ -121,7 +176,7 @@ public class MovementSystem
                     cameFrom[neighbor] = current;
                     open.Enqueue(neighbor);
 
-                    if (!reachableCells.Contains(neighbor) && cell.IsEmpty)
+                    if (!skipReachableCollection && cell.IsEmpty && !reachableCells.Contains(neighbor))
                     {
                         reachableCells.Add(neighbor);
                     }
@@ -129,6 +184,233 @@ public class MovementSystem
             }
         }
         return targetCell == null;
+    }
+
+    public bool FindPath(
+        Vector2Int fromCell,
+        Vector2Int toCell,
+        out List<Vector2Int> route,
+        int movementRange = int.MaxValue,
+        bool ignoreObstacles = false)
+    {
+        switch (_pathfindingMethod)
+        {
+            case PathfindingMethod.Dijkstra:
+                return FindPathDijkstra(fromCell, toCell, out route, movementRange, ignoreObstacles);
+            case PathfindingMethod.AStar:
+                return FindPathAStar(fromCell, toCell, out route, movementRange, ignoreObstacles);
+            case PathfindingMethod.Legacy:
+            default:
+                return FindPathLegacy(fromCell, toCell, out route, movementRange, ignoreObstacles);
+        }
+    }
+
+    public bool FindPathLegacy(
+        Vector2Int fromCell,
+        Vector2Int toCell,
+        out List<Vector2Int> route,
+        int movementRange = int.MaxValue,
+        bool ignoreObstacles = false,
+        bool useRouteCache = false,
+        bool useNeighborPrecomputation = false,
+        bool skipReachableCollection = false)
+    {
+        if (useRouteCache && routesCache.TryGetValue((fromCell, toCell), out route))
+        {
+            return route != null && route.Count > 0;
+        }
+
+        bool result = RunPathfinding(fromCell, movementRange, toCell, out _, out route, ignoreObstacles, skipReachableCollection, useNeighborPrecomputation);
+        return route != null && route.Count > 0;
+    }
+
+    public bool FindPathDijkstra(
+        Vector2Int fromCell,
+        Vector2Int toCell,
+        out List<Vector2Int> route,
+        int movementRange = int.MaxValue,
+        bool ignoreObstacles = false)
+    {
+        return FindPathDijkstraInternal(fromCell, toCell, movementRange, ignoreObstacles, out route);
+    }
+
+    public bool FindPathAStar(
+        Vector2Int fromCell,
+        Vector2Int toCell,
+        out List<Vector2Int> route,
+        int movementRange = int.MaxValue,
+        bool ignoreObstacles = false)
+    {
+        return FindPathAStarInternal(fromCell, toCell, movementRange, ignoreObstacles, out route);
+    }
+
+    private static void EnqueueNode(
+        SortedDictionary<float, Queue<Vector2Int>> open,
+        Vector2Int node,
+        float cost)
+    {
+        if (!open.TryGetValue(cost, out var queue))
+        {
+            queue = new Queue<Vector2Int>();
+            open[cost] = queue;
+        }
+        queue.Enqueue(node);
+    }
+
+    private static bool TryDequeueNode(
+        SortedDictionary<float, Queue<Vector2Int>> open,
+        out Vector2Int node,
+        out float cost)
+    {
+        if (open.Count == 0)
+        {
+            node = default;
+            cost = 0;
+            return false;
+        }
+
+        var first = open.First();
+        cost = first.Key;
+        var queue = first.Value;
+        node = queue.Dequeue();
+        if (queue.Count == 0)
+        {
+            open.Remove(first.Key);
+        }
+        return true;
+    }
+
+    private static void ReconstructPath(
+        Vector2Int startCell,
+        Vector2Int endCell,
+        Dictionary<Vector2Int, Vector2Int> cameFrom,
+        List<Vector2Int> route)
+    {
+        route.Clear();
+        var step = endCell;
+        while (step != startCell)
+        {
+            route.Add(step);
+            step = cameFrom[step];
+        }
+        route.Add(startCell);
+        route.Reverse();
+    }
+
+    private bool FindPathDijkstraInternal(
+        Vector2Int startCell,
+        Vector2Int targetCell,
+        int movementRange,
+        bool ignoreObstacles,
+        out List<Vector2Int> route)
+    {
+        route = new List<Vector2Int>();
+
+        Dictionary<Vector2Int, float> moveCosts = new();
+        Dictionary<Vector2Int, Vector2Int> cameFrom = new();
+        SortedDictionary<float, Queue<Vector2Int>> open = new();
+        HashSet<Vector2Int> closed = new();
+
+        moveCosts[startCell] = 0;
+        EnqueueNode(open, startCell, 0);
+
+        while (TryDequeueNode(open, out var current, out _))
+        {
+            if (!closed.Add(current))
+                continue;
+
+            if (current == targetCell)
+            {
+                ReconstructPath(startCell, current, cameFrom, route);
+                routesCache[(startCell, targetCell)] = route;
+                return true;
+            }
+
+            float costSoFar = moveCosts[current];
+
+            foreach (var neighbor in GetNeighbors(current))
+            {
+                if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell))
+                    continue;
+                if (!cell.IsEmpty && !ignoreObstacles)
+                    continue;
+                if (closed.Contains(neighbor))
+                    continue;
+
+                float newCost = costSoFar + GetDistanceMagnitude(current, neighbor);
+
+                if (newCost > movementRange)
+                    continue;
+
+                if (!moveCosts.ContainsKey(neighbor) || newCost < moveCosts[neighbor])
+                {
+                    moveCosts[neighbor] = newCost;
+                    cameFrom[neighbor] = current;
+                    EnqueueNode(open, neighbor, newCost);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool FindPathAStarInternal(
+        Vector2Int startCell,
+        Vector2Int targetCell,
+        int movementRange,
+        bool ignoreObstacles,
+        out List<Vector2Int> route)
+    {
+        route = new List<Vector2Int>();
+
+        Dictionary<Vector2Int, float> gScore = new();
+        Dictionary<Vector2Int, Vector2Int> cameFrom = new();
+        SortedDictionary<float, Queue<Vector2Int>> open = new();
+        HashSet<Vector2Int> closed = new();
+
+        gScore[startCell] = 0;
+        float initialHeuristic = GetDistanceMagnitude(startCell, targetCell);
+        EnqueueNode(open, startCell, initialHeuristic);
+
+        while (TryDequeueNode(open, out var current, out _))
+        {
+            if (!closed.Add(current))
+                continue;
+
+            if (current == targetCell)
+            {
+                ReconstructPath(startCell, current, cameFrom, route);
+                routesCache[(startCell, targetCell)] = route;
+                return true;
+            }
+
+            float costSoFar = gScore[current];
+
+            foreach (var neighbor in GetNeighbors(current))
+            {
+                if (!_grid.TryGetGridObject(neighbor.x, neighbor.y, out var cell))
+                    continue;
+                if (!cell.IsEmpty && !ignoreObstacles)
+                    continue;
+                if (closed.Contains(neighbor))
+                    continue;
+
+                float tentativeG = costSoFar + GetDistanceMagnitude(current, neighbor);
+
+                if (tentativeG > movementRange)
+                    continue;
+
+                if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])
+                {
+                    gScore[neighbor] = tentativeG;
+                    cameFrom[neighbor] = current;
+                    float fScore = tentativeG + GetDistanceMagnitude(neighbor, targetCell);
+                    EnqueueNode(open, neighbor, fScore);
+                }
+            }
+        }
+
+        return false;
     }
 
     private float GetDistanceMagnitude(Vector2Int from, Vector2Int to)

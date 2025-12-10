@@ -31,6 +31,8 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         public Vector2 Move => _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
         public Vector2 Look => _lookAction != null ? _lookAction.ReadValue<Vector2>() : Vector2.zero;
         public bool IsSprinting => _sprintAction != null && _sprintAction.IsPressed();
+        private bool _isDisposed;
+
         [Inject]
         private void Construct()
         {
@@ -45,18 +47,6 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             _openBookAction = _playerMap.Menus.OpenMushroomBook;
             _openHelpMenu = _playerMap.Menus.OpenHelpMenu;
             SubscribeActionCallbacks();
-        }
-
-        private void OnDisable()
-        {
-            if (_playerMap == null)
-                return;
-
-            _playerMap.Disable();
-
-            // ensure consumers reset state when input turns off
-            MoveChanged?.Invoke(Vector2.zero);
-            SprintChanged?.Invoke(false);
         }
 
         private void SubscribeActionCallbacks()
@@ -105,11 +95,12 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
             }
         }
 
-       
-
         private void UnsubscribeActionCallbacks()
         {
-            _playerMap.Disable();
+            if (_playerMap != null)
+            {
+                _playerMap.Disable();
+            }
             if (_moveAction != null)
             {
                 _moveAction.performed -= OnMovePerformed;
@@ -218,12 +209,14 @@ namespace Assets.Scripts.Adventure.Infrastructure.Input
         }
         public void Dispose()
         {
-            UnsubscribeActionCallbacks();
-        }
+            if (_isDisposed)
+                return;
 
-        private void OnDestroy()
-        {
-            Dispose();
+            _isDisposed = true;
+            UnsubscribeActionCallbacks();
+            // ensure consumers reset state when input turns off
+            MoveChanged?.Invoke(Vector2.zero);
+            SprintChanged?.Invoke(false);
         }
     }
 }

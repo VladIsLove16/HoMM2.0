@@ -114,40 +114,43 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
 
     private void BindGridRenderer(DiContainer container)
     {
+        ActivateRenderer(perCellGridRenderer, false);
+        ActivateRenderer(tileGridRenderer, false);
+
         switch (gridRenderStrategy)
         {
-            case GridRenderStrategy.Single:
-                throw new NotImplementedException();
-                //container.BindInterfacesAndSelfTo<SingleGridRenderer>().AsSingle();
             case GridRenderStrategy.PerCell:
-                ActivateRenderer(perCellGridRenderer, true);
-                ActivateRenderer(tileGridRenderer, false);
-                if (perCellGridRenderer != null)
-                {
-                    container.BindInterfacesAndSelfTo<PerCellGridRenderer>()
-                             .FromInstance(perCellGridRenderer)
-                             .AsSingle();
-                }
-                else
-                {
-                    Debug.LogWarning("[ThreeDPresentationInstaller] PerCellGridRenderer is not assigned.", this);
-                }
+                BindRendererInstance(container,
+                    perCellGridRenderer,
+                    "[ThreeDPresentationInstaller] PerCellGridRenderer");
                 break;
+
             case GridRenderStrategy.Tile:
-                ActivateRenderer(perCellGridRenderer, false);
-                ActivateRenderer(tileGridRenderer, true);
-                if (tileGridRenderer != null)
-                {
-                    container.BindInterfacesAndSelfTo<TileGridRenderer>()
-                             .FromInstance(tileGridRenderer)
-                             .AsSingle();
-                }
-                else
-                {
-                    Debug.LogWarning("[ThreeDPresentationInstaller] TileGridRenderer is not assigned.", this);
-                }
+                BindRendererInstance(container,
+                    tileGridRenderer,
+                    "[ThreeDPresentationInstaller] TileGridRenderer");
                 break;
+
+            case GridRenderStrategy.Single:
+                throw new NotImplementedException("Single grid renderer strategy is not implemented yet.");
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void BindRendererInstance<T>(DiContainer container, T renderer, string warningContext)
+        where T : MonoBehaviour, IGridCellRenderer
+    {
+        if (renderer == null)
+        {
+            Debug.LogWarning($"{warningContext} is not assigned.", this);
+            return;
+        }
+
+        ActivateRenderer(renderer, true);
+        container.BindInterfacesAndSelfTo<T>()
+                 .FromInstance(renderer)
+                 .AsSingle();
     }
 
     private static void ActivateRenderer(MonoBehaviour renderer, bool active)

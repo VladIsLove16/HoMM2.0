@@ -2,6 +2,7 @@ using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx.Toolkit;
 using UnityEngine;
 using Zenject;
 
@@ -14,6 +15,7 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
     private Grid<CellView> _grid;
     private IGridViewModel _viewModel;
     private IBattleAnimationGate _animationGate;
+    private CellViewPool _cellPool;
 
     private readonly Dictionary<CellState, List<Vector2Int>> _cellStates = new();
     private readonly Dictionary<CellState, HashSet<Vector2Int>> _hiddenStates = new();
@@ -65,6 +67,27 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
             Unbind(_viewModel);
         }
         Clear();
+    }
+
+    private sealed class CellViewPool : ObjectPool<CellView>
+    {
+        private readonly CellView _prefab;
+        private readonly Transform _parent;
+
+        public CellViewPool(CellView prefab, Transform parent)
+        {
+            _prefab = prefab;
+            _parent = parent;
+        }
+
+        protected override CellView CreateInstance()
+        {
+            if (_prefab == null)
+                throw new InvalidOperationException("[PerCellGridRenderer] CellView prefab is not assigned for pool.");
+
+            var instance = UnityEngine.Object.Instantiate(_prefab, _parent);
+            return instance;
+        }
     }
 
     public void Bind(IGridViewModel viewModel)
@@ -123,7 +146,14 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
                     else
 #endif
                     {
-                        Destroy(cell.gameObject);
+                        if (_cellPool != null)
+                        {
+                            _cellPool.Return(cell);
+                        }
+                        else
+                        {
+                            Destroy(cell.gameObject);
+                        }
                     }
                 }
             }
@@ -166,6 +196,11 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
         Clear();
 
         var parentTransform = parent != null ? parent.transform : transform;
+        if (_cellPool == null)
+        {
+            _cellPool = new CellViewPool(prefab, parentTransform);
+        }
+
         _grid = new Grid<CellView>(
             width,
             height,
@@ -180,8 +215,15 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
 
     private CellView CreateCellView(Grid<CellView> grid, int x, int y, Transform parentTransform)
     {
-        var cellView = Instantiate(prefab, grid.GetWorldPosition(x, y), Quaternion.identity, parentTransform);
-        cellView.name += $" {x} {y}";
+        if (_cellPool == null)
+        {
+            _cellPool = new CellViewPool(prefab, parentTransform);
+        }
+
+        var cellView = _cellPool.Rent();
+        cellView.transform.SetParent(parentTransform, false);
+        cellView.transform.position = grid.GetWorldPosition(x, y);
+        cellView.name = $"{prefab.name} {x} {y}";
 
         var settings = ResolveSettings();
         cellView.transform.localScale = new Vector3(grid.GetCellSize(), settings.CellHeight, grid.GetCellSize());

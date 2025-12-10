@@ -10,7 +10,7 @@ namespace Adventure.Settings.View
 {
     public sealed class GridGameSettingsView : GameSettingsViewBase<GridGameSettingsViewModel>
     {
-        private static readonly string[] DefaultAnimationLabels = { "1x", "2x", "Instant" };
+        private static readonly string[] DefaultAnimationLabels = { "1x", "2x", "VeryFast" };
 
         [SerializeField] private TMP_Dropdown animationSpeedDropdown;
         [SerializeField] private List<string> animationModeStringOptions;

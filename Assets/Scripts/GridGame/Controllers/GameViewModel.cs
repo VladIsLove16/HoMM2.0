@@ -12,10 +12,12 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     public event Action<PreviewResult> PreviewChanged;
     public event Action<PreviewResult> PreviewUpdated;
     public event Action<DamageContextPreview> DamageContextPreviewChanged;
+    public event Action<UnitViewModel, UnitViewModel> AttackAnimationRequested;
     public Action<UnitViewModel> UnitSpawned { get; set; }
     public IGridRenderSettings RenderSettings { get;set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
+    private const int DeploymentRows = 2;
 
     private readonly GameModel _gameModel;
     private readonly MovementSystem _movementSystem;
@@ -126,7 +128,9 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
                 if (unit != null)
                 {
                     var cells = _movementSystem.GetReachableCells(fromCell, unit.ModifiedStats.MoveSpeed);
-                    previewResult.Add(CellState.enemyReachableCell, cells);
+                    var filtered = ApplyDeploymentBounds(unit.Team.Value, fromCell, cells);
+                    previewResult.Add(CellState.enemyReachableCell, filtered);
+                    _data[CellState.enemyReachableCell] = new List<Vector2Int>(filtered);
                     enemyPreviewAdded = true;
                 }
             }
@@ -134,6 +138,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
         if (!enemyPreviewAdded)
         {
+            _data[CellState.enemyReachableCell] = new List<Vector2Int>();
             previewResult.Add(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
         }
 
@@ -162,6 +167,11 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         {
             Debug.LogWarning($"[GameViewModel] Action {actionHandler.ActionType} rejected locally for context {actionContext}");
             return;
+        }
+
+        if (actionHandler is IAttackActionHandler)
+        {
+            RaiseAttackAnimationRequested(activeUnit, coords.Key);
         }
 
         if (!_gameCommandExecutor.Execute(actionHandler.ActionType, actionContext))
@@ -220,7 +230,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         var reachableCells = new List<Vector2Int>();
         if (_turnState.IsMyTurn)
         {
-            reachableCells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
+            var cells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
+            reachableCells = ApplyDeploymentBounds(combatObject.Team, combatObject.Position, cells);
         }
 
         _data[CellState.reachableCell] = reachableCells;
@@ -236,6 +247,24 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         {
             _data[CellState.hovered] = new List<Vector2Int>();
         }
+    }
+
+    private void RaiseAttackAnimationRequested(IGridContent attacker, Vector2Int targetCell)
+    {
+        if (attacker == null)
+            return;
+
+        var targetContent = _gameModel.GetCell(targetCell)?.Unit;
+        if (targetContent == null)
+            return;
+
+        if (!_uvms.TryGetValue(attacker, out var attackerVm))
+            return;
+
+        if (!_uvms.TryGetValue(targetContent, out var defenderVm))
+            return;
+
+        AttackAnimationRequested?.Invoke(attackerVm, defenderVm);
     }
 
     public bool CanExecute(ActionType type, ActionContext actionContext)
@@ -293,8 +322,53 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             return false;
 
         var cells = _movementSystem.GetReachableCells(unit.Position.Value, unit.ModifiedStats.MoveSpeed);
-        preview.Add(CellState.enemyReachableCell, cells);
+        var filtered = ApplyDeploymentBounds(unit.Team.Value, unit.Position.Value, cells);
+        preview.Add(CellState.enemyReachableCell, filtered);
+        _data[CellState.enemyReachableCell] = new List<Vector2Int>(filtered);
         return true;
+    }
+
+    private List<Vector2Int> ApplyDeploymentBounds(Team team, Vector2Int origin, IEnumerable<Vector2Int> cells)
+    {
+        if (cells == null)
+            return new List<Vector2Int> { origin };
+
+        if (Height <= 0 || team == Team.None)
+            return new List<Vector2Int>(cells);
+
+        var result = new List<Vector2Int>();
+        foreach (var cell in cells)
+        {
+            if (IsWithinDeploymentZone(team, cell))
+            {
+                if (!result.Contains(cell))
+                {
+                    result.Add(cell);
+                }
+            }
+        }
+
+        if (!result.Contains(origin))
+        {
+            result.Insert(0, origin);
+        }
+
+        return result;
+    }
+
+    private bool IsWithinDeploymentZone(Team team, Vector2Int cell)
+    {
+        if (Height <= 0 || team == Team.None)
+            return true;
+
+        var rows = Mathf.Clamp(DeploymentRows, 1, Height);
+
+        return team switch
+        {
+            Team.Blue => cell.y < rows,
+            Team.Red => cell.y >= Height - rows,
+            _ => true
+        };
     }
 }
    

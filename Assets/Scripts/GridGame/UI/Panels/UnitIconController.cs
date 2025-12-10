@@ -56,7 +56,7 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void Unbind()
     {
-        _viewModel?.ReleaseFocus();
+        //_viewModel?.ReleaseFocus();
         _bindings.Clear();
         _viewModel = null;
         ClearDamagePopup();

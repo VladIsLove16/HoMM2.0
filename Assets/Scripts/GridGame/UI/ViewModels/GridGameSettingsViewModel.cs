@@ -6,7 +6,7 @@ using UniRx;
 
 namespace Adventure.Settings.ViewModel
 {
-    public sealed class GridGameSettingsViewModel : GameSettingsViewModel, IGridGameActiveMenu
+    public sealed class GridGameSettingsViewModel : GameSettingsViewModel
     {
         private readonly IAnimationSpeedSettings _animationSettings;
 

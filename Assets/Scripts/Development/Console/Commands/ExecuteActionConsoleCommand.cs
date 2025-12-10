@@ -54,11 +54,11 @@ public class ExecuteActionConsoleCommand : IDeveloperConsoleCommand
 
         var actionContext = new ActionContext(from, target, SpellType.None, attackFrom);
 
-        if (!context.GridViewModel.CanExecute(actionType, actionContext))
-        {
-            output.AppendError($"Action {actionType} cannot be executed with the provided context.");
-            return;
-        }
+        //if (!context.GridViewModel.CanExecute(actionType, actionContext))
+        //{
+        //    output.AppendError($"Action {actionType} cannot be executed with the provided context.");
+        //    return;
+        //}
 
         context.CommandExecutor.Execute(actionType, actionContext);
         output.AppendLine($"Executed {actionType} from ({from.x},{from.y}) to ({target.x},{target.y}).");

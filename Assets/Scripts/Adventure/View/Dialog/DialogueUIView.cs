@@ -55,7 +55,7 @@ namespace Adventure.Presentation.Dialog
         {
             if (node == null)
             {
-                Debug.LogWarning("attempt to set null ref DialogueNode");
+                Debug.LogWarning("DialogueNode setted null");
                 return;
             }
 

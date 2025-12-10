@@ -6,10 +6,10 @@ public class UnitAnimatorController : MonoBehaviour
 {
     [SerializeField] private Animator animator;
     [SerializeField] private string idleTrigger = "Idle";
-    [SerializeField] private string walkTrigger = "Walking";
     [SerializeField] private string attackTrigger = "Attacking";
     [SerializeField] private string hitTrigger = "Hitted";
     [SerializeField] private string dieTrigger = "Die";
+    [SerializeField] private string walkingBool = "IsWalking";
     [SerializeField] private bool logEvents;
     [SerializeField] private UnitAnimationState previewState = UnitAnimationState.Idle;
 
@@ -39,10 +39,19 @@ public class UnitAnimatorController : MonoBehaviour
         if (animator == null)
             return;
 
+        Debug.Log("[UnitAnimatorController] Play animation request " + state, this);
+
+        if (state == UnitAnimationState.Walk)
+        {
+            SetWalking(true);
+            return;
+        }
+
+        SetWalking(false);
+
         var trigger = state switch
         {
             UnitAnimationState.Idle => idleTrigger,
-            UnitAnimationState.Walk => walkTrigger,
             UnitAnimationState.Attack => attackTrigger,
             UnitAnimationState.Hit => hitTrigger,
             UnitAnimationState.Die => dieTrigger,
@@ -51,12 +60,21 @@ public class UnitAnimatorController : MonoBehaviour
 
         if (!string.IsNullOrEmpty(trigger))
         {
+            animator.ResetTrigger(trigger);
             animator.SetTrigger(trigger);
+            Debug.Log("[UnitAnimatorController] Playing animation " + state, this);
         }
         else
         {
             Debug.LogWarning($"[UnitAnimatorController] Trigger not configured for {state}", this);
         }
+    }
+
+    public void SetWalking(bool value)
+    {
+        if (animator == null)
+            return;
+        animator.SetBool(walkingBool, value);
     }
 
     public void SetPlaybackSpeed(float multiplier, bool instant)

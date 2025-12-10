@@ -16,7 +16,11 @@ public class TileGridRenderer : MonoBehaviour, IGridCellRenderer
     [SerializeField] private bool createSurfaceCollider = true;
     [SerializeField] private float colliderThickness = 0.05f;
     [SerializeField] private float highlightYOffset = 0.02f;
+    [SerializeField] private float routeInset = 0.15f;
+    [SerializeField] private float borderInset = 0.08f;
+    [SerializeField] private float borderThickness = 0.08f;
     [SerializeField] private GridRenderSettingsSO editorRenderSettings;
+    [SerializeField] private Material fallbackHoverMaterial;
 
     private Mesh _gridMesh;
     private IGridViewModel _viewModel;

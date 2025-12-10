@@ -350,7 +350,7 @@ public partial class @InputSystem_GridGame: IInputActionCollection2, IDisposable
                     ""name"": ""Drag"",
                     ""type"": ""Button"",
                     ""id"": ""b163bfaa-0cac-4fa6-99c5-1a8a92012978"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
