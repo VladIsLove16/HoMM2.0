@@ -90,18 +90,20 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     {
         Container.Bind<AdventureDevTools>().FromInstance(devTools).AsSingle().NonLazy();
     }
-    private void BindServices()
-    {
-        BindPersistence();
-        Container.Bind<PauseController>().AsSingle();
-        var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
-        Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
-        Container.Bind<BattleLaunchService>().AsSingle();
-        Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().NonLazy();
-
-        if (gridConfigurationGateway != null)
+        private void BindServices()
         {
-            Container.Bind<IGridConfigurationGateway>().FromInstance(gridConfigurationGateway).AsSingle();
+            BindPersistence();
+            Container.Bind<PauseController>().AsSingle();
+            var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
+            Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
+            Container.Bind<BattleLaunchService>().AsSingle();
+            Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().NonLazy();
+            Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
+            Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
+
+            if (gridConfigurationGateway != null)
+            {
+                Container.Bind<IGridConfigurationGateway>().FromInstance(gridConfigurationGateway).AsSingle();
         }
         else
         {

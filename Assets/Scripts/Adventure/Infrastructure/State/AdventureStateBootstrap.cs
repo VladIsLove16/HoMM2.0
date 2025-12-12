@@ -1,4 +1,5 @@
 using Adventure.Application.Dialog;
+using Adventure.Infrastructure.Dialog;
 using Adventure.Integration.Battle;
 using Adventure.Infrastructure.Movement;
 using Zenject;
@@ -9,11 +10,16 @@ namespace Adventure.Infrastructure.State
     {
         private readonly DialogVM _dialogVM;
         private readonly PlayerMovementController _playerMovementController;
+        private readonly NpcBehaviorGraphRegistry _behaviorGraphRegistry;
 
-        public AdventureStateBootstrap(DialogVM dialogVM, PlayerMovementController playerMovementController)
+        public AdventureStateBootstrap(
+            DialogVM dialogVM,
+            PlayerMovementController playerMovementController,
+            NpcBehaviorGraphRegistry behaviorGraphRegistry)
         {
             _dialogVM = dialogVM;
             _playerMovementController = playerMovementController;
+            _behaviorGraphRegistry = behaviorGraphRegistry;
         }
 
         public void Initialize()
@@ -48,7 +54,7 @@ namespace Adventure.Infrastructure.State
 
         private void ResumePendingDialog()
         {
-            if (!BattleStateCache.TryConsumePendingDialog(out var dialogId, out var resumeNodeId, out ArmyLineupSO lineup, out var _))
+            if (!BattleStateCache.TryConsumePendingDialog(out var dialogId, out var resumeNodeId, out ArmyLineupSO lineup, out var outcome))
             {
                 return;
             }
@@ -58,7 +64,19 @@ namespace Adventure.Infrastructure.State
                 return;
             }
 
-            _dialogVM?.TryStartDialog(dialogId, lineup, resumeNodeId);
+            _behaviorGraphRegistry?.SetPendingDialog(dialogId);
+            var started = _dialogVM?.TryStartDialog(dialogId, lineup, resumeNodeId) ?? false;
+            if (!started)
+            {
+                _behaviorGraphRegistry?.ClearPending(dialogId);
+                return;
+            }
+
+            _behaviorGraphRegistry?.ForceActivate(dialogId);
+            if (outcome != BattleOutcome.Unknown)
+            {
+                _behaviorGraphRegistry?.NotifyBattleOutcome(outcome);
+            }
         }
     }
 }

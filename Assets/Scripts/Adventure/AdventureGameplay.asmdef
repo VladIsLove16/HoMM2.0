@@ -12,7 +12,8 @@
         "GameCore",
         "SharedView",
         "SharedVMs",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "Unity.Behavior"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
