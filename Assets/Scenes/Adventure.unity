@@ -5039,6 +5039,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8047135755570936088}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8047135755570936090}
   m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
 --- !u!4 &8047135755570936086 stripped
 Transform:
@@ -5090,6 +5093,73 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8047135755570936090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8047135755570936087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: 1551836960159966069, guid: a325203bf4e30474088b944556be97b8, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 6358094479105982932
+  - rid: 6358094479105983361
+  - rid: 6358094479105983362
+  - rid: 6358094479105983363
+  - rid: 6358094482320916577
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 6358094479105982932
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 8047135755570936087}
+    - rid: 6358094479105983361
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 6917427642889637470
+          m_Value1: 6574205382297526522
+        Name: Npc name
+        m_Value: Witch
+    - rid: 6358094479105983362
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2248937054185321339
+          m_Value1: 5558981797306414224
+        Name: Player
+        m_Value: {fileID: 221153542}
+    - rid: 6358094479105983363
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2809462757486773655
+          m_Value1: 6562731522693776679
+        Name: Npc
+        m_Value: {fileID: 8047135755570936086}
+    - rid: 6358094482320916577
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12315169535829404793
+          m_Value1: 9420711356835765330
+        Name: CloserDistance
+        m_Value: 5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
