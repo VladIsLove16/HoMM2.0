@@ -15,8 +15,13 @@ namespace Adventure.Settings.ViewModel
             AudioMixer audioMixer)
             : base(model, pauseController, settingsRepository, audioMixer)
         {
+            EnsureSettingsLoaded();
         }
 
         public InputMode InputMode => _inputMode;
+        public override void ExitGame()
+        {
+            SceneLoader.Load(SceneLoader.Scene.MainMenu);
+        }
     }
 }

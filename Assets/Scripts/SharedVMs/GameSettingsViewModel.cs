@@ -1,9 +1,12 @@
 using Adventure.Infrastructure.Persistence;
 using Adventure.Settings.Model;
+using Mono.Cecil.Cil;
 using System;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 namespace Adventure.Settings.ViewModel
 {
@@ -15,6 +18,7 @@ namespace Adventure.Settings.ViewModel
 
         private const float MinNormalizedVolume = 0.0001f;
         private const float MutedDecibels = -80f;
+        private const float MinMouseSensitivity = 0.01f;
 
         private readonly GameSettingsModel _model;
         private readonly PauseController _pauseController;
@@ -22,6 +26,7 @@ namespace Adventure.Settings.ViewModel
         private readonly IDataRepository<GameSettingsSaveData> _settingsRepository;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
         private bool loaded = false;
+        private bool _suppressLanguageChange;
         public GameSettingsViewModel(
             GameSettingsModel model,
             PauseController pauseController,
@@ -32,17 +37,47 @@ namespace Adventure.Settings.ViewModel
             _pauseController = pauseController ?? throw new ArgumentNullException(nameof(pauseController));
             _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
             _audioMixer = audioMixer;
+            LocalizationSettings.InitializationOperation.WaitForCompletion();
+            LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
+            LanguageIndex.Value = GetLocaleIndex(LocalizationSettings.SelectedLocale);
+            LanguageIndex.Subscribe(OnLanguageIndexChanged);
+        }
 
+        private void OnLanguageIndexChanged(int index)
+        {
+            if (_suppressLanguageChange)
+                return;
+
+            var locales = LocalizationSettings.AvailableLocales?.Locales;
+            if (locales == null || locales.Count == 0)
+                return;
+
+            var clamped = Mathf.Clamp(index, 0, locales.Count - 1);
+            if (clamped != index)
+            {
+                _suppressLanguageChange = true;
+                LanguageIndex.Value = clamped;
+                _suppressLanguageChange = false;
+            }
+
+            if (clamped >= 0 && clamped < locales.Count)
+            {
+                var target = locales[clamped];
+                if (LocalizationSettings.SelectedLocale != target)
+                {
+                    LocalizationSettings.SelectedLocale = target;
+                }
+            }
         }
 
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         public AudioSettingsModel Audio => _model.Audio;
         public GraphicsSettingsModel Graphics => _model.Graphics;
         public ControlSettingsModel Controls => _model.Controls;
-
+        public readonly ReactiveProperty<int> LanguageIndex = new(0);
         public virtual void Open()
         {
-            LoadSettings();
+            EnsureSettingsLoaded();
 
             if (_isOpen.Value)
                 return;
@@ -75,7 +110,7 @@ namespace Adventure.Settings.ViewModel
             PersistSettings();
         }
 
-        public void ExitGame()
+        public virtual void ExitGame()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -127,7 +162,14 @@ namespace Adventure.Settings.ViewModel
             ApplyVolumeInternal(exposedParameter, value, targetMixer);
         }
 
-        private void LoadSettings()
+        public void SetMouseSensitivity(float value)
+        {
+            var clamped = Mathf.Max(MinMouseSensitivity, value);
+            Controls.MouseSensitivity = clamped;
+            PersistSettings();
+        }
+
+        protected void EnsureSettingsLoaded()
         {
             if (loaded)
                 return;
@@ -141,6 +183,8 @@ namespace Adventure.Settings.ViewModel
             Graphics.ResolutionWidth = data.ResolutionWidth;
             Graphics.ResolutionHeight = data.ResolutionHeight;
             Graphics.Fullscreen = data.Fullscreen;
+            Controls.MouseSensitivity = data.MouseSensitivity <= 0f ? 1f : data.MouseSensitivity;
+            SetInitialLocale(data.LanguageIndex);
             OnLoadAdditionalSettings(data);
             loaded = true;
         }
@@ -182,6 +226,8 @@ namespace Adventure.Settings.ViewModel
                 ResolutionWidth = Graphics.ResolutionWidth,
                 ResolutionHeight = Graphics.ResolutionHeight,
                 Fullscreen = Graphics.Fullscreen,
+                MouseSensitivity = Controls.MouseSensitivity,
+                LanguageIndex = LanguageIndex.Value
             };
 
             PersistAdditionalSettings(data);
@@ -194,6 +240,49 @@ namespace Adventure.Settings.ViewModel
 
         protected virtual void PersistAdditionalSettings(GameSettingsSaveData data)
         {
+        }
+
+        private void SetInitialLocale(int savedIndex)
+        {
+            var locales = LocalizationSettings.AvailableLocales?.Locales;
+            if (locales == null || locales.Count == 0)
+                return;
+
+            var clamped = Mathf.Clamp(savedIndex, 0, locales.Count - 1);
+            _suppressLanguageChange = true;
+            LanguageIndex.Value = clamped;
+            _suppressLanguageChange = false;
+            if (clamped >= 0 && clamped < locales.Count)
+            {
+                LocalizationSettings.SelectedLocale = locales[clamped];
+            }
+        }
+
+        private int GetLocaleIndex(Locale locale)
+        {
+            if (locale == null)
+                return 0;
+
+            var locales = LocalizationSettings.AvailableLocales?.Locales;
+            if (locales == null || locales.Count == 0)
+                return 0;
+
+            for (int i = 0; i < locales.Count; i++)
+            {
+                if (locales[i] == locale)
+                    return i;
+            }
+
+            return 0;
+        }
+
+        private void HandleLocaleChanged(Locale locale)
+        {
+            var index = GetLocaleIndex(locale);
+            _suppressLanguageChange = true;
+            LanguageIndex.Value = index;
+            _suppressLanguageChange = false;
+            PersistSettings();
         }
     }
 }

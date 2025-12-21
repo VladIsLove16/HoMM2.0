@@ -3,13 +3,13 @@ using Adventure.Infrastructure.Persistence;
 using Adventure.Settings.Model;
 using UnityEngine.Audio;
 using UniRx;
+using Zenject;
 
 namespace Adventure.Settings.ViewModel
 {
     public sealed class GridGameSettingsViewModel : GameSettingsViewModel
     {
         private readonly IAnimationSpeedSettings _animationSettings;
-
         public GridGameSettingsViewModel(
             GameSettingsModel model,
             PauseController pauseController,
@@ -19,6 +19,7 @@ namespace Adventure.Settings.ViewModel
             : base(model, pauseController, settingsRepository, audioMixer)
         {
             _animationSettings = animationSettings ?? throw new ArgumentNullException(nameof(animationSettings));
+            EnsureSettingsLoaded();
         }
 
         public bool SupportsAnimationSpeed => true;
@@ -38,6 +39,10 @@ namespace Adventure.Settings.ViewModel
         protected override void PersistAdditionalSettings(GameSettingsSaveData data)
         {
             data.AnimationSpeed = _animationSettings.Mode.Value;
+        }
+        public override void ExitGame()
+        {
+            SceneLoader.Load(SceneLoader.Scene.Adventure);
         }
     }
 }

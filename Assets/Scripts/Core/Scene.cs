@@ -1,4 +1,4 @@
-public static partial class Loader
+public static partial class SceneLoader
 {
     public enum Scene
     {

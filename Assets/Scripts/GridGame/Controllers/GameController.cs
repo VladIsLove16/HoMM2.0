@@ -33,6 +33,12 @@ public class GameController : MonoBehaviour
 
     public void Setup(IGameConfigurationService configurationService)
     {
+        if (_gameModel == null || _turnService == null)
+        {
+            Debug.LogError("[GameController] Missing dependencies. Ensure Zenject binding executed before Setup.", this);
+            return;
+        }
+
         var service = configurationService ?? _configurationService;
         var config = service?.GetSelectedConfiguration();
         CreateGridContent(config);
@@ -54,6 +60,12 @@ public class GameController : MonoBehaviour
 
     public void CreateGridContent(GridContentEntrySO unitContentEntrySO)
     {
+        if (_gameModel == null)
+        {
+            Debug.LogError("[GameController] GameModel is not initialized. Cannot create grid content.", this);
+            return;
+        }
+
         if (unitContentEntrySO == null)
         {
             Debug.LogWarning("CreateGridContent called with null configuration. Skipping grid setup.");
@@ -62,7 +74,14 @@ public class GameController : MonoBehaviour
 
         _gameModel.InitializeGrid(unitContentEntrySO.Width, unitContentEntrySO.Height);
         _gameModel.GameChange_UnitSpawned += OnGameModel_UnitSpawn;
-        foreach (var content in unitContentEntrySO.contents)
+        var contents = unitContentEntrySO.contents;
+        if (contents == null || contents.Count == 0)
+        {
+            Debug.LogWarning("[GameController] Grid content entry has no units configured.", this);
+            return;
+        }
+
+        foreach (var content in contents)
         {
             var team = content.Team;
             var spawnParams = new UnitSpawnParams(content.X, content.Y, content.unitType, content.Amount, team);

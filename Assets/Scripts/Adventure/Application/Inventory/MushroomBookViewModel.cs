@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using Zenject;
 
 namespace Adventure.Presentation.Mushroom
@@ -25,6 +27,19 @@ namespace Adventure.Presentation.Mushroom
             UnitStatType.Defense,
             UnitStatType.MoveSpeed,
             UnitStatType.AttackRange
+        };
+
+        private static readonly Dictionary<UnitStatType, string> StatLocalizationKeys = new()
+        {
+            { UnitStatType.Health, "UnitStat.Health" },
+            { UnitStatType.MaxHealth, "UnitStat.MaxHealth" },
+            { UnitStatType.Damage, "UnitStat.Damage" },
+            { UnitStatType.SpellPower, "UnitStat.SpellPower" },
+            { UnitStatType.Offense, "UnitStat.Offense" },
+            { UnitStatType.Defense, "UnitStat.Defense" },
+            { UnitStatType.MoveSpeed, "UnitStat.MoveSpeed" },
+            { UnitStatType.AttackRange, "UnitStat.AttackRange" },
+            { UnitStatType.CanFly, "UnitStat.CanFly" }
         };
 
         private readonly MushroomInventoryModel _mushroomInventoryModel;
@@ -58,6 +73,7 @@ namespace Adventure.Presentation.Mushroom
 
             RebuildEntries();
             UpdateCurrentPage();
+            LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         }
 
         public void NextPage() => GoToPage(_currentPageIndex.Value + 1);
@@ -231,25 +247,27 @@ namespace Adventure.Presentation.Mushroom
 
         private static string GetLabel(UnitStatType statType)
         {
-            return statType switch
+            if (StatLocalizationKeys.TryGetValue(statType, out var key))
             {
-                UnitStatType.Health => "Health",
-                UnitStatType.MaxHealth => "Max Health",
-                UnitStatType.Damage => "Damage",
-                UnitStatType.SpellPower => "Spell Power",
-                UnitStatType.Offense => "Offense",
-                UnitStatType.Defense => "Defense",
-                UnitStatType.MoveSpeed => "Move Speed",
-                UnitStatType.AttackRange => "Attack Range",
-                UnitStatType.CanFly => "Can Fly",
-                _ => statType.ToString()
-            };
+                var localized = LocalizationSettings.StringDatabase.GetLocalizedString("MainLocalization", key);
+                if (!string.IsNullOrEmpty(localized))
+                    return localized;
+            }
+
+            return statType.ToString();
         }
 
         public void Dispose()
         {
             Close();
             _subscriptions.Dispose();
+            LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+        }
+
+        private void OnLocaleChanged(Locale _)
+        {
+            RebuildEntries();
+            UpdateCurrentPage();
         }
     }
 }

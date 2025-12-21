@@ -1,4 +1,5 @@
 using Adventure.Domain.Movement;
+using Adventure.Settings.Configuration;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Assets.Scripts.Adventure.Infrastructure.Input;
@@ -22,6 +23,7 @@ namespace Adventure.Infrastructure.Movement
         private bool _useExternalInput;
         [FormerlySerializedAs("adventureCharacterInput")]
         [Inject] private AdventureInput legacyInputProvider;
+        [Inject(Optional = true)] private IMouseSensitivityService _mouseSensitivityService;
 
         private void Awake()
         {
@@ -68,7 +70,10 @@ namespace Adventure.Infrastructure.Movement
                 }
             }
 
-            var movementInput = new MovementInput(move, lookDelta, sprint);
+            var lookMultiplier = ResolveLookMultiplier();
+            var scaledLook = lookDelta * lookMultiplier;
+
+            var movementInput = new MovementInput(move, scaledLook, sprint);
 
             _yaw += movementInput.Look.x * settings.LookSensitivity;
             transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
@@ -77,6 +82,11 @@ namespace Adventure.Infrastructure.Movement
             UpdateCameraPitch(command.DesiredPitch);
 
             PerformMove(command.Velocity, deltaTime);
+        }
+
+        private float ResolveLookMultiplier()
+        {
+            return _mouseSensitivityService?.RotationMultiplier ?? 1f;
         }
 
         public void SetMoveInput(Vector2 move)

@@ -52,7 +52,7 @@ namespace Adventure.Integration.Battle
 
             _gridGateway.PrepareBattle(payload, _formationResolver);
 
-            return () => Loader.Load(_gridGateway.BattleScene);
+            return () => SceneLoader.Load(_gridGateway.BattleScene);
         }
 
         public void Launch(BattleLaunchContext context)

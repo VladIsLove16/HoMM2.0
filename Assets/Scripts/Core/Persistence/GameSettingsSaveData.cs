@@ -16,5 +16,7 @@ namespace Adventure.Infrastructure.Persistence
         public bool Fullscreen = true;
 
         public AnimationSpeedMode AnimationSpeed = AnimationSpeedMode.Fast;
+        public float MouseSensitivity = 1f;
+        public int LanguageIndex = 0;
     }
 }

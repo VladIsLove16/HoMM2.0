@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public static partial class Loader
+public static partial class SceneLoader
 {
     private class LoadingMonoBehaviour : MonoBehaviour { }
 

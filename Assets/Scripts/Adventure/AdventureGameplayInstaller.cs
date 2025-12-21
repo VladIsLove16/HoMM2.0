@@ -10,6 +10,7 @@ using Adventure.Infrastructure.State;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Dialog;
 using Adventure.Presentation.Mushroom;
+using Adventure.Settings.Configuration;
 using Adventure.Settings.Model;
 using Adventure.Settings.View;
 using Adventure.Settings.ViewModel;
@@ -29,6 +30,9 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [Header("Catalogues")]
     [SerializeField] private AdventureMushroomAssetMap mushroomAssetMap;
     [SerializeField] private DialogueDatabaseSO dialogueDatabase;
+
+    [Header("Input Tuning")]
+    [SerializeField] private MouseSensitivityProfileSO mouseSensitivityProfile;
 
     [Header("Battle")]
     [SerializeField] private GridConfigurationGateway gridConfigurationGateway;
@@ -93,6 +97,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         private void BindServices()
         {
             BindPersistence();
+            BindMouseSensitivity();
             Container.Bind<PauseController>().AsSingle();
             var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
             Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
@@ -110,6 +115,23 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
         }
         Container.Bind<EventBus>().AsSingle();
+    }
+
+    private void BindMouseSensitivity()
+    {
+        MouseSensitivityProfileSO profileInstance;
+        if (mouseSensitivityProfile == null)
+        {
+            profileInstance = ScriptableObject.CreateInstance<MouseSensitivityProfileSO>();
+            Debug.LogWarning("[AdventureGameplayInstaller] MouseSensitivityProfile is not assigned. Using runtime default.", this);
+        }
+        else
+        {
+            profileInstance = mouseSensitivityProfile;
+        }
+
+        Container.Bind<IMouseSensitivityProfile>().FromInstance(profileInstance).AsSingle();
+        Container.Bind<IMouseSensitivityService>().To<MouseSensitivityService>().AsSingle();
     }
 
     private void BindPersistence()

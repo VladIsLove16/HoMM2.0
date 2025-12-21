@@ -10,8 +10,8 @@ public class LoaderCallback : MonoBehaviour
         if (isFirstUpdate)
         {
             isFirstUpdate = false;
-            Loader.LoaderCallback();
+            SceneLoader.LoaderCallback();
         }
-        loadingProgress.fillAmount = Loader.GetLoadingProgress();
+        loadingProgress.fillAmount = SceneLoader.GetLoadingProgress();
     }
 }

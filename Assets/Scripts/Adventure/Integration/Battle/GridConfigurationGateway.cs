@@ -8,7 +8,7 @@ namespace Adventure.Integration.Battle
     public sealed class GridConfigurationGateway : MonoBehaviour, IGridConfigurationGateway
     {
         [SerializeField] private GameConfigurationService configurationService;
-        [SerializeField] private Loader.Scene battleScene = Loader.Scene.GridFight;
+        [SerializeField] private SceneLoader.Scene battleScene = SceneLoader.Scene.GridFight;
         [SerializeField] private int gridWidth = 10;
         [SerializeField] private int gridHeight = 10;
         [SerializeField] private Team playerTeam = Team.Blue;
@@ -16,7 +16,7 @@ namespace Adventure.Integration.Battle
         private GridContentEntrySO _runtimeContent;
         private BattleSetupPayload _lastPayload;
 
-        public Loader.Scene BattleScene => battleScene;
+        public SceneLoader.Scene BattleScene => battleScene;
         public int GridWidth => gridWidth;
         public int GridHeight => gridHeight;
         public Team PlayerTeam => playerTeam;

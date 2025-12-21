@@ -6,12 +6,6 @@ using UnityEngine;
 
 namespace Adventure.Infrastructure.State
 {
-    public enum BattleOutcome
-    {
-        Unknown = 0,
-        Victory = 1,
-        Defeat = 2
-    }
 
     public static class BattleStateCache
     {
@@ -21,7 +15,7 @@ namespace Adventure.Infrastructure.State
         private static List<UnitStackData> _inventorySnapshot;
         private static Vector3? _playerPosition;
         private static Quaternion? _playerRotation;
-        private static Loader.Scene? _returnScene;
+        private static SceneLoader.Scene? _returnScene;
         private static IDataRepository<GameStateSaveData> _gameStateRepository;
 
         private static string _pendingDialogId;
@@ -90,14 +84,14 @@ namespace Adventure.Infrastructure.State
             return _collectedMushrooms.Contains(Quantize(position));
         }
 
-        public static void SetReturnScene(Loader.Scene scene)
+        public static void SetReturnScene(SceneLoader.Scene scene)
         {
             _returnScene = scene;
         }
 
-        public static Loader.Scene GetReturnSceneOrDefault()
+        public static SceneLoader.Scene GetReturnSceneOrDefault()
         {
-            return _returnScene ?? Loader.Scene.Adventure;
+            return _returnScene ?? SceneLoader.Scene.Adventure;
         }
 
         public static void ScheduleBattleDialog(string dialogId, ArmyLineupSO lineup, string victoryNodeId, string defeatNodeId)

@@ -1,3 +1,4 @@
+using Adventure.Settings.View;
 using System;
 using UnityEngine;
 using Zenject;
@@ -10,6 +11,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
     [SerializeField] private AttackActionPanel attackActionPanel;
     [SerializeField] private UnitTurnPanelView unitTurnPanel;
     [SerializeField] private InGameUI inGameUI;
+    [SerializeField] private GridGameSettingsView _gridGameSettingsView;
     [SerializeField] private UnitStatsPanel unitStatsPanel;
     [SerializeField] private MaterialProvider materialProvider;
     [SerializeField] private PerCellGridRenderer perCellGridRenderer;

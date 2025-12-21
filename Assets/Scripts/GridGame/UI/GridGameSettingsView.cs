@@ -4,38 +4,48 @@ using System.Collections.Generic;
 using TMPro;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 
 namespace Adventure.Settings.View
 {
     public sealed class GridGameSettingsView : GameSettingsViewBase<GridGameSettingsViewModel>
     {
-        private static readonly string[] DefaultAnimationLabels = { "1x", "2x", "VeryFast" };
-
         [SerializeField] private TMP_Dropdown animationSpeedDropdown;
-        [SerializeField] private List<string> animationModeStringOptions;
         private Action<AnimationSpeedMode> _animationSetter;
+        private bool _animationConfigured;
+        [SerializeField] LocalizedString animationSpeedOption1;
+        [SerializeField] LocalizedString animationSpeedOption2;
+        [SerializeField] LocalizedString animationSpeedOption3;
 
         public void ConfigureAnimationControls()
         {
-            if (animationModeStringOptions == null || animationModeStringOptions.Count == 0)
-            {
-                animationModeStringOptions = new List<string>(DefaultAnimationLabels);
-            }
+            if (_animationConfigured)
+                return;
+
+            if (ViewModel == null || animationSpeedDropdown == null)
+                return;
+
             if (!ViewModel.SupportsAnimationSpeed)
             {
+                animationSpeedDropdown.gameObject.SetActive(false);
                 return;
             }
 
+            var labels = BuildAnimationLabels();
             SetupAnimationDropdown(
                 ViewModel.AnimationSpeed,
                 ViewModel.SetAnimationSpeed,
-                animationModeStringOptions);
+                labels);
+            _animationConfigured = true;
         }
         public override void TryInitialize()
         {
             base.TryInitialize();
-            ConfigureAnimationControls();
+            if (ViewModel != null)
+            {
+                ConfigureAnimationControls();
+            }
         }
 
         public void SetupAnimationDropdown(IReadOnlyReactiveProperty<AnimationSpeedMode> source, Action<AnimationSpeedMode> setter, IList<string> options)
@@ -49,7 +59,7 @@ namespace Adventure.Settings.View
             var optionData = new List<TMP_Dropdown.OptionData>(enumLength);
             for (var index = 0; index < enumLength; index++)
             {
-                optionData.Add(new TMP_Dropdown.OptionData(GetAnimationLabel(options, index)));
+                optionData.Add(new TMP_Dropdown.OptionData(options[index]));
             }
             animationSpeedDropdown.AddOptions(optionData);
             animationSpeedDropdown.SetValueWithoutNotify((int)source.Value);
@@ -68,25 +78,17 @@ namespace Adventure.Settings.View
             base.OnDestroy();
             if (animationSpeedDropdown != null)
                 animationSpeedDropdown.onValueChanged.RemoveListener(OnAnimationDropdownChanged);
+            _animationConfigured = false;
         }
 
-        private static string GetAnimationLabel(IList<string> options, int index)
+
+        private IList<string> BuildAnimationLabels()
         {
-            if (options != null && index < options.Count)
-            {
-                var candidate = options[index];
-                if (!string.IsNullOrWhiteSpace(candidate))
-                {
-                    return candidate;
-                }
-            }
-
-            if (index < DefaultAnimationLabels.Length)
-            {
-                return DefaultAnimationLabels[index];
-            }
-
-            return $"Option {index + 1}";
+            var labels = new List<string>();
+            labels.Add(animationSpeedOption1.GetLocalizedString());
+            labels.Add(animationSpeedOption2.GetLocalizedString());
+            labels.Add(animationSpeedOption3.GetLocalizedString());
+            return labels;
         }
         
     }

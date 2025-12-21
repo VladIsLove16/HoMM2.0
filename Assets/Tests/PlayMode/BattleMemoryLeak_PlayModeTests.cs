@@ -13,8 +13,8 @@ public sealed class BattleMemoryLeak_PlayModeTests
     public IEnumerator BattleMemoryLeakTester_MultipleLoadsAndBattles_LogMemoryStats()
     {
         var stats = new MemoryStats();
-        var adventureScene = Loader.Scene.Adventure.ToString();
-        var gridScene = Loader.Scene.GridFight.ToString();
+        var adventureScene = SceneLoader.Scene.Adventure.ToString();
+        var gridScene = SceneLoader.Scene.GridFight.ToString();
 
         yield return LoadSceneAndMeasure(adventureScene, "[Initial Adventure]", stats, countTowardsSummary: false);
         stats.SetBaselineToLast();

@@ -32,7 +32,8 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
     private void Start()
     {
-        _statusEffectDict = statusEffectDatas.ToDictionary(); 
+        _statusEffectDict = statusEffectDatas.ToDictionary();
+        _statusEffectViewModels = new List<StatusEffectViewModel>();
         _gameViewModel.UnitStatsRequested += OnGameViewModel_UnitStatsRequested;
         Hide();
     }

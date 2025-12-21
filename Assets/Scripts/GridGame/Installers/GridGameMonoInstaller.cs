@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Zenject;
+using Adventure.Settings.Configuration;
 using Adventure.Settings.ViewModel;
 using Adventure.Settings.Model;
 using UnityEngine.Audio;
+using Adventure.Settings.View;
 
 public class GridGameMonoInstaller : MonoInstaller
 {
@@ -28,11 +30,12 @@ public class GridGameMonoInstaller : MonoInstaller
     [SerializeField] private GameConfigurationService gameConfigurationService;
     [Header("Presentation")]
     [SerializeField] private MonoBehaviour _presentationInstaller;
+    [SerializeField] private GridGameSettingsView _gridGameSettingsView;
     [Header("Cursor")]
     [SerializeField] private List<CursorStateTexture> cursorStateTextures;
+    [SerializeField] private MouseSensitivityProfileSO mouseSensitivityProfile;
     public override void InstallBindings()
     {
-
         BindConfigurationService();
         BindServices();
         BindModels();
@@ -48,6 +51,7 @@ public class GridGameMonoInstaller : MonoInstaller
             gamePresentationInstaller.Install(Container);
         else
             throw new ArgumentException();
+        Container.Bind<GridGameSettingsView>().FromInstance(_gridGameSettingsView).AsSingle();
     }
 
     private void BindCursor()
@@ -70,6 +74,7 @@ public class GridGameMonoInstaller : MonoInstaller
     private void BindServices()
     {
         BindPersistenceServices();
+        BindMouseSensitivity();
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
@@ -88,6 +93,23 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<PauseController>().AsSingle();
         Container.Bind<AudioMixer>().AsSingle();
         //BindAchievementServices();
+    }
+
+    private void BindMouseSensitivity()
+    {
+        MouseSensitivityProfileSO profileInstance;
+        if (mouseSensitivityProfile == null)
+        {
+            profileInstance = ScriptableObject.CreateInstance<MouseSensitivityProfileSO>();
+            Debug.LogWarning("[GridGameMonoInstaller] MouseSensitivityProfile is not assigned. Using runtime default.");
+        }
+        else
+        {
+            profileInstance = mouseSensitivityProfile;
+        }
+
+        Container.Bind<IMouseSensitivityProfile>().FromInstance(profileInstance).AsSingle();
+        Container.Bind<IMouseSensitivityService>().To<MouseSensitivityService>().AsSingle();
     }
 
     private void BindPersistenceServices()
@@ -175,7 +197,3 @@ public class GridGameMonoInstaller : MonoInstaller
     }
 
 }
-
-
-
-

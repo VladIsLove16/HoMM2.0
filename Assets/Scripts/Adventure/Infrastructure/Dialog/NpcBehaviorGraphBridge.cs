@@ -18,33 +18,51 @@ namespace Adventure.Infrastructure.Dialog
             public const string BattleOutcome = "New BattleOutcome";
             public const string DialogueEventChannel = "New DialogueEventChannel";
             public const string ChoiceEventChannel = "New ChoiceEventChannel";
+            public const string BattleResultChannel = "New BattleResultChannel";
         }
 
         [SerializeField] private BehaviorGraphAgent agent;
         [SerializeField, Min(0.5f)] private float lookDistance = 5f;
         [Header("Event Channels")]
-        [SerializeField] private DialogueEventChannel dialogueEventChannel;
-        [SerializeField] private ChoiceEventChannel choiceEventChannel;
-        [SerializeField] private BattleResultChannel battleResultChannel;
+        [SerializeField] private EventChannel dialogueEventChannel;
+        [SerializeField] private EventChannel choiceEventChannel;
+        [SerializeField] private EventChannel battleResultChannel;
         [Header("Presentation")]
         [SerializeField] private NpcBattleAnimationController animationController;
 
-        private Transform _playerTransform;
+        private BlackboardVariable<Transform> _playerTransformVariable;
+        private BlackboardVariable<float> _lookDistanceVariable;
+        private BlackboardVariable<bool> _isPlayerInDialogVariable;
+        private BlackboardVariable<bool> _dialogueChoiceVariable;
+        private BlackboardVariable<bool> _battleRequestedVariable;
+        private BlackboardVariable<BattleOutcome> _battleOutcomeVariable;
+        private BlackboardVariable<EventChannel> _dialogueEventChannelVariable;
+        private BlackboardVariable<EventChannel> _choiceEventChannelVariable;
+        private BlackboardVariable<EventChannel> _battleResultChannelVariable;
+        private bool _variablesBound;
         private string _dialogId;
 
         private void Awake()
         {
-            if (agent == null)
-            {
-                agent = GetComponent<BehaviorGraphAgent>();
-            }
+            agent = GetComponent<BehaviorGraphAgent>();
 
+            TryBindBlackboardVariables();
             ApplyStaticConfiguration();
+        }
+
+        private void Start()
+        {
+            TryBindBlackboardVariables();
+            ApplyStaticConfiguration();
+        }
+
+        private void OnEnable()
+        {
+            TryBindBlackboardVariables();
         }
 
         private void OnValidate()
         {
-            if (agent == null)
             {
                 agent = GetComponent<BehaviorGraphAgent>();
             }
@@ -57,44 +75,44 @@ namespace Adventure.Infrastructure.Dialog
 
         public void ConfigurePlayer(Transform playerTransform)
         {
-            _playerTransform = playerTransform;
-            TrySetBlackboardValue(BlackboardKeys.PlayerTransform, _playerTransform);
+            AssignValue(_playerTransformVariable, BlackboardKeys.PlayerTransform, playerTransform);
         }
 
         private void ApplyStaticConfiguration()
         {
-            TrySetBlackboardValue(BlackboardKeys.LookDistance, lookDistance);
-            TrySetBlackboardValue(BlackboardKeys.DialogueEventChannel, dialogueEventChannel);
-            TrySetBlackboardValue(BlackboardKeys.ChoiceEventChannel, choiceEventChannel);
+            AssignValue(_lookDistanceVariable, BlackboardKeys.LookDistance, lookDistance);
+            AssignValue(_dialogueEventChannelVariable, BlackboardKeys.DialogueEventChannel, dialogueEventChannel);
+            AssignValue(_choiceEventChannelVariable, BlackboardKeys.ChoiceEventChannel, choiceEventChannel);
+            AssignValue(_battleResultChannelVariable, BlackboardKeys.BattleResultChannel, battleResultChannel);
         }
 
         public void NotifyDialogOpened()
         {
-            TrySetBlackboardValue(BlackboardKeys.IsPlayerInDialog, true);
-            dialogueEventChannel?.SendEventMessage();
+            AssignValue(_isPlayerInDialogVariable, BlackboardKeys.IsPlayerInDialog, true);
+            ResolveDialogueChannel()?.SendEventMessage();
             animationController?.PlayAnimation(NpcAnimationType.Greeting);
         }
 
         public void NotifyDialogClosed()
         {
-            TrySetBlackboardValue(BlackboardKeys.IsPlayerInDialog, false);
-            TrySetBlackboardValue(BlackboardKeys.DialogueChoiceOpened, false);
-            TrySetBlackboardValue(BlackboardKeys.BattleRequested, false);
+            AssignValue(_isPlayerInDialogVariable, BlackboardKeys.IsPlayerInDialog, false);
+            AssignValue(_dialogueChoiceVariable, BlackboardKeys.DialogueChoiceOpened, false);
+            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, false);
             animationController?.PlayAnimation(NpcAnimationType.Bye);
         }
 
         public void NotifyChoiceWindowState(bool isOpen)
         {
-            TrySetBlackboardValue(BlackboardKeys.DialogueChoiceOpened, isOpen);
+            AssignValue(_dialogueChoiceVariable, BlackboardKeys.DialogueChoiceOpened, isOpen);
             if (isOpen)
             {
-                choiceEventChannel?.SendEventMessage();
+                ResolveChoiceChannel()?.SendEventMessage();
             }
         }
 
         public void NotifyBattleRequested()
         {
-            TrySetBlackboardValue(BlackboardKeys.BattleRequested, true);
+            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, true);
             animationController?.PlayAnimation(NpcAnimationType.BattleStart);
         }
 
@@ -105,9 +123,9 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            TrySetBlackboardValue(BlackboardKeys.BattleOutcome, outcome);
-            battleResultChannel?.SendEventMessage();
-            TrySetBlackboardValue(BlackboardKeys.BattleRequested, false);
+            AssignValue(_battleOutcomeVariable, BlackboardKeys.BattleOutcome, outcome);
+            ResolveBattleResultChannel()?.SendEventMessage();
+            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, false);
 
             if (animationController == null)
                 return;
@@ -118,6 +136,66 @@ namespace Adventure.Infrastructure.Dialog
             animationController.PlayAnimation(animation);
         }
 
+        private void TryBindBlackboardVariables()
+        {
+            if (_variablesBound || agent == null || agent.Graph == null)
+            {
+                return;
+            }
+
+            BindVariable(BlackboardKeys.PlayerTransform, ref _playerTransformVariable);
+            BindVariable(BlackboardKeys.LookDistance, ref _lookDistanceVariable);
+            BindVariable(BlackboardKeys.IsPlayerInDialog, ref _isPlayerInDialogVariable);
+            BindVariable(BlackboardKeys.DialogueChoiceOpened, ref _dialogueChoiceVariable);
+            BindVariable(BlackboardKeys.BattleRequested, ref _battleRequestedVariable);
+            BindVariable(BlackboardKeys.BattleOutcome, ref _battleOutcomeVariable);
+            BindVariable(BlackboardKeys.DialogueEventChannel, ref _dialogueEventChannelVariable);
+            BindVariable(BlackboardKeys.ChoiceEventChannel, ref _choiceEventChannelVariable);
+            BindVariable(BlackboardKeys.BattleResultChannel, ref _battleResultChannelVariable);
+
+            _variablesBound = true;
+        }
+
+        private void BindVariable<T>(string key, ref BlackboardVariable<T> storage)
+        {
+            if (agent == null || string.IsNullOrEmpty(key) || storage != null)
+                return;
+
+            if (!agent.GetVariable(key, out storage))
+            {
+                Debug.LogWarning(
+                    $"[NpcBehaviorGraphBridge] Blackboard variable '{key}' is not defined for dialog '{_dialogId}'",
+                    this);
+            }
+        }
+
+        private void AssignValue<T>(BlackboardVariable<T> variable, string variableKey, T value)
+        {
+            if (variable != null)
+            {
+                variable.Value = value;
+            }
+            else
+            {
+                TrySetBlackboardValue(variableKey, value);
+            }
+        }
+
+        private EventChannel ResolveDialogueChannel()
+        {
+            return _dialogueEventChannelVariable?.Value ?? dialogueEventChannel;
+        }
+
+        private EventChannel ResolveChoiceChannel()
+        {
+            return _choiceEventChannelVariable?.Value ?? choiceEventChannel;
+        }
+
+        private EventChannel ResolveBattleResultChannel()
+        {
+            return _battleResultChannelVariable?.Value ?? battleResultChannel;
+        }
+
         private void TrySetBlackboardValue<T>(string variable, T value)
         {
             if (agent == null || string.IsNullOrEmpty(variable))
@@ -125,7 +203,7 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            if (!agent.SetVariableValue(variable, value) && Application.isPlaying)
+            if (!agent.SetVariableValue(variable, value))
             {
                 Debug.LogWarning(
                     $"[NpcBehaviorGraphBridge] Failed to set blackboard variable '{variable}' on dialog '{_dialogId}'",

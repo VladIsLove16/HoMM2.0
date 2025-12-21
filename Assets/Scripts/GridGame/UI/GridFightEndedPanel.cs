@@ -82,7 +82,7 @@ public class GridFightEndedPanel : MonoBehaviour, IDisposable
     private void OnReturnClicked()
     {
         var targetScene = BattleStateCache.GetReturnSceneOrDefault();
-        Loader.Load(targetScene);
+        SceneLoader.Load(targetScene);
     }
 
     public void Dispose()

@@ -11,21 +11,22 @@ using Unity.Properties;
     id: "bbefad0fb7c3480d8b13afc3b1919af8")]
 public sealed partial class BattleOutcomeCondition : Condition
 {
-    [SerializeReference] public BlackboardVariable<BattleOutcome> BattleOutcome;
-    [SerializeReference] public BlackboardVariable<BattleOutcome> Expected;
+    //[SerializeReference] public BlackboardVariable<BattleOutcome> BattleOutcome;
+    //[SerializeReference] public BlackboardVariable<BattleOutcome> Expected;
 
     public override bool IsTrue()
     {
-        return BattleOutcome != null
-            && Expected != null
-            && BattleOutcome.Value == Expected.Value;
+        //return BattleOutcome != null
+        //    && Expected != null
+        //    && BattleOutcome.Value == Expected.Value;
+        return true;
     }
 
-    public override void OnStart()
-    {
-    }
+    //public override void OnStart()
+    //{
+    //}
 
-    public override void OnEnd()
-    {
-    }
+    //public override void OnEnd()
+    //{
+    //}
 }

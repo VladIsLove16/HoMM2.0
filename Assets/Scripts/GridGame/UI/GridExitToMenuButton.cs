@@ -21,7 +21,7 @@ public sealed class GridExitToMenuButton : MonoBehaviour
         _pauseController?.SetPaused(false);
 
         // Переходим в главное меню через общий загрузчик сцен.
-        Loader.Load(Loader.Scene.MainMenu);
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
 }
 

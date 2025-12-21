@@ -12,7 +12,7 @@ namespace Adventure.Integration.Battle
             string dialogId,
             string victoryNodeId,
             string defeatNodeId,
-            Loader.Scene returnScene = Loader.Scene.Adventure)
+            SceneLoader.Scene returnScene = SceneLoader.Scene.Adventure)
         {
             EnemyArmy = enemyArmy;
             DialogId = dialogId;
@@ -25,7 +25,7 @@ namespace Adventure.Integration.Battle
         public string DialogId { get; }
         public string VictoryNodeId { get; }
         public string DefeatNodeId { get; }
-        public Loader.Scene ReturnScene { get; }
+        public SceneLoader.Scene ReturnScene { get; }
 
         public bool HasDialog => !string.IsNullOrWhiteSpace(DialogId);
     }

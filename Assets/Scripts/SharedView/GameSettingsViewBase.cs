@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Adventure.Settings.ViewModel;
+//using Shared.Localization;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 using Zenject;
 
@@ -19,6 +23,7 @@ namespace Adventure.Settings.View
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider effectsSlider;
         [SerializeField] private TMP_Dropdown qualityDropdown;
+        [SerializeField] private TMP_Dropdown languageDropdown;
 
         protected TViewModel ViewModel { get; private set; }
         protected CompositeDisposable Bindings { get; private set; }
@@ -26,6 +31,7 @@ namespace Adventure.Settings.View
         private UnityAction _closeAction;
         private UnityAction _exitAction;
         private bool _initialized;
+        private bool _waitingLocalizationInit;
 
         [Inject]
         public virtual void Construct(TViewModel vm)
@@ -54,6 +60,14 @@ namespace Adventure.Settings.View
                     effectsSlider.onValueChanged.RemoveListener(OnEffectsSliderChanged);
                 if (qualityDropdown != null)
                     qualityDropdown.onValueChanged.RemoveListener(OnQualityChanged);
+                if (languageDropdown != null)
+                    languageDropdown.onValueChanged.RemoveListener(OnLanguageChanged);
+
+                if (_waitingLocalizationInit)
+                {
+                    LocalizationSettings.InitializationOperation.Completed -= OnLocalizationInitializationCompleted;
+                    _waitingLocalizationInit = false;
+                }
 
                 Bindings?.Dispose();
             }
@@ -63,6 +77,10 @@ namespace Adventure.Settings.View
         {
             ViewModel.SetQualityLevel(value);
             ViewModel.ApplyGraphics();
+        }
+        private void OnLanguageChanged(int value)
+        {
+            ViewModel.LanguageIndex.SetValueAndForceNotify(value);
         }
 
         private void OnMusicSliderChanged(float value)
@@ -83,9 +101,9 @@ namespace Adventure.Settings.View
             }
         }
 
-      
 
-    
+
+
 
         public virtual void TryInitialize()
         {
@@ -127,7 +145,69 @@ namespace Adventure.Settings.View
                 qualityDropdown.onValueChanged.AddListener(OnQualityChanged);
                 qualityDropdown.SetValueWithoutNotify(ViewModel.Graphics.QualityLevel);
             }
+            if (languageDropdown != null)
+            {
+                ConfigureLanguageDropdown();
+                languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
+                ViewModel.LanguageIndex.Subscribe(idx =>
+                    languageDropdown.SetValueWithoutNotify(idx)).AddTo(Bindings);
+            }
+        }
 
+        private void ConfigureLanguageDropdown()
+        {
+            if (languageDropdown == null)
+                return;
+
+            if (!LocalizationSettings.InitializationOperation.IsDone)
+            {
+                if (_waitingLocalizationInit)
+                    return;
+
+                _waitingLocalizationInit = true;
+                LocalizationSettings.InitializationOperation.Completed += OnLocalizationInitializationCompleted;
+                return;
+            }
+
+            PopulateLanguageDropdown();
+        }
+
+        private void OnLocalizationInitializationCompleted(AsyncOperationHandle<LocalizationSettings> handle)
+        {
+            LocalizationSettings.InitializationOperation.Completed -= OnLocalizationInitializationCompleted;
+            _waitingLocalizationInit = false;
+            PopulateLanguageDropdown();
+        }
+
+        private void PopulateLanguageDropdown()
+        {
+            if (languageDropdown == null)
+                return;
+
+            var locales = LocalizationSettings.AvailableLocales?.Locales;
+            if (locales == null || locales.Count == 0)
+            {
+                languageDropdown.interactable = false;
+                languageDropdown.ClearOptions();
+                return;
+            }
+
+            var options = new List<TMP_Dropdown.OptionData>(locales.Count);
+            foreach (var locale in locales)
+            {
+                if (locale == null)
+                    continue;
+
+                var display = !string.IsNullOrWhiteSpace(locale.LocaleName)
+                    ? locale.LocaleName
+                    : locale.Identifier.Code;
+                options.Add(new TMP_Dropdown.OptionData(display));
+            }
+
+            languageDropdown.interactable = locales.Count > 1;
+            languageDropdown.ClearOptions();
+            languageDropdown.AddOptions(options);
+            languageDropdown.SetValueWithoutNotify(ViewModel.LanguageIndex.Value);
         }
     }
 }

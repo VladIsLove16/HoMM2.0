@@ -95,7 +95,7 @@ public class LobbyManager : NetworkBehaviour
             GameConfigurationService.SetTeam(Team.Blue);
             ApplyConfigurationToService(); // локально
         }
-        Loader.Load(Loader.Scene.GridFight);
+        SceneLoader.Load(SceneLoader.Scene.GridFight);
     }
 
     private void AddPlayerToLobby()
@@ -216,12 +216,12 @@ public class LobbyManager : NetworkBehaviour
         // Загружаем игровую сцену через Netcode (чтобы синхронизировать сцену между игроками)
         if (IsHost)
         {
-            Loader.Load(Loader.Scene.GridFight, HostLoadRoutine);
+            SceneLoader.Load(SceneLoader.Scene.GridFight, HostLoadRoutine);
         }
         else
         {
             // Клиенты просто дождутся команды с сервера/Netcode, но на всякий случай можно использовать обычную загрузку если не сетевой режим
-            Loader.Load(Loader.Scene.GridFight, ClientWaitRoutine);
+            SceneLoader.Load(SceneLoader.Scene.GridFight, ClientWaitRoutine);
         }
     }
 

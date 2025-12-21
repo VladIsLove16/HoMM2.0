@@ -1,4 +1,5 @@
 using System;
+using Adventure.Settings.Configuration;
 using Adventure.Settings.ViewModel;
 using UniRx;
 using UnityEngine;
@@ -11,11 +12,12 @@ using Zenject;
 /// </summary>
 public sealed class GridInputRouter : ITickable, IDisposable
 {
-    private const float VirtualCursorSpeed = 1400f;
+    private const float DefaultVirtualCursorSpeed = 1400f;
 
     private readonly CellInputHandler _cell;
     private readonly ITurnStateViewModel _turnState;
     private readonly GridGameSettingsViewModel _settingsVM;
+    private readonly IMouseSensitivityService _mouseSensitivityService;
 
     private InputSystem_GridGame _input;
     private IDisposable _stateSubscription;
@@ -31,11 +33,13 @@ public sealed class GridInputRouter : ITickable, IDisposable
     public GridInputRouter(
         CellInputHandler cell,
         ITurnStateViewModel turnState,
-        GridGameSettingsViewModel settingsVM)
+        GridGameSettingsViewModel settingsVM,
+        IMouseSensitivityService mouseSensitivityService = null)
     {
         _cell = cell ?? throw new ArgumentNullException(nameof(cell));
         _turnState = turnState;
         _settingsVM = settingsVM ?? throw new ArgumentNullException(nameof(settingsVM));
+        _mouseSensitivityService = mouseSensitivityService;
 
         _input = new InputSystem_GridGame();
         WireInput();
@@ -198,7 +202,8 @@ public sealed class GridInputRouter : ITickable, IDisposable
         if (!_useVirtualPointer || _navigationVector.sqrMagnitude < 0.0001f)
             return;
 
-        var delta = _navigationVector * VirtualCursorSpeed * Time.unscaledDeltaTime;
+        var speed = _mouseSensitivityService?.CursorSpeed ?? DefaultVirtualCursorSpeed;
+        var delta = _navigationVector * speed * Time.unscaledDeltaTime;
         _virtualPointerPosition = ClampToScreen(_virtualPointerPosition + delta);
         _currentPointerPosition = _virtualPointerPosition;
         _cell.UpdatePointerPosition(_virtualPointerPosition);
