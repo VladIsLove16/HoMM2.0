@@ -21,6 +21,7 @@ public class GameGridUIPanelView : MonoBehaviour
     [SerializeField] private TMP_InputField xText;
     [SerializeField] private TMP_InputField yText;
     [SerializeField] private TMP_Text errorText;
+    [SerializeField] private bool enableOnStart = true;
     private int X 
     {
         get
@@ -54,7 +55,25 @@ public class GameGridUIPanelView : MonoBehaviour
         btnSpawnAt.onClick.AddListener(() => Debug.Log("btnSpawnAt clicked"));
         btnSelectCell.onClick.AddListener(() => Debug.Log("btnSelectCell clicked"));
 
+        ToggleStartingVivsibilty();
     }
+    private void ToggleStartingVivsibilty()
+    {
+        if (enableOnStart)
+            Show();
+        else
+            Hide();
+    }
+
+    private void Show()
+    {
+        gameObject.SetActive(true);
+    }
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
     private void OnBtnSpawnRandom_Clicked()
     {
         Debug.Log("btnSpawnRandom clicked");

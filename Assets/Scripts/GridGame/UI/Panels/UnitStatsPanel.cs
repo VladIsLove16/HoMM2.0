@@ -20,6 +20,7 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     [SerializeField] Transform statusEffectIconsParent;
     [SerializeField] Vector3 showOffset;
     [SerializeField] Vector3 screenEdgeOffset;
+    [SerializeField] bool enableOnStart;
 
     // Removed direct GameView3D dependency - should work through GameViewModel events
     private UnitStatsViewModel _vm;
@@ -35,9 +36,17 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
         _statusEffectDict = statusEffectDatas.ToDictionary();
         _statusEffectViewModels = new List<StatusEffectViewModel>();
         _gameViewModel.UnitStatsRequested += OnGameViewModel_UnitStatsRequested;
-        Hide();
+        ToggleStartingVivsibilty();
     }
-    
+
+    private void ToggleStartingVivsibilty()
+    {
+        if (enableOnStart)
+            Show();
+        else
+            Hide();
+    }
+
     private void OnGameViewModel_UnitStatsRequested(UnitViewModel unit)
     {
         var vm = new UnitStatsViewModel(unit.Model);

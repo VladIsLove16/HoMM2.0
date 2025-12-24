@@ -8,6 +8,7 @@ public class UnitTurnPanelView : MonoBehaviour
     [SerializeField] private UnitIconController unitIconPrefab;
     [SerializeField] private Transform parent;
     [SerializeField] private UnitIconController activeCharacterController;
+    [SerializeField] bool enableOnStart = true;
 
     private readonly Dictionary<UnitPortraitViewModel, UnitIconController> _iconBindings = new();
     private readonly List<UnitIconController> _icons = new();
@@ -33,8 +34,24 @@ public class UnitTurnPanelView : MonoBehaviour
         {
             OnPortraitEnqueued(portrait);
         }
+        ToggleStartingVivsibilty();
+    }   
+    private void ToggleStartingVivsibilty()
+    {
+        if (enableOnStart)
+            Show();
+        else
+            Hide();
     }
 
+    private void Show()
+    {
+        gameObject.SetActive(true);
+    }
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
     private void OnPortraitEnqueued(UnitPortraitViewModel portrait)
     {
         if (portrait == null || unitIconPrefab == null || parent == null)

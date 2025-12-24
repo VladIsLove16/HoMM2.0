@@ -13,11 +13,11 @@
         "SharedView",
         "SharedVMs",
         "Unity.Addressables",
-        "Unity.Behavior",
         "Shared",
         "Unity.Netcode.Runtime",
         "Unity.Behavior.Serialization",
         "Unity.Localization",
+        "Unity.Behavior",
         "Unity.Behavior.SerializableGUID"
     ],
     "includePlatforms": [],

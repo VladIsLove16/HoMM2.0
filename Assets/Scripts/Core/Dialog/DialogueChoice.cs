@@ -1,3 +1,5 @@
+using Unity.Behavior;
+
 namespace Adventure.Domain.Dialog
 {
     public sealed class DialogueChoice
@@ -25,7 +27,7 @@ namespace Adventure.Domain.Dialog
         public string BattleVictoryNodeId { get; }
         public string BattleDefeatNodeId { get; }
     }
-
+    [BlackboardEnum]    
     public enum DialogueChoiceAction
     {
         None,

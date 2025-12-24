@@ -1,14 +1,15 @@
+using Unity.Behavior;
+
 namespace Adventure.Infrastructure.Dialog
 {
-    public sealed partial class NpcBattleAnimationController
+    [BlackboardEnum]
+    public enum NpcAnimationType
     {
-        public enum NpcAnimationType
-        {
-            Greeting,
-            BattleStart,
-            BattleWon,
-            BattleLost,
-            Bye
-        }
+        Greeting,
+        Talking,
+        BattleStart,
+        BattleWon,
+        BattleLost,
+        Bye
     }
 }

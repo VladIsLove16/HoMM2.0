@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Adventure.Infrastructure.Dialog
 {
     [RequireComponent(typeof(Animator))]
-    public sealed partial class NpcBattleAnimationController : MonoBehaviour, IBattleSequencePlayer
+    public sealed class NpcBattleAnimationController : MonoBehaviour, IBattleSequencePlayer
     {
         [SerializeField] private Animator animator;
         [SerializeField] private string greetTrigger = "Greet";

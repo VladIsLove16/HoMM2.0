@@ -1,5 +1,6 @@
 using System;
 using Adventure.Infrastructure.Dialog;
+using Adventure.Infrastructure.State;
 using Unity.Behavior;
 using Unity.Properties;
 using UnityEngine;
@@ -7,12 +8,8 @@ using static Adventure.Infrastructure.Dialog.NpcBattleAnimationController;
 using Action = Unity.Behavior.Action;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(
-    name: "NPC Play Animation",
-    story: "Switches the NPC animator to the requested state",
-    category: "Adventure/NPC",
-    id: "5d24a4f3b2df4f79be8b4d835f4291a7")]
-public sealed partial class PlayNpcAnimationAction : Action
+[NodeDescription(name: "NPC Play Animation", story: "Switches the NPC animator to the [NpcAnimationType] state", category: "Action", id: "5d24a4f3b2df4f79be8b4d835f4291a7")]
+public sealed partial class NpcPlayAnimationAction : Action
 {
     [SerializeReference] public BlackboardVariable<NpcBattleAnimationController> Controller;
     [SerializeReference] public BlackboardVariable<NpcAnimationType> Animation;

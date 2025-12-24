@@ -5,13 +5,10 @@ using UnityEngine;
 using Action = Unity.Behavior.Action;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(
-    name: "NPC Look At Target",
-    story: "Rotates the NPC towards the provided target transform",
-    category: "Adventure/NPC",
-    id: "f73a7555c1aa4211a5a2d8ad07a4477f")]
-public sealed partial class LookAtPlayerAction : Action
+[NodeDescription(name: "NPC Look At Target", story: "Rotates the NPC towards the [Player]", category: "Action", id: "f73a7555c1aa4211a5a2d8ad07a4477f")]
+public sealed partial class NpcLookAtTargetAction : Action
 {
+    [SerializeReference] public BlackboardVariable<Transform> Player;
     [SerializeReference] public BlackboardVariable<Transform> NpcTransform;
     [SerializeReference] public BlackboardVariable<Transform> TargetTransform;
     [SerializeReference] public BlackboardVariable<float> RotationSpeed;
