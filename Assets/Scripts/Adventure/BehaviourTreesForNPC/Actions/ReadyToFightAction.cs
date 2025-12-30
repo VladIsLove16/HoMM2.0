@@ -5,7 +5,7 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Ready to fight", story: "Npc sets state to Ready to fight", category: "Action", id: "4d44c884036abbeb2d591240b6b3b4f1")]
+[NodeDescription(name: "Ready to fight", story: "NPC sets state to Ready to fight", category: "Action", id: "4d44c884036abbeb2d591240b6b3b4f1")]
 public partial class ReadyToFightAction : Action
 {
 

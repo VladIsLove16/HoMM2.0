@@ -14,6 +14,7 @@ namespace Adventure.Application.Dialog
     {
         private readonly IDialogRepository _repository;
         private readonly IDialogStateStore _stateStore;
+        private readonly PlayerChosenDialogOption _playerChoiceEventChannel;
         private readonly ReactiveProperty<DialogueNode> _currentNode = new ReactiveProperty<DialogueNode>();
         private readonly ReactiveProperty<ArmyLineupSO> _enenyArmy = new ReactiveProperty<ArmyLineupSO>();
         private DialogueSession _session;
@@ -21,10 +22,11 @@ namespace Adventure.Application.Dialog
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
         [Inject] private BattleLaunchService battleLaunchService;
-        public DialogVM(IDialogRepository repository, IDialogStateStore stateStore)
+        public DialogVM(IDialogRepository repository, IDialogStateStore stateStore, PlayerChosenDialogOption playerChoiceEventChannel = null)
         {
             _repository = repository;
             _stateStore = stateStore;
+            _playerChoiceEventChannel = playerChoiceEventChannel;
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
         public IReadOnlyReactiveProperty<ArmyLineupSO> EnemyArmy => _enenyArmy;
@@ -86,6 +88,7 @@ namespace Adventure.Application.Dialog
             {
                 ContinueDialog();
             }
+            _playerChoiceEventChannel?.SendEventMessage(action);
             ChoiceActionTriggered?.Invoke(action);
         }
 

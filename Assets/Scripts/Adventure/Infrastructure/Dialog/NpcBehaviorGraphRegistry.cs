@@ -105,7 +105,7 @@ namespace Adventure.Infrastructure.Dialog
 
         public void NotifyBattleOutcome(BattleOutcome outcome)
         {
-            if (outcome == BattleOutcome.Unknown)
+            if (outcome == default)
             {
                 return;
             }

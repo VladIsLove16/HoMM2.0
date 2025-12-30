@@ -50,6 +50,9 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private HelpMenu helpMenu;
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private AdventureDevTools devTools;
+    [Header("Behavior Graph Events")]
+    [SerializeField] private PlayerChosenDialogOption playerChosenDialogOptionChannel;
+    [SerializeField] private BattleFinishedChannel battleFinishedChannel;
     public override void InstallBindings()
     {
         BindDatabases();
@@ -70,7 +73,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     private void BindsVMS()
     {
         Container.BindInterfacesAndSelfTo<MushroomBookViewModel>().AsSingle();
-        Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle();
+        Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle().WithArguments(playerChosenDialogOptionChannel);
         Container.BindInterfacesAndSelfTo<AdventureGameSettingsViewModel>().AsSingle().NonLazy();
         Container.Bind<AdventureMenusCoordinatorViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<Adventure.Infrastructure.Cursor.CursorViewModel>().AsSingle().NonLazy();
@@ -102,7 +105,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
             Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
             Container.Bind<BattleLaunchService>().AsSingle();
-            Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().NonLazy();
+            Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
             Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
             Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
 

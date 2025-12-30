@@ -3,7 +3,7 @@ using Adventure.Infrastructure.Interaction;
 using Adventure.Integration.Battle;
 using UnityEngine;
 using Zenject;
-using static Adventure.Infrastructure.Dialog.NpcBattleAnimationController;
+using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
@@ -12,7 +12,7 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private DialogueGraphSO dialogue;
         [SerializeField] ArmyLineupSO lineup;
         [SerializeField] string Name;
-        [SerializeField] private NpcBattleAnimationController battleAnimationController;
+        [SerializeField] private NpcAnimationController battleAnimationController;
         [SerializeField] private NpcBehaviorGraphBridge behaviorGraphBridge;
         private DialogVM _dialogVM;
         private NpcBehaviorGraphRegistry _behaviorGraphRegistry;

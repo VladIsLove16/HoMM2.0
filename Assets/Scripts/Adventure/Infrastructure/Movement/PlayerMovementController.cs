@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using Zenject;
+using System;
 
 namespace Adventure.Infrastructure.Movement
 {
@@ -76,12 +77,17 @@ namespace Adventure.Infrastructure.Movement
             var movementInput = new MovementInput(move, scaledLook, sprint);
 
             _yaw += movementInput.Look.x * settings.LookSensitivity;
-            transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
 
             var command = _movementService.Tick(_state, movementInput, transform.rotation, deltaTime);
-            UpdateCameraPitch(command.DesiredPitch);
+            NewMethod(command);
 
             PerformMove(command.Velocity, deltaTime);
+        }
+
+        private void NewMethod(MovementCommand command)
+        {
+            transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+            UpdateCameraPitch(command.DesiredPitch);
         }
 
         private float ResolveLookMultiplier()
@@ -148,6 +154,51 @@ namespace Adventure.Infrastructure.Movement
                 return;
 
             cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+
+        public Quaternion BodyRotation => transform.rotation;
+
+        public Quaternion CameraLocalRotation => cameraPivot != null
+            ? cameraPivot.localRotation
+            : Quaternion.identity;
+
+        public void RotateTowards(Vector3 worldPosition)
+        {
+            var bodyDirection = worldPosition - transform.position;
+            bodyDirection.y = 0f;
+            if (bodyDirection.sqrMagnitude > Mathf.Epsilon)
+            {
+                var bodyRotation = Quaternion.LookRotation(bodyDirection.normalized, Vector3.up);
+                ApplyBodyRotation(bodyRotation);
+            }
+
+            if (cameraPivot == null)
+                return;
+
+            var cameraDirection = worldPosition - cameraPivot.position;
+            if (cameraDirection.sqrMagnitude <= Mathf.Epsilon)
+                return;
+
+            var flat = new Vector3(cameraDirection.x, 0f, cameraDirection.z);
+            var pitch = flat.sqrMagnitude > Mathf.Epsilon
+                ? -Mathf.Atan2(cameraDirection.y, flat.magnitude) * Mathf.Rad2Deg
+                : 0f;
+            cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+
+        public void RestoreOrientation(Quaternion bodyRotation, Quaternion cameraRotation)
+        {
+            ApplyBodyRotation(bodyRotation);
+            if (cameraPivot != null)
+            {
+                cameraPivot.localRotation = cameraRotation;
+            }
+        }
+
+        private void ApplyBodyRotation(Quaternion rotation)
+        {
+            transform.rotation = rotation;
+            _yaw = rotation.eulerAngles.y;
         }
     }
 }

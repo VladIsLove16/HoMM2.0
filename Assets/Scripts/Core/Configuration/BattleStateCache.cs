@@ -106,7 +106,7 @@ namespace Adventure.Infrastructure.State
 
         public static void CompleteBattle(bool playerWon)
         {
-            _pendingOutcome = playerWon ? BattleOutcome.Victory : BattleOutcome.Defeat;
+            _pendingOutcome = playerWon ? BattleOutcome.PlayerWon : BattleOutcome.PlayerLost;
             var targetNode = playerWon ? _pendingVictoryNodeId : _pendingDefeatNodeId ?? _pendingVictoryNodeId;
             _pendingResumeNodeId = targetNode;
         }

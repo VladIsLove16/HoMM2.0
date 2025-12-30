@@ -1,7 +1,7 @@
 using Adventure.Infrastructure.State;
 using Unity.Behavior;
 using UnityEngine;
-using static Adventure.Infrastructure.Dialog.NpcBattleAnimationController;
+using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
@@ -28,7 +28,7 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private EventChannel choiceEventChannel;
         [SerializeField] private EventChannel battleResultChannel;
         [Header("Presentation")]
-        [SerializeField] private NpcBattleAnimationController animationController;
+        [SerializeField] private NpcAnimationController animationController;
 
         private BlackboardVariable<Transform> _playerTransformVariable;
         private BlackboardVariable<float> _lookDistanceVariable;
@@ -118,7 +118,7 @@ namespace Adventure.Infrastructure.Dialog
 
         public void NotifyBattleOutcome(BattleOutcome outcome)
         {
-            if (outcome == BattleOutcome.Unknown)
+            if (outcome == default)
             {
                 return;
             }
@@ -130,7 +130,7 @@ namespace Adventure.Infrastructure.Dialog
             if (animationController == null)
                 return;
 
-            var animation = outcome == BattleOutcome.Victory
+            var animation = outcome == BattleOutcome.PlayerWon
                 ? NpcAnimationType.BattleLost
                 : NpcAnimationType.BattleWon;
             animationController.PlayAnimation(animation);

@@ -58,7 +58,7 @@ public sealed class AdventureCommander
 
         if (_inventoryModel == null)
         {
-            output.AppendError("Player inventory is not available in this scene.");
+            output.AppendError("Target inventory is not available in this scene.");
             return;
         }
 
@@ -72,7 +72,7 @@ public sealed class AdventureCommander
         var playerUnits = _inventoryModel.GetData();
         if (playerUnits == null || playerUnits.Count == 0)
         {
-            output.AppendError("Player army is empty.");
+            output.AppendError("Target army is empty.");
             return;
         }
 
@@ -103,7 +103,7 @@ public sealed class AdventureCommander
 
         if (_inventoryModel == null)
         {
-            output.AppendError("Player inventory is not available in this scene.");
+            output.AppendError("Target inventory is not available in this scene.");
             return;
         }
 
@@ -120,7 +120,7 @@ public sealed class AdventureCommander
         }
 
         _inventoryModel.Add(unitType, amount);
-        output.AppendLine($"Player received {amount} units of '{unitType}'.");
+        output.AppendLine($"Target received {amount} units of '{unitType}'.");
     }
 
     public void SpawnFungus(UnitType unitType, int count, IDeveloperConsoleOutput output)

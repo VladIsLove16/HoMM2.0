@@ -10,6 +10,8 @@ namespace Adventure.Infrastructure.Dialog
         BattleStart,
         BattleWon,
         BattleLost,
-        Bye
+        Bye,
+        StartWalkingWithRotation,
+        LookAround
     }
 }

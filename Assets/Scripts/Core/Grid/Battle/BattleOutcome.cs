@@ -5,5 +5,7 @@ using Unity.Behavior;
 public enum BattleOutcome
 {
     PlayerWon,
-	PlayerLost
+	PlayerLost,
+    Unknown,
+    Tie
 }

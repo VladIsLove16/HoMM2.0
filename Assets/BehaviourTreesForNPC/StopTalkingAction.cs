@@ -5,11 +5,9 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Patrol", story: "Patroling to [A] or [B]", category: "Action", id: "869fdfbeac2aa2df97e0ec444cf30c38")]
-public partial class PatrolAction : Action
+[NodeDescription(name: "StopTalking", story: "Npc stops talking with player", category: "Action", id: "3c358f89502b1528c54dad7d991b3552")]
+public partial class StopTalkingAction : Action
 {
-    [SerializeReference] public BlackboardVariable<Transform> A;
-    [SerializeReference] public BlackboardVariable<Transform> B;
 
     protected override Status OnStart()
     {

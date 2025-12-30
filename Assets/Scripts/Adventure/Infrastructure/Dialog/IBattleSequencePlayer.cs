@@ -1,5 +1,5 @@
 using System;
-using static Adventure.Infrastructure.Dialog.NpcBattleAnimationController;
+using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
