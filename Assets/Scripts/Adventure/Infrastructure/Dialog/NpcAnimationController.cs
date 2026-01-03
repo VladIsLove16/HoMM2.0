@@ -14,7 +14,7 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private string battleWonTrigger = "BattleWon";
         [SerializeField] private string battleLostTrigger = "BattleLost";
         [SerializeField] private string startWalkingWithRotation = "StartWalkingWithRotation";
-        [SerializeField] private string lookAroundTrigger = "LookAround";
+        [SerializeField] private string lookAroundTrigger = "LookingAround";
         [SerializeField] private string WalkingBool = "Walking";
         private Action _onSequenceComplete;
         private void Awake()

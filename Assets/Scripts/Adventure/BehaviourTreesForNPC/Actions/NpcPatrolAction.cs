@@ -30,7 +30,7 @@ public sealed partial class NpcPatrolAction : Action
     [SerializeReference] public BlackboardVariable<bool> AllowRotation;
     [SerializeReference] public BlackboardVariable<bool> AllowMovement;
     [SerializeReference] public BlackboardVariable<NpcAnimationController> Npc;
-    [SerializeReference] public BlackboardVariable<PatrolPhase> _phase;
+    [SerializeReference] public BlackboardVariable<NPCState> _phase;
     private readonly List<Transform> _patrolCandidates = new();
     private bool subs;
     private Transform _currentTarget;
@@ -49,7 +49,7 @@ public sealed partial class NpcPatrolAction : Action
         }
             
         EnsureTargetAssigned();
-        if (_phase.Value == PatrolPhase.None)
+        if (_phase.Value == NPCState.None)
         {
             EnterRotationPhase();
         }
@@ -65,15 +65,15 @@ public sealed partial class NpcPatrolAction : Action
 
         switch (_phase.Value)
         {
-            case PatrolPhase.RotatingToTarget:
+            case NPCState.RotatingToTarget:
                 UpdateRotationPhase();
                 if (IsRotationCompleted(Npc.Value.transform, _currentTarget))
                     EnterWalkingPhase();
                 break;
-            case PatrolPhase.Walking:
+            case NPCState.Walking:
                 UpdateWalkingPhase();
                 break;
-            case PatrolPhase.LookAround:
+            case NPCState.LookingAround:
                 UpdateWaitingPhase();
                 break;
         }
@@ -83,7 +83,7 @@ public sealed partial class NpcPatrolAction : Action
 
     protected override void OnEnd()
     {
-        //_phase.Value = PatrolPhase.None;
+        //_phase.Value = NPCState.None;
         //_waitTimer = 0f;
         //_slowdownTriggered = false;
 
@@ -107,7 +107,7 @@ public sealed partial class NpcPatrolAction : Action
     private void EnterRotationPhase()
     {
         TriggerAnimation(NpcAnimationType.StartWalkingWithRotation);
-        _phase.Value = PatrolPhase.RotatingToTarget;
+        _phase.Value = NPCState.RotatingToTarget;
         UpdateRotationPhase();
     }
 
@@ -153,7 +153,7 @@ public sealed partial class NpcPatrolAction : Action
 
     private void EnterWalkingPhase()
     {
-        _phase.Value = PatrolPhase.Walking;
+        _phase.Value = NPCState.Walking;
        
         _slowdownTriggered = false;
     }
@@ -191,7 +191,7 @@ public sealed partial class NpcPatrolAction : Action
         TriggerAnimation(NpcAnimationType.LookAround);
 
         _waitTimer = GetSwitchDelay();
-        _phase.Value = PatrolPhase.LookAround;
+        _phase.Value = NPCState.LookingAround;
     }
 
     private void UpdateWaitingPhase()
