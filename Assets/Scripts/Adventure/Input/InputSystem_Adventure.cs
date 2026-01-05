@@ -91,7 +91,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Touch;Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -102,7 +102,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -113,7 +113,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -124,18 +124,29 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Gamepad"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
-                    ""id"": ""cc39f786-8f0b-4731-8187-5b1d6618e212"",
+                    ""id"": ""3470f82a-52e6-4f6d-9819-79389958f852"",
+                    ""path"": ""<Joystick>/stick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Touch;Keyboard&Mouse;Gamepad;Joystick"",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e69c700a-196c-424e-b5c8-5b9e01efc24b"",
                     ""path"": ""<Gamepad>/leftStick"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Gamepad"",
+                    ""groups"": "";Touch;Joystick;Gamepad;Keyboard&Mouse"",
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -146,18 +157,29 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                     ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick"",
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""505c5b57-1f6d-4f20-8af9-600f8373c04c"",
+                    ""id"": ""f94c7fc5-8c46-41cd-831e-73f6b8e2991b"",
+                    ""path"": ""<Joystick>/stick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Touch;Gamepad;Keyboard&Mouse;Joystick"",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3a252f96-f780-4d79-a4bc-fc0f68a16fcb"",
                     ""path"": ""<Gamepad>/rightStick"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Gamepad"",
+                    ""groups"": "";Touch;Joystick;Gamepad;Keyboard&Mouse"",
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -219,8 +241,19 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
+                    ""id"": ""c4a93323-7d50-45b7-8eb3-8a859950461c"",
+                    ""path"": ""<NimbusGamepadHid>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""a4ce677b-5164-417c-98a2-530f35990a22"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
@@ -231,7 +264,7 @@ public partial class @InputSystem_Adventure: IInputActionCollection2, IDisposabl
                 {
                     ""name"": """",
                     ""id"": ""d2525262-b34d-4ff3-8afd-199d67d993c1"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""path"": ""<NimbusGamepadHid>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",

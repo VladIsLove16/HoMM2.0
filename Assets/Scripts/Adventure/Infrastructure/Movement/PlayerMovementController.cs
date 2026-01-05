@@ -11,6 +11,7 @@ namespace Adventure.Infrastructure.Movement
     [RequireComponent(typeof(CharacterController))]
     public sealed class PlayerMovementController : MonoBehaviour
     {
+        private const float VELOCITYTHRESHOLD = 0.0001f;
         [SerializeField] private MovementSettingsSO settings;
         [SerializeField] private Transform cameraPivot;
 
@@ -79,12 +80,12 @@ namespace Adventure.Infrastructure.Movement
             _yaw += movementInput.Look.x * settings.LookSensitivity;
 
             var command = _movementService.Tick(_state, movementInput, transform.rotation, deltaTime);
-            NewMethod(command);
+            Rotate(command);
 
             PerformMove(command.Velocity, deltaTime);
         }
 
-        private void NewMethod(MovementCommand command)
+        private void Rotate(MovementCommand command)
         {
             transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
             UpdateCameraPitch(command.DesiredPitch);
@@ -123,6 +124,10 @@ namespace Adventure.Infrastructure.Movement
 
         private void PerformMove(Vector3 velocity, float deltaTime)
         {
+            if(velocity.sqrMagnitude < VELOCITYTHRESHOLD)
+            {
+                return;
+            }
             var displacement = velocity * deltaTime;
             var collision = _controller.Move(displacement);
             if ((collision & CollisionFlags.Sides) != 0 && settings.StepHeight > 0f)
