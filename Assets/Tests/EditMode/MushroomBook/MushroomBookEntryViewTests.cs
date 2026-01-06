@@ -37,7 +37,7 @@ namespace Tests.EditMode.MushroomBook
                 new MushroomStatViewData(UnitStatType.Health, "10"),
                 new MushroomStatViewData(UnitStatType.MoveSpeed, "3")
             };
-            var viewData = new MushroomBookEntryViewModel(UnitType.Witch, "Witch", "Swift attacker", null, null, null, null, stats);
+            var viewData = new MushroomBookEntryViewModel(UnitType.Witch, "Witch", "Swift attacker", null, null, null, null, stats, null);
 
             harness.View.Bind(viewData);
 
@@ -68,7 +68,8 @@ namespace Tests.EditMode.MushroomBook
                 hovered,
                 humanized,
                 humanizedHovered,
-                Array.Empty<MushroomStatViewData>());
+                Array.Empty<MushroomStatViewData>(), 
+                null);
 
             harness.View.Bind(viewData);
 

@@ -84,7 +84,8 @@ public class MushroomBookView : MonoBehaviour
                     shared?.HoveredIcon,
                     shared?.HumanizedIcon,
                     shared?.HumanizedHoveredIcon,
-                    Array.Empty<MushroomStatViewData>()));
+                    Array.Empty<MushroomStatViewData>(),
+                    null));
             }
         }
 

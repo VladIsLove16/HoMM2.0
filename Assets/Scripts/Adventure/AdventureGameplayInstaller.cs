@@ -47,6 +47,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private DialogueUIView dialogueUIView;
     [SerializeField] private MushroomBookView mushroomBookView;
     [SerializeField] private AdventureGameSettingsView gameSettingsView;
+    [SerializeField] private Adventure.MushroomBook.MushroomDropPresenter mushroomDropPresenter;
     [SerializeField] private HelpMenu helpMenu;
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private AdventureDevTools devTools;
@@ -84,6 +85,13 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.Bind<MushroomBookView>().FromInstance(mushroomBookView).AsSingle();
         Container.Bind<DialogueUIView>().FromInstance(dialogueUIView).AsSingle();
         Container.Bind<AdventureGameSettingsView>().FromInstance(gameSettingsView).AsSingle().NonLazy();
+        if (mushroomDropPresenter != null)
+        {
+            Container.Bind<Adventure.MushroomBook.MushroomDropPresenter>()
+                .FromInstance(mushroomDropPresenter)
+                .AsSingle()
+                .NonLazy();
+        }
         Container.Bind<NpcDialogueTrigger>()
             .FromComponentsInHierarchy()
             .AsTransient();
@@ -108,6 +116,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
             Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
             Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
+            Container.Bind<IMushroomDropService>().To<MushroomDropService>().AsSingle();
 
             if (gridConfigurationGateway != null)
             {

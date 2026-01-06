@@ -31,7 +31,38 @@ namespace Adventure.Domain.Inventory
         {
             AddInternal(mushroomId, amount, true);
         }
+        public bool Remove(UnitType mushroomId)
+        {
+            return RemoveInternal(mushroomId, true);
+        }
 
+        public bool TryConsume(UnitType mushroomId)
+        {
+            return RemoveInternal(mushroomId, true);
+        }
+
+        private bool RemoveInternal(UnitType mushroomId, bool updateSnapshot)
+        {
+            if (!_items.TryGetValue(mushroomId, out var existing) || existing <= 0)
+                return false;
+
+            existing -= 1;
+            if (existing <= 0)
+            {
+                _items.Remove(mushroomId);
+            }
+            else
+            {
+                _items[mushroomId] = existing;
+            }
+
+            if (updateSnapshot)
+            {
+                BattleStateCache.StoreInventorySnapshot(GetData());
+            }
+
+            return true;
+        }
         private void AddInternal(UnitType mushroomId, int amount, bool updateSnapshot)
         {
             if (amount <= 0)

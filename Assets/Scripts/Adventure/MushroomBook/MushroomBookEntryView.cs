@@ -27,6 +27,7 @@ public class MushroomBookEntryView : MonoBehaviour, IEntryView
     [SerializeField] private Transform statsRoot;
     [SerializeField] private UnitSingleStatPanel statItemPrefab;
     [SerializeField] private StatIcons statIcons;
+    [SerializeField] private Button DropButton;
 
     private readonly Dictionary<UnitStatType, Sprite> _iconLookup = new();
     private MushroomBookEntryViewModel _viewData = MushroomBookEntryViewModel.Empty;
@@ -44,6 +45,20 @@ public class MushroomBookEntryView : MonoBehaviour, IEntryView
     {
         BuildIconLookup();
         SubscribeToPointerEvents();
+        SubscribeToButtonClicks();
+    }
+
+    private void SubscribeToButtonClicks()
+    {
+        if (DropButton != null)
+        {
+            DropButton.onClick.AddListener(OnDropClicked);
+        }
+    }
+
+    private void OnDropClicked()
+    {
+        _viewData?.Drop();
     }
 
     private void OnEnable()

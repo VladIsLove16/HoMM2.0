@@ -16,7 +16,8 @@ namespace Adventure.Presentation.Mushroom
             null,
             null,
             null,
-            Array.Empty<MushroomStatViewData>());
+            Array.Empty<MushroomStatViewData>(),
+            null);
 
         public MushroomBookEntryViewModel(
             UnitType unitType,
@@ -26,8 +27,10 @@ namespace Adventure.Presentation.Mushroom
             Sprite hoveredIcon,
             Sprite humanizedIcon,
             Sprite humanizedHoveredIcon,
-            IReadOnlyList<MushroomStatViewData> stats)
+            IReadOnlyList<MushroomStatViewData> stats,
+            MushroomBookViewModel mushroomBookViewModel)
         {
+            MushroomBookViewModel = mushroomBookViewModel;
             UnitType = unitType;
             DisplayName = displayName ?? string.Empty;
             Description = description ?? string.Empty;
@@ -38,6 +41,7 @@ namespace Adventure.Presentation.Mushroom
             Stats = stats ?? Array.Empty<MushroomStatViewData>();
         }
 
+        public MushroomBookViewModel MushroomBookViewModel { get; private set; }
         public UnitType UnitType { get; }
         public string DisplayName { get; }
         public int Amount { get; set; }
@@ -47,7 +51,18 @@ namespace Adventure.Presentation.Mushroom
         public Sprite HumanizedIcon { get; }
         public Sprite HumanizedHoveredIcon { get; }
         public IReadOnlyList<MushroomStatViewData> Stats { get; }
+        public bool Drop()
+        {
+            if (Amount <= 0 || MushroomBookViewModel == null)
+                return false;
 
+            var result = MushroomBookViewModel.Drop(UnitType);
+            if (result)
+            {
+                Amount = Mathf.Max(0, Amount - 1);
+            }
+            return result;
+        }
         public Sprite GetSprite(PresentationMode mode, bool hovered)
         {
             if (hovered)

@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b44ff350212a48d1952778a80b8ff164, type: 3}
+  m_Name: RainWeatherProfile
+  m_EditorClassIdentifier: 
+  weatherId: Default
+  description: 
+  sunIntensityMultiplier: 0.7
+  sunColorTint: {r: 1, g: 1, b: 1, a: 1}
+  ambientColorTint: {r: 0.8000001, g: 0.85, b: 0.9, a: 1}
+  overrideFog: 1
+  fogMode: 3
+  fogDensity: 0.16
+  fogColor: {r: 0.7, g: 0.8, b: 0.9, a: 1}
+  spawnPrecipitation: 1
+  precipitationPrefab: {fileID: 919132149155446097, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
+  precipitationOffset: {x: 0, y: 0, z: 0}
+  ambienceLoop: {fileID: 8300000, guid: e7303d9c489c8b841821f61a48a663cb, type: 3}
+  enterSfx: {fileID: 8300000, guid: c3018e3c42700a441b6e77a2b13c74f2, type: 3}
+  exitSfx: {fileID: 8300000, guid: d5a2957093c735f45b0d9bcc785943ef, type: 3}
+  ambienceVolume: 0.6
+  overrideWind: 0
+  windMain: 0.5
+  windTurbulence: 0.1
+  intensityOptions:
+  - label: Mushroom rain
+    strength: 0.05
+    probabilityWeight: 2
+  - label: Rainy
+    strength: 0.2
+    probabilityWeight: 5
+  - label: SuperHeavy
+    strength: 0.4
+    probabilityWeight: 5
+  - label: THUNDER
+    strength: 1
+    probabilityWeight: 1
+  spawnChanceOverDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.020276159
+      value: 0.14949526
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.7190751
+      value: 0.14920422
+      inSlope: -0.008117847
+      outSlope: -0.008117847
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.73089755
+      value: 0.14913888
+      inSlope: 0.0017788013
+      outSlope: 0.0017788013
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.7620672
+      value: 0.34938365
+      inSlope: -0.00086624915
+      outSlope: -0.00086624915
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.9114152
+      value: 0.34948078
+      inSlope: 0.0017620489
+      outSlope: 0.0017620489
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.819094
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.9838867
+      value: 0.14891052
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  wetnessDarken: 0.2
+  thunderSfx: {fileID: 8300000, guid: 778a6bd70f912354699e49f0f59a8b49, type: 3}
+  minThunderInterval: 6
+  maxThunderInterval: 18
+  minThunderChance: 0.05
+  maxThunderChance: 0.6

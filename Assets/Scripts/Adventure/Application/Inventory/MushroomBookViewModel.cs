@@ -1,4 +1,5 @@
 using Adventure.Domain.Inventory;
+using Adventure.Infrastructure.Inventory;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using CustomEventBus;
@@ -95,6 +96,10 @@ namespace Adventure.Presentation.Mushroom
             _isOpen.SetValueAndForceNotify(true);
         }
 
+        public event Action<UnitType> MushroomDropped;
+
+        public bool Drop(UnitType type) => DropInternal(type, notify: true);
+
         public void Collect(UnitType type)
         {
             if (_mushroomInventoryModel == null)
@@ -104,6 +109,25 @@ namespace Adventure.Presentation.Mushroom
             var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
             _gameplayEvents.Invoke(new MushroomCollectedCustomEvent(type.ToString(), totals));
             RebuildEntries();
+        }
+
+        private bool DropInternal(UnitType type, bool notify)
+        {
+            if (_mushroomInventoryModel == null)
+                return false;
+
+            if (!_mushroomInventoryModel.TryConsume(type))
+                return false;
+
+            var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
+            if (notify)
+            {
+                _gameplayEvents.Invoke(new MushroomThrownCustomEvent(type.ToString(), totals));
+            }
+
+            MushroomDropped?.Invoke(type);
+            RebuildEntries();
+            return true;
         }
 
         public void SetPageCapacity(int count)
@@ -182,7 +206,8 @@ namespace Adventure.Presentation.Mushroom
                 shared?.HoveredIcon,
                 shared?.HumanizedIcon,
                 shared?.HumanizedHoveredIcon,
-                BuildStats(statsForView));
+                BuildStats(statsForView),
+                this);
             vm.Amount = amount;
             return vm;
         }

@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc84cc3f147348b59b5bba9a804806a6, type: 3}
+  m_Name: FogWeatherProfile
+  m_EditorClassIdentifier: 
+  weatherId: Default
+  description: 
+  sunIntensityMultiplier: 1
+  sunColorTint: {r: 1, g: 1, b: 1, a: 1}
+  ambientColorTint: {r: 1, g: 1, b: 1, a: 1}
+  overrideFog: 1
+  fogMode: 3
+  fogDensity: 0.2
+  fogColor: {r: 0.7, g: 0.8, b: 0.9, a: 1}
+  spawnPrecipitation: 0
+  precipitationPrefab: {fileID: 0}
+  precipitationOffset: {x: 0, y: 0, z: 0}
+  ambienceLoop: {fileID: 8300000, guid: 61370b22da993604c9f499d42b8ede7c, type: 3}
+  enterSfx: {fileID: 8300000, guid: c3018e3c42700a441b6e77a2b13c74f2, type: 3}
+  exitSfx: {fileID: 8300000, guid: d5a2957093c735f45b0d9bcc785943ef, type: 3}
+  ambienceVolume: 0.6
+  overrideWind: 0
+  windMain: 0.5
+  windTurbulence: 0.1
+  intensityOptions:
+  - label: Weak
+    strength: 0.05
+    probabilityWeight: 3
+  - label: Normal
+    strength: 0.67
+    probabilityWeight: 5
+  - label: High
+    strength: 0.1
+    probabilityWeight: 2
+  spawnChanceOverDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.08847951
+      value: 0.10068318
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.20241083
+      value: 0.30105576
+      inSlope: 0.00070007506
+      outSlope: 0.00070007506
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.29896104
+      value: 0.29897726
+      inSlope: -0.0026269765
+      outSlope: -0.0026269765
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3570947
+      value: 0.10240265
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1.0313975
+      value: 0.10001403
+      inSlope: 0.0004093638
+      outSlope: 0.0004093638
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.42741674
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  visibilityMultiplier: 1

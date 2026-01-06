@@ -369,6 +369,7 @@ namespace Tests.EditMode.Input
                 Data = new GameSettingsSaveData();
             }
         }
+
     }
 }
 

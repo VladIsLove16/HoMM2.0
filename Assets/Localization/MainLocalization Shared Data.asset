@@ -148,6 +148,10 @@ MonoBehaviour:
     m_Key: MainMenu.PlayText
     m_Metadata:
       m_Items: []
+  - m_Id: 6982595734134784
+    m_Key: Book.ThrowAway
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -1,4 +1,5 @@
 using Adventure.Domain.Inventory;
+using Adventure.Infrastructure.Inventory;
 using Adventure.Integration.Battle;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
