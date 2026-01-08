@@ -50,7 +50,7 @@ namespace Tests.EditMode.MushroomBook
             Assert.That(harness.View.PageCapacity, Is.EqualTo(2));
             Assert.That(harness.View.Slots[0].Title, Is.EqualTo(entryNames[0]));
             Assert.That(harness.View.Slots[1].Title, Is.EqualTo(string.Empty));
-            Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("1"));
+            Assert.That(harness.View.FirstListNumberText, Is.EqualTo("1"));
             Assert.That(harness.View.Slots[0].StatItemCount, Is.GreaterThan(0));
         }
 
@@ -67,7 +67,7 @@ namespace Tests.EditMode.MushroomBook
 
             Assert.That(harness.View.Slots[0].Title, Is.EqualTo(string.Empty));
             Assert.That(harness.View.Slots[1].Title, Is.EqualTo(string.Empty));
-            Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("0"));
+            Assert.That(harness.View.FirstListNumberText, Is.EqualTo("0"));
         }
 
         [Test]
@@ -108,11 +108,29 @@ namespace Tests.EditMode.MushroomBook
             var viewModel = CreateViewModel(5, out _);
 
             harness.View.Construct(viewModel);
-            Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("1"));
+            Assert.That(harness.View.FirstListNumberText, Is.EqualTo("1"));
 
             viewModel.NextPage();
 
-            Assert.That(harness.View.CurrentPageLabel, Is.EqualTo("2"));
+            Assert.That(harness.View.FirstListNumberText, Is.EqualTo("2"));
+        }
+
+        [Test]
+        public void Collect_ShowsNewEntryInView()
+        {
+            var harness = MushroomBookViewHarness.Create(1, _createdObjects);
+            var catalog = TestDataFactory.CreateSingleAdventureMushroom(_createdObjects, UnitType.Witch, moveSpeed: 3, health: 10);
+            var inventory = new MushroomInventoryModel(new List<UnitStackData>());
+            var viewModel = new MushroomBookViewModel(inventory, catalog, new StubAchievementEventBus());
+            _disposables.Add(viewModel);
+
+            harness.View.Construct(viewModel);
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(string.Empty));
+
+            viewModel.Collect(UnitType.Witch);
+
+            Assert.That(harness.View.Slots[0].Title, Is.EqualTo(UnitType.Witch.ToString()));
+            Assert.That(harness.View.Slots[0].AmountText, Is.EqualTo("1"));
         }
 
         private MushroomBookViewModel CreateViewModel(int entryCount, out string[] entryNames)

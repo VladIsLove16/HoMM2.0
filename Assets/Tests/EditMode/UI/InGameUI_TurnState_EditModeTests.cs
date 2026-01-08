@@ -26,7 +26,7 @@ public class InGameUI_TurnState_EditModeTests
         SetField(ui, "_gameCommandExecutor", executor);
 
         var turnState = new StubTurnState();
-        ui.Init(turnState);
+        ui.Init(turnState,null);
 
         turnState.BattleStateProperty.Value = BattleState.inProgress;
         Assert.That(battleStateText.text, Is.EqualTo(BattleState.inProgress.ToString()));

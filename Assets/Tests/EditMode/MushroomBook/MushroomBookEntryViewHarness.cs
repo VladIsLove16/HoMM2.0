@@ -14,6 +14,7 @@ namespace Tests.EditMode.MushroomBook
         public Image Picture { get; }
         public TextMeshProUGUI NameText { get; }
         public TextMeshProUGUI DescriptionText { get; }
+        public TextMeshProUGUI AmountText { get; }
         public Transform StatsRoot { get; }
         public UnitSingleStatPanel StatItemPrefab { get; }
         public StatIcons StatIcons { get; }
@@ -24,6 +25,7 @@ namespace Tests.EditMode.MushroomBook
             Image picture,
             TextMeshProUGUI nameText,
             TextMeshProUGUI descriptionText,
+            TextMeshProUGUI amountText,
             Transform statsRoot,
             UnitSingleStatPanel statItemPrefab,
             StatIcons statIcons)
@@ -33,6 +35,7 @@ namespace Tests.EditMode.MushroomBook
             Picture = picture;
             NameText = nameText;
             DescriptionText = descriptionText;
+            AmountText = amountText;
             StatsRoot = statsRoot;
             StatItemPrefab = statItemPrefab;
             StatIcons = statIcons;
@@ -58,6 +61,7 @@ namespace Tests.EditMode.MushroomBook
 
             var nameText = MushroomBookTestHelpers.CreateText(tracker, $"{name}_Name", go.transform);
             var descriptionText = MushroomBookTestHelpers.CreateText(tracker, $"{name}_Description", go.transform);
+            var amountText = MushroomBookTestHelpers.CreateText(tracker, $"{name}_Amount", go.transform);
             var statsRoot = MushroomBookTestHelpers.CreateContainer(tracker, $"{name}_StatsRoot", go.transform);
 
             var statPrefab = new GameObject($"{name}_StatPrefab");
@@ -86,12 +90,13 @@ namespace Tests.EditMode.MushroomBook
             MushroomBookTestHelpers.RequireProperty(viewSO, "mushroomImageController").objectReferenceValue = controller;
             MushroomBookTestHelpers.RequireProperty(viewSO, "nameText").objectReferenceValue = nameText;
             MushroomBookTestHelpers.RequireProperty(viewSO, "descriptionText").objectReferenceValue = descriptionText;
+            MushroomBookTestHelpers.RequireProperty(viewSO, "amountText").objectReferenceValue = amountText;
             MushroomBookTestHelpers.RequireProperty(viewSO, "statsRoot").objectReferenceValue = statsRoot;
             MushroomBookTestHelpers.RequireProperty(viewSO, "statItemPrefab").objectReferenceValue = statPanel;
             MushroomBookTestHelpers.RequireProperty(viewSO, "statIcons").objectReferenceValue = statIcons;
             viewSO.ApplyModifiedProperties();
 
-            return new MushroomBookEntryViewHarness(view, controller, picture, nameText, descriptionText, statsRoot, statPanel, statIcons);
+            return new MushroomBookEntryViewHarness(view, controller, picture, nameText, descriptionText, amountText, statsRoot, statPanel, statIcons);
         }
     }
 }

@@ -116,7 +116,6 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
             Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
             Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
-            Container.Bind<IMushroomDropService>().To<MushroomDropService>().AsSingle();
 
             if (gridConfigurationGateway != null)
             {

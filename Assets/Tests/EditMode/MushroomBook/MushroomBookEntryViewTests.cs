@@ -95,5 +95,19 @@ namespace Tests.EditMode.MushroomBook
             Assert.That(harness.View.Description, Is.EqualTo(string.Empty));
             Assert.That(harness.View.StatItemCount, Is.EqualTo(0));
         }
+
+        [Test]
+        public void Bind_SetsAmountText()
+        {
+            var root = new GameObject("EntryRoot");
+            _createdObjects.Add(root);
+            var harness = MushroomBookEntryViewHarness.Create("EntryView", root.transform, _createdObjects);
+            var viewData = new MushroomBookEntryViewModel(UnitType.Witch, "Witch", "Swift attacker", null, null, null, null, Array.Empty<MushroomStatViewData>(), null);
+            viewData.Amount = 3;
+
+            harness.View.Bind(viewData);
+
+            Assert.That(harness.View.AmountText, Is.EqualTo("3"));
+        }
     }
 }

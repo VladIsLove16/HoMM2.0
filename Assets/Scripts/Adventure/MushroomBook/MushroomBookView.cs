@@ -15,14 +15,16 @@ public class MushroomBookView : MonoBehaviour
 {
     [Header("Blocked")]
     [SerializeField] private List<MushroomBookEntryView> pageSlots = new List<MushroomBookEntryView>();
-    [SerializeField] private TextMeshProUGUI pageNumberText;
+    [SerializeField] private TextMeshProUGUI firstListNumberText;
+    [SerializeField] private TextMeshProUGUI secondListNumberText;
     [SerializeField] private AdventureMushroomAssetMap testDefinitions;
     private MushroomBookViewModel _viewModel;
     private CompositeDisposable _subscriptions = new CompositeDisposable();
     private readonly ReactiveCollection<MushroomBookEntryViewModel> _reactiveEntries = new();
     public int PageCapacity => pageSlots?.Count ?? 0;
     public IReadOnlyList<MushroomBookEntryView> Slots => pageSlots ?? (IReadOnlyList<MushroomBookEntryView>)Array.Empty<MushroomBookEntryView>();
-    public string CurrentPageLabel => pageNumberText != null ? pageNumberText.text : string.Empty;
+    public string FirstListNumberText => firstListNumberText != null ? firstListNumberText.text : string.Empty;
+    public string SecondListNumberText => secondListNumberText != null ? secondListNumberText.text : string.Empty;
     [Inject]
     public void Construct(MushroomBookViewModel viewModel)
     {
@@ -32,7 +34,7 @@ public class MushroomBookView : MonoBehaviour
         if (_viewModel == null)
         {
             RenderEntries(null);
-            UpdatePageNumber(0, 0);
+            UpdateListNumbers(0, 0);
             return;
         }
 
@@ -61,7 +63,7 @@ public class MushroomBookView : MonoBehaviour
             .AddTo(_subscriptions);
 
         RefreshPageNumber();
-        ToglePresMode();
+        ToglePresentationMode();
     }
 
     [Button("Render Test Page")]
@@ -90,12 +92,12 @@ public class MushroomBookView : MonoBehaviour
         }
 
         RenderEntries(_reactiveEntries);
-        UpdatePageNumber(0, 1);
+        UpdateListNumbers(0, 1);
 
         Debug.Log($"[MushroomBookView] Rendered test entries.");
     }
-    [Button("ToglePresMode")]
-    private void ToglePresMode()
+    [Button("ToglePresentationMode")]
+    private void ToglePresentationMode()
     {
        foreach( var slot in pageSlots)
         {
@@ -126,16 +128,21 @@ public class MushroomBookView : MonoBehaviour
         {
             var slot = pageSlots[i];
             if (slot == null)
-                continue;
+                throw new IndexOutOfRangeException();
+
+            slot.SetSlotIndex(i);
+            slot.SwapRequested = HandleSwapRequested;
 
             if (i < count && entries != null)
             {
                 slot.Bind(entries[i]);
                 slot.SetPresentationMode(mode);
+                slot.Show();
             }
             else
             {
                 slot.Bind(null);
+                slot.Hide();
             }
         }
     }
@@ -153,7 +160,7 @@ public class MushroomBookView : MonoBehaviour
 
     private void OnBookStateChanged(bool isOpen)
     {
-        Debug.Log("new book state" +  isOpen);
+        Debug.Log("new book open state" +  isOpen);
         gameObject.SetActive(isOpen);
         RenderEntries(_viewModel.CurrentPageEntries);
     }
@@ -161,19 +168,22 @@ public class MushroomBookView : MonoBehaviour
     {
         if (_viewModel == null)
         {
-            UpdatePageNumber(0, 0);
+            UpdateListNumbers(0, 0);
             return;
         }
 
-        UpdatePageNumber(_viewModel.CurrentPage.Value, _viewModel.TotalPages);
+        UpdateListNumbers(_viewModel.CurrentPage.Value, _viewModel.TotalPages);
     }
 
-    private void UpdatePageNumber(int currentPage, int totalPages)
+    private void UpdateListNumbers(int currentPage, int totalPages)
     {
-        if (pageNumberText == null)
+        if (firstListNumberText == null)
+            return;
+        if (secondListNumberText == null)
             return;
 
-        pageNumberText.text = totalPages > 0 ? (currentPage + 1).ToString() : "0";
+        firstListNumberText.text = totalPages > 0 ? (currentPage*2).ToString() : "0";
+        secondListNumberText.text = totalPages > 0 ? (currentPage*2 + 1).ToString() : "1";
     }
 
     private void DisposeSubscriptions()
@@ -188,5 +198,14 @@ public class MushroomBookView : MonoBehaviour
     private void OnDestroy()
     {
         DisposeSubscriptions();
+    }
+
+    private void HandleSwapRequested(int fromIndex, int toIndex)
+    {
+        if (_viewModel == null)
+            return;
+
+        _viewModel.SwapCurrentPageEntries(fromIndex, toIndex);
+        RenderEntries(_viewModel.CurrentPageEntries);
     }
 }

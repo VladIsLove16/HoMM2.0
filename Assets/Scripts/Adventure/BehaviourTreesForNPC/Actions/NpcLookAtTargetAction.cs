@@ -36,10 +36,8 @@ public sealed partial class NpcLookAtTargetAction : Action
             return Status.Success;
         }
 
-        if (RestrictToYaw == null || RestrictToYaw.Value)
-        {
-            direction.y = 0f;
-        }
+        // Always restrict rotation to yaw (no pitch/roll), regardless of RestrictToYaw flag.
+        direction.y = 0f;
 
         var desiredRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
         var speed = Mathf.Max(1f, RotationSpeed != null ? RotationSpeed.Value : 360f);

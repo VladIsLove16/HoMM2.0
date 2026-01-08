@@ -1,5 +1,6 @@
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Inventory;
+using Adventure.Infrastructure.Movement;
 using Adventure.Presentation.Mushroom;
 using UnityEngine;
 using Zenject;
@@ -13,13 +14,19 @@ namespace Adventure.MushroomBook
     public sealed class MushroomDropPresenter : MonoBehaviour
     {
         private MushroomBookViewModel _viewModel;
-        private IMushroomDropService _dropService;
+        private AdventureMushroomAssetMap _assetMap;
+        private PlayerMovementController _player;
+       [SerializeField] private LayerMask _layerMask;
 
+        private readonly Vector3 _spawnOffset = new Vector3(0f, 0.05f, 0f);
+        private const float GroundRayDistance = 5f;
         [Inject]
-        public void Construct(MushroomBookViewModel viewModel, IMushroomDropService dropService)
+            
+        public void Construct(AdventureMushroomAssetMap assetMap, MushroomBookViewModel viewModel,PlayerMovementController playerController)
         {
             _viewModel = viewModel;
-            _dropService = dropService;
+            _assetMap= assetMap;
+            _player = playerController;
 
             if (_viewModel != null)
             {
@@ -37,7 +44,48 @@ namespace Adventure.MushroomBook
 
         private void OnMushroomDropped(UnitType type)
         {
-            _dropService?.TrySpawn(type);
+            TrySpawn(type);
+        }
+
+        public bool TrySpawn(UnitType type)
+        {
+            if (_assetMap == null || !_assetMap.TryGetAsset(type, out var prefab) || prefab == null)
+                return false;
+
+            var spawnPosition = ResolveSpawnPosition(prefab.transform.position);
+            var spawnRotation = prefab.transform.rotation;
+
+            var instance = Object.Instantiate(prefab, spawnPosition, spawnRotation);
+            //_container?.InjectGameObject(instance.gameObject);
+            instance.Configure(type, true);
+            instance.Construct(_viewModel);
+
+            var growth = instance.GetComponent<MushroomGrowthAnimator>();
+            if (growth == null)
+            {
+                growth = instance.gameObject.AddComponent<MushroomGrowthAnimator>();
+            }
+            growth.Play();
+
+            return true;
+        }
+
+        private Vector3 ResolveSpawnPosition(Vector3 fallback)
+        {
+            if (_player == null)
+            {
+                Debug.LogError("playerController not setted");
+                return fallback + _spawnOffset;
+
+            }
+
+            var origin = _player.transform.position + _spawnOffset;
+            var rayOrigin = origin + Vector3.up * 1f;
+            if (Physics.Raycast(rayOrigin, Vector3.down, out var hit, GroundRayDistance, _layerMask.value, QueryTriggerInteraction.Ignore))
+            {
+                origin = hit.point + _spawnOffset;
+            }
+            return origin;
         }
     }
 }

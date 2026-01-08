@@ -14,4 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerUnits:
   - UnitType: 6
-    Amount: 5
+    Amount: 2
+  - UnitType: 0
+    Amount: 2
+  - UnitType: 1
+    Amount: 2
+  - UnitType: 3
+    Amount: 2
+  - UnitType: 5
+    Amount: 2

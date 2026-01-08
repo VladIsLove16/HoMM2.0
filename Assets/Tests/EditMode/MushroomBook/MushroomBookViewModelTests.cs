@@ -121,6 +121,32 @@ namespace Tests.EditMode.MushroomBook
             }
         }
 
+        [Test]
+        public void Collect_RefreshesCurrentPageEntriesAndAmount()
+        {
+            var catalog = TestDataFactory.CreateSingleAdventureMushroom(_createdAssets, UnitType.Witch, moveSpeed: 3, health: 10);
+            var inventory = new MushroomInventoryModel(new List<UnitStackData>());
+            var bus = new StubAchievementEventBus();
+            var viewModel = new MushroomBookViewModel(inventory, catalog, bus);
+
+            try
+            {
+                Assert.That(viewModel.CurrentPageEntries.Count, Is.EqualTo(0));
+
+                viewModel.Collect(UnitType.Witch);
+                Assert.That(viewModel.CurrentPageEntries.Count, Is.EqualTo(1));
+                Assert.That(viewModel.CurrentPageEntries[0].Amount, Is.EqualTo(1));
+
+                viewModel.Collect(UnitType.Witch);
+                Assert.That(viewModel.CurrentPageEntries.Count, Is.EqualTo(1));
+                Assert.That(viewModel.CurrentPageEntries[0].Amount, Is.EqualTo(2));
+            }
+            finally
+            {
+                viewModel.Dispose();
+            }
+        }
+
         private MushroomBookViewModel CreateViewModel(
             int entryCount,
             out MushroomInventoryModel inventory,

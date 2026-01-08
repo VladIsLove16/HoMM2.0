@@ -109,6 +109,7 @@ namespace Adventure.Presentation.Mushroom
             var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
             _gameplayEvents.Invoke(new MushroomCollectedCustomEvent(type.ToString(), totals));
             RebuildEntries();
+            UpdateCurrentPage();
         }
 
         private bool DropInternal(UnitType type, bool notify)
@@ -122,11 +123,12 @@ namespace Adventure.Presentation.Mushroom
             var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
             if (notify)
             {
-                _gameplayEvents.Invoke(new MushroomThrownCustomEvent(type.ToString(), totals));
+                _gameplayEvents.Invoke(new MushroomDropedEvent(type.ToString(), totals));
             }
 
             MushroomDropped?.Invoke(type);
             RebuildEntries();
+            UpdateCurrentPage();
             return true;
         }
 
@@ -161,6 +163,20 @@ namespace Adventure.Presentation.Mushroom
             _presentationMode.Value = mode;
         }
 
+        public void SwapCurrentPageEntries(int slotA, int slotB)
+        {
+            if (slotA == slotB)
+                return;
+            if (slotA < 0 || slotB < 0)
+                return;
+            var start = _currentPageIndex.Value * _entriesPerPage;
+            if (start + slotA >= _allEntries.Count || start + slotB >= _allEntries.Count)
+                return;
+
+            (_allEntries[start + slotA], _allEntries[start + slotB]) = (_allEntries[start + slotB], _allEntries[start + slotA]);
+            UpdateCurrentPage();
+        }
+
         private void RebuildEntries()
         {
             _allEntries.Clear();
@@ -177,6 +193,12 @@ namespace Adventure.Presentation.Mushroom
         private void UpdateCurrentPage()
         {
             _currentPageEntries.Clear();
+
+            var maxPageIndex = Mathf.Max(0, TotalPages - 1);
+            if (_currentPageIndex.Value > maxPageIndex)
+            {
+                _currentPageIndex.Value = maxPageIndex;
+            }
 
             if (TotalPages == 0)
                 return;

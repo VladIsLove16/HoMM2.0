@@ -1,3 +1,5 @@
+using CustomEventBus;
+using GridGame.UI;
 using System;
 using TMPro;
 using UniRx;
@@ -10,6 +12,7 @@ public class InGameUI : MonoBehaviour
     private ITurnStateViewModel _turnState;
     [Inject] private IGameCommandExecutor _gameCommandExecutor;
     [SerializeField] private Button StartBattle;
+    [SerializeField] ForceDefeatAndReturnButton LoseBattle;
     [SerializeField] private TextMeshProUGUI turnNumber;
     [SerializeField] private Animator turnNumberAnimator;
     [SerializeField] private Animator battleStateAnimator;
@@ -17,14 +20,17 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI isMyTurnText;
     private int currentTurn;
     private readonly CompositeDisposable _disposables = new();
+    private EventBus eventBus;
 
     [Inject]
-    public void Init(ITurnStateViewModel turnState)
+    public void Init(ITurnStateViewModel turnState,EventBus eventBus)
     {
         _turnState = turnState;
         _turnState.ActiveObject.Subscribe(OnUnitTurnStarted).AddTo(_disposables);
         _turnState.BattleStateProperty.Subscribe(OnTurnStateChanged).AddTo(_disposables);
         StartBattle.onClick.AddListener(() => _gameCommandExecutor.StartBattle());
+        this.eventBus = eventBus;
+        LoseBattle.Construct(eventBus);
     }
 
     private void OnTurnStateChanged(BattleState state)
