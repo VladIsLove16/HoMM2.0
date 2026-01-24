@@ -5975,7 +5975,7 @@ PrefabInstance:
       objectReference: {fileID: 47613583}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: gridRenderStrategy
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: perCellGridRenderer
