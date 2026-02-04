@@ -101,10 +101,16 @@ public class CellView : MonoBehaviour, IGameViewObject
     {
         private static readonly Dictionary<CellState, int> Priorities = new()
         {
-            { CellState.selected, 500 },
+            { CellState.activeUnit, 500 },
+            { CellState.attackTargetBlocked, 460 },
+            { CellState.attackTarget, 450 },
+            { CellState.enemyCell, 320 },
+            { CellState.hoveredEnemy, 420 },
             { CellState.reachableCell, 400 },
-            { CellState.enemyReachableCell, 300 },
+            { CellState.enemyReachableCell, 410 },
             { CellState.hovered, 250 },
+            { CellState.routeEndAccessible, 220 },
+            { CellState.routeEndBlocked, 210 },
             { CellState.accessibleRoutePoint, 200 },
             { CellState.inaccessibleRoutePoint, 150 },
             { CellState.normal, 0 }
@@ -212,14 +218,30 @@ public class CellView : MonoBehaviour, IGameViewObject
             if (route == null)
                 return;
 
-            bool show = states.Contains(CellState.accessibleRoutePoint) || states.Contains(CellState.inaccessibleRoutePoint);
+            bool show = states.Contains(CellState.accessibleRoutePoint)
+                        || states.Contains(CellState.inaccessibleRoutePoint)
+                        || states.Contains(CellState.routeEndAccessible)
+                        || states.Contains(CellState.routeEndBlocked)
+                        || states.Contains(CellState.enemyCell);
             route.gameObject.SetActive(show);
 
             if (!show)
                 return;
 
             var materials = _materialsProvider();
-            if (states.Contains(CellState.accessibleRoutePoint) && materials.TryGet(CellState.accessibleRoutePoint, out var accessible))
+            if (states.Contains(CellState.routeEndAccessible) && materials.TryGet(CellState.routeEndAccessible, out var endAccessible))
+            {
+                route.material = endAccessible;
+            }
+            else if (states.Contains(CellState.routeEndBlocked) && materials.TryGet(CellState.routeEndBlocked, out var endBlocked))
+            {
+                route.material = endBlocked;
+            }
+            else if (states.Contains(CellState.enemyCell) && materials.TryGet(CellState.enemyCell, out var enemyCell))
+            {
+                route.material = enemyCell;
+            }
+            else if (states.Contains(CellState.accessibleRoutePoint) && materials.TryGet(CellState.accessibleRoutePoint, out var accessible))
             {
                 route.material = accessible;
             }
@@ -236,9 +258,12 @@ public class CellView : MonoBehaviour, IGameViewObject
                 return;
 
             var materials = _materialsProvider();
-            if (TryApply(renderer, materials, states, CellState.selected)) return;
-            if (TryApply(renderer, materials, states, CellState.reachableCell)) return;
+            if (TryApply(renderer, materials, states, CellState.activeUnit)) return;
+            if (TryApply(renderer, materials, states, CellState.attackTargetBlocked)) return;
+            if (TryApply(renderer, materials, states, CellState.attackTarget)) return;
+            if (TryApply(renderer, materials, states, CellState.hoveredEnemy)) return;
             if (TryApply(renderer, materials, states, CellState.enemyReachableCell)) return;
+            if (TryApply(renderer, materials, states, CellState.reachableCell)) return;
             if (materials.TryGet(CellState.normal, out var normal))
             {
                 renderer.material = normal;

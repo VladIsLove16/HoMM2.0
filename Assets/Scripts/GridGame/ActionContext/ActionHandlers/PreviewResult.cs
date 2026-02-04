@@ -19,6 +19,11 @@ public class PreviewResult
         _data[state].AddRange(cells);
     }
 
+    public void Set(CellState state, IEnumerable<Vector2Int> cells)
+    {
+        _data[state] = cells == null ? new List<Vector2Int>() : new List<Vector2Int>(cells);
+    }
+
     public void Add(Dictionary<CellState, List<Vector2Int>> dict)
     {
         foreach(var cell in dict)

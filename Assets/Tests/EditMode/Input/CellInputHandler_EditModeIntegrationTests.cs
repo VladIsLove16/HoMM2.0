@@ -49,7 +49,7 @@ namespace Tests.EditMode.Input
             {
                 MakeMaterial(CellState.normal, "normal"),
                 MakeMaterial(CellState.hovered, "hovered"),
-                MakeMaterial(CellState.selected, "selected"),
+                MakeMaterial(CellState.activeUnit, "selected"),
                 MakeMaterial(CellState.reachableCell, "reachable"),
             };
             TestGridRenderSettings gridRenderSettings = new TestGridRenderSettings();
@@ -111,7 +111,7 @@ namespace Tests.EditMode.Input
                 gameView.TestHandleCellSelected = pair =>
                 {
                     var selectPreview = new PreviewResult();
-                    selectPreview.Add(CellState.selected, new List<Vector2Int> { pair.Value });
+                    selectPreview.Add(CellState.activeUnit, new List<Vector2Int> { pair.Value });
                     _gridVM.RaisePreview(selectPreview);
                 };
 
@@ -121,7 +121,7 @@ namespace Tests.EditMode.Input
 
                 gameView.HandleGameViewObjectSelected(targetCell);
                 var statesAfterSelect = targetCell.GetStates();
-                Assert.That(System.Array.Exists(statesAfterSelect, s => s == CellState.selected));
+                Assert.That(System.Array.Exists(statesAfterSelect, s => s == CellState.activeUnit));
             }
             finally
             {

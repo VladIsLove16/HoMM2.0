@@ -20,6 +20,10 @@ public struct UnitStatsInline
     public int Defense;
     public int MoveSpeed;
     public int AttackRange;
+    /// <summary>
+    /// null = использовать значение по умолчанию (true).
+    /// </summary>
+    public bool? AllowAdjacentRanged;
     public bool CanFly;
 
     public bool? IsSkeleton;

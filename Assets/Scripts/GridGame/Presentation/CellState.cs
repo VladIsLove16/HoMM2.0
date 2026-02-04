@@ -3,12 +3,15 @@
     reachableCell,
     accessibleRoutePoint,
     inaccessibleRoutePoint,
-    selected,
+    routeEndAccessible,
+    routeEndBlocked,
+    activeUnit,
     hovered,
     normal,
     None,
     attackTarget,
-    hoveredMyTurn,
-    hoveredNotMyTurn,
-    enemyReachableCell
+    attackTargetBlocked,
+    enemyCell,
+    enemyReachableCell,
+    hoveredEnemy
 }

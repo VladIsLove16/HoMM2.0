@@ -30,9 +30,12 @@ namespace Tests.EditMode.Actions
             var resolver = new ActionResolver(_model, _movementSystem);
             var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 0), SpellType.None, default);
 
-            var result = resolver.Resolve(ctx, out var handler);
+            var result = resolver.TryResolvePlan(ctx, out var plan);
 
-            Assert.That(result, Is.True, "Должен быть найден обработчик для простого перемещения");
+            Assert.That(result, Is.True, "Должен быть найден план для простого перемещения");
+            Assert.That(plan, Is.Not.EqualTo(ActionPlan.None), "План не должен быть None");
+
+            var handler = resolver.Resolve(plan.ActionType, plan.Context);
             Assert.That(handler, Is.Not.Null, "Обработчик не должен быть null");
             Assert.That(handler, Is.TypeOf<MoveActionHandler>(), "Ожидается MoveActionHandler");
         }
@@ -44,10 +47,10 @@ namespace Tests.EditMode.Actions
             // Некорректный контекст: перемещение в ту же клетку
             var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(0, 0), default, default);
 
-            var result = resolver.Resolve(ctx, out var handler);
+            var result = resolver.TryResolvePlan(ctx, out var plan);
 
-            Assert.That(result, Is.False, "Не должен быть найден обработчик для некорректного действия");
-            Assert.That(handler, Is.Null, "Обработчик должен быть null");
+            Assert.That(result, Is.False, "Не должен быть найден план для некорректного действия");
+            Assert.That(plan, Is.EqualTo(ActionPlan.None), "План должен быть None");
         }
     }
     public class MockUnitStatsProviderInline : IUnitStatsProvider

@@ -24,9 +24,18 @@ public class PerCellGridRenderer : MonoBehaviour, IGridCellRenderer
 
     private static readonly HashSet<CellState> StatesHiddenWhileLocked = new()
     {
+        CellState.activeUnit,
         CellState.reachableCell,
+        CellState.enemyReachableCell,
+        CellState.hovered,
+        CellState.hoveredEnemy,
+        CellState.attackTarget,
+        CellState.attackTargetBlocked,
+        CellState.enemyCell,
         CellState.accessibleRoutePoint,
-        CellState.inaccessibleRoutePoint
+        CellState.inaccessibleRoutePoint,
+        CellState.routeEndAccessible,
+        CellState.routeEndBlocked
     };
 
     [Inject]

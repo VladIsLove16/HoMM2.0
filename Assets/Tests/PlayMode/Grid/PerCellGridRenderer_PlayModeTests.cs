@@ -82,12 +82,12 @@
 //            yield return null;
 
 //            var preview = new PreviewResult();
-//            preview.Add(CellState.selected, new[] { new Vector2Int(1, 0) });
+//            preview.Add(CellState.activeUnit, new[] { new Vector2Int(1, 0) });
 //            vm.RaisePreview(preview);
 //            yield return null;
 
 //            var states = fixture.Renderer.GetCellStates(new Vector2Int(1, 0));
-//            Assert.That(states, Does.Contain(CellState.selected));
+//            Assert.That(states, Does.Contain(CellState.activeUnit));
 //        }
 //        [UnityTest]
 //        public void PreviewChanged_HoverStateActivatesHoverRenderer()
@@ -166,7 +166,7 @@
 //            {
 //                new CellMaterial( CellState.normal,  new Material(shader) { name = "Normal" } ),
 //                new CellMaterial( CellState.hovered,new Material(shader) { name = "Hover" } ),
-//                new CellMaterial( CellState.selected, new Material(shader) { name = "Selected" } ),
+//                new CellMaterial( CellState.activeUnit, new Material(shader) { name = "Selected" } ),
 //                new CellMaterial( CellState.reachableCell,new Material(shader) { name = "Reachable" } )
 //            };
 //        }

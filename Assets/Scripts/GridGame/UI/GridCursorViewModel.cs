@@ -20,9 +20,9 @@ public class GridCursorViewModel : ICursorViewModel, IDisposable
         _actionResolver.ActionNotResolved += OnActionNotResolved;
     }
 
-    private void OnActionPreviewChanged((IActionHandler, ActionContext) tuple)
+    private void OnActionPreviewChanged(ActionPlan plan)
     {
-        var state = GetCursorStateByActionHandler(tuple.Item1);
+        var state = GetCursorStateByActionType(plan.ActionType);
         _cursorState.SetValueAndForceNotify(state);
     }
 
@@ -45,9 +45,9 @@ public class GridCursorViewModel : ICursorViewModel, IDisposable
         _cursorState.SetValueAndForceNotify(CursorVisualState.NotAvailable);
     }
 
-    private CursorVisualState GetCursorStateByActionHandler(IActionHandler actionHandler)
+    private CursorVisualState GetCursorStateByActionType(ActionType actionType)
     {
-        switch (actionHandler.ActionType)
+        switch (actionType)
         {
             case ActionType.Move:
                 return CursorVisualState.Move;

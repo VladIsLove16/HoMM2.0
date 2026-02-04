@@ -18,28 +18,34 @@ public class ConsoleGridState
 
     private static readonly CellState[] _statePriority =
     {
-        CellState.selected,
+        CellState.activeUnit,
+        CellState.attackTargetBlocked,
         CellState.attackTarget,
+        CellState.enemyCell,
         CellState.hovered,
-        CellState.hoveredMyTurn,
-        CellState.hoveredNotMyTurn,
-        CellState.reachableCell,
+        CellState.hoveredEnemy,
         CellState.enemyReachableCell,
+        CellState.reachableCell,
         CellState.accessibleRoutePoint,
-        CellState.inaccessibleRoutePoint
+        CellState.inaccessibleRoutePoint,
+        CellState.routeEndAccessible,
+        CellState.routeEndBlocked
     };
 
     private static readonly Dictionary<CellState, char> _stateMarkers = new()
     {
-        { CellState.selected, 'S' },
+        { CellState.activeUnit, 'S' },
+        { CellState.attackTargetBlocked, 'X' },
         { CellState.attackTarget, '!' },
+        { CellState.enemyCell, 'U' },
         { CellState.hovered, 'H' },
-        { CellState.hoveredMyTurn, 'M' },
-        { CellState.hoveredNotMyTurn, 'N' },
+        { CellState.hoveredEnemy, 'h' },
         { CellState.reachableCell, 'R' },
         { CellState.enemyReachableCell, 'E' },
         { CellState.accessibleRoutePoint, 'a' },
-        { CellState.inaccessibleRoutePoint, 'x' }
+        { CellState.inaccessibleRoutePoint, 'x' },
+        { CellState.routeEndAccessible, 'A' },
+        { CellState.routeEndBlocked, 'B' }
     };
 
     public void Initialize(int width, int height)

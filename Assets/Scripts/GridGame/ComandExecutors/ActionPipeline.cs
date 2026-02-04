@@ -13,7 +13,13 @@ public class ActionPipeline
 
     public bool Execute(ActionType type, ActionContext ctx)
     {
-        var handler = _resolver.Resolve(type, ctx);
+        if (!_resolver.TryResolvePlan(ctx, out var plan) || plan.ActionType != type)
+        {
+            Debug.LogWarning($"[Pipeline] No valid action plan for {type} and ctx {ctx}");
+            return false;
+        }
+
+        var handler = _resolver.Resolve(plan.ActionType, plan.Context);
         Debug.Log("ActionPipeline  " + type);
         if (handler == null)
         {
@@ -21,13 +27,7 @@ public class ActionPipeline
             return false;
         }
 
-        if (!handler.CanExecute(ctx))
-        {
-            Debug.LogWarning($"[Pipeline] Handler cannot execute {type} for ctx " + ctx.ToString());
-            return false;
-        }
-
-        handler.Execute(ctx);
+        handler.Execute(plan.Context);
         _turnSystem.EndTurn();
         return true;
     }

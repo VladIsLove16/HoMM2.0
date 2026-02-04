@@ -19,22 +19,28 @@ MonoBehaviour:
   - cellState: 0
     material: {fileID: 2100000, guid: 8d59494cf0bd6664f8bbab2f50e22a22, type: 2}
   - cellState: 1
-    material: {fileID: 2100000, guid: 8d59494cf0bd6664f8bbab2f50e22a22, type: 2}
+    material: {fileID: 2100000, guid: 386163d3d6564f4459c06caa8c3e80c5, type: 2}
   - cellState: 2
-    material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+    material: {fileID: 2100000, guid: 7dc22b679722b7948a13d43f383b9371, type: 2}
   - cellState: 3
-    material: {fileID: 2100000, guid: f12defa7b0f54b4438a8b031dfeec605, type: 2}
+    material: {fileID: 2100000, guid: 17fbb81dbd4c8b243bde5bf84a76f38b, type: 2}
   - cellState: 4
-    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+    material: {fileID: 2100000, guid: 7dc22b679722b7948a13d43f383b9371, type: 2}
   - cellState: 5
-    material: {fileID: 1165080902808173757, guid: 1e6b87be9aad804418f185c06838329a, type: 3}
+    material: {fileID: 2100000, guid: f12defa7b0f54b4438a8b031dfeec605, type: 2}
   - cellState: 6
-    material: {fileID: 2100000, guid: 60b6b9410963f4c4f9df4f80b7b08571, type: 2}
+    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
   - cellState: 7
-    material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
+    material: {fileID: 2100000, guid: 26161d04c2a3cfc4ca2d0043ab602a4a, type: 2}
   - cellState: 8
-    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+    material: {fileID: 2100000, guid: 26161d04c2a3cfc4ca2d0043ab602a4a, type: 2}
   - cellState: 9
-    material: {fileID: 2100000, guid: 46eca05edfa82cd4bb9af693c1279483, type: 2}
+    material: {fileID: 2100000, guid: e11a515dd24794845b03fea27d66df86, type: 2}
   - cellState: 10
+    material: {fileID: 2100000, guid: 2c3b4fb753d02b24cafab543ef15e2c4, type: 2}
+  - cellState: 11
+    material: {fileID: 2100000, guid: 0a302be7931b16043800b78e8faf30e2, type: 2}
+  - cellState: 12
     material: {fileID: 2100000, guid: 8531f0db72cb14d45b68cafc0a668240, type: 2}
+  - cellState: 13
+    material: {fileID: 2100000, guid: 0a302be7931b16043800b78e8faf30e2, type: 2}

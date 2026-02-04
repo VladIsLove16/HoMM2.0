@@ -4152,10 +4152,15 @@ MonoBehaviour:
   colliderThickness: 0.05
   highlightYOffset: 0.02
   routeInset: 0.15
+  routeLineThickness: 0.06
   borderInset: 0.08
   borderThickness: 0.08
+  targetInset: 0.2
+  routeEndInset: 0.2
   editorRenderSettings: {fileID: 11400000, guid: 8d1b105e239017443b2d9bfa3c827b50, type: 2}
-  fallbackHoverMaterial: {fileID: 0}
+  fallbackHoverMaterial: {fileID: 2100000, guid: 33898210659debf4cab578d2673590ac, type: 2}
+  routePulseSpeed: 2
+  routePulseAmplitude: 0.25
 --- !u!23 &1807175103
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5975,7 +5980,7 @@ PrefabInstance:
       objectReference: {fileID: 47613583}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: gridRenderStrategy
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8076826114984115153, guid: ab53309ee62d3da44ba8dc8ec258da6f, type: 3}
       propertyPath: perCellGridRenderer

@@ -26,6 +26,7 @@ public class UnitStatsSource
             Defense = Inline.Defense,
             MoveSpeed = Inline.MoveSpeed,
             AttackRange = Inline.AttackRange,
+            AllowAdjacentRanged = Inline.AllowAdjacentRanged ?? true,
             CanFly = Inline.CanFly,
             InvulnerableEffects = Inline.InvulnerableEffects != null ? new List<StatusEffectType>(Inline.InvulnerableEffects) : new List<StatusEffectType>()
         };

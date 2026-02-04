@@ -43,6 +43,11 @@ public class MoveActionHandler : IActionHandler
             Debug.LogError("Cant execute MoveActionHandler " + ctx.ToString());
             return;
         }
+        if (!_gameModel.GetCell(ctx.TargetCell).IsEmpty)
+        {
+            Debug.LogError("Cant execute MoveActionHandler: target cell occupied " + ctx.ToString());
+            return;
+        }
         Debug.Log("Execute moveHandler ");
         _gameModel.MoveObject(moveable, accessiblemoveRoute);
     }
@@ -50,6 +55,8 @@ public class MoveActionHandler : IActionHandler
     {
         IMoveable moveable = _gameModel.GetCell(ctx.FromCell).Unit as IMoveable;
         if (moveable == null)
+            return false;
+        if (!_gameModel.GetCell(ctx.TargetCell).IsEmpty)
             return false;
         bool accessibleExist = GetAccessibleRoute(moveable, ctx.TargetCell, out var accessiblemoveRoute);
         if(!accessibleExist)    
@@ -73,6 +80,16 @@ public class MoveActionHandler : IActionHandler
 
         result.Add(CellState.accessibleRoutePoint, accessible);
         result.Add(CellState.inaccessibleRoutePoint, inaccessible);
+
+        var target = ctx.TargetCell;
+        if (accessible.Contains(target))
+        {
+            result.Add(CellState.routeEndAccessible, new List<Vector2Int> { target });
+        }
+        else if (route.Contains(target))
+        {
+            result.Add(CellState.routeEndBlocked, new List<Vector2Int> { target });
+        }
         return result;
     }
 

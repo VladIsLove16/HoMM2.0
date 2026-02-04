@@ -53,7 +53,7 @@ public class AttackActionHandler : IActionHandler, IAttackActionHandler
         if(target.Team == attacker.Team.Value)
             return false;
 
-        _movementSystem.GetRoute(ctx.FromCell, ctx.TargetCell, out var route);
+        _movementSystem.GetRouteIgnoringObstacles(ctx.FromCell, ctx.TargetCell, out var route);
         if (route == null)
             return false;
 

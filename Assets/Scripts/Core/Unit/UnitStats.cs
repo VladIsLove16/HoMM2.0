@@ -28,6 +28,10 @@ public class UnitStats : ScriptableObject
     public int Defense = 0;
     public int MoveSpeed = 0;
     public int AttackRange = 0;
+    /// <summary>
+    /// Если true, стрелок может стрелять по цели вплотную. По умолчанию true, чтобы сохранить текущее поведение.
+    /// </summary>
+    public bool AllowAdjacentRanged = true;
     public bool CanFly = false;
     public bool? IsSkeleton;
     [SerializeField] private List<StatusEffectType> invulnerableEffects;
@@ -59,6 +63,7 @@ public class UnitStats : ScriptableObject
         baseStats.Defense += modifier.Defense;
         baseStats.MoveSpeed += modifier.MoveSpeed;
         baseStats.AttackRange += modifier.AttackRange;
+        baseStats.AllowAdjacentRanged &= modifier.AllowAdjacentRanged;
         return baseStats;
     }
 }

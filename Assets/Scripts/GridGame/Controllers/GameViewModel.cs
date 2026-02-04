@@ -63,7 +63,30 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             UpdateHoverState(null);
         }
 
-        PreviewUpdated?.Invoke(new PreviewResult(_data));
+        var previewResult = new PreviewResult();
+        InitializePreviewStates(previewResult);
+
+        if (_data.TryGetValue(CellState.reachableCell, out var reachableCells) && reachableCells != null && reachableCells.Count > 0)
+        {
+            previewResult.Add(CellState.reachableCell, reachableCells);
+        }
+
+        if (_data.TryGetValue(CellState.activeUnit, out var activeCells) && activeCells != null && activeCells.Count > 0)
+        {
+            previewResult.Add(CellState.activeUnit, activeCells);
+        }
+
+        if (_data.TryGetValue(CellState.hovered, out var hoveredCells) && hoveredCells != null && hoveredCells.Count > 0)
+        {
+            previewResult.Add(CellState.hovered, hoveredCells);
+        }
+
+        if (_data.TryGetValue(CellState.enemyCell, out var enemyUnitCells) && enemyUnitCells != null && enemyUnitCells.Count > 0)
+        {
+            previewResult.Add(CellState.enemyCell, enemyUnitCells);
+        }
+
+        PreviewUpdated?.Invoke(previewResult);
     }
 
     public void HandleCellHovered(Vector2Int cell)
@@ -84,62 +107,116 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         if (activeUnit == null)
             return;
 
-        UpdateHoverState(cell);
-
         var previewResult = new PreviewResult();
-        var enemyPreviewAdded = TryAddEnemyReachablePreview(previewResult, cell);
+        InitializePreviewStates(previewResult);
+        var hoveredCell = _gameModel.GetCell(cell);
+        var hoveredUnit = hoveredCell?.Unit as UnitModel;
+        bool enemyReachableAdded = false;
+
+        if (_turnState.BattleStateProperty.Value == BattleState.replacement)
+        {
+            UpdateHoverState(null);
+            ClearEnemyReachablePreview(previewResult);
+            previewResult.Set(CellState.reachableCell, Array.Empty<Vector2Int>());
+            DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
+            PreviewUpdated?.Invoke(previewResult);
+            return;
+        }
+
+        if (!_turnState.IsMyTurn)
+        {
+            UpdateHoverState(null);
+
+            if (hoveredUnit != null)
+            {
+                enemyReachableAdded = TryAddUnitReachablePreview(previewResult, hoveredUnit);
+            }
+
+            if (!enemyReachableAdded)
+            {
+                ClearEnemyReachablePreview(previewResult);
+            }
+            previewResult.Set(CellState.reachableCell, Array.Empty<Vector2Int>());
+
+            DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
+            PreviewUpdated?.Invoke(previewResult);
+            return;
+        }
+
         if (_data.TryGetValue(CellState.reachableCell, out var reachableCells) && reachableCells != null && reachableCells.Count > 0)
         {
             previewResult.Add(CellState.reachableCell, reachableCells);
         }
-        previewResult.Add(CellState.hovered, new[] { cell });
 
-        if (_turnState.IsMyTurn)
+        if (_data.TryGetValue(CellState.activeUnit, out var activeCells) && activeCells != null && activeCells.Count > 0)
         {
-            var fromCell = activeUnit.Position;
-            var actionContext = new ActionContext(fromCell, cell, SpellType.None, nearestCell);
+            previewResult.Add(CellState.activeUnit, activeCells);
+        }
 
-            _actionResolver.Resolve(actionContext, out var actionHandler);
-            if (actionHandler != null)
+        if (_data.TryGetValue(CellState.enemyCell, out var enemyCells) && enemyCells != null && enemyCells.Count > 0)
+        {
+            previewResult.Add(CellState.enemyCell, enemyCells);
+        }
+
+        if (hoveredUnit == null)
+        {
+            UpdateHoverState(cell);
+            previewResult.Add(CellState.hovered, new[] { cell });
+
+            var fromCell = activeUnit.Position;
+            var actionContext = new ActionContext(fromCell, cell, SpellType.None, cell);
+            var moveHandler = _actionResolver.Resolve(ActionType.Move, actionContext);
+            previewResult.Add(moveHandler.GetPreview(actionContext).ToDictionary());
+            ClearEnemyReachablePreview(previewResult);
+            DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
+            PreviewUpdated?.Invoke(previewResult);
+            return;
+        }
+
+        if (hoveredUnit.Team.Value == activeUnit.Team)
+        {
+            UpdateHoverState(null);
+            if (!ReferenceEquals(hoveredUnit, activeUnit))
             {
-                previewResult.Add(actionHandler.GetPreview(actionContext).ToDictionary());
-                if (actionHandler is IAttackActionHandler attackHandler)
-                {
-                    DamageContextPreviewChanged?.Invoke(new(attackHandler.GetDamageContext(actionContext)));
-                }
-                else
-                {
-                    DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
-                }
+                enemyReachableAdded = TryAddUnitReachablePreview(previewResult, hoveredUnit);
             }
-            else
+            if (!enemyReachableAdded)
             {
-                previewResult.Add(CellState.accessibleRoutePoint, Array.Empty<Vector2Int>());
-                previewResult.Add(CellState.inaccessibleRoutePoint, Array.Empty<Vector2Int>());
-                DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
+                ClearEnemyReachablePreview(previewResult);
             }
+
+            DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
+            PreviewUpdated?.Invoke(previewResult);
+            return;
+        }
+
+        UpdateHoverState(cell);
+        previewResult.Add(CellState.hovered, new[] { cell });
+        previewResult.Add(CellState.hoveredEnemy, new[] { cell });
+        enemyReachableAdded = TryAddUnitReachablePreview(previewResult, hoveredUnit);
+
+        var attackFromCell = ResolveAttackFromCell(activeUnit, cell, nearestCell);
+        if (attackFromCell != activeUnit.Position)
+        {
+            var moveContext = new ActionContext(activeUnit.Position, attackFromCell, SpellType.None, attackFromCell);
+            var moveHandler = _actionResolver.Resolve(ActionType.Move, moveContext);
+            previewResult.Add(moveHandler.GetPreview(moveContext).ToDictionary());
+        }
+
+        var attackContext = new ActionContext(activeUnit.Position, cell, SpellType.None, attackFromCell);
+        if (_actionResolver.TryResolvePlan(attackContext, out var plan) &&
+            _actionResolver.Resolve(plan.ActionType, plan.Context) is IAttackActionHandler attackHandler)
+        {
+            DamageContextPreviewChanged?.Invoke(new(attackHandler.GetDamageContext(plan.Context)));
         }
         else
         {
-            if (!enemyPreviewAdded)
-            {
-                var fromCell = activeUnit.Position;
-                var unit = _gameModel.GetCell(fromCell).Unit;
-                if (unit != null)
-                {
-                    var cells = _movementSystem.GetReachableCells(fromCell, unit.ModifiedStats.MoveSpeed);
-                    var filtered = ApplyDeploymentBounds(unit.Team.Value, fromCell, cells);
-                    previewResult.Add(CellState.enemyReachableCell, filtered);
-                    _data[CellState.enemyReachableCell] = new List<Vector2Int>(filtered);
-                    enemyPreviewAdded = true;
-                }
-            }
+            DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
         }
 
-        if (!enemyPreviewAdded)
+        if (!enemyReachableAdded)
         {
-            _data[CellState.enemyReachableCell] = new List<Vector2Int>();
-            previewResult.Add(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
+            ClearEnemyReachablePreview(previewResult);
         }
 
         PreviewUpdated?.Invoke(previewResult);
@@ -156,25 +233,19 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
         var fromCell = activeUnit.Position;
         var actionContext = new ActionContext(fromCell, coords.Key, SpellType.None, coords.Value);
-        _actionResolver.Resolve(actionContext, out var actionHandler);
-        if (actionHandler == null)
+        if (!_actionResolver.TryResolvePlan(actionContext, out var plan))
         {
             Debug.LogWarning($"[GameViewModel] No action handler for {coords.Key}");
             return;
         }
-
-        if (!actionHandler.CanExecute(actionContext))
-        {
-            Debug.LogWarning($"[GameViewModel] Action {actionHandler.ActionType} rejected locally for context {actionContext}");
-            return;
-        }
+        var actionHandler = _actionResolver.Resolve(plan.ActionType, plan.Context);
 
         if (actionHandler is IAttackActionHandler)
         {
             RaiseAttackAnimationRequested(activeUnit, coords.Key);
         }
 
-        if (!_gameCommandExecutor.Execute(actionHandler.ActionType, actionContext))
+        if (!_gameCommandExecutor.Execute(actionHandler.ActionType, plan.Context))
         {
             Debug.LogWarning($"[GameViewModel] Command executor declined {actionHandler.ActionType}");
         }
@@ -221,6 +292,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             return;
 
         SetReachableCellState(combatObject);
+        SetEnemyCellState();
+        _data[CellState.activeUnit] = new List<Vector2Int> { combatObject.Position };
         var previewResult = new PreviewResult(_data);
         PreviewChanged?.Invoke(previewResult);
     }
@@ -231,10 +304,23 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         if (_turnState.IsMyTurn)
         {
             var cells = _movementSystem.GetReachableCells(combatObject.Position, combatObject.Stats.MoveSpeed);
-            reachableCells = ApplyDeploymentBounds(combatObject.Team, combatObject.Position, cells);
+            reachableCells = ShouldApplyDeploymentBounds()
+                ? ApplyDeploymentBounds(combatObject.Team, combatObject.Position, cells)
+                : new List<Vector2Int>(cells);
         }
 
         _data[CellState.reachableCell] = reachableCells;
+    }
+
+    private void SetEnemyCellState()
+    {
+        if (!_turnState.IsMyTurn)
+        {
+            _data[CellState.enemyCell] = new List<Vector2Int>();
+            return;
+        }
+
+        _data[CellState.enemyCell] = GetEnemyCells();
     }
 
     private void UpdateHoverState(Vector2Int? cell)
@@ -269,17 +355,16 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
     public bool CanExecute(ActionType type, ActionContext actionContext)
     {
-        var handler = _actionResolver.Resolve(type, actionContext);
-        return handler.CanExecute(actionContext);
+        return _actionResolver.TryResolvePlan(actionContext, out var plan) && plan.ActionType == type;
     }
 
     public void Execute(ActionType type, ActionContext actionContext)
     {
-        var handler = _actionResolver.Resolve(type, actionContext);
-        if (!handler.CanExecute(actionContext))
+        if (!_actionResolver.TryResolvePlan(actionContext, out var plan) || plan.ActionType != type)
             throw new InvalidOperationException("Action cannot be executed for supplied context");
 
-        handler.Execute(actionContext);
+        var handler = _actionResolver.Resolve(plan.ActionType, plan.Context);
+        handler.Execute(plan.Context);
     }
 
     public void SetCell(UnitViewModel draggedVM, Vector2Int coords)
@@ -311,21 +396,118 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         coords = new KeyValuePair<Vector2Int, Vector2Int>(main, main);
         return success;
     }
-    private bool TryAddEnemyReachablePreview(PreviewResult preview, Vector2Int cell)
+    private bool TryAddUnitReachablePreview(PreviewResult preview, UnitModel unit)
     {
-        var gridCell = _gameModel.GetCell(cell);
-        if (gridCell == null)
-            return false;
-
-        var unit = gridCell.Unit as UnitModel;
-        if (unit == null || unit.Team.Value == _turnState.LocalTeam)
+        if (unit == null || unit.ModifiedStats == null)
             return false;
 
         var cells = _movementSystem.GetReachableCells(unit.Position.Value, unit.ModifiedStats.MoveSpeed);
-        var filtered = ApplyDeploymentBounds(unit.Team.Value, unit.Position.Value, cells);
+        var filtered = ShouldApplyDeploymentBounds()
+            ? ApplyDeploymentBounds(unit.Team.Value, unit.Position.Value, cells)
+            : new List<Vector2Int>(cells);
         preview.Add(CellState.enemyReachableCell, filtered);
-        _data[CellState.enemyReachableCell] = new List<Vector2Int>(filtered);
         return true;
+    }
+
+    private bool ShouldApplyDeploymentBounds()
+    {
+        return _turnState.BattleStateProperty.Value == BattleState.replacement;
+    }
+
+    private void ClearEnemyReachablePreview(PreviewResult preview)
+    {
+        preview.Set(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
+    }
+
+    private List<Vector2Int> GetEnemyCells()
+    {
+        var result = new List<Vector2Int>();
+        foreach (var unit in _turnState.CombatUnits)
+        {
+            if (unit == null || unit.Team == _turnState.LocalTeam)
+                continue;
+            result.Add(unit.Position);
+        }
+        return result;
+    }
+
+    private static void InitializePreviewStates(PreviewResult preview)
+    {
+        preview.Set(CellState.hovered, Array.Empty<Vector2Int>());
+        preview.Set(CellState.activeUnit, Array.Empty<Vector2Int>());
+        preview.Set(CellState.hoveredEnemy, Array.Empty<Vector2Int>());
+        preview.Set(CellState.reachableCell, Array.Empty<Vector2Int>());
+        preview.Set(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
+        preview.Set(CellState.attackTarget, Array.Empty<Vector2Int>());
+        preview.Set(CellState.attackTargetBlocked, Array.Empty<Vector2Int>());
+        preview.Set(CellState.enemyCell, Array.Empty<Vector2Int>());
+        preview.Set(CellState.accessibleRoutePoint, Array.Empty<Vector2Int>());
+        preview.Set(CellState.inaccessibleRoutePoint, Array.Empty<Vector2Int>());
+        preview.Set(CellState.routeEndAccessible, Array.Empty<Vector2Int>());
+        preview.Set(CellState.routeEndBlocked, Array.Empty<Vector2Int>());
+    }
+
+    private Vector2Int ResolveAttackFromCell(ICombatObject attacker, Vector2Int targetCell, Vector2Int nearestCell)
+    {
+        if (nearestCell.x >= 0 && nearestCell.y >= 0)
+            return nearestCell;
+
+        if (attacker is not UnitModel unit || unit.ModifiedStats == null)
+            return attacker.Position;
+
+        if (TryFindAttackFromCell(unit, targetCell, out var attackFrom))
+        {
+            return attackFrom;
+        }
+
+        return attacker.Position;
+    }
+
+    private bool TryFindAttackFromCell(UnitModel attacker, Vector2Int targetCell, out Vector2Int attackFrom)
+    {
+        attackFrom = attacker.Position.Value;
+        var stats = attacker.ModifiedStats;
+        if (stats == null)
+            return false;
+
+        var reachable = _movementSystem.GetReachableCells(attacker.Position.Value, stats.MoveSpeed);
+        if (reachable == null || reachable.Count == 0)
+            return false;
+
+        float bestCost = float.MaxValue;
+        Vector2Int bestCell = attacker.Position.Value;
+
+        foreach (var cell in reachable)
+        {
+            var cellObj = _gameModel.GetCell(cell);
+            if (cellObj == null || !cellObj.IsEmpty)
+                continue;
+
+            if (!_movementSystem.GetRouteIgnoringObstacles(cell, targetCell, out var attackRoute))
+                continue;
+
+            var attackDistance = _movementSystem.GetRouteCost(attackRoute);
+            if (attackDistance > stats.AttackRange)
+                continue;
+
+            if (!_movementSystem.GetRoute(attacker.Position.Value, cell, out var moveRoute))
+                continue;
+
+            var moveCost = _movementSystem.GetRouteCost(moveRoute);
+            if (moveCost <= stats.MoveSpeed && moveCost < bestCost)
+            {
+                bestCost = moveCost;
+                bestCell = cell;
+            }
+        }
+
+        if (bestCost < float.MaxValue)
+        {
+            attackFrom = bestCell;
+            return true;
+        }
+
+        return false;
     }
 
     private List<Vector2Int> ApplyDeploymentBounds(Team team, Vector2Int origin, IEnumerable<Vector2Int> cells)
