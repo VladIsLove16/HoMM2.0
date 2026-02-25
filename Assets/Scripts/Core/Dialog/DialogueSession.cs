@@ -61,6 +61,8 @@ namespace Adventure.Domain.Dialog
                 return false;
             }
             bool isNextNode = _graph.TryGetNode(choice.NextNodeId, out next);
+            if (!isNextNode)
+                throw new ArgumentException("NodeId " + choice.NextNodeId + " not found in local database");
             return isNextNode && !string.IsNullOrEmpty(choice.NextNodeId);
         }
 

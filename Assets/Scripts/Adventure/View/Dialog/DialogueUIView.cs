@@ -66,7 +66,6 @@ namespace Adventure.Presentation.Dialog
 
             RebuildChoices(node);
         }
-
         private void RebuildChoices(DialogueNode node)
         {
             ClearChoicesButtons();
