@@ -24,14 +24,12 @@ public sealed class DialogueNodeSO : ScriptableObject
     [TextArea] [SerializeField] private string text;
     [SerializeField] private LocalizedString textLocalized;
     [SerializeField] private List<Choice> choices = new List<Choice>();
-    [SerializeField] private KeyWordsParser keyWordsParser;
     public string NodeId => nodeId;
 
     public DialogueNode ToDomain()
     {
         var resolvedSpeaker = ResolveLocalizedString(speakerLocalized, speaker);
         var resolvedText = ResolveLocalizedString(textLocalized, text);
-        var parsedText = keyWordsParser.Parse(resolvedText);
         var domainChoices = new List<DialogueChoice>(choices.Count);
         foreach (var choice in choices)
         {

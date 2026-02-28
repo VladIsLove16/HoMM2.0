@@ -6,11 +6,13 @@ namespace Adventure.Domain.Dialog
     public sealed class DialogueSession
     {
         private readonly DialogueGraph _graph;
+        private readonly DialogueNodeResolver _resolver;
         private DialogueNode _currentNode;
 
-        public DialogueSession(DialogueGraph graph, string startNodeId = null)
+        public DialogueSession(DialogueGraph graph, string startNodeId = null, IDialogueTextResolver textResolver = null)
         {
             _graph = graph ?? throw new ArgumentNullException(nameof(graph));
+            _resolver = textResolver != null ? new DialogueNodeResolver(textResolver) : null;
             var nodeId = string.IsNullOrEmpty(startNodeId) ? graph.StartNodeId : startNodeId;
             if (!_graph.TryGetNode(nodeId, out _currentNode))
             {
@@ -21,7 +23,7 @@ namespace Adventure.Domain.Dialog
             }
         }
 
-        public DialogueNode CurrentNode => _currentNode;
+        public DialogueNode CurrentNode => _resolver != null ? _resolver.Resolve(_currentNode) : _currentNode;
         public ReactiveProperty<bool> IsCompleted = new(false);
 
         public DialogueChoiceAction SelectChoice(string choiceId)

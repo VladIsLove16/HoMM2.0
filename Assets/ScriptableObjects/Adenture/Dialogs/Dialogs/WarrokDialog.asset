@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ae2ddc16c1c2a74cb3f8111eb9151fe, type: 3}
+  m_Name: WarrokDialog
+  m_EditorClassIdentifier: 
+  startNode: {fileID: 11400000, guid: 047fe2e00b19c114a99e95623c412996, type: 2}
+  additionalNodes:
+  - {fileID: 11400000, guid: 780648b8032e9414980d180addbd76d6, type: 2}
+  - {fileID: 11400000, guid: 5374edbc3b0c19b4dafb56ca88cbf406, type: 2}

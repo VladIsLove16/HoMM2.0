@@ -7,6 +7,8 @@ using Adventure.Settings.ViewModel;
 using UniRx;
 using Zenject;
 using System.Linq;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Adventure.Application.Dialog
 {
@@ -17,16 +19,22 @@ namespace Adventure.Application.Dialog
         private readonly PlayerChosenDialogOption _playerChoiceEventChannel;
         private readonly ReactiveProperty<DialogueNode> _currentNode = new ReactiveProperty<DialogueNode>();
         private readonly ReactiveProperty<ArmyLineupSO> _enenyArmy = new ReactiveProperty<ArmyLineupSO>();
+        private readonly IArmyLineupFormatter _armyFormatter;
         private DialogueSession _session;
         private string _activeDialogId;
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
         [Inject] private BattleLaunchService battleLaunchService;
-        public DialogVM(IDialogRepository repository, IDialogStateStore stateStore, PlayerChosenDialogOption playerChoiceEventChannel = null)
+        public DialogVM(
+            IDialogRepository repository,
+            IDialogStateStore stateStore,
+            PlayerChosenDialogOption playerChoiceEventChannel = null,
+            IArmyLineupFormatter armyFormatter = null)
         {
             _repository = repository;
             _stateStore = stateStore;
             _playerChoiceEventChannel = playerChoiceEventChannel;
+            _armyFormatter = armyFormatter ?? new DefaultArmyLineupFormatter();
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
         public IReadOnlyReactiveProperty<ArmyLineupSO> EnemyArmy => _enenyArmy;
@@ -54,7 +62,8 @@ namespace Adventure.Application.Dialog
                 startNodeId = snapshot.CurrentNodeId;
             }
 
-            _session = new DialogueSession(graph, startNodeId);
+            var resolver = BuildTextResolver(armyLineupSO);
+            _session = new DialogueSession(graph, startNodeId, resolver);
             _session.IsCompleted.Subscribe(OnSessionStateChanged);
             _currentNode.SetValueAndForceNotify(_session.CurrentNode);
             _isOpen.SetValueAndForceNotify(true);
@@ -138,6 +147,19 @@ namespace Adventure.Application.Dialog
         public void Open()
         {
             _isOpen.SetValueAndForceNotify(true);
+        }
+
+        private IDialogueTextResolver BuildTextResolver(ArmyLineupSO armyLineupSO)
+        {
+            var tokens = new Dictionary<string, string>();
+            var armyText = _armyFormatter.Format(armyLineupSO);
+            if (!string.IsNullOrEmpty(armyText))
+            {
+                // Support both legacy <NpcArmy> and your <Army> token.
+                tokens["NpcArmy"] = armyText;
+                tokens["Army"] = armyText;
+            }
+            return new DialogueTextResolver(tokens);
         }
     }
 }

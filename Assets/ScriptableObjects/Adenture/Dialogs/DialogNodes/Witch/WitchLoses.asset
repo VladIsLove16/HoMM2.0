@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: WitchDefeat
+  m_Name: WitchLoses
   m_EditorClassIdentifier: 
-  nodeId: witchDefeat
+  nodeId: witchVictory
   speaker: Witch
-  text: Hah! Come back when you learn a few more tricks.
+  text: Well done! Perhaps the legends are true.
   choices:
   - Id: leave
-    Text: I will practice harder.
+    Text: Until next time.
     Action: 2
     NextNode: {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}
     VictoryNode: {fileID: 0}

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: WitchArmy
+  m_Name: WarrokGoodMorning
   m_EditorClassIdentifier: 
-  nodeId: WitchArmy
-  speaker: Witch
+  nodeId: WarrokMorning
+  speaker: Warrok
   speakerLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -23,7 +23,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  text: I have nothing, what are you talking about? <Army> {Army}
+  text: Zag zag
   textLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -34,8 +34,8 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   choices:
-  - Id: OK
-    Text: I get it
+  - Id: zag zag
+    Text: Zag zag!
     TextLocalized:
       m_TableReference:
         m_TableCollectionName: 
@@ -45,10 +45,25 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    Action: 0
-    NextNode: {fileID: 11400000, guid: 5b0def6f51ec06745abc425faa6d9642, type: 2}
-    VictoryNode: {fileID: 0}
-    DefeatNode: {fileID: 0}
+    Action: 2
+    NextNode: {fileID: 0}
+    VictoryNode: {fileID: 11400000, guid: 780648b8032e9414980d180addbd76d6, type: 2}
+    DefeatNode: {fileID: 11400000, guid: 5374edbc3b0c19b4dafb56ca88cbf406, type: 2}
+  - Id: fight
+    Text: For the Alliance!
+    TextLocalized:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    Action: 1
+    NextNode: {fileID: 0}
+    VictoryNode: {fileID: 11400000, guid: 780648b8032e9414980d180addbd76d6, type: 2}
+    DefeatNode: {fileID: 11400000, guid: 5374edbc3b0c19b4dafb56ca88cbf406, type: 2}
   references:
     version: 2
     RefIds: []

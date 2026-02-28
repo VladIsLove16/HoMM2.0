@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: WitchArmy
+  m_Name: WarrokLoses
   m_EditorClassIdentifier: 
-  nodeId: WitchArmy
+  nodeId: witchVictory
   speaker: Witch
   speakerLocalized:
     m_TableReference:
@@ -23,7 +23,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  text: I have nothing, what are you talking about? <Army> {Army}
+  text: ARGH!! I WILL KILL YOU!
   textLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -34,8 +34,8 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   choices:
-  - Id: OK
-    Text: I get it
+  - Id: leave
+    Text: Maybe next time.
     TextLocalized:
       m_TableReference:
         m_TableCollectionName: 
@@ -45,8 +45,8 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    Action: 0
-    NextNode: {fileID: 11400000, guid: 5b0def6f51ec06745abc425faa6d9642, type: 2}
+    Action: 2
+    NextNode: {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
   references:
