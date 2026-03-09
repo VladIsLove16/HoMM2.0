@@ -15,6 +15,7 @@ using Adventure.Settings.Model;
 using Adventure.Settings.View;
 using Adventure.Settings.ViewModel;
 using Game.Events;
+using Game.Achievements;
 using Assets.Scripts.Adventure.Infrastructure.Input;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private PlayerInteractionController interactionController;
     [SerializeField] private DialogueUIView dialogueUIView;
     [SerializeField] private MushroomBookView mushroomBookView;
+    [SerializeField] private Game.Achievements.AchievementsView achievementsView;
+    [SerializeField] private Game.Achievements.AchievementToastView achievementToastView;
     [SerializeField] private AdventureGameSettingsView gameSettingsView;
     [SerializeField] private Adventure.MushroomBook.MushroomDropPresenter mushroomDropPresenter;
     [SerializeField] private HelpMenu helpMenu;
@@ -77,6 +80,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle().WithArguments(playerChosenDialogOptionChannel);
         Container.BindInterfacesAndSelfTo<AdventureGameSettingsViewModel>().AsSingle().NonLazy();
         Container.Bind<AdventureMenusCoordinatorViewModel>().AsSingle();
+        Container.BindInterfacesAndSelfTo<Game.Achievements.AchievementsViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<Adventure.Application.VMs.AdventureAchievementsMenuAdapter>().AsSingle();
         Container.BindInterfacesAndSelfTo<Adventure.Infrastructure.Cursor.CursorViewModel>().AsSingle().NonLazy();
     }
 
@@ -84,6 +89,22 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     {
         Container.Bind<MushroomBookView>().FromInstance(mushroomBookView).AsSingle();
         Container.Bind<DialogueUIView>().FromInstance(dialogueUIView).AsSingle();
+        if (achievementsView != null)
+        {
+            Container.Bind<Game.Achievements.AchievementsView>().FromInstance(achievementsView).AsSingle().NonLazy();
+        }
+        else
+        {
+            Debug.LogWarning("[AdventureGameplayInstaller] AchievementsView is not assigned.", this);
+        }
+        if (achievementToastView != null)
+        {
+            Container.Bind<Game.Achievements.AchievementToastView>().FromInstance(achievementToastView).AsSingle().NonLazy();
+        }
+        else
+        {
+            Debug.LogWarning("[AdventureGameplayInstaller] AchievementToastView is not assigned.", this);
+        }
         Container.Bind<AdventureGameSettingsView>().FromInstance(gameSettingsView).AsSingle().NonLazy();
         if (mushroomDropPresenter != null)
         {
@@ -105,10 +126,11 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     {
         Container.Bind<AdventureDevTools>().FromInstance(devTools).AsSingle().NonLazy();
     }
-        private void BindServices()
-        {
-            BindPersistence();
-            BindMouseSensitivity();
+    private void BindServices()
+    {
+        BindPersistence();
+        BindAchievementServices();
+        BindMouseSensitivity();
             Container.Bind<PauseController>().AsSingle();
             var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
             Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
@@ -126,6 +148,26 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
         }
         Container.Bind<EventBus>().AsSingle();
+    }
+
+    private void BindAchievementServices()
+    {
+        if (Container.HasBinding<IAchievementService>())
+            return;
+
+        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
+        if (catalog == null)
+        {
+            Debug.LogWarning("[AdventureGameplayInstaller] AchievementCatalog not found at Resources/Achievements/AchievementCatalog", this);
+            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+        }
+
+        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
+        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
+        Container.Bind<ICurrencyWallet>().To<GameStateCurrencyWallet>().AsSingle();
+        Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
+        Container.BindInterfacesTo<AchievementEventListener>().AsSingle().NonLazy();
     }
 
     private void BindMouseSensitivity()

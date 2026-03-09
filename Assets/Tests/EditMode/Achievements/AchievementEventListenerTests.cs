@@ -6,6 +6,7 @@ using Game.Achievements;
 using Game.Events;
 using NUnit.Framework;
 using UniRx;
+using UnityEngine;
 
 namespace Tests.EditMode.Achievements
 {
@@ -17,8 +18,8 @@ namespace Tests.EditMode.Achievements
         {
             var definitions = new[]
             {
-                CreateDefinition(AchievementIds.FirstMushroom),
-                CreateDefinition(AchievementIds.MushroomCollector),
+                CreateDefinition(AchievementIds.FirstMushroom, CreateCounterCondition(1)),
+                CreateDefinition(AchievementIds.MushroomCollector, CreateCounterCondition(10)),
             };
 
             var storage = new InMemoryAchievementStorage();
@@ -41,7 +42,7 @@ namespace Tests.EditMode.Achievements
         {
             var definitions = new[]
             {
-                CreateDefinition(AchievementIds.FirstBattleWin)
+                CreateDefinition(AchievementIds.FirstBattleWin, CreateEventCondition(AchievementEventIds.BattleWon))
             };
 
             var storage = new InMemoryAchievementStorage();
@@ -56,9 +57,33 @@ namespace Tests.EditMode.Achievements
             listener.Dispose();
         }
 
-        private static AchievementDefinition CreateDefinition(string id)
+        private static AchievementDefinition CreateDefinition(string id, params AchievementConditionSO[] conditions)
         {
-            return AchievementDefinitionBuilder.New().WithId(id).WithTitle(id).Create();
+            return AchievementDefinitionBuilder.New().WithId(id).WithTitle(id).WithConditions(conditions).Create();
+        }
+
+        private static AchievementEventConditionSO CreateEventCondition(string eventId)
+        {
+            var condition = ScriptableObject.CreateInstance<AchievementEventConditionSO>();
+            typeof(AchievementEventConditionSO)
+                .GetField("eventId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(condition, eventId);
+            return condition;
+        }
+
+        private static AchievementCounterConditionSO CreateCounterCondition(int target)
+        {
+            var condition = ScriptableObject.CreateInstance<AchievementCounterConditionSO>();
+            typeof(AchievementCounterConditionSO)
+                .GetField("eventId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(condition, AchievementEventIds.MushroomCollectedTotal);
+            typeof(AchievementCounterConditionSO)
+                .GetField("targetValue", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(condition, target);
+            typeof(AchievementCounterConditionSO)
+                .GetField("useMaxValueFromEvent", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(condition, true);
+            return condition;
         }
 
         private sealed class InMemoryDefinitionProvider : IAchievementDefinitionProvider
@@ -79,24 +104,14 @@ namespace Tests.EditMode.Achievements
 
         private sealed class InMemoryAchievementStorage : IAchievementStorage
         {
-            private readonly HashSet<string> _initial;
+            public AchievementProgressStorageData Load() => new AchievementProgressStorageData();
 
-            public InMemoryAchievementStorage(IEnumerable<string> initial = null)
+            public void Save(AchievementProgressStorageData data)
             {
-                _initial = initial != null
-                    ? new HashSet<string>(initial, StringComparer.OrdinalIgnoreCase)
-                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             }
 
-            public IEnumerable<string> Load() => _initial;
-
-            public void Save(IEnumerable<string> unlockedIds)
+            public void Clear()
             {
-                _initial.Clear();
-                foreach (var id in unlockedIds)
-                {
-                    _initial.Add(id);
-                }
             }
         }
     }

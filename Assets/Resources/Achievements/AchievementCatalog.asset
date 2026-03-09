@@ -17,11 +17,29 @@ MonoBehaviour:
     title: First Mushroom
     description: Collect your first mushroom in the forest.
     icon: {fileID: 0}
+    category: 2
+    completionMode: 0
+    isSecret: 0
+    rewardCurrencyAmount: 10
+    conditions:
+    - {fileID: 11400000, guid: d807e0a2763a45c1bf704dd3aa34b6cc, type: 2}
   - id: collect_ten_mushrooms
     title: Budding Mycologist
     description: Gather ten mushrooms across your journey.
     icon: {fileID: 0}
+    category: 2
+    completionMode: 0
+    isSecret: 0
+    rewardCurrencyAmount: 25
+    conditions:
+    - {fileID: 11400000, guid: 9bb8fd059c93455fb48c4a5e2a09753b, type: 2}
   - id: win_first_battle
     title: First Victory
     description: Win your first tactical battle.
     icon: {fileID: 0}
+    category: 1
+    completionMode: 0
+    isSecret: 0
+    rewardCurrencyAmount: 50
+    conditions:
+    - {fileID: 11400000, guid: be7e8c8e631f492fb09533c593bc0775, type: 2}

@@ -2,6 +2,7 @@ using Game.Achievements;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Tests.EditMode.Achievements
 {
@@ -9,29 +10,30 @@ namespace Tests.EditMode.Achievements
     public class AchievementServiceTests
     {
         [Test]
-        public void TryUnlock_AddsAchievement_WhenDefinitionExists()
+        public void HandleEvent_UnlocksAchievement_WhenConditionMet()
         {
-            var definitions = new[] { CreateDefinition(AchievementIds.FirstMushroom) };
+            var condition = CreateEventCondition(AchievementEventIds.BattleWon);
+            var definitions = new[] { CreateDefinition(AchievementIds.FirstBattleWin, condition) };
             var storage = new InMemoryAchievementStorage();
             var service = new AchievementService(new InMemoryDefinitionProvider(definitions), storage);
 
-            var unlocked = service.TryUnlock(AchievementIds.FirstMushroom);
+            service.HandleEvent(new AchievementEvent(AchievementEventIds.BattleWon, 1));
 
-            Assert.That(unlocked, Is.True);
-            Assert.That(service.IsUnlocked(AchievementIds.FirstMushroom), Is.True);
-            CollectionAssert.Contains(storage.LastSaved, AchievementIds.FirstMushroom);
+            Assert.That(service.IsUnlocked(AchievementIds.FirstBattleWin), Is.True);
+            Assert.That(storage.SaveCallCount, Is.GreaterThan(0));
         }
 
         [Test]
-        public void TryUnlock_ReturnsFalse_WhenAlreadyUnlocked()
+        public void HandleEvent_DoesNotUnlock_WhenEventDoesNotMatch()
         {
-            var definitions = new[] { CreateDefinition(AchievementIds.FirstMushroom) };
-            var storage = new InMemoryAchievementStorage(new[] { AchievementIds.FirstMushroom });
+            var condition = CreateEventCondition(AchievementEventIds.BattleWon);
+            var definitions = new[] { CreateDefinition(AchievementIds.FirstBattleWin, condition) };
+            var storage = new InMemoryAchievementStorage();
             var service = new AchievementService(new InMemoryDefinitionProvider(definitions), storage);
 
-            var unlocked = service.TryUnlock(AchievementIds.FirstMushroom);
+            service.HandleEvent(new AchievementEvent("other_event", 1));
 
-            Assert.That(unlocked, Is.False);
+            Assert.That(service.IsUnlocked(AchievementIds.FirstBattleWin), Is.False);
             Assert.That(storage.SaveCallCount, Is.EqualTo(0));
         }
 
@@ -48,9 +50,18 @@ namespace Tests.EditMode.Achievements
             Assert.That(storage.SaveCallCount, Is.EqualTo(0));
         }
 
-        private static AchievementDefinition CreateDefinition(string id)
+        private static AchievementDefinition CreateDefinition(string id, params AchievementConditionSO[] conditions)
         {
-            return AchievementDefinitionBuilder.New().WithId(id).WithTitle(id).Create();
+            return AchievementDefinitionBuilder.New().WithId(id).WithTitle(id).WithConditions(conditions).Create();
+        }
+
+        private static AchievementEventConditionSO CreateEventCondition(string eventId)
+        {
+            var condition = ScriptableObject.CreateInstance<AchievementEventConditionSO>();
+            typeof(AchievementEventConditionSO)
+                .GetField("eventId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(condition, eventId);
+            return condition;
         }
 
         private sealed class InMemoryDefinitionProvider : IAchievementDefinitionProvider
@@ -75,24 +86,21 @@ namespace Tests.EditMode.Achievements
 
         private sealed class InMemoryAchievementStorage : IAchievementStorage
         {
-            private readonly HashSet<string> _initial;
-
-            public InMemoryAchievementStorage(IEnumerable<string> initial = null)
-            {
-                _initial = initial != null
-                    ? new HashSet<string>(initial, StringComparer.OrdinalIgnoreCase)
-                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            }
-
             public int SaveCallCount { get; private set; }
-            public IReadOnlyCollection<string> LastSaved { get; private set; } = Array.Empty<string>();
+            public AchievementProgressStorageData LastSaved { get; private set; }
 
-            public IEnumerable<string> Load() => _initial;
+            public AchievementProgressStorageData Load() => new AchievementProgressStorageData();
 
-            public void Save(IEnumerable<string> unlockedIds)
+            public void Save(AchievementProgressStorageData data)
             {
                 SaveCallCount++;
-                LastSaved = new List<string>(unlockedIds);
+                LastSaved = data;
+            }
+
+            public void Clear()
+            {
+                SaveCallCount++;
+                LastSaved = new AchievementProgressStorageData();
             }
         }
     }

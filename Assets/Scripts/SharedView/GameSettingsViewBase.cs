@@ -7,10 +7,12 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Localization;
+using UnityEngine.Localization.Components;
 using UnityEngine.Localization.Settings;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 using Zenject;
+using Game.Achievements;
 
 namespace Adventure.Settings.View
 {
@@ -20,6 +22,7 @@ namespace Adventure.Settings.View
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private Button closeButton;
         [SerializeField] private Button exitButton;
+        [SerializeField] private Button achievementsButton;
         [SerializeField] private Slider musicSlider;
         [SerializeField] private Slider effectsSlider;
         [SerializeField] private TMP_Dropdown qualityDropdown;
@@ -30,8 +33,12 @@ namespace Adventure.Settings.View
 
         private UnityAction _closeAction;
         private UnityAction _exitAction;
+        private UnityAction _achievementsAction;
         private bool _initialized;
         private bool _waitingLocalizationInit;
+        private bool _achievementsBound;
+
+        [InjectOptional] private AchievementsViewModel _achievementsViewModel;
 
         [Inject]
         public virtual void Construct(TViewModel vm)
@@ -53,6 +60,8 @@ namespace Adventure.Settings.View
                     closeButton.onClick.RemoveListener(_closeAction);
                 if (exitButton != null && _exitAction != null)
                     exitButton.onClick.RemoveListener(_exitAction);
+                if (achievementsButton != null && _achievementsAction != null)
+                    achievementsButton.onClick.RemoveListener(_achievementsAction);
 
                 if (musicSlider != null)
                     musicSlider.onValueChanged.RemoveListener(OnMusicSliderChanged);
@@ -128,6 +137,8 @@ namespace Adventure.Settings.View
                 exitButton.onClick.AddListener(_exitAction);
             }
 
+            BindAchievementsButton();
+
             if (musicSlider != null)
             {
                 musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
@@ -152,6 +163,21 @@ namespace Adventure.Settings.View
                 ViewModel.LanguageIndex.Subscribe(idx =>
                     languageDropdown.SetValueWithoutNotify(idx)).AddTo(Bindings);
             }
+        }
+
+        private void BindAchievementsButton()
+        {
+            if (_achievementsBound || _achievementsViewModel == null)
+                return;
+
+            if (achievementsButton == null)
+                return;
+
+            achievementsButton.onClick.RemoveAllListeners();
+            _achievementsAction = () => _achievementsViewModel.Toggle();
+            achievementsButton.onClick.AddListener(_achievementsAction);
+            UpdateAchievementsLabel();
+            _achievementsBound = true;
         }
 
         private void ConfigureLanguageDropdown()
@@ -208,6 +234,16 @@ namespace Adventure.Settings.View
             languageDropdown.ClearOptions();
             languageDropdown.AddOptions(options);
             languageDropdown.SetValueWithoutNotify(ViewModel.LanguageIndex.Value);
+        }
+
+        private void UpdateAchievementsLabel()
+        {
+            if (achievementsButton == null)
+                return;
+
+            var textComponent = achievementsButton.GetComponentInChildren<TMP_Text>();
+            if (textComponent == null)
+                return;
         }
     }
 }

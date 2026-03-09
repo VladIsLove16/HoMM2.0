@@ -32,22 +32,14 @@ namespace Game.Achievements
 
             var totalCollected = data.Totals.Sum(pair => pair.Value);
 
-            if (totalCollected >= 1)
-            {
-                _service.TryUnlock(AchievementIds.FirstMushroom);
-            }
-
-            if (totalCollected >= 10)
-            {
-                _service.TryUnlock(AchievementIds.MushroomCollector);
-            }
+            _service.HandleEvent(new AchievementEvent(AchievementEventIds.MushroomCollectedTotal, totalCollected));
         }
 
         private void OnBattleCompleted(BattleCompletedCustomEvent data)
         {
             if (data.PlayerWon)
             {
-                _service.TryUnlock(AchievementIds.FirstBattleWin);
+                _service.HandleEvent(new AchievementEvent(AchievementEventIds.BattleWon, 1));
             }
         }
 

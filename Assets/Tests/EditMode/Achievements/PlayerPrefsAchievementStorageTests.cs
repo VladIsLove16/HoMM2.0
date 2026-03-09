@@ -27,20 +27,23 @@ namespace Tests.EditMode.Achievements
 
             var loaded = storage.Load();
 
-            Assert.That(loaded, Is.Empty);
+            Assert.That(loaded.Entries, Is.Empty);
         }
 
         [Test]
         public void Save_And_Load_PersistData()
         {
             var storage = new PlayerPrefsAchievementStorage();
-            var expected = new[] { "ach1", "ach2" };
+            var data = new AchievementProgressStorageData();
+            data.Entries.Add(new AchievementProgressSnapshot { Id = "ach1", IsUnlocked = true });
+            data.Entries.Add(new AchievementProgressSnapshot { Id = "ach2", IsUnlocked = true });
 
-            storage.Save(expected);
+            storage.Save(data);
 
-            var loaded = storage.Load().ToArray();
+            var loaded = storage.Load();
 
-            CollectionAssert.AreEquivalent(expected, loaded);
+            var ids = loaded.Entries.Select(entry => entry.Id).ToArray();
+            CollectionAssert.AreEquivalent(new[] { "ach1", "ach2" }, ids);
         }
     }
 }

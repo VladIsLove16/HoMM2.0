@@ -9,6 +9,7 @@ namespace Adventure.Infrastructure.Persistence
     {
         public List<UnitStackRecord> Inventory = new();
         public List<Vector3IntRecord> CollectedMushrooms = new();
+        public int Currency;
     }
 
     [Serializable]

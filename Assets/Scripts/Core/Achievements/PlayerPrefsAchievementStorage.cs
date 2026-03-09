@@ -1,33 +1,31 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Game.Achievements
 {
     public sealed class PlayerPrefsAchievementStorage : IAchievementStorage
     {
-        private const string Key = "achievements_unlocked";
-        private const char Separator = '|';
+        private const string Key = "achievements_progress";
 
-        public IEnumerable<string> Load()
+        public AchievementProgressStorageData Load()
         {
             var stored = PlayerPrefs.GetString(Key, string.Empty);
             if (string.IsNullOrEmpty(stored))
-            {
-                return Array.Empty<string>();
-            }
+                return new AchievementProgressStorageData();
 
-            return stored.Split(Separator, StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.OrdinalIgnoreCase);
+            var data = JsonUtility.FromJson<AchievementProgressStorageData>(stored);
+            return data ?? new AchievementProgressStorageData();
         }
 
-        public void Save(IEnumerable<string> unlockedIds)
+        public void Save(AchievementProgressStorageData data)
         {
-            var value = unlockedIds == null
-                ? string.Empty
-                : string.Join(Separator, unlockedIds);
+            var payload = data == null ? string.Empty : JsonUtility.ToJson(data);
+            PlayerPrefs.SetString(Key, payload);
+            PlayerPrefs.Save();
+        }
 
-            PlayerPrefs.SetString(Key, value);
+        public void Clear()
+        {
+            PlayerPrefs.DeleteKey(Key);
             PlayerPrefs.Save();
         }
     }

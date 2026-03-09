@@ -20,7 +20,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2
-    m_Key: Settings.Exit
+    m_Key: UI.Achievments
     m_Metadata:
       m_Items: []
   - m_Id: 3
@@ -150,6 +150,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6982595734134784
     m_Key: Book.Drop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27142249118162944
+    m_Key: Achievment.Adventure.Title.StartFight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27142613821284352
+    m_Key: Achievment.Adventure.Description.StartFight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 28226755048759296
+    m_Key: UI.Title
     m_Metadata:
       m_Items: []
   m_Metadata:

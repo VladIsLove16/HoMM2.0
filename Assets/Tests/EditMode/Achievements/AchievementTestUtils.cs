@@ -27,6 +27,18 @@ namespace Tests.EditMode.Achievements
             return this;
         }
 
+        public AchievementDefinitionBuilder WithConditions(params AchievementConditionSO[] conditions)
+        {
+            SetField("conditions", conditions == null ? null : new System.Collections.Generic.List<AchievementConditionSO>(conditions));
+            return this;
+        }
+
+        public AchievementDefinitionBuilder WithCompletionMode(AchievementCompletionMode mode)
+        {
+            SetField("completionMode", mode);
+            return this;
+        }
+
         public AchievementDefinition Create() => _definition;
 
         private void SetField(string fieldName, object value)

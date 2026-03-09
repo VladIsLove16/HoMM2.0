@@ -5,11 +5,15 @@ namespace Game.Achievements
 {
     public interface IAchievementService
     {
-        event Action<AchievementDefinition> AchievementUnlocked;
+        event Action<AchievementUnlockResult> AchievementUnlocked;
+        event Action<AchievementProgress> ProgressChanged;
 
-        IReadOnlyCollection<string> UnlockedIds { get; }
+        IReadOnlyCollection<AchievementProgress> Progresses { get; }
 
         bool IsUnlocked(string id);
+        AchievementProgress GetProgress(string id);
+        void HandleEvent(AchievementEvent evt);
         bool TryUnlock(string id);
+        void ResetAll();
     }
 }

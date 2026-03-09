@@ -175,8 +175,10 @@ namespace Adventure.Infrastructure.State
             if (_gameStateRepository == null)
                 return;
 
+            var existing = _gameStateRepository.Load() ?? new GameStateSaveData();
             var snapshot = new GameStateSaveData
             {
+                Currency = existing.Currency,
                 Inventory = _inventorySnapshot != null
                     ? _inventorySnapshot.Select(stack => new UnitStackRecord
                     {

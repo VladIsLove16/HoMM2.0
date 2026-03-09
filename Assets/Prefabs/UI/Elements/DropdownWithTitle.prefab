@@ -1026,7 +1026,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1186346988993209037}
   - component: {fileID: 7588397560424146978}
-  - component: {fileID: 1738780594572445450}
+  - component: {fileID: 2345864588552997503}
   m_Layer: 5
   m_Name: DropdownWithTitle
   m_TagString: Untagged
@@ -1063,7 +1063,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6922053065665053132}
   m_CullTransparentMesh: 1
---- !u!114 &1738780594572445450
+--- !u!114 &2345864588552997503
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1072,7 +1072,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6922053065665053132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
@@ -1080,8 +1080,8 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 1
-  m_Spacing: 20
+  m_ChildAlignment: 4
+  m_Spacing: 15
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -1330,7 +1330,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -431.38104, y: 0, z: -450.30615, w: 0}
+  m_margin: {x: -61.509583, y: -9.363831, z: -154.04938, w: -15.606384}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

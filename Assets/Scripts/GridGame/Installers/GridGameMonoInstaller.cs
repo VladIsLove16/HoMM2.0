@@ -31,6 +31,8 @@ public class GridGameMonoInstaller : MonoInstaller
     [Header("Presentation")]
     [SerializeField] private MonoBehaviour _presentationInstaller;
     [SerializeField] private GridGameSettingsView _gridGameSettingsView;
+    [SerializeField] private Game.Achievements.AchievementsView _achievementsView;
+    [SerializeField] private Game.Achievements.AchievementToastView _achievementToastView;
     [Header("Cursor")]
     [SerializeField] private List<CursorStateTexture> cursorStateTextures;
     [SerializeField] private MouseSensitivityProfileSO mouseSensitivityProfile;
@@ -52,6 +54,22 @@ public class GridGameMonoInstaller : MonoInstaller
         else
             throw new ArgumentException();
         Container.Bind<GridGameSettingsView>().FromInstance(_gridGameSettingsView).AsSingle();
+        if (_achievementsView != null)
+        {
+            Container.Bind<Game.Achievements.AchievementsView>().FromInstance(_achievementsView).AsSingle().NonLazy();
+        }
+        else
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] AchievementsView is not assigned.", this);
+        }
+        if (_achievementToastView != null)
+        {
+            Container.Bind<Game.Achievements.AchievementToastView>().FromInstance(_achievementToastView).AsSingle().NonLazy();
+        }
+        else
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] AchievementToastView is not assigned.", this);
+        }
     }
 
     private void BindCursor()
@@ -74,6 +92,7 @@ public class GridGameMonoInstaller : MonoInstaller
     private void BindServices()
     {
         BindPersistenceServices();
+        BindAchievementServices();
         BindMouseSensitivity();
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
@@ -92,7 +111,6 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<EventBus>().AsSingle();
         Container.Bind<PauseController>().AsSingle();
         Container.Bind<AudioMixer>().AsSingle();
-        //BindAchievementServices();
     }
 
     private void BindMouseSensitivity()
@@ -140,22 +158,25 @@ public class GridGameMonoInstaller : MonoInstaller
             Container.BindInterfacesTo<AdventureStatePersistenceInitializer>().AsSingle().NonLazy();
         }
     }
-    //private void BindAchievementServices()
-    //{
-    //    var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
-    //    if (catalog == null)
-    //    {
-    //        Debug.LogWarning("AchievementCatalog not found at Resources/Achievements/AchievementCatalog");
-    //        catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
-    //    }
+    private void BindAchievementServices()
+    {
+        if (Container.HasBinding<IAchievementService>())
+            return;
 
-    //    Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
-    //    Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
-    //    Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
-    //    Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
-    //    Container.Bind<IGameplayEventBus>().To<GameplayEventBus>().AsSingle();
-    //    Container.BindInterfacesTo<AchievementEventListener>().AsSingle().NonLazy();
-    //}
+        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
+        if (catalog == null)
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] AchievementCatalog not found at Resources/Achievements/AchievementCatalog");
+            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+        }
+
+        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
+        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
+        Container.Bind<ICurrencyWallet>().To<GameStateCurrencyWallet>().AsSingle();
+        Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
+        Container.BindInterfacesTo<AchievementEventListener>().AsSingle().NonLazy();
+    }
 
     private void BindModels()
     {
@@ -189,6 +210,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridCursorViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<Game.Achievements.AchievementsViewModel>().AsSingle().NonLazy();
     }
 
     private void BindGameController()
