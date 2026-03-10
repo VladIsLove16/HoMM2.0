@@ -13,6 +13,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     public event Action<PreviewResult> PreviewUpdated;
     public event Action<DamageContextPreview> DamageContextPreviewChanged;
     public event Action<UnitViewModel, UnitViewModel> AttackAnimationRequested;
+    public event Action<UnitViewModel> HoveredUnitChanged;
     public Action<UnitViewModel> UnitSpawned { get; set; }
     public IGridRenderSettings RenderSettings { get;set; }
     public int Width { get; private set; }
@@ -28,6 +29,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     private readonly Dictionary<IGridContent, UnitViewModel> _uvms = new();
     private readonly Dictionary<CellState, List<Vector2Int>> _data = new();
     private Vector2Int? _hoverOverride;
+    private UnitViewModel _hoveredUnit;
 
     public GameViewModel(
         GameModel model,
@@ -56,11 +58,13 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         {
             _hoverOverride = cell;
             UpdateHoverState(cell);
+            SetHoveredUnit(cell.Value);
         }
         else
         {
             _hoverOverride = null;
             UpdateHoverState(null);
+            SetHoveredUnit((UnitModel)null);
         }
 
         var previewResult = new PreviewResult();
@@ -112,10 +116,12 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         var hoveredCell = _gameModel.GetCell(cell);
         var hoveredUnit = hoveredCell?.Unit as UnitModel;
         bool enemyReachableAdded = false;
+        SetHoveredUnit(hoveredUnit);
 
         if (_turnState.BattleStateProperty.Value == BattleState.replacement)
         {
             UpdateHoverState(null);
+            SetHoveredUnit((UnitModel)null);
             ClearEnemyReachablePreview(previewResult);
             previewResult.Set(CellState.reachableCell, Array.Empty<Vector2Int>());
             DamageContextPreviewChanged?.Invoke(DamageContextPreview.Empty);
@@ -445,6 +451,28 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         preview.Set(CellState.inaccessibleRoutePoint, Array.Empty<Vector2Int>());
         preview.Set(CellState.routeEndAccessible, Array.Empty<Vector2Int>());
         preview.Set(CellState.routeEndBlocked, Array.Empty<Vector2Int>());
+    }
+
+    private void SetHoveredUnit(Vector2Int cell)
+    {
+        var hoveredCell = _gameModel.GetCell(cell);
+        var hoveredUnit = hoveredCell?.Unit as UnitModel;
+        SetHoveredUnit(hoveredUnit);
+    }
+
+    private void SetHoveredUnit(UnitModel unit)
+    {
+        UnitViewModel hoveredVm = null;
+        if (unit != null)
+        {
+            _uvms.TryGetValue(unit, out hoveredVm);
+        }
+
+        if (_hoveredUnit == hoveredVm)
+            return;
+
+        _hoveredUnit = hoveredVm;
+        HoveredUnitChanged?.Invoke(_hoveredUnit);
     }
 
     private Vector2Int ResolveAttackFromCell(ICombatObject attacker, Vector2Int targetCell, Vector2Int nearestCell)

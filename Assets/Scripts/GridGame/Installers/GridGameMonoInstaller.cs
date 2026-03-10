@@ -33,6 +33,8 @@ public class GridGameMonoInstaller : MonoInstaller
     [SerializeField] private GridGameSettingsView _gridGameSettingsView;
     [SerializeField] private Game.Achievements.AchievementsView _achievementsView;
     [SerializeField] private Game.Achievements.AchievementToastView _achievementToastView;
+    [Header("Achievements")]
+    [SerializeField] private AchievementCatalog achievementCatalog;
     [Header("Cursor")]
     [SerializeField] private List<CursorStateTexture> cursorStateTextures;
     [SerializeField] private MouseSensitivityProfileSO mouseSensitivityProfile;
@@ -163,15 +165,16 @@ public class GridGameMonoInstaller : MonoInstaller
         if (Container.HasBinding<IAchievementService>())
             return;
 
-        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
-        if (catalog == null)
+        if (achievementCatalog == null)
         {
-            Debug.LogWarning("[GridGameMonoInstaller] AchievementCatalog not found at Resources/Achievements/AchievementCatalog");
-            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+            Debug.LogError("[GridGameMonoInstaller] AchievementCatalog is not assigned. Achievements will be unavailable.", this);
+            Container.Bind<IAchievementDefinitionProvider>().To<EmptyAchievementDefinitionProvider>().AsSingle();
         }
-
-        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
-        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        else
+        {
+            Container.Bind<AchievementCatalog>().FromInstance(achievementCatalog).AsSingle();
+            Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        }
         Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
         Container.Bind<ICurrencyWallet>().To<GameStateCurrencyWallet>().AsSingle();
         Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();

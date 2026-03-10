@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e84b7e8d0a4f8dbda5234a3c75d1b6, type: 3}
+  m_Name: Achievement_WinFirstBattle
+  m_EditorClassIdentifier: 
+  id: win_first_battle
+  title: First Victory
+  titleLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  description: Win your first tactical battle.
+  descriptionLocalized:
+    m_TableReference:
+      m_TableCollectionName: GUID:d1ac0cf6ef8dbf84baaef29bbb47fd7d
+    m_TableEntryReference:
+      m_KeyId: 29694498306514944
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  icon: {fileID: 21300000, guid: 4a5d5dd8b6a787c4db7eca03c7e9b783, type: 3}
+  category: 1
+  completionMode: 0
+  isSecret: 0
+  rewardCurrencyAmount: 50
+  conditions:
+  - {fileID: 11400000, guid: be7e8c8e631f492fb09533c593bc0775, type: 2}
+  references:
+    version: 2
+    RefIds: []

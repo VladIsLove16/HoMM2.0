@@ -54,6 +54,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private HelpMenu helpMenu;
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private AdventureDevTools devTools;
+    [Header("Achievements")]
+    [SerializeField] private AchievementCatalog achievementCatalog;
     [Header("Behavior Graph Events")]
     [SerializeField] private PlayerChosenDialogOption playerChosenDialogOptionChannel;
     [SerializeField] private BattleFinishedChannel battleFinishedChannel;
@@ -155,15 +157,16 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         if (Container.HasBinding<IAchievementService>())
             return;
 
-        var catalog = Resources.Load<AchievementCatalog>("Achievements/AchievementCatalog");
-        if (catalog == null)
+        if (achievementCatalog == null)
         {
-            Debug.LogWarning("[AdventureGameplayInstaller] AchievementCatalog not found at Resources/Achievements/AchievementCatalog", this);
-            catalog = ScriptableObject.CreateInstance<AchievementCatalog>();
+            Debug.LogError("[AdventureGameplayInstaller] AchievementCatalog is not assigned. Achievements will be unavailable.", this);
+            Container.Bind<IAchievementDefinitionProvider>().To<EmptyAchievementDefinitionProvider>().AsSingle();
         }
-
-        Container.Bind<AchievementCatalog>().FromInstance(catalog).AsSingle();
-        Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        else
+        {
+            Container.Bind<AchievementCatalog>().FromInstance(achievementCatalog).AsSingle();
+            Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
+        }
         Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
         Container.Bind<ICurrencyWallet>().To<GameStateCurrencyWallet>().AsSingle();
         Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();

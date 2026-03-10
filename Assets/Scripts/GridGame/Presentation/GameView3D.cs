@@ -13,6 +13,7 @@ public class GameView3D : MonoBehaviour
     [Inject] private IWorldToCellProvider _worldToCellProvider;
     [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
     private UnitView3D _draggedUnit;
+    private IHoverable _lastHoverable;
 
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellSelected;
@@ -66,12 +67,19 @@ public class GameView3D : MonoBehaviour
         if (gameViewObject == null)
             return;
 
+        if (_lastHoverable != null && !ReferenceEquals(_lastHoverable, gameViewObject))
+        {
+            _lastHoverable.Unhover();
+            _lastHoverable = null;
+        }
+
         if (Log)
             Debug.Log(gameViewObject.transform.gameObject.name + " HandleGameViewObjectHovered");
 
         if (gameViewObject is IHoverable hoverable)
         {
             hoverable.Hover();
+            _lastHoverable = hoverable;
         }
 
         if (TryResolveCoords(gameViewObject.transform.position, out var coords))
@@ -108,9 +116,16 @@ public class GameView3D : MonoBehaviour
         if (!TryResolveCoords(worldPosition, out var coords))
             return false;
 
+        ClearHoverable();
         cell = coords.Key;
         ProcessCellHover(coords);
         return true;
+    }
+
+    public void ClearHover()
+    {
+        ClearHoverable();
+        _gameVM?.HandleCellHovered((Vector2Int?)null);
     }
 
     public bool HandleGridSelect(Vector3 worldPosition)
@@ -202,6 +217,15 @@ public class GameView3D : MonoBehaviour
     {
         TestHandleCellHovered?.Invoke(coords);
         _gameVM?.HandleCellHovered(coords.Key, coords.Value);
+    }
+
+    private void ClearHoverable()
+    {
+        if (_lastHoverable == null)
+            return;
+
+        _lastHoverable.Unhover();
+        _lastHoverable = null;
     }
 
     private void ProcessCellSelected(KeyValuePair<Vector2Int, Vector2Int> coords)

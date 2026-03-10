@@ -5,7 +5,7 @@ namespace Tests.EditMode.Achievements
 {
     internal sealed class AchievementDefinitionBuilder
     {
-        private readonly AchievementDefinition _definition = new AchievementDefinition();
+        private readonly AchievementDefinition _definition = UnityEngine.ScriptableObject.CreateInstance<AchievementDefinition>();
 
         public static AchievementDefinitionBuilder New() => new AchievementDefinitionBuilder();
 

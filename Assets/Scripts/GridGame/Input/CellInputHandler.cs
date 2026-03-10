@@ -55,6 +55,7 @@ public class CellInputHandler : MonoBehaviour
     {
         if (!TryGetHit(out var hit))
         {
+            _gameView3D?.ClearHover();
             _lastHoveredCollider = null;
             _lastHoveredCell = null;
             return;

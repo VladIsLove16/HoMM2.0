@@ -14,6 +14,7 @@ public sealed class UnitPortraitViewModel : IDisposable
     private readonly ReactiveProperty<int> _turnOrder;
     private readonly ReactiveProperty<Team> _team;
     private readonly ReactiveProperty<Vector2Int> _cellPosition;
+    private readonly ReactiveProperty<bool> _isHovered = new(false);
     private readonly Subject<UnitPortraitDamageEvent> _damageStream = new();
     [Inject] private ITurnQueue _turnQueue;
     public UnitPortraitViewModel(
@@ -44,6 +45,7 @@ public sealed class UnitPortraitViewModel : IDisposable
         _disposables.Add(_turnOrder);
         _disposables.Add(_team);
         _disposables.Add(_cellPosition);
+        _disposables.Add(_isHovered);
     }
 
     public Sprite Icon { get; }
@@ -54,11 +56,13 @@ public sealed class UnitPortraitViewModel : IDisposable
     public IReadOnlyReactiveProperty<int> TurnOrderObservable => _turnOrder;
     public IReadOnlyReactiveProperty<Team> TeamObservable => _team;
     public IReadOnlyReactiveProperty<Vector2Int> CellPositionObservable => _cellPosition;
+    public IReadOnlyReactiveProperty<bool> IsHoveredObservable => _isHovered;
     public IObservable<UnitPortraitDamageEvent> DamageTaken => _damageStream;
 
     public event Action<UnitPortraitViewModel> UnitRemoved;
 
     public void UpdateTurnOrder(int turnOrder) => _turnOrder.Value = turnOrder;
+    public void SetHovered(bool isHovered) => _isHovered.Value = isHovered;
 
     public void RequestFocus()
     {
@@ -105,6 +109,7 @@ public sealed class UnitPortraitViewModel : IDisposable
             _unitModel.Died -= OnUnitDied;
         }
 
+        _isHovered.Value = false;
         _disposables.Dispose();
         _damageStream.OnCompleted();
         ReleaseFocus();

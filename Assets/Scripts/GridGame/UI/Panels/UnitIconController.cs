@@ -1,9 +1,9 @@
-using System.Collections;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -15,17 +15,36 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
     [SerializeField] private TextMeshProUGUI turnText;
     [SerializeField] private Animator portraitAnimator;
     [SerializeField] private string damageTriggerName = "Damage";
+    [SerializeField] private string hoverOnTriggerName = "HoverOn";
+    [SerializeField] private string hoverOffTriggerName = "HoverOff";
 
     [Header("Damage Popup")]
     [SerializeField] private TextMeshProUGUI damagePopupText;
-    [SerializeField] private float damagePopupDuration = 1.25f;
+    [SerializeField] private float damagePopupFadeIn = 0.1f;
+    [SerializeField] private float damagePopupHold = 0.6f;
+    [SerializeField] private float damagePopupFadeOut = 0.25f;
+    [SerializeField] private float damagePopupMoveUp = 18f;
 
     private UnitPortraitViewModel _viewModel;
     private readonly CompositeDisposable _bindings = new();
-    private Coroutine _damageRoutine;
+    private Sequence _damageSequence;
+    private Vector2 _damagePopupBasePos;
+    private int _damageTriggerId;
+    private int _hoverOnTriggerId;
+    private int _hoverOffTriggerId;
 
     private void Awake()
     {
+        _damageTriggerId = string.IsNullOrEmpty(damageTriggerName) ? 0 : Animator.StringToHash(damageTriggerName);
+        _hoverOnTriggerId = string.IsNullOrEmpty(hoverOnTriggerName) ? 0 : Animator.StringToHash(hoverOnTriggerName);
+        _hoverOffTriggerId = string.IsNullOrEmpty(hoverOffTriggerName) ? 0 : Animator.StringToHash(hoverOffTriggerName);
+
+        if (damagePopupText != null)
+        {
+            var rect = damagePopupText.rectTransform;
+            _damagePopupBasePos = rect.anchoredPosition;
+            SetDamagePopupVisible(false, true);
+        }
         ClearDamagePopup();
         ClearVisuals();
     }
@@ -52,6 +71,7 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
         _bindings.Add(_viewModel.TeamObservable.Subscribe(UpdateTeam));
         _bindings.Add(_viewModel.TurnOrderObservable.Subscribe(UpdateTurnText));
         _bindings.Add(_viewModel.DamageTaken.Subscribe(OnDamageTaken));
+        _bindings.Add(_viewModel.IsHoveredObservable.Subscribe(OnHoveredChanged));
     }
 
     public void Unbind()
@@ -92,40 +112,36 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
     {
         if (damagePopupText != null)
         {
-            damagePopupText.gameObject.SetActive(true);
             damagePopupText.text = $"-{evt.Amount}";
-            if (_damageRoutine != null)
-            {
-                StopCoroutine(_damageRoutine);
-            }
-            _damageRoutine = StartCoroutine(HideDamagePopup());
+            PlayDamagePopupAnimation();
         }
 
-        if (portraitAnimator != null && !string.IsNullOrEmpty(damageTriggerName))
+        if (portraitAnimator != null && _damageTriggerId != 0)
         {
-            portraitAnimator.SetTrigger(damageTriggerName);
+            portraitAnimator.SetTrigger(_damageTriggerId);
         }
     }
 
-    private IEnumerator HideDamagePopup()
+    private void OnHoveredChanged(bool isHovered)
     {
-        yield return new WaitForSeconds(damagePopupDuration);
-        ClearDamagePopup();
-        _damageRoutine = null;
+        if (portraitAnimator == null)
+            return;
+
+        if (isHovered && _hoverOnTriggerId != 0)
+        {
+            portraitAnimator.SetTrigger(_hoverOnTriggerId);
+        }
+        else if (!isHovered && _hoverOffTriggerId != 0)
+        {
+            portraitAnimator.SetTrigger(_hoverOffTriggerId);
+        }
     }
 
     private void ClearDamagePopup()
     {
-        if (_damageRoutine != null)
-        {
-            StopCoroutine(_damageRoutine);
-            _damageRoutine = null;
-        }
-
-        if (damagePopupText != null)
-        {
-            damagePopupText.gameObject.SetActive(false);
-        }
+        _damageSequence?.Kill();
+        _damageSequence = null;
+        SetDamagePopupVisible(false, true);
     }
 
     private void ClearVisuals()
@@ -156,5 +172,40 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
     private void OnDestroy()
     {
         Unbind();
+    }
+
+    private void PlayDamagePopupAnimation()
+    {
+        if (damagePopupText == null)
+            return;
+
+        _damageSequence?.Kill();
+
+        var rect = damagePopupText.rectTransform;
+        rect.anchoredPosition = _damagePopupBasePos;
+        SetDamagePopupVisible(true, true, 0f);
+
+        _damageSequence = DOTween.Sequence()
+            .Append(damagePopupText.DOFade(1f, damagePopupFadeIn))
+            .Join(rect.DOAnchorPos(_damagePopupBasePos + Vector2.up * damagePopupMoveUp, damagePopupFadeIn))
+            .AppendInterval(damagePopupHold)
+            .Append(damagePopupText.DOFade(0f, damagePopupFadeOut))
+            .OnComplete(() => SetDamagePopupVisible(false, true));
+    }
+
+    private void SetDamagePopupVisible(bool visible, bool resetPosition, float? alphaOverride = null)
+    {
+        if (damagePopupText == null)
+            return;
+
+        if (resetPosition)
+        {
+            damagePopupText.rectTransform.anchoredPosition = _damagePopupBasePos;
+        }
+
+        var color = damagePopupText.color;
+        color.a = alphaOverride ?? (visible ? 1f : 0f);
+        damagePopupText.color = color;
+        damagePopupText.gameObject.SetActive(visible);
     }
 }

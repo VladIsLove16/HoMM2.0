@@ -11,6 +11,7 @@ public class UnitTurnPanelViewModel : IDisposable
     private readonly GameViewModel _gameViewModel;
     private readonly CompositeDisposable _disposables = new();
     private readonly Dictionary<ICombatObject, UnitPortraitViewModel> _portraitLookup = new();
+    private UnitPortraitViewModel _hoveredPortrait;
 
     public ReactiveCollection<UnitPortraitViewModel> TurnQueue { get; } = new();
     public ReactiveProperty<UnitPortraitViewModel> ActivePortrait { get; } = new();
@@ -44,6 +45,8 @@ public class UnitTurnPanelViewModel : IDisposable
         _turnState.UnitAddedStream
             .Subscribe(OnCombatUnitAdded)
             .AddTo(_disposables);
+
+        _gameViewModel.HoveredUnitChanged += OnHoveredUnitChanged;
     }
 
     private void OnActiveObjectChanged(ICombatObject combatObject)
@@ -142,6 +145,7 @@ public class UnitTurnPanelViewModel : IDisposable
 
     public void Dispose()
     {
+        _gameViewModel.HoveredUnitChanged -= OnHoveredUnitChanged;
         _disposables.Dispose();
         foreach (var portrait in _portraitLookup.Values)
         {
@@ -149,5 +153,35 @@ public class UnitTurnPanelViewModel : IDisposable
             portrait.Dispose();
         }
         _portraitLookup.Clear();
+    }
+
+    private void OnHoveredUnitChanged(UnitViewModel hoveredUnit)
+    {
+        var next = ResolvePortrait(hoveredUnit);
+        if (_hoveredPortrait == next)
+            return;
+
+        if (_hoveredPortrait != null)
+        {
+            _hoveredPortrait.SetHovered(false);
+        }
+
+        _hoveredPortrait = next;
+        if (_hoveredPortrait != null)
+        {
+            _hoveredPortrait.SetHovered(true);
+        }
+    }
+
+    private UnitPortraitViewModel ResolvePortrait(UnitViewModel hoveredUnit)
+    {
+        if (hoveredUnit == null)
+            return null;
+
+        if (hoveredUnit.Model == null)
+            return null;
+
+        _portraitLookup.TryGetValue(hoveredUnit.Model, out var portrait);
+        return portrait;
     }
 }

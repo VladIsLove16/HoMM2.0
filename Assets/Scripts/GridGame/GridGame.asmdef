@@ -18,13 +18,16 @@
         "GUID:ee5ed074ae628da4796a0375a08e13cb",
         "GUID:1c2a9d77c12a4e6ab41a3d162229a08d",
         "GUID:9e24947de15b9834991c9d8411ea37cf",
-        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5"
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:5b5f11441f0671d448f6e09ba1a75868"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        "DOTween.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],

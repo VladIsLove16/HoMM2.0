@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization;
 
 namespace Game.Achievements
 {
-    [Serializable]
-    public sealed class AchievementDefinition
+    [CreateAssetMenu(menuName = "Game/Achievements/Definition", fileName = "AchievementDefinition")]
+    public sealed class AchievementDefinition : ScriptableObject
     {
         [SerializeField] private string id;
         [SerializeField] private string title;

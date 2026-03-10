@@ -151,11 +151,31 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 27142613821284352
-    m_Localized: You have started your first fight!
+    m_Localized: Win your first fight
     m_Metadata:
       m_Items: []
   - m_Id: 28226755048759296
     m_Localized: Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29694301400719360
+    m_Localized: Start your first tactical battle.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29694498306514944
+    m_Localized: Win your first tactical battle.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29694666401636352
+    m_Localized: Gather ten mushrooms across your journey.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29695153721040896
+    m_Localized: Collect your first mushroom in the forest.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30033871975735296
+    m_Localized: Achievement load error.
     m_Metadata:
       m_Items: []
   references:

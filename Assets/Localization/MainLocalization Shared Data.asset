@@ -164,6 +164,26 @@ MonoBehaviour:
     m_Key: UI.Title
     m_Metadata:
       m_Items: []
+  - m_Id: 29694301400719360
+    m_Key: Achievement.StartFirstBattleDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29694498306514944
+    m_Key: Achievement.WinFirstBattleDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29694666401636352
+    m_Key: Achievement.GatherTenMushroomsDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 29695153721040896
+    m_Key: Achievement.GatherFirstMushroomDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30033871975735296
+    m_Key: UI.LoadError
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

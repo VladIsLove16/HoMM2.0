@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -13,14 +14,21 @@ namespace Game.Achievements
     {
         [Header("UI")]
         [SerializeField] private GameObject root;
+        [SerializeField] private RectTransform toastRect;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text descriptionText;
         [SerializeField] private TMP_Text rewardText;
         [SerializeField] private Image iconImage;
 
         [Header("Timing")]
-        [SerializeField] private float showDurationSeconds = 3f;
+        [SerializeField] private float showDurationSeconds = 2.5f;
+        [SerializeField] private float inDurationSeconds = 0.35f;
+        [SerializeField] private float outDurationSeconds = 0.35f;
         [SerializeField] private bool useUnscaledTime = true;
+        [SerializeField] private Vector2 shownPosition = new Vector2(-20f, 20f);
+        [SerializeField] private Vector2 hiddenPosition = new Vector2(-20f, -200f);
+        [SerializeField] private Ease inEase = Ease.OutBack;
+        [SerializeField] private Ease outEase = Ease.InBack;
 
         [Header("Audio")]
         [SerializeField] private AudioSource sfxSource;
@@ -29,6 +37,7 @@ namespace Game.Achievements
         private readonly Queue<AchievementUnlockResult> _queue = new();
         private IAchievementService _service;
         private Coroutine _activeRoutine;
+        private Sequence _sequence;
 
         [Inject]
         public void Construct(IAchievementService service)
@@ -39,11 +48,16 @@ namespace Game.Achievements
 
         private void Awake()
         {
+            if (toastRect == null)
+            {
+                toastRect = root != null ? root.GetComponent<RectTransform>() : GetComponent<RectTransform>();
+            }
             SetVisible(false);
         }
 
         private void OnDestroy()
         {
+            _sequence?.Kill();
             if (_service != null)
             {
                 _service.AchievementUnlocked -= OnAchievementUnlocked;
@@ -67,14 +81,7 @@ namespace Game.Achievements
                 ApplyResult(result);
                 PlaySfx();
                 SetVisible(true);
-                if (useUnscaledTime)
-                {
-                    yield return new WaitForSecondsRealtime(showDurationSeconds);
-                }
-                else
-                {
-                    yield return new WaitForSeconds(showDurationSeconds);
-                }
+                yield return StartCoroutine(PlayAnimation());
                 SetVisible(false);
             }
 
@@ -110,6 +117,28 @@ namespace Game.Achievements
             if (sfxSource == null || unlockSfx == null)
                 return;
             sfxSource.PlayOneShot(unlockSfx);
+        }
+
+        private IEnumerator PlayAnimation()
+        {
+            if (toastRect == null)
+            {
+                if (useUnscaledTime)
+                    yield return new WaitForSecondsRealtime(showDurationSeconds);
+                else
+                    yield return new WaitForSeconds(showDurationSeconds);
+                yield break;
+            }
+
+            toastRect.anchoredPosition = hiddenPosition;
+
+            _sequence?.Kill();
+            _sequence = DOTween.Sequence()
+                .SetUpdate(useUnscaledTime)
+                .Append(toastRect.DOAnchorPos(shownPosition, inDurationSeconds).SetEase(inEase))
+                .AppendInterval(showDurationSeconds)
+                .Append(toastRect.DOAnchorPos(hiddenPosition, outDurationSeconds).SetEase(outEase));
+            yield return _sequence.WaitForCompletion();
         }
 
         private static string ResolveLocalized(LocalizedString localized, string fallback)
