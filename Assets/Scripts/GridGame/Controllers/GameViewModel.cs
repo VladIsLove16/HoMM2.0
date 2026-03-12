@@ -51,6 +51,12 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         _turnState.ActiveObject
             .Subscribe(OnActiveUnitChanged)
             .AddTo(_subscriptions);
+        _turnState.BattleStateProperty
+            .Subscribe(OnBattleStateChanged)
+            .AddTo(_subscriptions);
+        _turnState.TurnNumber
+            .Subscribe(OnTurnNumberChanged)
+            .AddTo(_subscriptions);
     }
     public void HandleCellHovered(Vector2Int? cell)
     {
@@ -290,6 +296,10 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         Width = grid.GetWidth();
         Height = grid.GetHeight();
         GridInited?.Invoke(Width, Height);
+        if (_turnState.BattleStateProperty.Value == BattleState.replacement)
+        {
+            ApplyDeploymentPreview();
+        }
     }
 
     private void OnActiveUnitChanged(ICombatObject combatObject)
@@ -297,11 +307,79 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         if (combatObject == null)
             return;
 
+        if (_turnState.BattleStateProperty.Value == BattleState.replacement)
+        {
+            ApplyDeploymentPreview();
+            return;
+        }
+
         SetReachableCellState(combatObject);
         SetEnemyCellState();
         _data[CellState.activeUnit] = new List<Vector2Int> { combatObject.Position };
         var previewResult = new PreviewResult(_data);
         PreviewChanged?.Invoke(previewResult);
+    }
+
+    private void OnBattleStateChanged(BattleState state)
+    {
+        if (state == BattleState.replacement)
+        {
+            ApplyDeploymentPreview();
+            return;
+        }
+
+        if (_turnState.ActiveObject.Value != null)
+        {
+            OnActiveUnitChanged(_turnState.ActiveObject.Value);
+        }
+    }
+
+    private void OnTurnNumberChanged(int _)
+    {
+        if (_turnState.BattleStateProperty.Value == BattleState.replacement)
+        {
+            ApplyDeploymentPreview();
+            return;
+        }
+
+        if (_turnState.ActiveObject.Value != null)
+        {
+            OnActiveUnitChanged(_turnState.ActiveObject.Value);
+        }
+    }
+
+    private void ApplyDeploymentPreview()
+    {
+        if (Width <= 0 || Height <= 0)
+            return;
+
+        _data[CellState.activeUnit] = new List<Vector2Int>();
+        _data[CellState.enemyCell] = new List<Vector2Int>();
+        _data[CellState.reachableCell] = BuildDeploymentCells(_turnState.LocalTeam);
+
+        var previewResult = new PreviewResult(_data);
+        PreviewChanged?.Invoke(previewResult);
+    }
+
+    private List<Vector2Int> BuildDeploymentCells(Team team)
+    {
+        var rows = Mathf.Clamp(DeploymentRows, 1, Height);
+        var result = new List<Vector2Int>();
+
+        if (team == Team.Red)
+        {
+            for (var y = Height - rows; y < Height; y++)
+            for (var x = 0; x < Width; x++)
+                result.Add(new Vector2Int(x, y));
+        }
+        else
+        {
+            for (var y = 0; y < rows; y++)
+            for (var x = 0; x < Width; x++)
+                result.Add(new Vector2Int(x, y));
+        }
+
+        return result;
     }
 
     private void SetReachableCellState(ICombatObject combatObject)
@@ -573,12 +651,9 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
         var rows = Mathf.Clamp(DeploymentRows, 1, Height);
 
-        return team switch
-        {
-            Team.Blue => cell.y < rows,
-            Team.Red => cell.y >= Height - rows,
-            _ => true
-        };
+        return team == Team.Red
+            ? cell.y >= Height - rows
+            : cell.y < rows;
     }
 }
    

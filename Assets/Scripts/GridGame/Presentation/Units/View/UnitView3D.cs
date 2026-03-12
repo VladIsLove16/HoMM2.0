@@ -29,7 +29,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     {
         if (meshes == null || meshes.Length == 0)
         {
-            Debug.LogWarning("meshes have not been setted");
+            meshes = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            if (meshes == null || meshes.Length == 0)
+            {
+                Debug.LogWarning("[UnitView3D] meshes have not been assigned and no SkinnedMeshRenderer found.", this);
+            }
         }
         if (unitViewUI == null)
         {
@@ -120,6 +124,10 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         
         foreach (var mesh in meshes)
         {
+            if (mesh == null)
+            {
+                continue;
+            }
             mesh.material = material;
         }
         
@@ -453,8 +461,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         var desired = team switch
         {
             Team.Red => redDefaultForward,
-            Team.Blue => blueDefaultForward,
-            _ => _defaultForward
+            _ => blueDefaultForward
         };
 
         if (desired.sqrMagnitude < 0.0001f)

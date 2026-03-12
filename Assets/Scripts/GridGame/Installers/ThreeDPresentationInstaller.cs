@@ -53,6 +53,7 @@ public class ThreeDPresentationInstaller : MonoBehaviour, IGamePresentationInsta
         if (materialProvider != null)
         {
             container.Bind<IMaterialProvider>().FromInstance(materialProvider).AsSingle();
+            container.Bind<ITeamColorProvider>().FromInstance(materialProvider).AsSingle();
         }
 
         var parentTransform = ResolveUnitsParent();

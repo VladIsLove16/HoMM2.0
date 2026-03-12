@@ -10,11 +10,13 @@ public sealed class UnitPortraitViewModel : IDisposable
     private readonly IGridViewModel _gridViewModel;
     private readonly GameViewModel _gameViewModel;
     private readonly UnitModel _unitModel;
+    private readonly ITeamColorProvider _teamColorProvider;
     private readonly CompositeDisposable _disposables = new();
     private readonly ReactiveProperty<int> _turnOrder;
     private readonly ReactiveProperty<Team> _team;
     private readonly ReactiveProperty<Vector2Int> _cellPosition;
     private readonly ReactiveProperty<bool> _isHovered = new(false);
+    private readonly ReactiveProperty<Color> _borderColor = new(Color.white);
     private readonly Subject<UnitPortraitDamageEvent> _damageStream = new();
     [Inject] private ITurnQueue _turnQueue;
     public UnitPortraitViewModel(
@@ -22,11 +24,13 @@ public sealed class UnitPortraitViewModel : IDisposable
         Sprite icon,
         int turnOrder,
         IGridViewModel gridViewModel,
-        GameViewModel gameViewModel)
+        GameViewModel gameViewModel,
+        ITeamColorProvider teamColorProvider = null)
     {
         _combatUnit = combatUnit ?? throw new ArgumentNullException(nameof(combatUnit));
         _gridViewModel = gridViewModel ?? throw new ArgumentNullException(nameof(gridViewModel));
         _gameViewModel = gameViewModel ?? throw new ArgumentNullException(nameof(gameViewModel));
+        _teamColorProvider = teamColorProvider;
 
         Icon = icon;
         _turnOrder = new ReactiveProperty<int>(turnOrder);
@@ -42,10 +46,14 @@ public sealed class UnitPortraitViewModel : IDisposable
             _unitModel.Died += OnUnitDied;
         }
 
+        _borderColor.Value = ResolveTeamColor(_team.Value);
+        _team.Subscribe(team => _borderColor.Value = ResolveTeamColor(team)).AddTo(_disposables);
+
         _disposables.Add(_turnOrder);
         _disposables.Add(_team);
         _disposables.Add(_cellPosition);
         _disposables.Add(_isHovered);
+        _disposables.Add(_borderColor);
     }
 
     public Sprite Icon { get; }
@@ -57,12 +65,14 @@ public sealed class UnitPortraitViewModel : IDisposable
     public IReadOnlyReactiveProperty<Team> TeamObservable => _team;
     public IReadOnlyReactiveProperty<Vector2Int> CellPositionObservable => _cellPosition;
     public IReadOnlyReactiveProperty<bool> IsHoveredObservable => _isHovered;
+    public IReadOnlyReactiveProperty<Color> BorderColorObservable => _borderColor;
     public IObservable<UnitPortraitDamageEvent> DamageTaken => _damageStream;
 
     public event Action<UnitPortraitViewModel> UnitRemoved;
 
     public void UpdateTurnOrder(int turnOrder) => _turnOrder.Value = turnOrder;
     public void SetHovered(bool isHovered) => _isHovered.Value = isHovered;
+    public void SetBorderColor(Color color) => _borderColor.Value = color;
 
     public void RequestFocus()
     {
@@ -113,5 +123,15 @@ public sealed class UnitPortraitViewModel : IDisposable
         _disposables.Dispose();
         _damageStream.OnCompleted();
         ReleaseFocus();
+    }
+
+    private Color ResolveTeamColor(Team team)
+    {
+        if (_teamColorProvider != null)
+        {
+            return _teamColorProvider.GetTeamColor(team);
+        }
+
+        return team == Team.Red ? Color.red : Color.blue;
     }
 }

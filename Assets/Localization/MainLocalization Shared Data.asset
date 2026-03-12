@@ -20,7 +20,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2
-    m_Key: UI.Achievments
+    m_Key: UI.Continue
     m_Metadata:
       m_Items: []
   - m_Id: 3
@@ -182,6 +182,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 30033871975735296
     m_Key: UI.LoadError
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30109597613678592
+    m_Key: Settings.Exit
     m_Metadata:
       m_Items: []
   m_Metadata:

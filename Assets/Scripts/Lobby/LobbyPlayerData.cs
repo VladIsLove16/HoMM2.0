@@ -10,6 +10,7 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
     public ulong ClientId;
     public FixedString128Bytes PlayerName;
     public bool IsReady;
+    public Team Team;
 
     public bool Equals(LobbyPlayerData other)
     {
@@ -21,6 +22,7 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
         serializer.SerializeValue(ref ClientId);
         serializer.SerializeValue(ref PlayerName);
         serializer.SerializeValue(ref IsReady);
+        serializer.SerializeValue(ref Team);
     }
 }
 

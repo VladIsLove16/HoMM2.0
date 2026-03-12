@@ -8,9 +8,11 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     [SerializeField] private UnitHealthBar healthBar;
     [SerializeField] private TextMeshProUGUI amountText;
     [SerializeField] private TextMeshProUGUI healthAmountText;
+    [SerializeField] private bool faceCamera = true;
 
     private UnitViewModel _unitViewModel;
     private CompositeDisposable _disposables = new();
+    private Camera _camera;
 
     public virtual void Init(UnitViewModel vm)
     {
@@ -37,12 +39,6 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
         UpdateHealth();
         UpdateAmount();
-
-        var mainCam = Camera.main;
-        if (mainCam != null)
-        {
-            transform.rotation = new(mainCam.transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
-        }
     }
 
     private void UpdateHealth()
@@ -74,5 +70,21 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     public void Dispose()
     {
         _disposables.Dispose();
+    }
+
+    private void LateUpdate()
+    {
+        if (!faceCamera)
+            return;
+
+        if (_camera == null)
+        {
+            _camera = Camera.main;
+        }
+
+        if (_camera != null)
+        {
+            transform.rotation = _camera.transform.rotation;
+        }
     }
 }

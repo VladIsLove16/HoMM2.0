@@ -11,10 +11,15 @@ using UnityEngine.SceneManagement;
 public class LobbyManager : NetworkBehaviour
 {
     private const string GameSceneName = "GridFight";
+    private static readonly Team[] SelectableTeams = { Team.Blue, Team.Red, Team.Green, Team.Yellow };
 
     [Header("Game Configuration")]
     // Ссылка на ScriptableObject (назначать в инспекторе у префаба/объекта на сцене)
     [SerializeField] private GameConfigurationService GameConfigurationService;
+    [Header("Team Selection")]
+    [SerializeField] private Team defaultHostTeam = Team.Blue;
+    [SerializeField] private Team defaultClientTeam = Team.Red;
+    [SerializeField] private Team requestedTeam = Team.None;
 
     // Сетевые переменные (хост владеет и реплицирует)
     private NetworkList<LobbyPlayerData> _lobbyPlayers;
@@ -28,6 +33,7 @@ public class LobbyManager : NetworkBehaviour
     public Action<int,int> OnGridSizeChanged;
     public Action OnHostStarted;
     public Action OnClientStarted;
+    public Action<LobbyPlayerData> OnLocalPlayerTeamChanged;
 
     private void Awake()
     {
@@ -71,7 +77,7 @@ public class LobbyManager : NetworkBehaviour
         if (GameConfigurationService != null)
         {
             GameConfigurationService.SetGameMode(GameMode.Multiplayer);
-            GameConfigurationService.SetTeam(Team.Blue);
+            GameConfigurationService.SetTeam(defaultHostTeam);
         }
     }
 
@@ -82,7 +88,7 @@ public class LobbyManager : NetworkBehaviour
         if (GameConfigurationService != null)
         {
             GameConfigurationService.SetGameMode(GameMode.Multiplayer);
-            GameConfigurationService.SetTeam(Team.Red);
+            GameConfigurationService.SetTeam(defaultClientTeam);
         }
     }
 
@@ -100,11 +106,16 @@ public class LobbyManager : NetworkBehaviour
 
     private void AddPlayerToLobby()
     {
+        var teamPreference = requestedTeam != Team.None
+            ? requestedTeam
+            : (IsHost ? defaultHostTeam : defaultClientTeam);
+
         var playerData = new LobbyPlayerData
         {
             ClientId = NetworkManager.Singleton.LocalClientId,
             PlayerName = $"Player {NetworkManager.Singleton.LocalClientId}",
-            IsReady = false
+            IsReady = false,
+            Team = teamPreference
         };
 
         AddPlayerToLobbyServerRpc(playerData);
@@ -116,6 +127,7 @@ public class LobbyManager : NetworkBehaviour
         // На сервере добавляем игрока, если ещё нет
         if (!_lobbyPlayers.Contains(playerData))
         {
+            playerData.Team = ResolveTeamForPlayer(playerData);
             _lobbyPlayers.Add(playerData);
         }
     }
@@ -142,6 +154,7 @@ public class LobbyManager : NetworkBehaviour
             playersArray[i] = _lobbyPlayers[i];
         }
         OnPlayersListChanged?.Invoke(playersArray);
+        ApplyNetworkStateToLocalService();
     }
 
     // UI: переключатель конфигурации (на хосте)
@@ -229,6 +242,11 @@ public class LobbyManager : NetworkBehaviour
     {
 
         GameConfigurationService.SetSelectedConfiguration(_selectedConfigIndex.Value);
+        var local = FindLocalPlayerData();
+        if (local.HasValue)
+        {
+            GameConfigurationService.SetTeam(local.Value.Team);
+        }
     }
 
 
@@ -241,6 +259,80 @@ public class LobbyManager : NetworkBehaviour
         var clamped = (count > 0) ? Mathf.Clamp(_selectedConfigIndex.Value, 0, count - 1) : -1;
         GameConfigurationService.SetSelectedConfiguration(clamped);
 
+        var local = FindLocalPlayerData();
+        if (local.HasValue)
+        {
+            GameConfigurationService.SetTeam(local.Value.Team);
+            OnLocalPlayerTeamChanged?.Invoke(local.Value);
+        }
+
+    }
+
+    public void RequestTeam(Team team)
+    {
+        requestedTeam = team;
+        if (IsClient || IsHost)
+        {
+            RequestTeamServerRpc(NetworkManager.Singleton.LocalClientId, team);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestTeamServerRpc(ulong clientId, Team team)
+    {
+        for (int i = 0; i < _lobbyPlayers.Count; i++)
+        {
+            if (_lobbyPlayers[i].ClientId != clientId)
+                continue;
+
+            var updated = _lobbyPlayers[i];
+            updated.Team = ResolveTeamForPlayer(updated, team);
+            _lobbyPlayers[i] = updated;
+            return;
+        }
+    }
+
+    private LobbyPlayerData? FindLocalPlayerData()
+    {
+        var localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0;
+        for (int i = 0; i < _lobbyPlayers.Count; i++)
+        {
+            if (_lobbyPlayers[i].ClientId == localId)
+                return _lobbyPlayers[i];
+        }
+        return null;
+    }
+
+    private Team ResolveTeamForPlayer(LobbyPlayerData playerData, Team? requested = null)
+    {
+        var candidate = requested ?? playerData.Team;
+        if (candidate != Team.None && IsTeamAvailable(candidate, playerData.ClientId))
+        {
+            return candidate;
+        }
+
+        foreach (var team in SelectableTeams)
+        {
+            if (IsTeamAvailable(team, playerData.ClientId))
+            {
+                return team;
+            }
+        }
+
+        return Team.Blue;
+    }
+
+    private bool IsTeamAvailable(Team team, ulong requestingClientId)
+    {
+        for (int i = 0; i < _lobbyPlayers.Count; i++)
+        {
+            var player = _lobbyPlayers[i];
+            if (player.ClientId == requestingClientId)
+                continue;
+            if (player.Team == team)
+                return false;
+        }
+        return true;
     }
 
     public override void OnNetworkDespawn()

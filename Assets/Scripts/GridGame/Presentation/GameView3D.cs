@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using UniRx;
 
 public class GameView3D : MonoBehaviour
 {
@@ -12,8 +13,10 @@ public class GameView3D : MonoBehaviour
     private GameViewModel _gameVM;
     [Inject] private IWorldToCellProvider _worldToCellProvider;
     [Inject(Optional = true)] private IBattleAnimationGate _animationGate;
+    [Inject(Optional = true)] private ITurnStateViewModel _turnState;
     private UnitView3D _draggedUnit;
     private IHoverable _lastHoverable;
+    private readonly CompositeDisposable _subscriptions = new();
 
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellHovered;
     public Action<KeyValuePair<Vector2Int, Vector2Int>> TestHandleCellSelected;
@@ -40,11 +43,19 @@ public class GameView3D : MonoBehaviour
 
         _gameVM.UnitSpawned += OnGameVM_UnitSpawned;
         _gameVM.AttackAnimationRequested += OnAttackAnimationRequested;
+
+        if (_turnState != null)
+        {
+            _turnState.BattleStateProperty
+                .Subscribe(_ => UpdateUnitVisibility())
+                .AddTo(_subscriptions);
+        }
     }
     private void OnGameVM_UnitSpawned(UnitViewModel model)
     {
        var view =  _factory.Create(model);
         _views[model] = view;
+        UpdateUnitVisibility(view, model);
     }
 
     private void OnAttackAnimationRequested(UnitViewModel attackerVm, UnitViewModel defenderVm)
@@ -246,7 +257,32 @@ public class GameView3D : MonoBehaviour
             _gameVM.AttackAnimationRequested -= OnAttackAnimationRequested;
             _gameVM.UnitSpawned -= OnGameVM_UnitSpawned;
         }
+        _subscriptions.Dispose();
     }
 
     private bool IsInteractionLocked() => _animationGate != null && _animationGate.IsLocked;
+
+    private void UpdateUnitVisibility()
+    {
+        if (_turnState == null)
+            return;
+
+        foreach (var kvp in _views)
+        {
+            UpdateUnitVisibility(kvp.Value, kvp.Key as UnitViewModel);
+        }
+    }
+
+    private void UpdateUnitVisibility(UnitView3D view, UnitViewModel vm)
+    {
+        if (view == null || vm == null || _turnState == null)
+            return;
+
+        var hideEnemies = _turnState.BattleStateProperty.Value == BattleState.replacement;
+        var shouldShow = !hideEnemies || vm.Team == _turnState.LocalTeam;
+        if (view.gameObject.activeSelf != shouldShow)
+        {
+            view.gameObject.SetActive(shouldShow);
+        }
+    }
 }

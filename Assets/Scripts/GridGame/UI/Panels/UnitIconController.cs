@@ -10,8 +10,6 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
     [Header("Visuals")]
     [SerializeField] private Image unitIcon;
     [SerializeField] private Image unitTeamBorder;
-    [SerializeField] private Color blueTeamColor = Color.blue;
-    [SerializeField] private Color redTeamColor = Color.red;
     [SerializeField] private TextMeshProUGUI turnText;
     [SerializeField] private Animator portraitAnimator;
     [SerializeField] private string damageTriggerName = "Damage";
@@ -65,10 +63,11 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
 
         ApplySprite(_viewModel.Icon);
-        UpdateTeam(_viewModel.Team);
+        UpdateBorderColor(_viewModel.BorderColorObservable.Value);
         UpdateTurnText(_viewModel.TurnOrder);
 
-        _bindings.Add(_viewModel.TeamObservable.Subscribe(UpdateTeam));
+        _bindings.Add(_viewModel.TeamObservable.Subscribe(_ => UpdateBorderColor(_viewModel.BorderColorObservable.Value)));
+        _bindings.Add(_viewModel.BorderColorObservable.Subscribe(UpdateBorderColor));
         _bindings.Add(_viewModel.TurnOrderObservable.Subscribe(UpdateTurnText));
         _bindings.Add(_viewModel.DamageTaken.Subscribe(OnDamageTaken));
         _bindings.Add(_viewModel.IsHoveredObservable.Subscribe(OnHoveredChanged));
@@ -92,11 +91,11 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
     }
 
-    private void UpdateTeam(Team team)
+    private void UpdateBorderColor(Color color)
     {
         if (unitTeamBorder != null)
         {
-            unitTeamBorder.color = team == Team.Blue ? blueTeamColor : redTeamColor;
+            unitTeamBorder.color = color;
         }
     }
 

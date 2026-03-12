@@ -9,6 +9,7 @@ public class UnitTurnPanelViewModel : IDisposable
     private readonly GridUnitAssetMap _unitAssets;
     private readonly IGridViewModel _gridViewModel;
     private readonly GameViewModel _gameViewModel;
+    private readonly ITeamColorProvider _teamColorProvider;
     private readonly CompositeDisposable _disposables = new();
     private readonly Dictionary<ICombatObject, UnitPortraitViewModel> _portraitLookup = new();
     private UnitPortraitViewModel _hoveredPortrait;
@@ -25,12 +26,14 @@ public class UnitTurnPanelViewModel : IDisposable
         ITurnStateViewModel turnState,
         GridUnitAssetMap unitAssets,
         IGridViewModel gridViewModel,
-        GameViewModel gameViewModel)
+        GameViewModel gameViewModel,
+        ITeamColorProvider teamColorProvider = null)
     {
         _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
         _unitAssets = unitAssets;
         _gridViewModel = gridViewModel ?? throw new ArgumentNullException(nameof(gridViewModel));
         _gameViewModel = gameViewModel ?? throw new ArgumentNullException(nameof(gameViewModel));
+        _teamColorProvider = teamColorProvider;
 
         TurnNumber.Value = _turnState.TurnNumber.Value;
 
@@ -95,7 +98,7 @@ public class UnitTurnPanelViewModel : IDisposable
         if (!_portraitLookup.TryGetValue(combatUnit, out var portrait))
         {
             var icon = ResolveIcon(combatUnit.UnitType);
-            portrait = new UnitPortraitViewModel(combatUnit, icon, turn, _gridViewModel, _gameViewModel);
+            portrait = new UnitPortraitViewModel(combatUnit, icon, turn, _gridViewModel, _gameViewModel, _teamColorProvider);
             portrait.UnitRemoved += OnPortraitUnitRemoved;
             _portraitLookup[combatUnit] = portrait;
         }

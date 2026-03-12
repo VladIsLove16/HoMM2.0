@@ -46,11 +46,11 @@ public class UnitTurnPanelView : MonoBehaviour
 
     private void Show()
     {
-        gameObject.SetActive(true);
+        parent.gameObject.SetActive(true);
     }
     private void Hide()
     {
-        gameObject.SetActive(false);
+        parent.gameObject.SetActive(false);
     }
     private void OnPortraitEnqueued(UnitPortraitViewModel portrait)
     {

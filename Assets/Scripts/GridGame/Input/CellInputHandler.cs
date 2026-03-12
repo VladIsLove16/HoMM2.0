@@ -30,6 +30,7 @@ public class CellInputHandler : MonoBehaviour
     private Vector2Int? _lastHoveredCell;
     private Vector2 _currentPointerPosition;
     private bool _pointerInitialized;
+    private Vector3? _lastDragWorldPos;
 
     public bool IsDragging { get; private set; }
     public Action ActionCanceled;
@@ -129,6 +130,7 @@ public class CellInputHandler : MonoBehaviour
         if (unitView != null)
         {
             IsDragging = true;
+            _lastDragWorldPos = hit.point;
             _gameView3D?.BeginDrag(unitView);
         }
     }
@@ -136,9 +138,20 @@ public class CellInputHandler : MonoBehaviour
     public void HandleDragUpdate()
     {
         if (!IsDragging) return;
-        if (!TryGetHit(out var hit)) return;
+        if (!TryGetHit(out var hit))
+        {
+            if (_lastDragWorldPos.HasValue)
+            {
+                _gameView3D?.UpdateDrag(_lastDragWorldPos.Value);
+            }
+            return;
+        }
         var obj = hit.collider.GetComponent<IGameViewObject>();
-        if (!TryResolveWorldPosition(obj, out var worldPos)) worldPos = Vector3.zero;
+        if (!TryResolveWorldPosition(obj, out var worldPos))
+        {
+            worldPos = hit.point;
+        }
+        _lastDragWorldPos = worldPos;
         _gameView3D?.UpdateDrag(worldPos);
     }
 
@@ -146,12 +159,31 @@ public class CellInputHandler : MonoBehaviour
     {
         if (!IsDragging) return;
         IsDragging = false;
-        if (!TryGetHit(out var hit)) { ActionCanceled?.Invoke(); return; }
-        var obj = hit.collider.GetComponent<IGameViewObject>();
-        if (TryResolveWorldPosition(obj, out var worldPos))
-            _gameView3D?.EndDrag(worldPos);
-        else
+        if (!TryGetHit(out var hit))
+        {
+            if (_lastDragWorldPos.HasValue)
+            {
+                _gameView3D?.EndDrag(_lastDragWorldPos.Value);
+                _lastDragWorldPos = null;
+                return;
+            }
             ActionCanceled?.Invoke();
+            return;
+        }
+        var obj = hit.collider.GetComponent<IGameViewObject>();
+        Vector3 worldPos;
+        if (TryResolveWorldPosition(obj, out worldPos))
+        {
+            _lastDragWorldPos = worldPos;
+            _gameView3D?.EndDrag(worldPos);
+        }
+        else
+        {
+            worldPos = hit.point;
+            _lastDragWorldPos = worldPos;
+            _gameView3D?.EndDrag(worldPos);
+        }
+        _lastDragWorldPos = null;
     }
 
     private UnitView3D ResolveUnitView(IGameViewObject obj)
