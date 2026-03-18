@@ -19,29 +19,29 @@ MonoBehaviour:
     Amount: 2
     X: 1
     Y: 5
-    Team: 0
+    Team: 1
   - unitType: 1
     Amount: 2
     X: 3
     Y: 5
-    Team: 0
+    Team: 1
   - unitType: 2
     Amount: 2
     X: 5
     Y: 5
-    Team: 0
+    Team: 1
   - unitType: 0
     Amount: 3
     X: 5
     Y: 0
-    Team: 1
+    Team: 0
   - unitType: 1
     Amount: 3
     X: 3
     Y: 0
-    Team: 1
+    Team: 0
   - unitType: 2
     Amount: 3
     X: 1
     Y: 0
-    Team: 1
+    Team: 0

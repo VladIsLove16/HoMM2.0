@@ -31,6 +31,8 @@ public class CellInputHandler : MonoBehaviour
     private Vector2 _currentPointerPosition;
     private bool _pointerInitialized;
     private Vector3? _lastDragWorldPos;
+    private Plane _dragPlane;
+    private bool _dragPlaneReady;
 
     public bool IsDragging { get; private set; }
     public Action ActionCanceled;
@@ -123,34 +125,46 @@ public class CellInputHandler : MonoBehaviour
 
     public void HandleDragStart()
     {
-        if (IsPointerOverUI()) return;
-        if (!TryGetHit(out var hit)) return;
+        if (IsPointerOverUI())
+        {
+            Debug.Log("[CellInputHandler] DragStart blocked: pointer over UI.");
+            return;
+        }
+        if (!TryGetHit(out var hit))
+        {
+            Debug.Log("[CellInputHandler] DragStart blocked: no hit under cursor.");
+            return;
+        }
         var obj = hit.collider.GetComponent<IGameViewObject>();
         var unitView = ResolveUnitView(obj);
+        if (unitView == null)
+        {
+            unitView = hit.collider.GetComponentInParent<UnitView3D>();
+        }
+        if (unitView == null && _gameView3D != null && _gameView3D.TryGetUnitAtWorld(hit.point, out var viewFromCell))
+        {
+            unitView = viewFromCell;
+        }
         if (unitView != null)
         {
             IsDragging = true;
             _lastDragWorldPos = hit.point;
-            _gameView3D?.BeginDrag(unitView);
+            _dragPlane = new Plane(Vector3.up, hit.point);
+            _dragPlaneReady = true;
+            _gameView3D?.BeginDrag(unitView, hit.point);
+        }
+        else
+        {
+            Debug.Log("[CellInputHandler] DragStart blocked: no UnitView3D under cursor.");
         }
     }
 
     public void HandleDragUpdate()
     {
         if (!IsDragging) return;
-        if (!TryGetHit(out var hit))
-        {
-            if (_lastDragWorldPos.HasValue)
-            {
-                _gameView3D?.UpdateDrag(_lastDragWorldPos.Value);
-            }
-            return;
-        }
-        var obj = hit.collider.GetComponent<IGameViewObject>();
-        if (!TryResolveWorldPosition(obj, out var worldPos))
-        {
-            worldPos = hit.point;
-        }
+        var worldPos = TryGetDragPlanePoint(out var planePoint)
+            ? planePoint
+            : (_lastDragWorldPos ?? Vector3.zero);
         _lastDragWorldPos = worldPos;
         _gameView3D?.UpdateDrag(worldPos);
     }
@@ -159,31 +173,43 @@ public class CellInputHandler : MonoBehaviour
     {
         if (!IsDragging) return;
         IsDragging = false;
-        if (!TryGetHit(out var hit))
+        _dragPlaneReady = false;
+        if (TryGetDragPlanePoint(out var planePoint))
         {
-            if (_lastDragWorldPos.HasValue)
-            {
-                _gameView3D?.EndDrag(_lastDragWorldPos.Value);
-                _lastDragWorldPos = null;
-                return;
-            }
-            ActionCanceled?.Invoke();
+            _lastDragWorldPos = planePoint;
+            _gameView3D?.EndDrag(planePoint);
+            _lastDragWorldPos = null;
             return;
         }
-        var obj = hit.collider.GetComponent<IGameViewObject>();
-        Vector3 worldPos;
-        if (TryResolveWorldPosition(obj, out worldPos))
+
+        if (_lastDragWorldPos.HasValue)
         {
+            _gameView3D?.EndDrag(_lastDragWorldPos.Value);
+            _lastDragWorldPos = null;
+            return;
+        }
+
+        if (TryGetHit(out var hit))
+        {
+            var worldPos = hit.point;
             _lastDragWorldPos = worldPos;
             _gameView3D?.EndDrag(worldPos);
+            _lastDragWorldPos = null;
+            return;
         }
-        else
-        {
-            worldPos = hit.point;
-            _lastDragWorldPos = worldPos;
-            _gameView3D?.EndDrag(worldPos);
-        }
+
+        ActionCanceled?.Invoke();
+    }
+
+    public void ClearInteractionState()
+    {
+        IsDragging = false;
+        _dragPlaneReady = false;
         _lastDragWorldPos = null;
+        _lastHoveredCollider = null;
+        _lastHoveredCell = null;
+        _gameView3D?.CancelDrag();
+        _gameView3D?.ClearHover();
     }
 
     private UnitView3D ResolveUnitView(IGameViewObject obj)
@@ -191,17 +217,6 @@ public class CellInputHandler : MonoBehaviour
         if (obj is UnitView3D uv) return uv;
         if (obj is Component c) return c.GetComponentInParent<UnitView3D>();
         return null;
-    }
-
-    private bool TryResolveWorldPosition(IGameViewObject obj, out Vector3 worldPosition)
-    {
-        if (obj is Component c)
-        {
-            worldPosition = c.transform.position;
-            return true;
-        }
-        worldPosition = default;
-        return false;
     }
 
     private bool TryGetHit(out RaycastHit hit)
@@ -228,6 +243,26 @@ public class CellInputHandler : MonoBehaviour
             return _currentPointerPosition;
 
         return (Vector2)Input.mousePosition;
+    }
+
+    private bool TryGetDragPlanePoint(out Vector3 worldPos)
+    {
+        worldPos = default;
+        if (!_dragPlaneReady)
+            return false;
+
+        var cam = Cam;
+        if (cam == null)
+            return false;
+
+        var ray = cam.ScreenPointToRay(GetPointerPosition());
+        if (_dragPlane.Raycast(ray, out var enter))
+        {
+            worldPos = ray.GetPoint(enter);
+            return true;
+        }
+
+        return false;
     }
 
 #if UNITY_INCLUDE_TESTS

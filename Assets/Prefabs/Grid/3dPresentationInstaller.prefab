@@ -49,12 +49,26 @@ MonoBehaviour:
   attackActionPanel: {fileID: 0}
   unitTurnPanel: {fileID: 0}
   inGameUI: {fileID: 0}
+  _gridGameSettingsView: {fileID: 0}
   unitStatsPanel: {fileID: 0}
   materialProvider:
     _blueTeamMaterial: {fileID: 2100000, guid: 644c36062bfa6354b9076d7c791b0155, type: 2}
     _hoveredBlueTeamMaterial: {fileID: 2100000, guid: 33898210659debf4cab578d2673590ac, type: 2}
     _redTeamMaterial: {fileID: 2100000, guid: 734068f41cdc988489f826a8e4bde0eb, type: 2}
     _hoveredRedTeamMaterial: {fileID: 2100000, guid: f08efeeaf720620419d10802d99114e1, type: 2}
+    _greenTeamMaterial: {fileID: 2100000, guid: c9ff123bddc2d1d48acd4bf4a0c8443f, type: 2}
+    _hoveredGreenTeamMaterial: {fileID: 2100000, guid: b816e13347653644b9943dcffc05b94b, type: 2}
+    _yellowTeamMaterial: {fileID: 2100000, guid: 6fc70193c9d87e84495b8b560f401c74, type: 2}
+    _hoveredYellowTeamMaterial: {fileID: 2100000, guid: 8f70987260314e244b36b0edc371549d, type: 2}
+    _blueTeamColor: {r: 0, g: 0, b: 1, a: 1}
+    _hoveredBlueTeamColor: {r: 0.4, g: 0.7, b: 1, a: 1}
+    _redTeamColor: {r: 1, g: 0, b: 0, a: 1}
+    _hoveredRedTeamColor: {r: 1, g: 0.5, b: 0.5, a: 1}
+    _greenTeamColor: {r: 0, g: 1, b: 0, a: 1}
+    _hoveredGreenTeamColor: {r: 0.4, g: 1, b: 0.4, a: 1}
+    _yellowTeamColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    _hoveredYellowTeamColor: {r: 1, g: 1, b: 0.5, a: 1}
   perCellGridRenderer: {fileID: 0}
+  tileGridRenderer: {fileID: 0}
   unitsParent: {fileID: 0}
   gridRenderStrategy: 0

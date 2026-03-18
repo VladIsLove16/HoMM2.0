@@ -214,6 +214,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridCursorViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<Game.Achievements.AchievementsViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<GameplayInputGate>().AsSingle().NonLazy();
     }
 
     private void BindGameController()

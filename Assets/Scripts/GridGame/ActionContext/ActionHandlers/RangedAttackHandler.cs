@@ -42,7 +42,7 @@ public class RangedAttackHandler : IActionHandler, IAttackActionHandler
         var target = _gameModel.GetCell(ctx.TargetCell).Unit;
         if(target == null)
             return false;
-        if (unit.Team == target.Team)
+        if (((IGridContent)unit).Team == ((IGridContent)target).Team)
             return false;
         var dist = GetDistance(ctx.FromCell, ctx.TargetCell);
         bool isAdjacent = dist <= 1.01f;

@@ -203,6 +203,38 @@ public class UnitModel : IEffectable, IEffectApplier, IDamagable, IDamageSource,
             throw new ArgumentNullException(nameof(ctx), "DamageContext cannot be null");
             
         _statusEffectManager.HandleOutDamage(ctx, true);
+        if (ctx.DamageAmount < 0)
+            throw new ArgumentException("Damage amount cannot be negative", nameof(ctx.DamageAmount));
+
+        // Simulate deaths without mutating unit state.
+        ctx.DieAmount = 0;
+        var damageLeft = ctx.DamageAmount;
+        var tempAmount = Amount.Value;
+        var tempHealth = ModifiedStats.Health;
+
+        while (damageLeft > 0 && tempAmount > 0)
+        {
+            if (tempHealth > damageLeft)
+            {
+                tempHealth -= damageLeft;
+                damageLeft = 0;
+            }
+            else
+            {
+                damageLeft -= tempHealth;
+                tempAmount--;
+                ctx.DieAmount++;
+                if (tempAmount > 0)
+                {
+                    tempHealth = ModifiedStats.MaxHealth;
+                }
+                else
+                {
+                    tempHealth = 0;
+                    break;
+                }
+            }
+        }
     }
 
     public void TakeTurn()

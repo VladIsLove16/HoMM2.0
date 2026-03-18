@@ -1,6 +1,7 @@
 using System;
 using Adventure.Settings.Configuration;
 using Adventure.Settings.ViewModel;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,6 +11,62 @@ using Zenject;
 /// Routes all grid related input to the CellInputHandler and opens in-game menus.
 /// Pointer handling is platform agnostic (touch, mouse, gamepad) so the handler does not care about device specifics.
 /// </summary>
+public interface IGameplayInputGate
+{
+    IReadOnlyReactiveProperty<bool> IsBlocked { get; }
+    bool IsInputBlocked { get; }
+}
+
+public sealed class GameplayInputGate : IGameplayInputGate, IDisposable
+{
+    private readonly List<IActiveMenu> _menus = new();
+    private readonly CompositeDisposable _disposables = new();
+    private readonly ReactiveProperty<bool> _isBlocked = new(false);
+
+    public GameplayInputGate(IEnumerable<IActiveMenu> menus)
+    {
+        if (menus == null)
+            return;
+
+        foreach (var menu in menus)
+        {
+            if (menu == null)
+                continue;
+
+            _menus.Add(menu);
+            menu.IsOpen
+                .DistinctUntilChanged()
+                .Subscribe(_ => Recalculate())
+                .AddTo(_disposables);
+        }
+
+        Recalculate();
+    }
+
+    public IReadOnlyReactiveProperty<bool> IsBlocked => _isBlocked;
+    public bool IsInputBlocked => _isBlocked.Value;
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
+    }
+
+    private void Recalculate()
+    {
+        var blocked = false;
+        for (var i = 0; i < _menus.Count; i++)
+        {
+            if (_menus[i].IsOpen.Value)
+            {
+                blocked = true;
+                break;
+            }
+        }
+
+        _isBlocked.SetValueAndForceNotify(blocked);
+    }
+}
+
 public sealed class GridInputRouter : ITickable, IDisposable
 {
     private const float DefaultVirtualCursorSpeed = 1400f;
@@ -18,9 +75,11 @@ public sealed class GridInputRouter : ITickable, IDisposable
     private readonly ITurnStateViewModel _turnState;
     private readonly GridGameSettingsViewModel _settingsVM;
     private readonly IMouseSensitivityService _mouseSensitivityService;
+    private readonly IGameplayInputGate _inputGate;
 
     private InputSystem_GridGame _input;
     private IDisposable _stateSubscription;
+    private IDisposable _inputBlockSubscription;
 
     private Vector2 _currentPointerPosition;
     private Vector2 _virtualPointerPosition;
@@ -34,11 +93,13 @@ public sealed class GridInputRouter : ITickable, IDisposable
         CellInputHandler cell,
         ITurnStateViewModel turnState,
         GridGameSettingsViewModel settingsVM,
+        IGameplayInputGate inputGate,
         IMouseSensitivityService mouseSensitivityService = null)
     {
         _cell = cell ?? throw new ArgumentNullException(nameof(cell));
         _turnState = turnState;
         _settingsVM = settingsVM ?? throw new ArgumentNullException(nameof(settingsVM));
+        _inputGate = inputGate ?? throw new ArgumentNullException(nameof(inputGate));
         _mouseSensitivityService = mouseSensitivityService;
 
         _input = new InputSystem_GridGame();
@@ -55,6 +116,8 @@ public sealed class GridInputRouter : ITickable, IDisposable
             _input.Grid.Enable();
             _input.GridPlacement.Disable();
         }
+
+        _inputBlockSubscription = _inputGate.IsBlocked.Subscribe(OnInputBlockedChanged);
     }
 
     public void Tick()
@@ -76,6 +139,8 @@ public sealed class GridInputRouter : ITickable, IDisposable
         UnwireInput();
         _stateSubscription?.Dispose();
         _stateSubscription = null;
+        _inputBlockSubscription?.Dispose();
+        _inputBlockSubscription = null;
 
         if (_input != null)
         {
@@ -123,6 +188,9 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void OnPointerMoved(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
+
         var position = ctx.ReadValue<Vector2>();
         if (float.IsNaN(position.x) || float.IsNaN(position.y))
             return;
@@ -137,6 +205,9 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void OnSelect(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
+
         if (ctx.performed)
         {
             _cell.HandleSelect();
@@ -145,6 +216,9 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void OnAction(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
+
         if (ctx.performed)
         {
             _cell.HandleAction();
@@ -153,6 +227,9 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void OnNavigate(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
+
         _navigationVector = ctx.ReadValue<Vector2>();
         if (_navigationVector.sqrMagnitude < 0.0001f)
             return;
@@ -176,16 +253,22 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void OnDragStarted(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
         _cell.HandleDragStart();
     }
 
     private void OnDragPerformed(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
         _cell.HandleDragUpdate();
     }
 
     private void OnDragCanceled(InputAction.CallbackContext ctx)
     {
+        if (IsInputBlocked())
+            return;
         _cell.HandleDragCancel();
     }
 
@@ -199,6 +282,9 @@ public sealed class GridInputRouter : ITickable, IDisposable
 
     private void UpdateVirtualPointer()
     {
+        if (IsInputBlocked())
+            return;
+
         if (!_useVirtualPointer || _navigationVector.sqrMagnitude < 0.0001f)
             return;
 
@@ -229,6 +315,13 @@ public sealed class GridInputRouter : ITickable, IDisposable
         if (_input == null)
             return;
 
+        if (IsInputBlocked())
+        {
+            _input.Grid.Disable();
+            _input.GridPlacement.Disable();
+            return;
+        }
+
         switch (state)
         {
             case BattleState.replacement:
@@ -240,5 +333,35 @@ public sealed class GridInputRouter : ITickable, IDisposable
                 _input.GridPlacement.Disable();
                 break;
         }
+    }
+
+    private void OnInputBlockedChanged(bool isBlocked)
+    {
+        if (_input == null)
+            return;
+
+        if (isBlocked)
+        {
+            _navigationVector = Vector2.zero;
+            _input.Grid.Disable();
+            _input.GridPlacement.Disable();
+            _cell.ClearInteractionState();
+            return;
+        }
+
+        if (_turnState != null)
+        {
+            OnTurnStateChanged(_turnState.BattleStateProperty.Value);
+        }
+        else
+        {
+            _input.Grid.Enable();
+            _input.GridPlacement.Disable();
+        }
+    }
+
+    private bool IsInputBlocked()
+    {
+        return _inputGate.IsInputBlocked;
     }
 }

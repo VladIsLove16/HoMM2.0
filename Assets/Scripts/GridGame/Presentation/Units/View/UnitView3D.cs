@@ -22,6 +22,10 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     private bool _disposed;
     private IDisposable _gateHandle;
     private Vector3 _defaultForward = Vector3.forward;
+    private Renderer[] _allRenderers;
+    private Collider[] _colliders;
+    private bool _isDead;
+    private UnitAnimationState _currentAnimationState = UnitAnimationState.Idle;
     public bool IsHoverable => true;
     public bool IsSelectable => true;
 
@@ -40,6 +44,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             Debug.LogWarning("unitViewUI null ref");
             return;
         }
+        _allRenderers = GetComponentsInChildren<Renderer>(true);
+        _colliders = GetComponentsInChildren<Collider>(true);
         if (_animationController == null)
         {
             _animationController = GetComponent<UnitAnimatorController>();
@@ -67,7 +73,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         FaceDefaultDirection();
         unitViewUI.Init(vm);
         SubscribeToViewModel(vm);
-        ApplyAnimationSpeed();
+        ApplyAnimationSpeed(_currentAnimationState);
     }
 
     private void SetupMaterial(UnitViewModel vm)
@@ -176,13 +182,16 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
                 LogDebugEvent($"Teleporting to: {point}");
                 transform.position = point;
             }
-            Play(UnitAnimationState.Walk);
+            _animationController?.SetWalking(false);
+            Play(UnitAnimationState.Idle);
             LogDebugEvent("Movement Finished (instant)");
             FaceDefaultDirection();
             yield return null;
             yield break;
         }
 
+        _currentAnimationState = UnitAnimationState.Walk;
+        ApplyAnimationSpeed(UnitAnimationState.Walk);
         _animationController?.SetWalking(true);
 
         foreach (var point in route)
@@ -243,15 +252,16 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     {
         LogDebugEvent("Handling Death Animation");
         yield return PlayAnimationRoutine(UnitAnimationState.Die, UnitAnimationEvent.DieFinished);
-        LogDebugEvent("Unit Deactivated");
-        gameObject.SetActive(false);
+        LogDebugEvent("Unit Dead (corpse stays)");
+        SetDeadState();
     }
 
 
     public void Play(UnitAnimationState state)
     {
         if (_animationController == null) return;
-        ApplyAnimationSpeed();
+        _currentAnimationState = state;
+        ApplyAnimationSpeed(state);
         _animationController.PlayAnimation(state);
         LogDebugEvent($"Animation Trigger Set: {state}");
     }
@@ -340,13 +350,18 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     
     private void OnAnimationSpeedChanged(AnimationSpeedMode mode)
     {
-        ApplyAnimationSpeed();
+        ApplyAnimationSpeed(_currentAnimationState);
     }
 
-    private void ApplyAnimationSpeed()
+    private void ApplyAnimationSpeed(UnitAnimationState state)
     {
         if (_animationController == null)
             return;
+        if (state == UnitAnimationState.Idle)
+        {
+            _animationController.SetPlaybackSpeed(1f, false);
+            return;
+        }
         var multiplier = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
         var isInstant = _animationSpeedSettings?.IsInstant ?? false;
         _animationController.SetPlaybackSpeed(multiplier, isInstant);
@@ -407,6 +422,45 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         FaceDefaultDirection();
     }
 
+    public void SetCorpseVisible(bool visible)
+    {
+        if (!_isDead)
+            return;
+
+        if (_allRenderers == null)
+            _allRenderers = GetComponentsInChildren<Renderer>(true);
+
+        foreach (var renderer in _allRenderers)
+        {
+            if (renderer != null)
+                renderer.enabled = visible;
+        }
+    }
+
+    private void SetDeadState()
+    {
+        if (_isDead)
+            return;
+
+        _isDead = true;
+
+        if (unitViewUI != null)
+        {
+            unitViewUI.gameObject.SetActive(false);
+        }
+
+        if (_colliders == null)
+            _colliders = GetComponentsInChildren<Collider>(true);
+
+        foreach (var col in _colliders)
+        {
+            if (col != null)
+                col.enabled = false;
+        }
+
+        SetCorpseVisible(true);
+    }
+
     private void OnWorldRouteReceived(IReadOnlyList<Vector3> route)
     {
         if (route == null || route.Count == 0)
@@ -422,6 +476,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             FaceTowards(targetWorldPosition.Value);
         }
         yield return PlayAnimationRoutine(UnitAnimationState.Attack, UnitAnimationEvent.AttackFinished);
+        if (!_isDead)
+        {
+            Play(UnitAnimationState.Idle);
+            FaceDefaultDirection();
+        }
     }
 
     private IEnumerator PlayHitRoutine(Vector3? attackerWorldPosition)
@@ -431,6 +490,11 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             FaceTowards(attackerWorldPosition.Value);
         }
         yield return PlayAnimationRoutine(UnitAnimationState.Hit, UnitAnimationEvent.HitFinished);
+        if (!_isDead)
+        {
+            Play(UnitAnimationState.Idle);
+            FaceDefaultDirection();
+        }
     }
 
     private void FaceTowards(Vector3 worldTarget)

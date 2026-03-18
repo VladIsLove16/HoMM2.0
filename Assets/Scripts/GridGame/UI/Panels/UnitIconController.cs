@@ -10,6 +10,7 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
     [Header("Visuals")]
     [SerializeField] private Image unitIcon;
     [SerializeField] private Image unitTeamBorder;
+    [SerializeField] private Image hoveredImage;
     [SerializeField] private TextMeshProUGUI turnText;
     [SerializeField] private Animator portraitAnimator;
     [SerializeField] private string damageTriggerName = "Damage";
@@ -123,16 +124,18 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     private void OnHoveredChanged(bool isHovered)
     {
-        if (portraitAnimator == null)
-            return;
-
-        if (isHovered && _hoverOnTriggerId != 0)
+        if (portraitAnimator != null && isHovered && _hoverOnTriggerId != 0)
         {
             portraitAnimator.SetTrigger(_hoverOnTriggerId);
         }
-        else if (!isHovered && _hoverOffTriggerId != 0)
+        else if (portraitAnimator != null && !isHovered && _hoverOffTriggerId != 0)
         {
             portraitAnimator.SetTrigger(_hoverOffTriggerId);
+        }
+
+        if (hoveredImage != null)
+        {
+            hoveredImage.gameObject.SetActive(isHovered);
         }
     }
 
@@ -149,6 +152,10 @@ public class UnitIconController : MonoBehaviour, IPointerEnterHandler, IPointerE
         if (turnText != null)
         {
             turnText.text = string.Empty;
+        }
+        if (hoveredImage != null)
+        {
+            hoveredImage.gameObject.SetActive(false);
         }
         ClearDamagePopup();
     }

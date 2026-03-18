@@ -65,6 +65,8 @@ public class MoveActionHandler : IActionHandler
         {
             return false;
         }
+        if (accessiblemoveRoute[^1] != ctx.TargetCell)
+            return false;
         return true;
     }
     public PreviewResult GetPreview(ActionContext ctx)

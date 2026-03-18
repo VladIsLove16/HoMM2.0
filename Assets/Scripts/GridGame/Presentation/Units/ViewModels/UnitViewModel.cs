@@ -20,6 +20,7 @@ public class UnitViewModel : IViewModel
     public IObservable<int> OnAmountChanged => _onAmountChanged;
     public IObservable<Vector2Int> OnPosChanged => _onPosChanged;
     public IObservable<List<Vector2Int>> OnMoveByRoute => _onMovedByRoute;
+    public IObservable<DamageContext> OnDamageTaken => _onDamageTaken;
 
     public IObservable<Vector3> OnWorldPositionChanged => _onWorldPositionChanged;
     public IObservable<IReadOnlyList<Vector3>> OnMoveByWorldRoute => _onMovedByWorldRoute;
@@ -44,6 +45,7 @@ public class UnitViewModel : IViewModel
     private readonly Subject<int> _onAmountChanged = new();
     private readonly Subject<Vector2Int> _onPosChanged = new();
     private readonly Subject<List<Vector2Int>> _onMovedByRoute = new();
+    private readonly Subject<DamageContext> _onDamageTaken = new();
 
     private readonly Subject<Vector3> _onWorldPositionChanged = new();
     private readonly Subject<IReadOnlyList<Vector3>> _onMovedByWorldRoute = new();
@@ -67,6 +69,7 @@ public class UnitViewModel : IViewModel
 
         Model.Hitted += ctx =>
         {
+            _onDamageTaken.OnNext(ctx);
             EmitWorldPosition(ctx?.Source as IGridContent, _onHitWorld);
         };
 

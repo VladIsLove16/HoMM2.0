@@ -50,7 +50,7 @@ public class AttackActionHandler : IActionHandler, IAttackActionHandler
         if (target == null)
             return false;
 
-        if(target.Team == attacker.Team.Value)
+        if (target.Team == ((IGridContent)attacker).Team)
             return false;
 
         _movementSystem.GetRouteIgnoringObstacles(ctx.FromCell, ctx.TargetCell, out var route);

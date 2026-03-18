@@ -451,10 +451,78 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         handler.Execute(plan.Context);
     }
 
+    public bool TrySetCell(UnitViewModel draggedVM, Vector2Int coords)
+    {
+        if (draggedVM == null)
+            return false;
+        if (!IsInBounds(coords))
+            return false;
+        if (_turnState.BattleStateProperty.Value != BattleState.replacement)
+            return false;
+
+        var kvp = _uvms.FirstOrDefault(pair => pair.Value == draggedVM);
+        var model = kvp.Key;
+        if (model == null)
+            return false;
+
+        if (model.Team != _turnState.LocalTeam)
+            return false;
+
+        if (!IsWithinDeploymentZone(model.Team, coords))
+            return false;
+
+        if (IsCellOccupied(coords) && model.Position != coords)
+            return false;
+
+        _gameModel.MoveObject(model, coords);
+        return true;
+    }
+
     public void SetCell(UnitViewModel draggedVM, Vector2Int coords)
     {
-        var model = _uvms.First(kvp => kvp.Value == draggedVM).Key;
-        _gameModel.MoveObject(model, coords);
+        TrySetCell(draggedVM, coords);
+    }
+
+    public bool IsInBounds(Vector2Int coords)
+    {
+        if (Width <= 0 || Height <= 0)
+            return false;
+        return coords.x >= 0 && coords.x < Width && coords.y >= 0 && coords.y < Height;
+    }
+
+    public bool TryGetUnitCell(UnitViewModel vm, out Vector2Int coords)
+    {
+        coords = default;
+        if (vm == null)
+            return false;
+
+        foreach (var kvp in _uvms)
+        {
+            if (kvp.Value == vm && kvp.Key != null)
+            {
+                coords = kvp.Key.Position;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetUnitAtCell(Vector2Int cell, out UnitViewModel viewModel)
+    {
+        viewModel = null;
+        var cellObj = _gameModel.GetCell(cell);
+        var unit = cellObj?.Unit;
+        if (unit == null)
+            return false;
+
+        return _uvms.TryGetValue(unit, out viewModel);
+    }
+
+    public bool IsCellOccupied(Vector2Int cell)
+    {
+        var cellObj = _gameModel.GetCell(cell);
+        return cellObj?.Unit != null;
     }
 
    

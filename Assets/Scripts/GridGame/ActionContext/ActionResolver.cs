@@ -86,7 +86,7 @@ public class ActionResolver
         }
 
         // 3) Если цель союзная — перемещаться нельзя (клетка занята)
-        if (fromUnit != null && targetUnit.Team == fromUnit.Team)
+        if (fromUnit != null && targetUnit.Team.Value == fromUnit.Team.Value)
         {
             actionType = ActionType.None;
             return false;
@@ -110,7 +110,11 @@ public class ActionResolver
         }
 
         // 5) Move-then-attack (если нужно переместиться в attackFromCell)
-        if (fromUnit is IMoveable mover && attackFromCell != null && !attackCellOccupiedByOther && IsEnemy(fromUnit, targetUnit))
+        if (fromUnit is IMoveable mover &&
+            attackFromCell != null &&
+            ctx.AttackFromCell != ctx.FromCell &&
+            !attackCellOccupiedByOther &&
+            IsEnemy(fromUnit, targetUnit))
         {
             if (TryMoveToCellThenMelee(mover, ctx.AttackFromCell, fromUnit, ctx.TargetCell))
             {
@@ -147,7 +151,7 @@ public class ActionResolver
             var targetCellObj = _gameModel.GetCell(target);
             if (targetCellObj != null && !targetCellObj.IsEmpty)
                 return false;
-            return accessible.Count > 0 && _movementSystem.GetRouteCost(accessible) <= mover.MoveSpeed;
+            return accessible[^1] == target;
         }
 
         bool TryMoveToCellThenMelee(IMoveable mover, Vector2Int attackFrom, UnitModel attacker, Vector2Int target)
@@ -167,6 +171,8 @@ public class ActionResolver
             var accessible = _movementSystem.GetAccessibleRoutePoints(routeTo, mover.MoveSpeed);
             if (accessible.Count == 0 || _movementSystem.GetRouteCost(accessible) > mover.MoveSpeed)
                 return false;
+            if (accessible[^1] != attackFrom)
+                return false;
 
             _movementSystem.GetRouteIgnoringObstacles(attackFrom, target, out var routeAttack);
             if (routeAttack == null) return false;
@@ -178,6 +184,6 @@ public class ActionResolver
             return true;
         }
 
-        bool IsEnemy(UnitModel a, UnitModel b) => b != null && a != null && a.Team != b.Team;
+        bool IsEnemy(UnitModel a, UnitModel b) => b != null && a != null && a.Team.Value != b.Team.Value;
     }
 }

@@ -49,7 +49,19 @@ public class GameModel
         var unit = _unitFactory.Create(spawnParams);
         cell.AddContent(unit);
 
-        //unit.Died += () => UnitDied?.Invoke(new ContentDiedParams(unit));
+        unit.Died += () =>
+        {
+            if (_grid == null)
+                return;
+            var pos = unit.Position;
+            if (!_grid.IsInBounds(pos.Value.x, pos.Value.y))
+                return;
+            var currentCell = _grid.GetGridObject(pos.Value.x, pos.Value.y);
+            if (currentCell.Unit == unit)
+            {
+                currentCell.RemoveContent(unit);
+            }
+        };
         var unitModelCreatedParams = new UnitModelCreatedParams(unit);
         GameChange_UnitSpawned?.Invoke(unitModelCreatedParams);
         return new(true);
