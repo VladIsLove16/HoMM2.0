@@ -277,7 +277,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hbase_grib 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: dbfa389cbf9dfb84dbbaeb6409eaa88c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

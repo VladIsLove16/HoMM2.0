@@ -23,7 +23,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  text: I have nothing, what are you talking about? <Army> {Army}
+  text: I have nothing, what are you talking about? (You feel she is lying. She has
+    <Army>)
   textLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -34,7 +35,7 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   choices:
-  - Id: OK
+  - Id: Okey, my bad, don't worry.
     Text: I get it
     TextLocalized:
       m_TableReference:

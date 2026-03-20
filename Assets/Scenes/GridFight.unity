@@ -4590,7 +4590,7 @@ MonoBehaviour:
   meshRenderer: {fileID: 1807175103}
   lineColor: {r: 1, g: 1, b: 1, a: 1}
   lineWidth: 0.05
-  focusIndicatorPrefab: {fileID: 5056989746382058328, guid: 6c575b29c96580a4f9a630be62057616, type: 3}
+  focusIndicatorPrefab: {fileID: 0}
   focusIndicatorParent: {fileID: 1807175101}
   createSurfaceCollider: 1
   colliderThickness: 0.05
@@ -5912,11 +5912,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 50
+      value: 320
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 50
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5948,11 +5948,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 549
+      value: 621
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -245
       objectReference: {fileID: 0}
     - target: {fileID: 2094808077879572441, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5969,6 +5969,30 @@ PrefabInstance:
     - target: {fileID: 2768964969051434180, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
       propertyPath: m_Name
       value: AttackActionPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 320
+      objectReference: {fileID: 0}
+    - target: {fileID: 7472836350307634052, guid: 12f203b1ed2489042b0a378784714b21, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 200
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

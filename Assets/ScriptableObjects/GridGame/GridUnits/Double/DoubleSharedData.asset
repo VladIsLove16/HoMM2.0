@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1663b41f013f8c47b3ff8acfc0238e7, type: 3}
-  m_Name: HSharedData
+  m_Name: DoubleSharedData
   m_EditorClassIdentifier: 
-  displayName: Hdata
+  displayName: Blue
   displayNameLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -22,7 +22,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  description: First human among mushrooms
+  description: Blue as sky
   descriptionLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -32,10 +32,10 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  icon: {fileID: 21300000, guid: da5703fd7e739c04ab8c11676d53793b, type: 3}
-  hoveredIcon: {fileID: 21300000, guid: 88c8ef887b26bc5458d4d4961ff3594f, type: 3}
-  humanizedIcon: {fileID: 21300000, guid: 0135e3d1b81285f48997c72fd061f8d8, type: 3}
-  humanizedHoveredIcon: {fileID: 21300000, guid: 279a7f16bcc31014ea2d1e135f042805, type: 3}
+  icon: {fileID: 21300000, guid: 8433a39cec23667449b85c7fa65ea58a, type: 3}
+  hoveredIcon: {fileID: 21300000, guid: e53f41bebf6e67442b5168732f391255, type: 3}
+  humanizedIcon: {fileID: 21300000, guid: 15cf8f3502281dd4b86191f1f7ab935e, type: 3}
+  humanizedHoveredIcon: {fileID: 21300000, guid: afa13aa3dd1037b4684bb0e9a8e18d8f, type: 3}
   references:
     version: 2
     RefIds: []

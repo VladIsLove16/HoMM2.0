@@ -12,9 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1663b41f013f8c47b3ff8acfc0238e7, type: 3}
   m_Name: BaseSharedData
   m_EditorClassIdentifier: 
-  displayName: 
-  description: 
+  displayName: Base mushroom
+  displayNameLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  description: Glass mushroom
+  descriptionLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   icon: {fileID: 21300000, guid: de7da5901b9fac84d8fddb8b46c9284f, type: 3}
   hoveredIcon: {fileID: 21300000, guid: 4c0af558ad987be44bbe5755c3461037, type: 3}
   humanizedIcon: {fileID: 21300000, guid: 236de3bd419cc0146adee449186176f9, type: 3}
   humanizedHoveredIcon: {fileID: 21300000, guid: da567883eebf21b4aa7fab1fb11f5e8c, type: 3}
+  references:
+    version: 2
+    RefIds: []

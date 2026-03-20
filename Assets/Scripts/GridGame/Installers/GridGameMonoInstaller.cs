@@ -209,6 +209,7 @@ public class GridGameMonoInstaller : MonoInstaller
     private void BindViewModels()
     {
         Container.BindInterfacesAndSelfTo<TurnStateViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<EnemyAiTurnService>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GameViewModel>().AsSingle().NonLazy();
         Container.Bind<UnitTurnPanelViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GridGameSettingsViewModel>().AsSingle().NonLazy();

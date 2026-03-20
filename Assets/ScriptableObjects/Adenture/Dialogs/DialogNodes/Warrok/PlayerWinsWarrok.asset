@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1663b41f013f8c47b3ff8acfc0238e7, type: 3}
-  m_Name: HSharedData
+  m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
+  m_Name: PlayerWinsWarrok
   m_EditorClassIdentifier: 
-  displayName: Hdata
-  displayNameLocalized:
+  nodeId: WarrokLoses
+  speaker: Warrok
+  speakerLocalized:
     m_TableReference:
       m_TableCollectionName: 
     m_TableEntryReference:
@@ -22,8 +23,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  description: First human among mushrooms
-  descriptionLocalized:
+  text: ARGH!! I WILL KILL YOU!
+  textLocalized:
     m_TableReference:
       m_TableCollectionName: 
     m_TableEntryReference:
@@ -32,10 +33,22 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  icon: {fileID: 21300000, guid: da5703fd7e739c04ab8c11676d53793b, type: 3}
-  hoveredIcon: {fileID: 21300000, guid: 88c8ef887b26bc5458d4d4961ff3594f, type: 3}
-  humanizedIcon: {fileID: 21300000, guid: 0135e3d1b81285f48997c72fd061f8d8, type: 3}
-  humanizedHoveredIcon: {fileID: 21300000, guid: 279a7f16bcc31014ea2d1e135f042805, type: 3}
+  choices:
+  - Id: leave
+    Text: Maybe next time.
+    TextLocalized:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    Action: 2
+    NextNode: {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}
+    VictoryNode: {fileID: 0}
+    DefeatNode: {fileID: 0}
   references:
     version: 2
     RefIds: []

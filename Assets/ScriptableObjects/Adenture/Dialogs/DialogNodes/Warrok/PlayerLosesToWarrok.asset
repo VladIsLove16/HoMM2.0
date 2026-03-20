@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
-  m_Name: WarrokLoses
+  m_Name: PlayerLosesToWarrok
   m_EditorClassIdentifier: 
-  nodeId: witchVictory
-  speaker: Witch
+  nodeId: WarrokWins
+  speaker: Warrok
   speakerLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -23,7 +23,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  text: ARGH!! I WILL KILL YOU!
+  text: AhAHAHAHhhahaahHAA
   textLocalized:
     m_TableReference:
       m_TableCollectionName: 
@@ -35,7 +35,7 @@ MonoBehaviour:
     m_LocalVariables: []
   choices:
   - Id: leave
-    Text: Maybe next time.
+    Text: I will practice harder.
     TextLocalized:
       m_TableReference:
         m_TableCollectionName: 

@@ -30,8 +30,7 @@ public class TurnService : ITurnService
     public int TurnNumber => _turnNumber.Value;
     public IReadOnlyList<ICombatObject> CombatUnits => _combatUnits;
     public bool IsMyTurn =>
-        _mode == GameMode.SinglePlayer ||
-        (_activeObject.Value != null && _activeObject.Value.Team == LocalTeam);
+        _activeObject.Value != null && _activeObject.Value.Team == LocalTeam;
 
     public IObservable<ICombatObject> ActiveObjectStream => _activeObject;
     public IObservable<BattleState> BattleStateStream => _battleState;

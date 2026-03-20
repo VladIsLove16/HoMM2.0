@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WitchData
   m_EditorClassIdentifier: 
   type: 1
-  sharedData: {fileID: 11400000, guid: cf628a0de4c0c9d46aa8243840efd411, type: 2}
+  sharedData: {fileID: 11400000, guid: cacad4dc40938f7428cbded6ce992366, type: 2}
   unitStats:
     UseInline: 0
     Reference: {fileID: 11400000, guid: ece113b70b1077c459cba2b62d38ba7b, type: 2}
