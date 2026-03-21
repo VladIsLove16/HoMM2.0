@@ -10,6 +10,7 @@ using Zenject;
 public class InGameUI : MonoBehaviour
 {
     private ITurnStateViewModel _turnState;
+    private IBattleControlModeService _battleControlModes;
     [Inject] private IGameCommandExecutor _gameCommandExecutor;
     [SerializeField] private Button StartBattle;
     [SerializeField] ForceDefeatAndReturnButton LoseBattle;
@@ -23,11 +24,13 @@ public class InGameUI : MonoBehaviour
     private EventBus eventBus;
 
     [Inject]
-    public void Init(ITurnStateViewModel turnState,EventBus eventBus)
+    public void Init(ITurnStateViewModel turnState, EventBus eventBus, [InjectOptional] IBattleControlModeService battleControlModes = null)
     {
         _turnState = turnState;
+        _battleControlModes = battleControlModes;
         _turnState.ActiveObject.Subscribe(OnUnitTurnStarted).AddTo(_disposables);
         _turnState.BattleStateProperty.Subscribe(OnTurnStateChanged).AddTo(_disposables);
+        _battleControlModes?.TeamModeChanged.Subscribe(_ => OnUnitTurnStarted(_turnState.ActiveObject.Value)).AddTo(_disposables);
         StartBattle.onClick.AddListener(() => _gameCommandExecutor.StartBattle());
         this.eventBus = eventBus;
         LoseBattle.Construct(eventBus);

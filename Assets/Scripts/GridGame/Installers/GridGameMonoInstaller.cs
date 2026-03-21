@@ -25,6 +25,7 @@ public class GridGameMonoInstaller : MonoInstaller
     [SerializeField] private GridUnitAssetMap gridUnitAssets;
     [SerializeField] private GridRenderSettingsSO gridRenderSettings;
     [SerializeField] private AnimationSpeedSettings animationSpeedSettings;
+    [SerializeField] private BattleAiControlConfigSO battleAiControlConfig;
     [Header("Model dependencies")]
     [SerializeField] private StatusEffectDatas statusEffectDatas;
     [SerializeField] private GameConfigurationService gameConfigurationService;
@@ -100,6 +101,12 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
         Container.Bind<IAnimationSpeedSettings>().To<AnimationSpeedSettings>().FromInstance(animationSpeedSettings).AsSingle().WithArguments(AnimationSpeedMode.Fast);
+        if (battleAiControlConfig == null)
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] BattleAiControlConfig is not assigned. Using runtime default config.");
+            battleAiControlConfig = ScriptableObject.CreateInstance<BattleAiControlConfigSO>();
+        }
+        Container.Bind<BattleAiControlConfigSO>().FromInstance(battleAiControlConfig).AsSingle();
         if (gridRenderSettings == null)
         {
             Debug.LogWarning("[GridGameMonoInstaller] GridRenderSettings is not assigned. Using default settings.");
@@ -208,6 +215,7 @@ public class GridGameMonoInstaller : MonoInstaller
 
     private void BindViewModels()
     {
+        Container.BindInterfacesAndSelfTo<BattleControlModeService>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<TurnStateViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<EnemyAiTurnService>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<GameViewModel>().AsSingle().NonLazy();

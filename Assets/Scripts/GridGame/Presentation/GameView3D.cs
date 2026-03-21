@@ -46,7 +46,6 @@ public class GameView3D : MonoBehaviour
         }
 
         _gameVM.UnitSpawned += OnGameVM_UnitSpawned;
-        _gameVM.AttackAnimationRequested += OnAttackAnimationRequested;
         _gameVM.HoveredUnitChanged += OnHoveredUnitChanged;
 
         if (_turnState != null)
@@ -56,9 +55,10 @@ public class GameView3D : MonoBehaviour
                 .AddTo(_subscriptions);
         }
     }
+
     private void OnGameVM_UnitSpawned(UnitViewModel model)
     {
-       var view =  _factory.Create(model);
+        var view = _factory.Create(model);
         _views[model] = view;
         UpdateUnitVisibility(view, model);
 
@@ -69,21 +69,14 @@ public class GameView3D : MonoBehaviour
         model.OnPosChanged
             .Subscribe(_ => RefreshDeadBodyVisibility())
             .AddTo(_subscriptions);
-    }
 
-    private void OnAttackAnimationRequested(UnitViewModel attackerVm, UnitViewModel defenderVm)
-    {
-        if (attackerVm == null || defenderVm == null)
-            return;
+        model.OnAttackedWorld
+            .Subscribe(targetWorld => view?.HandleAttack(targetWorld))
+            .AddTo(_subscriptions);
 
-        if (!_views.TryGetValue(attackerVm, out var attackerView))
-            return;
-
-        if (!_views.TryGetValue(defenderVm, out var defenderView))
-            return;
-
-        attackerView?.PlayCoordinatedAttack(defenderView);
-        defenderView?.PlayCoordinatedHit(attackerView);
+        model.OnHitWorld
+            .Subscribe(attackerWorld => view?.HandleHit(attackerWorld))
+            .AddTo(_subscriptions);
     }
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
@@ -172,11 +165,13 @@ public class GameView3D : MonoBehaviour
         ProcessCellAction(coords);
         return true;
     }
+
     public void SnapUnitToCell(UnitView3D unitView, Vector2Int cell)
     {
-        var worldPos = _worldToCellProvider.ToWorld(cell.x,cell.y);
+        var worldPos = _worldToCellProvider.ToWorld(cell.x, cell.y);
         unitView.SnapToCell(worldPos);
     }
+
     public void BeginDrag(UnitView3D unit, Vector3 grabWorldPosition)
     {
         if (IsInteractionLocked())
@@ -192,8 +187,8 @@ public class GameView3D : MonoBehaviour
             _dragOffset.y = 0f;
             _dragY = unitPosition.y;
         }
-        if(Log)
-        Debug.Log(_draggedUnit.gameObject.name);
+        if (Log)
+            Debug.Log(_draggedUnit.gameObject.name);
     }
 
     public void CancelDrag()
@@ -344,7 +339,6 @@ public class GameView3D : MonoBehaviour
     {
         if (_gameVM != null)
         {
-            _gameVM.AttackAnimationRequested -= OnAttackAnimationRequested;
             _gameVM.UnitSpawned -= OnGameVM_UnitSpawned;
             _gameVM.HoveredUnitChanged -= OnHoveredUnitChanged;
         }

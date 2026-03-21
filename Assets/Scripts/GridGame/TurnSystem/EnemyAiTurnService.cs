@@ -7,42 +7,89 @@ using UnityEngine;
 public sealed class EnemyAiTurnService : IDisposable
 {
     private readonly ITurnService _turnService;
+    private readonly IBattleControlModeService _battleControlModes;
     private readonly ActionResolver _resolver;
     private readonly ActionPipeline _pipeline;
     private readonly MovementSystem _movementSystem;
     private readonly GameModel _gameModel;
+    private readonly BattleAiControlConfigSO _config;
     private readonly CompositeDisposable _disposables = new();
 
     private bool _isProcessing;
+    private bool _deploymentApplied;
+    private IDisposable _pendingTurn;
 
     public EnemyAiTurnService(
         ITurnService turnService,
+        IBattleControlModeService battleControlModes,
         ActionResolver resolver,
         ActionPipeline pipeline,
         MovementSystem movementSystem,
-        GameModel gameModel)
+        GameModel gameModel,
+        BattleAiControlConfigSO config)
     {
         _turnService = turnService ?? throw new ArgumentNullException(nameof(turnService));
+        _battleControlModes = battleControlModes ?? throw new ArgumentNullException(nameof(battleControlModes));
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
         _movementSystem = movementSystem ?? throw new ArgumentNullException(nameof(movementSystem));
         _gameModel = gameModel ?? throw new ArgumentNullException(nameof(gameModel));
+        _config = config ?? throw new ArgumentNullException(nameof(config));
 
         _turnService.ActiveObjectStream
-            .Subscribe(_ => ProcessEnemyTurnsIfNeeded())
+            .Subscribe(_ => ScheduleProcessingIfNeeded())
             .AddTo(_disposables);
 
         _turnService.BattleStateStream
-            .Subscribe(_ => ProcessEnemyTurnsIfNeeded())
+            .Subscribe(OnBattleStateChanged)
+            .AddTo(_disposables);
+
+        _battleControlModes.TeamModeChanged
+            .Subscribe(_ => ScheduleProcessingIfNeeded())
             .AddTo(_disposables);
     }
 
     public void Dispose()
     {
+        _pendingTurn?.Dispose();
         _disposables.Dispose();
     }
 
-    private void ProcessEnemyTurnsIfNeeded()
+    private void OnBattleStateChanged(BattleState state)
+    {
+        if (state == BattleState.replacement)
+        {
+            TryRandomizeDeployment();
+        }
+        else
+        {
+            _deploymentApplied = false;
+        }
+
+        ScheduleProcessingIfNeeded();
+    }
+
+    private void ScheduleProcessingIfNeeded()
+    {
+        _pendingTurn?.Dispose();
+        _pendingTurn = null;
+
+        if (!ShouldControlCurrentUnit())
+            return;
+
+        var delaySeconds = _battleControlModes.IsFastResolveActive.Value ? 0f : _config.AiTurnDelaySeconds;
+        if (delaySeconds <= 0f)
+        {
+            ProcessEnemyTurn();
+            return;
+        }
+
+        UnityLogger.Log($"[EnemyAiTurnService] Scheduling AI action in {delaySeconds:0.00}s for {_turnService.ActiveObject}", LogCategory.AI);
+        _pendingTurn = Observable.Timer(TimeSpan.FromSeconds(delaySeconds))
+            .Subscribe(_ => ProcessEnemyTurn());
+    }
+
+    private void ProcessEnemyTurn()
     {
         if (_isProcessing)
             return;
@@ -53,27 +100,33 @@ public sealed class EnemyAiTurnService : IDisposable
         _isProcessing = true;
         try
         {
-            while (ShouldControlCurrentUnit())
+            if (!ShouldControlCurrentUnit())
+                return;
+
+            var active = _turnService.ActiveObject as UnitModel;
+            if (active == null)
             {
-                var active = _turnService.ActiveObject as UnitModel;
-                if (active == null)
-                {
-                    _turnService.EndTurn();
-                    continue;
-                }
+                UnityLogger.Log("[EnemyAiTurnService] Active AI object is null or not UnitModel. Ending turn.", LogCategory.AI);
+                _turnService.EndTurn();
+                return;
+            }
 
-                if (!TryBuildBestPlan(active, out var plan))
+            if (!TryBuildBestPlan(active, out var plan))
+            {
+                UnityLogger.Log($"[EnemyAiTurnService] No valid plan for {active.UnitType.Value} [{active.Team.Value}] at {active.Position.Value}", LogCategory.AI);
+                if (_config.AutoEndTurnWhenNoPlan)
                 {
-                    UnityLogger.Log($"[EnemyAiTurnService] No valid plan for {active.UnitType.Value} [{active.Team.Value}] at {active.Position.Value}", LogCategory.AI);
                     _turnService.EndTurn();
-                    continue;
                 }
+                return;
+            }
 
-                var executed = _pipeline.Execute(plan.ActionType, plan.Context);
-                if (!executed && ReferenceEquals(_turnService.ActiveObject, active))
-                {
-                    _turnService.EndTurn();
-                }
+            UnityLogger.Log($"[EnemyAiTurnService] Executing {plan.ActionType} from {plan.Context.FromCell} to {plan.Context.TargetCell} (attackFrom {plan.Context.AttackFromCell})", LogCategory.AI);
+            var executed = _pipeline.Execute(plan.ActionType, plan.Context);
+            if (!executed && ReferenceEquals(_turnService.ActiveObject, active))
+            {
+                UnityLogger.Log($"[EnemyAiTurnService] Pipeline declined {plan.ActionType}. Ending turn for {active.UnitType.Value}.", LogCategory.AI);
+                _turnService.EndTurn();
             }
         }
         finally
@@ -87,7 +140,7 @@ public sealed class EnemyAiTurnService : IDisposable
         var active = _turnService.ActiveObject;
         return active != null &&
                _turnService.BattleState == BattleState.inProgress &&
-               active.Team != _turnService.LocalTeam;
+               _battleControlModes.IsAiControlled(active.Team);
     }
 
     private bool TryBuildBestPlan(UnitModel activeUnit, out ActionPlan plan)
@@ -100,16 +153,22 @@ public sealed class EnemyAiTurnService : IDisposable
         if (enemies.Count == 0)
             return false;
 
-        foreach (var enemy in enemies)
+        if (_config.TryDirectAttackFirst)
         {
-            if (TryBuildAttackPlan(activeUnit, enemy, out plan))
-                return true;
+            foreach (var enemy in enemies)
+            {
+                if (TryBuildAttackPlan(activeUnit, enemy, out plan))
+                    return true;
+            }
         }
 
-        foreach (var enemy in enemies)
+        if (_config.TryMoveTowardsEnemy)
         {
-            if (TryBuildMovePlan(activeUnit, enemy, out plan))
-                return true;
+            foreach (var enemy in enemies)
+            {
+                if (TryBuildMovePlan(activeUnit, enemy, out plan))
+                    return true;
+            }
         }
 
         return false;
@@ -123,7 +182,7 @@ public sealed class EnemyAiTurnService : IDisposable
                            unit != activeUnit &&
                            unit.Amount.Value > 0 &&
                            unit.Team.Value != activeUnit.Team.Value)
-            .OrderBy(unit => EstimateDistance(activeUnit.Position.Value, unit.Position.Value))
+            .OrderBy(unit => _config.PreferNearestEnemy ? EstimateDistance(activeUnit.Position.Value, unit.Position.Value) : 0f)
             .ToList();
     }
 
@@ -148,6 +207,9 @@ public sealed class EnemyAiTurnService : IDisposable
             plan = directPlan;
             return true;
         }
+
+        if (!_config.TryMoveThenAttack)
+            return false;
 
         var reachable = _movementSystem.GetReachableCells(attackerCell, attacker.ModifiedStats.MoveSpeed);
         ActionPlan bestPlan = ActionPlan.None;
@@ -224,5 +286,83 @@ public sealed class EnemyAiTurnService : IDisposable
             return float.MaxValue;
 
         return _movementSystem.GetRouteCost(route);
+    }
+
+    private void TryRandomizeDeployment()
+    {
+        if (_deploymentApplied || !_config.RandomizeEnemyDeployment || _turnService.Mode != GameMode.SinglePlayer)
+            return;
+
+        var cells = _gameModel.GetAllCells();
+        if (cells == null)
+            return;
+
+        var allUnits = _turnService.CombatUnits.OfType<UnitModel>().ToList();
+        if (allUnits.Count == 0)
+            return;
+
+        var width = 0;
+        var height = 0;
+        foreach (var cell in cells)
+        {
+            if (cell == null)
+                continue;
+
+            width = Mathf.Max(width, cell.X + 1);
+            height = Mathf.Max(height, cell.Y + 1);
+        }
+
+        if (width <= 0 || height <= 0)
+            return;
+
+        var rows = Mathf.Clamp(2, 1, height);
+        var rng = new System.Random();
+        var aiTeams = allUnits
+            .Select(unit => unit.Team.Value)
+            .Where(team => team != _turnService.LocalTeam && _battleControlModes.IsAiControlled(team))
+            .Distinct()
+            .ToList();
+
+        foreach (var team in aiTeams)
+        {
+            var availableCells = BuildDeploymentCells(team, width, height, rows)
+                .Where(cell =>
+                {
+                    var gridCell = _gameModel.GetCell(cell);
+                    return gridCell != null && (gridCell.IsEmpty || (gridCell.Unit != null && gridCell.Unit.Team.Value == team));
+                })
+                .OrderBy(_ => rng.Next())
+                .ToList();
+
+            var teamUnits = allUnits.Where(unit => unit.Team.Value == team).OrderBy(_ => rng.Next()).ToList();
+            for (var i = 0; i < teamUnits.Count && i < availableCells.Count; i++)
+            {
+                var unit = teamUnits[i];
+                var targetCell = availableCells[i];
+                if (unit.Position.Value == targetCell)
+                    continue;
+
+                UnityLogger.Log($"[EnemyAiTurnService] Random deployment: {unit.UnitType.Value} [{team}] -> {targetCell}", LogCategory.AI);
+                _gameModel.MoveObject(unit, targetCell);
+            }
+        }
+
+        _deploymentApplied = true;
+    }
+
+    private static IEnumerable<Vector2Int> BuildDeploymentCells(Team team, int width, int height, int rows)
+    {
+        if (team == Team.Red)
+        {
+            for (var y = height - rows; y < height; y++)
+            for (var x = 0; x < width; x++)
+                yield return new Vector2Int(x, y);
+        }
+        else
+        {
+            for (var y = 0; y < rows; y++)
+            for (var x = 0; x < width; x++)
+                yield return new Vector2Int(x, y);
+        }
     }
 }

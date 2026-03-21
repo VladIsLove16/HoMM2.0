@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Tests.EditMode.Combat
 {
@@ -10,15 +12,20 @@ namespace Tests.EditMode.Combat
         private MovementSystem _movementSystem;
         private GameModel _gameModel;
         private TurnService _turnService;
+        private BattleControlModeService _battleControlModes;
         private ActionResolver _resolver;
         private ActionPipeline _pipeline;
         private EnemyAiTurnService _enemyAi;
+        private AnimationSpeedSettings _animationSpeedSettings;
+        private BattleAiControlConfigSO _config;
         private UnitStats _baseStats;
 
         [SetUp]
         public void SetUp()
         {
             _movementSystem = new MovementSystem();
+            _animationSpeedSettings = ScriptableObject.CreateInstance<AnimationSpeedSettings>();
+            _config = ScriptableObject.CreateInstance<BattleAiControlConfigSO>();
             _baseStats = CreateStats(health: 100, damage: 20, moveSpeed: 2, attackRange: 1, allowAdjacentRanged: true);
 
             var provider = new InlineStatsProvider();
@@ -29,13 +36,26 @@ namespace Tests.EditMode.Combat
             _turnService = new TurnService(new TurnQueue(), GameMode.SinglePlayer, Team.Blue);
             _resolver = new ActionResolver(_gameModel, _movementSystem);
             _pipeline = new ActionPipeline(_resolver, _turnService);
-            _enemyAi = new EnemyAiTurnService(_turnService, _resolver, _pipeline, _movementSystem, _gameModel);
+            _battleControlModes = new BattleControlModeService(_turnService, _animationSpeedSettings, _config);
+            _enemyAi = new EnemyAiTurnService(_turnService, _battleControlModes, _resolver, _pipeline, _movementSystem, _gameModel, _config);
         }
 
         [TearDown]
         public void TearDown()
         {
             _enemyAi?.Dispose();
+            _battleControlModes?.Dispose();
+
+            if (_animationSpeedSettings != null)
+            {
+                Object.DestroyImmediate(_animationSpeedSettings);
+            }
+
+            if (_config != null)
+            {
+                Object.DestroyImmediate(_config);
+            }
+
             if (_baseStats != null)
             {
                 Object.DestroyImmediate(_baseStats);
@@ -56,8 +76,8 @@ namespace Tests.EditMode.Combat
 
             _turnService.EndTurn();
 
-            Assert.That(blue.ModifiedStats.Health, Is.EqualTo(80), "Красный AI должен атаковать соседнего синего даже при одинаковом UnitType.");
-            Assert.That(_turnService.ActiveObject, Is.SameAs(blue), "После хода AI очередь должна вернуться к локальной команде.");
+            Assert.That(blue.ModifiedStats.Health, Is.EqualTo(80));
+            Assert.That(_turnService.ActiveObject, Is.SameAs(blue));
             Assert.That(red.Position.Value, Is.EqualTo(new Vector2Int(1, 0)));
         }
 
@@ -76,7 +96,7 @@ namespace Tests.EditMode.Combat
             _turnService.RunBattle();
             _turnService.EndTurn();
 
-            Assert.That(red.Position.Value, Is.EqualTo(new Vector2Int(2, 0)), "AI должен подбежать к ближайшему врагу на максимальную доступную дистанцию.");
+            Assert.That(red.Position.Value, Is.EqualTo(new Vector2Int(2, 0)));
             Assert.That(_turnService.ActiveObject, Is.SameAs(blue));
         }
 
@@ -94,8 +114,60 @@ namespace Tests.EditMode.Combat
 
             _turnService.EndTurn();
 
-            Assert.That(blue.ModifiedStats.Health, Is.EqualTo(80), "AI должен управлять любой non-local командой, а не только красной.");
-            Assert.That(_turnService.IsMyTurn, Is.True, "После завершения хода non-local AI управление должно вернуться локальной команде.");
+            Assert.That(blue.ModifiedStats.Health, Is.EqualTo(80));
+            Assert.That(_turnService.IsMyTurn, Is.True);
+        }
+
+        [Test]
+        public void EnemyAi_DoesNotProcess_WhenEnemyTeamSetToManual()
+        {
+            _gameModel.InitializeGrid(3, 1);
+            var blue = SpawnUnit(0, 0, UnitType.Archer, Team.Blue);
+            var red = SpawnUnit(1, 0, UnitType.Archer, Team.Red);
+            _turnService.AddCombatUnit(blue);
+            _turnService.AddCombatUnit(red);
+            _battleControlModes.SetEnemyTeamsMode(BattleControlMode.Manual);
+
+            _turnService.RunBattle();
+            _turnService.EndTurn();
+
+            Assert.That(_turnService.ActiveObject, Is.SameAs(red));
+            Assert.That(blue.ModifiedStats.Health, Is.EqualTo(100));
+        }
+
+        [Test]
+        public void EnemyAi_CanControl_LocalTeam_WhenSwitchedToAi()
+        {
+            _gameModel.InitializeGrid(3, 1);
+            var blue = SpawnUnit(0, 0, UnitType.Archer, Team.Blue);
+            var red = SpawnUnit(1, 0, UnitType.Archer, Team.Red);
+            _turnService.AddCombatUnit(blue);
+            _turnService.AddCombatUnit(red);
+            _battleControlModes.SetLocalTeamMode(BattleControlMode.AI);
+            _battleControlModes.SetEnemyTeamsMode(BattleControlMode.Manual);
+
+            _turnService.RunBattle();
+
+            Assert.That(red.ModifiedStats.Health, Is.EqualTo(80));
+            Assert.That(_turnService.ActiveObject, Is.SameAs(red));
+        }
+
+        [Test]
+        public void BattleControlModes_EnableFastResolve_SetsAiAndAnimationOverride()
+        {
+            _gameModel.InitializeGrid(2, 1);
+            var blue = SpawnUnit(0, 0, UnitType.Archer, Team.Blue);
+            var red = SpawnUnit(1, 0, UnitType.Archer, Team.Red);
+            _turnService.AddCombatUnit(blue);
+            _turnService.AddCombatUnit(red);
+
+            _battleControlModes.EnableFastResolve();
+
+            Assert.That(_battleControlModes.IsFastResolveActive.Value, Is.True);
+            Assert.That(_battleControlModes.IsAiControlled(Team.Blue), Is.True);
+            Assert.That(_battleControlModes.IsAiControlled(Team.Red), Is.True);
+            Assert.That(_animationSpeedSettings.PlaybackMultiplier, Is.EqualTo(10f));
+            Assert.That(_animationSpeedSettings.IsInstant, Is.False);
         }
 
         [Test]
@@ -114,7 +186,7 @@ namespace Tests.EditMode.Combat
             turnService.EndTurn();
 
             Assert.That(turnService.ActiveObject, Is.SameAs(red));
-            Assert.That(turnService.IsMyTurn, Is.False, "В singleplayer мой ход должен определяться локальной командой, а не самим фактом singleplayer-режима.");
+            Assert.That(turnService.IsMyTurn, Is.False);
         }
 
         private UnitModel SpawnUnit(int x, int y, UnitType type, Team team)
@@ -174,6 +246,7 @@ namespace Tests.EditMode.Combat
             public UnitType UnitType => UnitType.Archer;
             public UnitStats Stats { get; }
             public Action<ICombatObject> Died { get; set; }
+            System.Action<ICombatObject> ICombatObject.Died { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
         }
     }
 }

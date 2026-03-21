@@ -24,6 +24,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     private readonly MovementSystem _movementSystem;
     private readonly IGameCommandExecutor _gameCommandExecutor;
     private readonly ITurnStateViewModel _turnState;
+    private readonly IBattleControlModeService _battleControlModes;
     private readonly ActionResolver _actionResolver;
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Dictionary<IGridContent, UnitViewModel> _uvms = new();
@@ -37,7 +38,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         IGameCommandExecutor actionExecutor,
         ITurnStateViewModel turnState,
         ActionResolver actionResolver,
-        IGridRenderSettings gridRenderSettings)
+        IGridRenderSettings gridRenderSettings,
+        [InjectOptional] IBattleControlModeService battleControlModes = null)
     {
         _gameModel = model ?? throw new ArgumentNullException(nameof(model));
         _movementSystem = movementSystem ?? throw new ArgumentNullException(nameof(movementSystem));
@@ -45,6 +47,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
         _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
         RenderSettings = gridRenderSettings ?? throw new ArgumentNullException(nameof(gridRenderSettings));
+        _battleControlModes = battleControlModes;
 
         _gameModel.GameChange_Initialized += OnGameModelGridInitialized;
         _gameModel.GameChange_UnitSpawned += OnGameModelUnitSpawned;
@@ -57,6 +60,13 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         _turnState.TurnNumber
             .Subscribe(OnTurnNumberChanged)
             .AddTo(_subscriptions);
+
+        if (_battleControlModes != null)
+        {
+            _battleControlModes.TeamModeChanged
+                .Subscribe(_ => RefreshCurrentTurnPreview())
+                .AddTo(_subscriptions);
+        }
     }
     public void HandleCellHovered(Vector2Int? cell)
     {
@@ -404,7 +414,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             return;
         }
 
-        _data[CellState.enemyCell] = GetEnemyCells();
+        var activeTeam = _turnState.ActiveObject.Value?.Team ?? _turnState.LocalTeam;
+        _data[CellState.enemyCell] = GetEnemyCells(activeTeam);
     }
 
     private void UpdateHoverState(Vector2Int? cell)
@@ -571,16 +582,30 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         preview.Set(CellState.enemyReachableCell, Array.Empty<Vector2Int>());
     }
 
-    private List<Vector2Int> GetEnemyCells()
+    private List<Vector2Int> GetEnemyCells(Team activeTeam)
     {
         var result = new List<Vector2Int>();
         foreach (var unit in _turnState.CombatUnits)
         {
-            if (unit == null || unit.Team == _turnState.LocalTeam)
+            if (unit == null || unit.Team == activeTeam)
                 continue;
             result.Add(unit.Position);
         }
         return result;
+    }
+
+    private void RefreshCurrentTurnPreview()
+    {
+        if (_turnState.BattleStateProperty.Value == BattleState.replacement)
+        {
+            ApplyDeploymentPreview();
+            return;
+        }
+
+        if (_turnState.ActiveObject.Value != null)
+        {
+            OnActiveUnitChanged(_turnState.ActiveObject.Value);
+        }
     }
 
     private static void InitializePreviewStates(PreviewResult preview)

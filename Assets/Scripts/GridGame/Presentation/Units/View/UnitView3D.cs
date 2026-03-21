@@ -411,7 +411,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
         if (_animationSpeedSettings != null)
         {
-            _animationSpeedSettings.Mode.Subscribe(OnAnimationSpeedChanged).AddTo(_disposables);
+            _animationSpeedSettings.Changed.Subscribe(_ => OnAnimationSpeedChanged(_animationSpeedSettings.Mode.Value)).AddTo(_disposables);
         }
     }
 
