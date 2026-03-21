@@ -114,6 +114,7 @@ public class ActionResolver
             attackFromCell != null &&
             ctx.AttackFromCell != ctx.FromCell &&
             !attackCellOccupiedByOther &&
+            IsMeleeUnit(fromUnit) &&
             IsEnemy(fromUnit, targetUnit))
         {
             if (TryMoveToCellThenMelee(mover, ctx.AttackFromCell, fromUnit, ctx.TargetCell))
@@ -185,5 +186,6 @@ public class ActionResolver
         }
 
         bool IsEnemy(UnitModel a, UnitModel b) => b != null && a != null && a.Team.Value != b.Team.Value;
+        bool IsMeleeUnit(UnitModel unit) => unit != null && unit.ModifiedStats != null && unit.ModifiedStats.AttackRange <= 1;
     }
 }

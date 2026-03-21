@@ -668,6 +668,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         var stats = attacker.ModifiedStats;
         if (stats == null)
             return false;
+        if (stats.AttackRange > 1)
+            return false;
 
         var reachable = _movementSystem.GetReachableCells(attacker.Position.Value, stats.MoveSpeed);
         if (reachable == null || reachable.Count == 0)
