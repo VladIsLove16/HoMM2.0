@@ -13,13 +13,13 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 using Zenject;
 using Game.Achievements;
+using SharedView;
 
 namespace Adventure.Settings.View
 {
-    public abstract class GameSettingsViewBase<TViewModel> : MonoBehaviour where TViewModel : GameSettingsViewModel
+    public abstract class GameSettingsViewBase<TViewModel> : CanvasGroupPanelViewBase<TViewModel> where TViewModel : GameSettingsViewModel
     {
         [Header("Common")]
-        [SerializeField] private GameObject panelRoot;
         [SerializeField] private Button closeButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private Button achievementsButton;
@@ -28,33 +28,24 @@ namespace Adventure.Settings.View
         [SerializeField] private TMP_Dropdown qualityDropdown;
         [SerializeField] private TMP_Dropdown languageDropdown;
 
-        protected TViewModel ViewModel { get; private set; }
-        protected CompositeDisposable Bindings { get; private set; }
-
         private UnityAction _closeAction;
         private UnityAction _exitAction;
         private UnityAction _achievementsAction;
-        private bool _initialized;
+        private bool _uiInitialized;
         private bool _waitingLocalizationInit;
         private bool _achievementsBound;
 
         [InjectOptional] private AchievementsViewModel _achievementsViewModel;
 
         [Inject]
-        public virtual void Construct(TViewModel vm)
+        public override void Construct(TViewModel vm)
         {
-            ViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-            TryInitialize();
+            base.Construct(vm);
         }
 
-        protected virtual void Start()
+        protected override void OnDestroy()
         {
-            TryInitialize();
-        }
-
-        protected virtual void OnDestroy()
-        {
-            if (_initialized)
+            if (_uiInitialized)
             {
                 if (closeButton != null && _closeAction != null)
                     closeButton.onClick.RemoveListener(_closeAction);
@@ -77,9 +68,9 @@ namespace Adventure.Settings.View
                     LocalizationSettings.InitializationOperation.Completed -= OnLocalizationInitializationCompleted;
                     _waitingLocalizationInit = false;
                 }
-
-                Bindings?.Dispose();
             }
+
+            base.OnDestroy();
         }
 
         private void OnQualityChanged(int value)
@@ -102,28 +93,14 @@ namespace Adventure.Settings.View
             ViewModel.SetSoundsVolume(value);
         }
 
-        private void OnVisibilityChanged(bool visible)
+        public override void TryInitialize()
         {
-            if (panelRoot != null)
-            {
-                panelRoot.SetActive(visible);
-            }
-        }
+            base.TryInitialize();
 
-
-
-
-
-        public virtual void TryInitialize()
-        {
-            if (_initialized || ViewModel == null)
+            if (_uiInitialized || ViewModel == null)
                 return;
 
-            _initialized = true;
-            Bindings = new CompositeDisposable();
-
-            ViewModel.IsOpen.Subscribe(OnVisibilityChanged).AddTo(Bindings);
-            OnVisibilityChanged(ViewModel.IsOpen.Value);
+            _uiInitialized = true;
 
             if (closeButton != null)
             {

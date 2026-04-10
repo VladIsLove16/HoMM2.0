@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7143387392552616303}
   - component: {fileID: 8537309346922596652}
+  - component: {fileID: 1031420578199238491}
   - component: {fileID: 2370140553118302732}
   m_Layer: 0
   m_Name: Achievments
@@ -47,6 +48,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1031420578199238490}
   m_CullTransparentMesh: 1
+--- !u!225 &1031420578199238491
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031420578199238490}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!114 &2370140553118302732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,7 +72,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 885d9889d17d1064aa149c2ce67ed77e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  root: {fileID: 1031420578199238490}
+  canvasGroup: {fileID: 1031420578199238491}
+  fadeDuration: 0.15
   itemPrefab: {fileID: 6429672840872198649, guid: 02b96d1b4030f0c4e93d7765e32a43a7, type: 3}
   listRoot: {fileID: 693644914415636786}
   resetButton: {fileID: 7361499357171823773}
@@ -183,6 +197,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -226,7 +241,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8437540790426094376}
   - component: {fileID: 8106179381258982365}
-  - component: {fileID: 6733093974823907270}
   m_Layer: 0
   m_Name: Root
   m_TagString: Untagged
@@ -264,36 +278,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3092188387081055340}
   m_CullTransparentMesh: 1
---- !u!114 &6733093974823907270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3092188387081055340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4031652072528211573
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,6 +502,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -654,6 +639,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

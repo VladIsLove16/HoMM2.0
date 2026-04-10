@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -13,6 +14,7 @@ namespace Tests.EditMode.Combat
         private GameModel _gameModel;
         private TurnService _turnService;
         private BattleControlModeService _battleControlModes;
+        private BattleAnimationGate _animationGate;
         private ActionResolver _resolver;
         private ActionPipeline _pipeline;
         private EnemyAiTurnService _enemyAi;
@@ -26,6 +28,8 @@ namespace Tests.EditMode.Combat
             _movementSystem = new MovementSystem();
             _animationSpeedSettings = ScriptableObject.CreateInstance<AnimationSpeedSettings>();
             _config = ScriptableObject.CreateInstance<BattleAiControlConfigSO>();
+            SetPrivateField(_config, "aiTurnDelaySeconds", 0f);
+            SetPrivateField(_config, "randomizeEnemyDeployment", false);
             _baseStats = CreateStats(health: 100, damage: 20, moveSpeed: 2, attackRange: 1, allowAdjacentRanged: true);
 
             var provider = new InlineStatsProvider();
@@ -34,10 +38,11 @@ namespace Tests.EditMode.Combat
 
             _gameModel = new GameModel(new UnitModelFactory(provider), _movementSystem);
             _turnService = new TurnService(new TurnQueue(), GameMode.SinglePlayer, Team.Blue);
+            _animationGate = new BattleAnimationGate();
             _resolver = new ActionResolver(_gameModel, _movementSystem);
             _pipeline = new ActionPipeline(_resolver, _turnService);
             _battleControlModes = new BattleControlModeService(_turnService, _animationSpeedSettings, _config);
-            _enemyAi = new EnemyAiTurnService(_turnService, _battleControlModes, _resolver, _pipeline, _movementSystem, _gameModel, _config);
+            _enemyAi = new EnemyAiTurnService(_turnService, _battleControlModes, _animationGate, _resolver, _pipeline, _movementSystem, _gameModel, _config);
         }
 
         [TearDown]
@@ -207,6 +212,13 @@ namespace Tests.EditMode.Combat
             stats.AllowAdjacentRanged = allowAdjacentRanged;
             stats.InvulnerableEffects = new List<StatusEffectType>();
             return stats;
+        }
+
+        private static void SetPrivateField<T>(object target, string fieldName, T value)
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null, $"Field '{fieldName}' not found on {target.GetType().Name}");
+            field.SetValue(target, value);
         }
 
         private sealed class InlineStatsProvider : IUnitStatsProvider

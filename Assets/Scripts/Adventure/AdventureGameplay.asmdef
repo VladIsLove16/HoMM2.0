@@ -14,6 +14,7 @@
         "SharedVMs",
         "Unity.Addressables",
         "Shared",
+        "Unity.Collections",
         "Unity.Netcode.Runtime",
         "Unity.Behavior.Serialization",
         "Unity.Localization",

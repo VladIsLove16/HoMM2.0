@@ -24,7 +24,7 @@ namespace Adventure.Infrastructure.Movement
         private Vector2 _pendingLookInput;
         private bool _useExternalInput;
         [FormerlySerializedAs("adventureCharacterInput")]
-        [Inject] private AdventureInput legacyInputProvider;
+        [Inject(Optional = true)] private AdventureInput legacyInputProvider;
         [Inject(Optional = true)] private IMouseSensitivityService _mouseSensitivityService;
 
         private void Awake()
@@ -88,7 +88,9 @@ namespace Adventure.Infrastructure.Movement
         private void Rotate(MovementCommand command)
         {
             transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
-            UpdateCameraPitch(command.DesiredPitch);
+            if (cameraPivot == null)
+                return;
+            cameraPivot.localRotation = Quaternion.Euler(command.DesiredPitch, 0f, 0f);
         }
 
         private float ResolveLookMultiplier()
@@ -153,13 +155,6 @@ namespace Adventure.Infrastructure.Movement
             }
         }
 
-        private void UpdateCameraPitch(float pitch)
-        {
-            if (cameraPivot == null)
-                return;
-
-            cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-        }
 
         public Quaternion BodyRotation => transform.rotation;
 

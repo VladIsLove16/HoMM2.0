@@ -51,6 +51,7 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
+            _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogue.Id, context.PlayerTransform);
             battleAnimationController?.PlayAnimation(NpcAnimationType.Greeting);
             _behaviorGraphRegistry?.SetPendingDialog(dialogue.Id);
             bool isDialogStarted = _dialogVM.TryStartDialog(dialogue.Id, lineup);

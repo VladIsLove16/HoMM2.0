@@ -1,5 +1,7 @@
 using Adventure.Infrastructure.Interaction;
 using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Players;
+using Adventure.Application.VMs;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.ViewModel;
 using Assets.Scripts.Adventure.Infrastructure.Input;
@@ -7,18 +9,16 @@ using System;
 using UnityEngine;
 using Zenject;
 
-[DefaultExecutionOrder(-150)]
 public sealed class AdventureInputRouter : IDisposable
 {
     [Inject] private AdventureInput adventureCharacterInput;
-    [Inject] private PlayerMovementController movementController;
-    [Inject] private PlayerInteractionController interactionController;
+    [Inject] private ILocalAdventurePlayerProvider localPlayerProvider;
 
     [Inject] private IInputModeVM inputModeVM;
     [Inject] private AdventureMenusCoordinatorViewModel menusVM;
     [Inject] private AdventureGameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
-    [InjectOptional] private HelpMenu helpMenu;
+    [InjectOptional] private HelpMenuViewModel helpMenuVM;
     [Inject]
     private void Construct()
     {
@@ -46,6 +46,7 @@ public sealed class AdventureInputRouter : IDisposable
 
     private void OnMoveChanged(Vector2 move)
     {
+        var movementController = localPlayerProvider.MovementController;
         if (movementController == null)
             return;
 
@@ -57,6 +58,7 @@ public sealed class AdventureInputRouter : IDisposable
 
     private void OnLookChanged(Vector2 delta)
     {
+        var movementController = localPlayerProvider.MovementController;
         if (movementController == null)
             return;
 
@@ -68,6 +70,7 @@ public sealed class AdventureInputRouter : IDisposable
 
     private void OnSprintChanged(bool sprint)
     {
+        var movementController = localPlayerProvider.MovementController;
         if (movementController == null)
             return;
 
@@ -80,6 +83,7 @@ public sealed class AdventureInputRouter : IDisposable
         if (!inputModeVM.CanMove)
             return;
 
+        var interactionController = localPlayerProvider.InteractionController;
         if (interactionController == null)
             return;
 
@@ -90,18 +94,18 @@ public sealed class AdventureInputRouter : IDisposable
     {
         UnityLogger.Log("OnOpenSettings clicked");
         if (menusVM.HasAnyOpen)
-            menusVM.CloseFirst();
+            menusVM.CloseTopmost();
         else
             settingsVM.Toggle();
     }
     private void OnOpenHelpMenu()
     {
-        if(helpMenu == null)
+        if(helpMenuVM == null)
         {
-            UnityLogger.Log("HelpMenu is not injected in AdventureInputRouter");
+            UnityLogger.Log("HelpMenuViewModel is not injected in AdventureInputRouter");
             return;
         }
-        helpMenu.Toggle();
+        helpMenuVM.Toggle();
     }
     private void OnOpenMushroomBook() => bookVM.Toggle();
 }

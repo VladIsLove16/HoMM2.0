@@ -51,7 +51,7 @@ public class GameView3D : MonoBehaviour
         if (_turnState != null)
         {
             _turnState.BattleStateProperty
-                .Subscribe(_ => UpdateUnitVisibility())
+                .Subscribe(OnBattleStateChanged)
                 .AddTo(_subscriptions);
         }
     }
@@ -347,6 +347,16 @@ public class GameView3D : MonoBehaviour
 
     private bool IsInteractionLocked() => _animationGate != null && _animationGate.IsLocked;
 
+    private void OnBattleStateChanged(BattleState state)
+    {
+        if (state != BattleState.replacement)
+        {
+            SnapAllUnitsToModelPositions();
+        }
+
+        UpdateUnitVisibility();
+    }
+
     private void UpdateUnitVisibility()
     {
         if (_turnState == null)
@@ -393,6 +403,22 @@ public class GameView3D : MonoBehaviour
             var cell = kvp.Value;
             var occupied = _gameVM.IsCellOccupied(cell);
             view.SetCorpseVisible(!occupied);
+        }
+    }
+
+    private void SnapAllUnitsToModelPositions()
+    {
+        foreach (var kvp in _views)
+        {
+            if (kvp.Key is not UnitViewModel vm || kvp.Value == null)
+                continue;
+
+            if (_draggedUnit == kvp.Value)
+                continue;
+
+            var cell = vm.Model.Position.Value;
+            var world = _worldToCellProvider.ToWorld(cell.x, cell.y);
+            kvp.Value.SnapToCell(world);
         }
     }
 

@@ -40,6 +40,7 @@ public class UnitAnimatorController : MonoBehaviour
             return;
 
         Debug.Log("[UnitAnimatorController] Play animation request " + state, this);
+        ResetAllTriggers();
 
         if (state == UnitAnimationState.Walk)
         {
@@ -60,13 +61,31 @@ public class UnitAnimatorController : MonoBehaviour
 
         if (!string.IsNullOrEmpty(trigger))
         {
-            animator.ResetTrigger(trigger);
             animator.SetTrigger(trigger);
             Debug.Log("[UnitAnimatorController] Playing animation " + state, this);
         }
         else
         {
             Debug.LogWarning($"[UnitAnimatorController] Trigger not configured for {state}", this);
+        }
+    }
+
+    private void ResetAllTriggers()
+    {
+        if (animator == null)
+            return;
+
+        ResetTriggerIfConfigured(idleTrigger);
+        ResetTriggerIfConfigured(attackTrigger);
+        ResetTriggerIfConfigured(hitTrigger);
+        ResetTriggerIfConfigured(dieTrigger);
+    }
+
+    private void ResetTriggerIfConfigured(string trigger)
+    {
+        if (!string.IsNullOrEmpty(trigger))
+        {
+            animator.ResetTrigger(trigger);
         }
     }
 
@@ -89,6 +108,25 @@ public class UnitAnimatorController : MonoBehaviour
         }
 
         animator.speed = Mathf.Max(0.01f, multiplier);
+    }
+
+    public float GetPlaybackSpeed()
+    {
+        return animator != null ? Mathf.Max(0.01f, animator.speed) : 1f;
+    }
+
+    public bool TryGetCurrentClipLength(out float clipLength)
+    {
+        clipLength = 0f;
+        if (animator == null)
+            return false;
+
+        var clipInfos = animator.GetCurrentAnimatorClipInfo(0);
+        if (clipInfos == null || clipInfos.Length == 0 || clipInfos[0].clip == null)
+            return false;
+
+        clipLength = clipInfos[0].clip.length;
+        return clipLength > 0f;
     }
 
     /// <summary>

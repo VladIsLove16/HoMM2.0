@@ -1,80 +1,85 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
+using Zenject;
 
 public class LobbyUI : MonoBehaviour
 {
     [Header("Panels")]
-    [SerializeField] private GameObject _connectionPanel;
-    [SerializeField] private GameObject _lobbyPanel;
+    [FormerlySerializedAs("_connectionPanel")]
+    [SerializeField] private GameObject connectionPanel;
+    [FormerlySerializedAs("_lobbyPanel")]
+    [SerializeField] private GameObject lobbyPanel;
 
     [Header("Connection Panel")]
-    [SerializeField] private Button _hostButton;
-    [SerializeField] private Button _clientButton;
-    [SerializeField] private InputField _ipInputField;
+    [FormerlySerializedAs("_hostButton")]
+    [SerializeField] private Button hostButton;
+    [FormerlySerializedAs("_clientButton")]
+    [SerializeField] private Button clientButton;
+    [FormerlySerializedAs("_ipInputField")]
+    [SerializeField] private InputField legacyJoinCodeInput;
+    [SerializeField] private TMP_InputField playerNameInput;
+    [SerializeField] private TMP_InputField roomNameInput;
+    [SerializeField] private TMP_InputField joinCodeInput;
+    [SerializeField] private Button refreshRoomsButton;
+    [SerializeField] private RectTransform roomsListParent;
+    [SerializeField] private GameObject roomListItemPrefab;
+    [SerializeField] private TMP_Text joinCodeLabel;
+    [SerializeField] private TMP_Text statusMessageLabel;
 
     [Header("Lobby Panel")]
-    [SerializeField] private RectTransform _playersListParent;
-    [SerializeField] private GameObject _playerListItemPrefab;
-    [SerializeField] private Button _startGameButton;
-    [SerializeField] private Button _singlePlayerButton;
-    [SerializeField] private Toggle _configToggle;
-    [SerializeField] private Text _configLabel;
-    [SerializeField] private Button _disconnectButton;
+    [FormerlySerializedAs("_playersListParent")]
+    [SerializeField] private RectTransform playersListParent;
+    [FormerlySerializedAs("_playerListItemPrefab")]
+    [SerializeField] private GameObject playerListItemPrefab;
+    [FormerlySerializedAs("_startGameButton")]
+    [SerializeField] private Button startGameButton;
+    [FormerlySerializedAs("_singlePlayerButton")]
+    [SerializeField] private Button singlePlayerButton;
+    [FormerlySerializedAs("_configToggle")]
+    [SerializeField] private Toggle configToggle;
+    [FormerlySerializedAs("_configLabel")]
+    [SerializeField] private Text configLabel;
+    [FormerlySerializedAs("_disconnectButton")]
+    [SerializeField] private Button disconnectButton;
+    [SerializeField] private Toggle sharedSceneLoadingToggle;
 
     [Header("External")]
-    [SerializeField] private LobbyManager _lobbyManager;
+    [Inject] private LobbyManager lobbyManager;
 
     [Header("Pooling")]
-    [SerializeField, Min(0)] private int _initialPoolSize = 8;
+    [FormerlySerializedAs("_initialPoolSize")]
+    [SerializeField, Min(0)] private int initialPlayerPoolSize = 8;
+    [SerializeField, Min(0)] private int initialRoomPoolSize = 8;
+
     [Header("Localization")]
-    [SerializeField] private LocalizedString _hostLabelText;
-    [SerializeField] private LocalizedString _clientLabelText;
-    [SerializeField] private LocalizedString _startGameLabelText;
-    [SerializeField] private LocalizedString _singlePlayerLabelText;
-    [SerializeField] private LocalizedString _disconnectLabelText;
-    [SerializeField] private LocalizedString _configToggleLabelText;
-    [SerializeField] private LocalizedString _ipPlaceholderText;
-    [SerializeField] private LocalizedString _configLabelFormat;
-    [SerializeField] private LocalizedString _noConfigLabelText;
-    [SerializeField] private LocalizedString _gameStartedMessage;
+    [SerializeField] private LocalizedString gameStartedMessage;
+    [SerializeField] private LocalizedString sharedAdventureModeLabelText;
+    [SerializeField] private LocalizedString armyPresetLabelFormat;
+    [SerializeField] private LocalizedString noArmyPresetLabelText;
 
-    private readonly List<LobbyPlayerListItem> _activeItems = new List<LobbyPlayerListItem>(16);
-    private readonly Queue<LobbyPlayerListItem> _itemPool = new Queue<LobbyPlayerListItem>(32);
+    private readonly List<LobbyPlayerListItem> _activePlayerItems = new(16);
+    private readonly Queue<LobbyPlayerListItem> _playerItemPool = new(32);
+    private readonly List<LobbyRoomListItem> _activeRoomItems = new(16);
+    private readonly Queue<LobbyRoomListItem> _roomItemPool = new(32);
+
     private bool _subscribed;
-
-    private Component _hostButtonLabel;
-    private Component _clientButtonLabel;
-    private Component _startGameButtonLabel;
-    private Component _singlePlayerButtonLabel;
-    private Component _disconnectButtonLabel;
-    private Component _configToggleLabelComponent;
-    private Component _ipPlaceholderComponent;
-    private TMP_Text _configLabelTMP;
     private bool _localizationSubscribed;
-    private int _lastConfigIndex;
+    private bool _showingDirectGridFightArmySelector;
+    private string _currentArmyPresetLabel = string.Empty;
 
-    #region Unity lifecycle
+    private TMP_Text _configLabelTMP;
+
     private void Awake()
     {
         LocalizationSettings.InitializationOperation.WaitForCompletion();
-
         EnsureLocalizationDefaults();
-        if (_lobbyManager == null)
-        {
-#if UNITY_2023_1_OR_NEWER
-            _lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
-#else
-            _lobbyManager = FindObjectOfType<LobbyManager>();
-#endif
-        }
-
-        CacheLocalizationTargets();
+        _configLabelTMP = configLabel != null ? configLabel.GetComponent<TMP_Text>() : null;
     }
 
     private void Start()
@@ -88,9 +93,19 @@ public class LobbyUI : MonoBehaviour
 
         SetupPool();
         SetupUiListeners();
+
+        if (lobbyManager == null)
+        {
+            Debug.LogError("[LobbyUI] LobbyManager was not injected. Add SceneContext to Lobby scene and register LobbyRoot installer.", this);
+            enabled = false;
+            return;
+        }
+
         TrySubscribeToLobbyManager();
         ShowConnectionPanel();
         ApplyLocalization();
+        lobbyManager.PublishCurrentLobbyState();
+        lobbyManager.RefreshRooms();
     }
 
     private void OnEnable()
@@ -110,71 +125,174 @@ public class LobbyUI : MonoBehaviour
         UnsubscribeLocalization();
         UnsubscribeFromLobbyManager();
     }
-    #endregion
 
-    #region Setup & validation
     private bool ValidateReferences()
     {
-        return _connectionPanel != null && _lobbyPanel != null &&
-               _hostButton != null && _clientButton != null && _ipInputField != null &&
-               _playersListParent != null && _playerListItemPrefab != null &&
-               _startGameButton != null && _configToggle != null && _configLabel != null &&
-               _disconnectButton != null;
+        return connectionPanel != null &&
+               lobbyPanel != null &&
+               hostButton != null &&
+               clientButton != null &&
+               playersListParent != null &&
+               playerListItemPrefab != null &&
+               startGameButton != null &&
+               configToggle != null &&
+               configLabel != null &&
+               disconnectButton != null;
     }
 
     private void SetupUiListeners()
     {
-        _hostButton.onClick.RemoveAllListeners();
-        _hostButton.onClick.AddListener(OnHostButtonClicked);
+        hostButton.onClick.RemoveAllListeners();
+        hostButton.onClick.AddListener(OnHostButtonClicked);
 
-        _clientButton.onClick.RemoveAllListeners();
-        _clientButton.onClick.AddListener(OnClientButtonClicked);
+        clientButton.onClick.RemoveAllListeners();
+        clientButton.onClick.AddListener(OnClientButtonClicked);
 
-        _startGameButton.onClick.RemoveAllListeners();
-        _startGameButton.onClick.AddListener(OnStartGameClicked);
+        startGameButton.onClick.RemoveAllListeners();
+        startGameButton.onClick.AddListener(OnStartGameClicked);
 
-        if (_singlePlayerButton != null)
+        if (singlePlayerButton != null)
         {
-            _singlePlayerButton.onClick.RemoveAllListeners();
-            _singlePlayerButton.onClick.AddListener(OnStartSinglePlayerClicked);
+            singlePlayerButton.onClick.RemoveAllListeners();
+            singlePlayerButton.onClick.AddListener(OnAuxiliaryButtonClicked);
         }
 
-        _configToggle.onValueChanged.RemoveAllListeners();
-        _configToggle.onValueChanged.AddListener(OnConfigToggleChanged);
-
-        _disconnectButton.onClick.RemoveAllListeners();
-        _disconnectButton.onClick.AddListener(OnDisconnectClicked);
-    }
-
-    private void CacheLocalizationTargets()
-    {
-        _hostButtonLabel = ResolveLabel(_hostButton);
-        _clientButtonLabel = ResolveLabel(_clientButton);
-        _startGameButtonLabel = ResolveLabel(_startGameButton);
-        _singlePlayerButtonLabel = ResolveLabel(_singlePlayerButton);
-        _disconnectButtonLabel = ResolveLabel(_disconnectButton);
-        _configToggleLabelComponent = ResolveLabel(_configToggle);
-        _configLabelTMP = _configLabel != null ? _configLabel.GetComponent<TMP_Text>() : null;
-
-        if (_ipInputField != null && _ipInputField.placeholder != null)
+        if (refreshRoomsButton != null)
         {
-            if (_ipInputField.placeholder is TMP_Text tmp)
-                _ipPlaceholderComponent = tmp;
-            else
-                _ipPlaceholderComponent = _ipInputField.placeholder.GetComponent<Text>();
+            refreshRoomsButton.onClick.RemoveAllListeners();
+            refreshRoomsButton.onClick.AddListener(OnRefreshRoomsClicked);
+        }
+
+        configToggle.onValueChanged.RemoveAllListeners();
+        configToggle.onValueChanged.AddListener(OnFlowToggleChanged);
+
+        disconnectButton.onClick.RemoveAllListeners();
+        disconnectButton.onClick.AddListener(OnDisconnectClicked);
+
+        if (sharedSceneLoadingToggle != null)
+        {
+            sharedSceneLoadingToggle.onValueChanged.RemoveAllListeners();
+            sharedSceneLoadingToggle.onValueChanged.AddListener(OnSharedSceneLoadingToggleChanged);
         }
     }
 
-    private Component ResolveLabel(Component owner)
+    private void SetupPool()
     {
-        if (owner == null)
+        for (int i = 0; i < initialPlayerPoolSize; i++)
+        {
+            var go = Instantiate(playerListItemPrefab, playersListParent);
+            go.SetActive(false);
+            var item = go.GetComponent<LobbyPlayerListItem>();
+            if (item != null)
+                _playerItemPool.Enqueue(item);
+        }
+
+        if (roomsListParent == null || roomListItemPrefab == null)
+            return;
+
+        for (int i = 0; i < initialRoomPoolSize; i++)
+        {
+            var go = Instantiate(roomListItemPrefab, roomsListParent);
+            go.SetActive(false);
+            var item = go.GetComponent<LobbyRoomListItem>();
+            if (item != null)
+                _roomItemPool.Enqueue(item);
+        }
+    }
+
+    private LobbyPlayerListItem GetPooledPlayerItem()
+    {
+        while (_playerItemPool.Count > 0)
+        {
+            var item = _playerItemPool.Dequeue();
+            if (item != null)
+                return item;
+        }
+
+        var newGo = Instantiate(playerListItemPrefab, playersListParent);
+        var newItem = newGo.GetComponent<LobbyPlayerListItem>();
+        newGo.SetActive(false);
+        return newItem;
+    }
+
+    private LobbyRoomListItem GetPooledRoomItem()
+    {
+        while (_roomItemPool.Count > 0)
+        {
+            var item = _roomItemPool.Dequeue();
+            if (item != null)
+                return item;
+        }
+
+        if (roomListItemPrefab == null || roomsListParent == null)
             return null;
 
-        var tmp = owner.GetComponentInChildren<TMP_Text>(true);
-        if (tmp != null)
-            return tmp;
+        var newGo = Instantiate(roomListItemPrefab, roomsListParent);
+        var newItem = newGo.GetComponent<LobbyRoomListItem>();
+        newGo.SetActive(false);
+        return newItem;
+    }
 
-        return owner.GetComponentInChildren<Text>(true);
+    private void RecycleAllPlayerItems()
+    {
+        foreach (var item in _activePlayerItems)
+        {
+            if (item == null)
+                continue;
+
+            item.gameObject.SetActive(false);
+            _playerItemPool.Enqueue(item);
+        }
+
+        _activePlayerItems.Clear();
+    }
+
+    private void RecycleAllRoomItems()
+    {
+        foreach (var item in _activeRoomItems)
+        {
+            if (item == null)
+                continue;
+
+            item.gameObject.SetActive(false);
+            _roomItemPool.Enqueue(item);
+        }
+
+        _activeRoomItems.Clear();
+    }
+
+    private void TrySubscribeToLobbyManager()
+    {
+        if (lobbyManager == null || _subscribed)
+            return;
+
+        lobbyManager.OnPlayersListChanged += UpdatePlayersList;
+        lobbyManager.OnGameStarted += OnGameStarted;
+        lobbyManager.OnHostStarted += OnHostStarted;
+        lobbyManager.OnClientStarted += OnClientStarted;
+        lobbyManager.OnRoomsListChanged += UpdateRoomsList;
+        lobbyManager.OnJoinCodeChanged += UpdateJoinCodeDisplay;
+        lobbyManager.OnStatusMessageChanged += UpdateStatusMessage;
+        lobbyManager.OnSharedSceneLoadingChanged += UpdateSharedSceneLoadingToggle;
+        lobbyManager.OnDirectGridFightArmyPresetChanged += UpdateDirectGridFightArmyPreset;
+        _subscribed = true;
+    }
+
+    private void UnsubscribeFromLobbyManager()
+    {
+        if (lobbyManager == null || !_subscribed)
+            return;
+
+        lobbyManager.OnPlayersListChanged -= UpdatePlayersList;
+        lobbyManager.OnGameStarted -= OnGameStarted;
+        lobbyManager.OnHostStarted -= OnHostStarted;
+        lobbyManager.OnClientStarted -= OnClientStarted;
+        lobbyManager.OnRoomsListChanged -= UpdateRoomsList;
+        lobbyManager.OnJoinCodeChanged -= UpdateJoinCodeDisplay;
+        lobbyManager.OnStatusMessageChanged -= UpdateStatusMessage;
+        lobbyManager.OnSharedSceneLoadingChanged -= UpdateSharedSceneLoadingToggle;
+        lobbyManager.OnDirectGridFightArmyPresetChanged -= UpdateDirectGridFightArmyPreset;
+        _subscribed = false;
     }
 
     private void SubscribeLocalization()
@@ -196,234 +314,238 @@ public class LobbyUI : MonoBehaviour
         _localizationSubscribed = false;
     }
 
-    private void TrySubscribeToLobbyManager()
+    private void OnHostButtonClicked()
     {
-        if (_lobbyManager == null || _subscribed)
-            return;
-
-        _lobbyManager.OnPlayersListChanged += UpdatePlayersList;
-        _lobbyManager.OnConfigChanged += UpdateConfigDisplay;
-        _lobbyManager.OnGameStarted += OnGameStarted;
-        _lobbyManager.OnHostStarted += OnHostStarted;
-        _lobbyManager.OnClientStarted += OnClientStarted;
-
-        _subscribed = true;
+        lobbyManager?.CreateRoom(GetPlayerNameInput(), GetRoomNameInput());
     }
-
-    private void UnsubscribeFromLobbyManager()
-    {
-        if (_lobbyManager == null || !_subscribed)
-            return;
-
-        _lobbyManager.OnPlayersListChanged -= UpdatePlayersList;
-        _lobbyManager.OnConfigChanged -= UpdateConfigDisplay;
-        _lobbyManager.OnGameStarted -= OnGameStarted;
-        _lobbyManager.OnHostStarted -= OnHostStarted;
-        _lobbyManager.OnClientStarted -= OnClientStarted;
-
-        _subscribed = false;
-    }
-    #endregion
-
-    #region Pooling
-    private void SetupPool()
-    {
-        for (int i = 0; i < _initialPoolSize; i++)
-        {
-            var go = Instantiate(_playerListItemPrefab, _playersListParent);
-            go.SetActive(false);
-            var item = go.GetComponent<LobbyPlayerListItem>();
-            _itemPool.Enqueue(item);
-        }
-    }
-
-    private LobbyPlayerListItem GetPooledItem()
-    {
-        while (_itemPool.Count > 0)
-        {
-            var item = _itemPool.Dequeue();
-            if (item != null)
-                return item;
-        }
-
-        var newGo = Instantiate(_playerListItemPrefab, _playersListParent);
-        var newItem = newGo.GetComponent<LobbyPlayerListItem>();
-        newGo.SetActive(false);
-        return newItem;
-    }
-
-    private void RecycleAllActiveItems()
-    {
-        foreach (var item in _activeItems)
-        {
-            if (item == null)
-                continue;
-
-            item.gameObject.SetActive(false);
-            _itemPool.Enqueue(item);
-        }
-
-        _activeItems.Clear();
-    }
-    #endregion
-
-    #region UI handlers
-    private void OnHostButtonClicked() => _lobbyManager?.StartHost();
 
     private void OnClientButtonClicked()
     {
-        var ip = _ipInputField?.text;
-        if (!string.IsNullOrWhiteSpace(ip))
-        {
-            _ipInputField.text = "set ip";
-        }
-
-        _lobbyManager?.StartClient();
+        lobbyManager?.JoinRoomByCode(GetPlayerNameInput(), GetJoinCodeInput());
     }
 
-    private void OnStartGameClicked() => _lobbyManager?.StartGame();
+    private void OnRefreshRoomsClicked()
+    {
+        lobbyManager?.RefreshRooms();
+    }
 
-    private void OnStartSinglePlayerClicked() => _lobbyManager?.StartSinglePlayer();
+    private void OnStartGameClicked()
+    {
+        lobbyManager?.StartGame();
+    }
 
-    private void OnConfigToggleChanged(bool isOn) => _lobbyManager?.OnConfigToggleChanged(isOn);
+    private void OnAuxiliaryButtonClicked()
+    {
+        if (lobbyManager != null && lobbyManager.IsDirectGridFightFlow())
+            lobbyManager.SelectNextDirectGridFightArmyPreset();
+    }
+
+    private void OnFlowToggleChanged(bool isOn)
+    {
+        lobbyManager?.SetRoomFlow(isOn ? SceneLoader.Scene.GridFight : SceneLoader.Scene.Adventure);
+    }
 
     private void OnDisconnectClicked()
     {
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.Shutdown();
-        }
-
+        lobbyManager?.Disconnect();
         ShowConnectionPanel();
     }
-    #endregion
 
-    #region Events from LobbyManager
+    private void OnSharedSceneLoadingToggleChanged(bool isOn)
+    {
+        lobbyManager?.SetUseSharedSceneLoading(isOn);
+    }
+
     private void UpdatePlayersList(LobbyPlayerData[] players)
     {
-        RecycleAllActiveItems();
+        RecycleAllPlayerItems();
 
         if (players == null)
             players = Array.Empty<LobbyPlayerData>();
 
         foreach (var player in players)
         {
-            var item = GetPooledItem();
-            item.transform.SetParent(_playersListParent, false);
+            var item = GetPooledPlayerItem();
+            if (item == null)
+                break;
+
+            item.transform.SetParent(playersListParent, false);
             item.Setup(player);
             item.gameObject.SetActive(true);
-            _activeItems.Add(item);
+            _activePlayerItems.Add(item);
         }
     }
 
-    private void UpdateConfigDisplay(int configIndex)
+    private void UpdateRoomsList(IReadOnlyList<LobbyRoomInfo> rooms)
     {
-        _lastConfigIndex = configIndex;
+        RecycleAllRoomItems();
 
-        if (_configToggle != null)
-            _configToggle.isOn = configIndex == 1;
-
-        if (_lobbyManager == null)
+        if (roomsListParent == null || roomListItemPrefab == null || rooms == null)
             return;
 
-        var config = _lobbyManager.GetConfigByIndex(configIndex);
-        string labelText;
-
-        if (config != null)
+        foreach (var room in rooms)
         {
-            var format = ResolveLocalized(_configLabelFormat, "Selected config: {0}");
-            labelText = string.Format(format, config.name);
-        }
-        else
-        {
-            labelText = ResolveLocalized(_noConfigLabelText, "No configuration selected");
-        }
+            var item = GetPooledRoomItem();
+            if (item == null)
+                break;
 
-        if (_configLabel != null)
-            _configLabel.text = labelText;
-
-        if (_configLabelTMP != null)
-            _configLabelTMP.text = labelText;
+            item.transform.SetParent(roomsListParent, false);
+            item.Setup(room, HandleJoinRoomClicked);
+            item.gameObject.SetActive(true);
+            _activeRoomItems.Add(item);
+        }
     }
 
     private void OnGameStarted(bool started)
     {
-        if (started)
-        {
-            var message = ResolveLocalized(_gameStartedMessage, "Game started");
-            Debug.Log($"[LobbyUI] {message}");
-        }
+        if (!started)
+            return;
+
+        var message = ResolveLocalized(gameStartedMessage, "Game started");
+        Debug.Log($"[LobbyUI] {message}");
     }
 
     private void OnHostStarted()
     {
         ShowLobbyPanel();
         SetHostUI();
+        UpdateJoinCodeDisplay(lobbyManager?.GetCurrentJoinCode());
+        UpdateSharedSceneLoadingToggle(lobbyManager != null && lobbyManager.UseSharedSceneLoading);
+        RefreshFlowSpecificControls();
+        lobbyManager?.EnsureLocalDirectGridFightArmyPresetPublished();
     }
 
     private void OnClientStarted()
     {
         ShowLobbyPanel();
         SetClientUI();
+        UpdateJoinCodeDisplay(lobbyManager?.GetCurrentJoinCode());
+        UpdateSharedSceneLoadingToggle(lobbyManager != null && lobbyManager.UseSharedSceneLoading);
+        RefreshFlowSpecificControls();
+        lobbyManager?.EnsureLocalDirectGridFightArmyPresetPublished();
     }
-    #endregion
 
-    #region Helpers
     private void SetHostUI()
     {
-        if (_startGameButton != null)
-            _startGameButton.gameObject.SetActive(true);
+        if (startGameButton != null)
+            startGameButton.gameObject.SetActive(true);
 
-        if (_configToggle != null)
-            _configToggle.interactable = true;
+        if (configToggle != null)
+            configToggle.interactable = true;
+
+        if (sharedSceneLoadingToggle != null)
+            sharedSceneLoadingToggle.interactable = true;
     }
 
     private void SetClientUI()
     {
-        if (_startGameButton != null)
-            _startGameButton.gameObject.SetActive(false);
+        if (startGameButton != null)
+            startGameButton.gameObject.SetActive(false);
 
-        if (_configToggle != null)
-            _configToggle.interactable = false;
+        if (configToggle != null)
+            configToggle.interactable = false;
+
+        if (sharedSceneLoadingToggle != null)
+            sharedSceneLoadingToggle.interactable = false;
     }
 
     private void ShowConnectionPanel()
     {
-        _connectionPanel?.SetActive(true);
-        _lobbyPanel?.SetActive(false);
+        connectionPanel?.SetActive(true);
+        lobbyPanel?.SetActive(false);
+        UpdateJoinCodeDisplay(null);
+        UpdateDirectGridFightArmyPreset(0, string.Empty, false);
+        lobbyManager?.RefreshRooms();
+    }
+
+    public void OpenConnectionFlow()
+    {
+        ShowConnectionPanel();
+        UpdateSharedSceneLoadingToggle(lobbyManager != null && lobbyManager.UseSharedSceneLoading);
+        lobbyManager?.PublishCurrentLobbyState();
     }
 
     private void ShowLobbyPanel()
     {
-        _connectionPanel?.SetActive(false);
-        _lobbyPanel?.SetActive(true);
+        connectionPanel?.SetActive(false);
+        lobbyPanel?.SetActive(true);
+    }
+
+    private void RefreshFlowSpecificControls()
+    {
+        if (lobbyManager == null)
+        {
+            UpdateDirectGridFightArmyPreset(0, string.Empty, false);
+            return;
+        }
+
+        UpdateDirectGridFightArmyPreset(
+            0,
+            lobbyManager.GetLocalDirectGridFightArmyPresetLabel(),
+            lobbyManager.IsDirectGridFightFlow());
+    }
+
+    private void UpdateDirectGridFightArmyPreset(int _, string label, bool showSelector)
+    {
+        _showingDirectGridFightArmySelector = showSelector;
+        _currentArmyPresetLabel = label ?? string.Empty;
+
+        if (configToggle != null)
+            configToggle.SetIsOnWithoutNotify(showSelector);
+
+        if (singlePlayerButton != null)
+        {
+            singlePlayerButton.gameObject.SetActive(showSelector);
+        }
+
+        if (showSelector)
+        {
+            var presetFormat = ResolveLocalized(armyPresetLabelFormat, "Army preset: {0}");
+            var displayLabel = string.IsNullOrWhiteSpace(_currentArmyPresetLabel)
+                ? ResolveLocalized(noArmyPresetLabelText, "Army preset is not selected")
+                : string.Format(presetFormat, _currentArmyPresetLabel);
+            ApplyConfigLabel(displayLabel);
+        }
+        else
+        {
+            ApplyConfigLabel(ResolveLocalized(sharedAdventureModeLabelText, "Shared Adventure"));
+        }
+    }
+
+    private void ApplyConfigLabel(string value)
+    {
+        if (configLabel != null)
+            configLabel.text = value;
+
+        if (_configLabelTMP != null)
+            _configLabelTMP.text = value;
+    }
+
+    private void UpdateJoinCodeDisplay(string joinCode)
+    {
+        if (joinCodeLabel == null)
+            return;
+
+        joinCodeLabel.text = string.IsNullOrWhiteSpace(joinCode) ? string.Empty : $"Code: {joinCode}";
+    }
+
+    private void UpdateStatusMessage(string message)
+    {
+        if (statusMessageLabel != null)
+            statusMessageLabel.text = message ?? string.Empty;
+    }
+
+    private void UpdateSharedSceneLoadingToggle(bool value)
+    {
+        if (sharedSceneLoadingToggle == null)
+            return;
+
+        sharedSceneLoadingToggle.SetIsOnWithoutNotify(value);
     }
 
     private void ApplyLocalization()
     {
-        SetComponentText(_hostButtonLabel, ResolveLocalized(_hostLabelText, "Host"));
-        SetComponentText(_clientButtonLabel, ResolveLocalized(_clientLabelText, "Join"));
-        SetComponentText(_startGameButtonLabel, ResolveLocalized(_startGameLabelText, "Start Game"));
-
-        if (_singlePlayerButton != null)
-            SetComponentText(_singlePlayerButtonLabel, ResolveLocalized(_singlePlayerLabelText, "Single Player"));
-
-        SetComponentText(_disconnectButtonLabel, ResolveLocalized(_disconnectLabelText, "Disconnect"));
-        SetComponentText(_configToggleLabelComponent, ResolveLocalized(_configToggleLabelText, "Use alt config"));
-        SetComponentText(_ipPlaceholderComponent, ResolveLocalized(_ipPlaceholderText, "Enter IP..."));
-
-        UpdateConfigDisplay(_lastConfigIndex);
-    }
-
-    private static void SetComponentText(Component target, string value)
-    {
-        if (target == null || string.IsNullOrEmpty(value))
-            return;
-
-        if (target is TMP_Text tmp)
-            tmp.text = value;
-        else if (target is Text legacy)
-            legacy.text = value;
+        UpdateDirectGridFightArmyPreset(0, _currentArmyPresetLabel, _showingDirectGridFightArmySelector);
     }
 
     private void OnLocalizationLanguageChanged(Locale _)
@@ -433,16 +555,10 @@ public class LobbyUI : MonoBehaviour
 
     private void EnsureLocalizationDefaults()
     {
-        EnsureEntry(ref _hostLabelText, "MainMenu.Host");
-        EnsureEntry(ref _clientLabelText, "MainMenu.Client");
-        EnsureEntry(ref _startGameLabelText, "MainMenu.StartGame");
-        EnsureEntry(ref _singlePlayerLabelText, "MainMenu.SinglePlayer");
-        EnsureEntry(ref _disconnectLabelText, "MainMenu.Disconnect");
-        EnsureEntry(ref _configToggleLabelText, "MainMenu.ConfigToggle");
-        EnsureEntry(ref _ipPlaceholderText, "MainMenu.IpPlaceholder");
-        EnsureEntry(ref _configLabelFormat, "MainMenu.ConfigLabel");
-        EnsureEntry(ref _noConfigLabelText, "MainMenu.NoConfig");
-        EnsureEntry(ref _gameStartedMessage, "System.GameStarted");
+        EnsureEntry(ref gameStartedMessage, "System.GameStarted");
+        EnsureEntry(ref sharedAdventureModeLabelText, "Lobby.SharedAdventureMode");
+        EnsureEntry(ref armyPresetLabelFormat, "Lobby.ArmyPresetFormat");
+        EnsureEntry(ref noArmyPresetLabelText, "Lobby.NoArmyPreset");
     }
 
     private static void EnsureEntry(ref LocalizedString entry, string key)
@@ -462,5 +578,27 @@ public class LobbyUI : MonoBehaviour
         var value = entry.GetLocalizedString();
         return string.IsNullOrEmpty(value) ? fallback : value;
     }
-    #endregion
+
+    private string GetPlayerNameInput()
+    {
+        return playerNameInput != null ? playerNameInput.text : string.Empty;
+    }
+
+    private string GetRoomNameInput()
+    {
+        return roomNameInput != null ? roomNameInput.text : string.Empty;
+    }
+
+    private string GetJoinCodeInput()
+    {
+        if (joinCodeInput != null && !string.IsNullOrWhiteSpace(joinCodeInput.text))
+            return joinCodeInput.text;
+
+        return legacyJoinCodeInput != null ? legacyJoinCodeInput.text : string.Empty;
+    }
+
+    private void HandleJoinRoomClicked(LobbyRoomInfo room)
+    {
+        lobbyManager?.JoinRoomById(GetPlayerNameInput(), room.SessionId);
+    }
 }

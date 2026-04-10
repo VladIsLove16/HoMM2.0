@@ -7,16 +7,20 @@ namespace Adventure.Integration.Battle
     /// </summary>
     public readonly struct BattleSetupPayload
     {
-        public static readonly BattleSetupPayload Empty = new BattleSetupPayload(default, SceneLoader.Scene.Adventure);
+        public static readonly BattleSetupPayload Empty = new BattleSetupPayload(default, SceneLoader.Scene.Adventure, Team.Blue, Team.Blue);
 
-        public BattleSetupPayload(BattleArmies armies, SceneLoader.Scene returnScene)
+        public BattleSetupPayload(BattleArmies armies, SceneLoader.Scene returnScene, Team localTeam, Team battlefieldBottomTeam)
         {
             Armies = armies;
             ReturnScene = returnScene;
+            LocalTeam = localTeam;
+            BattlefieldBottomTeam = battlefieldBottomTeam;
         }
 
         public BattleArmies Armies { get; }
         public SceneLoader.Scene ReturnScene { get; }
+        public Team LocalTeam { get; }
+        public Team BattlefieldBottomTeam { get; }
 
         public bool HasData =>
             (Armies.PlayerUnits?.Count ?? 0) > 0 ||

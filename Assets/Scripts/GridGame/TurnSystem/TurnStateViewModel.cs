@@ -38,6 +38,7 @@ public sealed class TurnStateViewModel : ITurnStateViewModel, IDisposable
     public IReadOnlyReactiveProperty<int> TurnNumber => _turnNumber;
     public IObservable<UnitTurnInfo> UnitAddedStream => _turnService.UnitAddedStream;
     public bool IsMyTurn => _activeObject.Value != null &&
+                            _activeObject.Value.Team == _turnService.LocalTeam &&
                             (_battleControlModes?.GetMode(_activeObject.Value.Team) ?? BattleControlMode.Manual) == BattleControlMode.Manual;
     public Team LocalTeam => _turnService.LocalTeam;
     public IReadOnlyList<ICombatObject> CombatUnits => _turnService.CombatUnits;

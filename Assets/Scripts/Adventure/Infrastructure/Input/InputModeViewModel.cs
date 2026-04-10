@@ -19,15 +19,26 @@ public sealed class InputModeViewModel : IInputModeVM
 
     public void PopMode(InputMode mode)
     {
-        if (_modes.Contains(mode))
-        {
-            var remaining = _modes.Where(m => m != mode).ToList();
-            _modes.Clear();
-            foreach (var m in remaining)
-                _modes.Push(m);
+        if (_modes.Count == 0 || !_modes.Contains(mode))
+            return;
 
-            UnityLogger.Log("new input " + mode);
-            OnModeChanged?.Invoke(Current);
+        var snapshot = _modes.ToArray(); // top-to-bottom
+        _modes.Clear();
+
+        var removed = false;
+        for (var i = snapshot.Length - 1; i >= 0; i--)
+        {
+            var current = snapshot[i];
+            if (!removed && current == mode)
+            {
+                removed = true;
+                continue;
+            }
+
+            _modes.Push(current);
         }
+
+        UnityLogger.Log("new input " + Current);
+        OnModeChanged?.Invoke(Current);
     }
 }

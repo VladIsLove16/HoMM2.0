@@ -1,57 +1,70 @@
 using Adventure.Application.Dialog;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Integration.Battle;
-using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Players;
 using Zenject;
 
 namespace Adventure.Infrastructure.State
 {
-    public sealed class AdventureStateBootstrap : IInitializable
+    public sealed class AdventureStateBootstrap : IInitializable, System.IDisposable
     {
         private readonly DialogVM _dialogVM;
-        private readonly PlayerMovementController _playerMovementController;
+        private readonly ILocalAdventurePlayerProvider _localPlayerProvider;
         private readonly NpcBehaviorGraphRegistry _behaviorGraphRegistry;
         private readonly BattleFinishedChannel _battleFinishedChannel;
+        private bool _playerTransformApplied;
 
         public AdventureStateBootstrap(
             DialogVM dialogVM,
-            PlayerMovementController playerMovementController,
+            ILocalAdventurePlayerProvider localPlayerProvider,
             NpcBehaviorGraphRegistry behaviorGraphRegistry,
             BattleFinishedChannel battleFinishedChannel = null)
         {
             _dialogVM = dialogVM;
-            _playerMovementController = playerMovementController;
+            _localPlayerProvider = localPlayerProvider;
             _behaviorGraphRegistry = behaviorGraphRegistry;
             _battleFinishedChannel = battleFinishedChannel;
         }
 
         public void Initialize()
         {
+            _localPlayerProvider.PlayerChanged += ApplyPlayerTransform;
             ApplyPlayerTransform();
             ResumePendingDialog();
         }
 
+        public void Dispose()
+        {
+            _localPlayerProvider.PlayerChanged -= ApplyPlayerTransform;
+        }
+
         private void ApplyPlayerTransform()
         {
-            if (_playerMovementController == null)
+            if (_playerTransformApplied)
+                return;
+
+            var playerMovementController = _localPlayerProvider.MovementController;
+            if (playerMovementController == null)
             {
                 return;
             }
 
             if (BattleStateCache.TryGetPlayerTransform(out var position, out var rotation))
             {
-                var controller = _playerMovementController.GetComponent<UnityEngine.CharacterController>();
+                var controller = playerMovementController.GetComponent<UnityEngine.CharacterController>();
                 if (controller != null)
                 {
                     var wasEnabled = controller.enabled;
                     controller.enabled = false;
-                    _playerMovementController.transform.SetPositionAndRotation(position, rotation);
+                    playerMovementController.transform.SetPositionAndRotation(position, rotation);
                     controller.enabled = wasEnabled;
                 }
                 else
                 {
-                    _playerMovementController.transform.SetPositionAndRotation(position, rotation);
+                    playerMovementController.transform.SetPositionAndRotation(position, rotation);
                 }
+
+                _playerTransformApplied = true;
             }
         }
 

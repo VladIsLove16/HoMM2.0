@@ -3,12 +3,14 @@ using Game.Events;
 using Adventure.Infrastructure.State;
 using TMPro;
 using UniRx;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 using CustomEventBus;
+using SharedView;
 
-public class GridFightEndedPanel : MonoBehaviour, IDisposable
+public class GridFightEndedPanel : CanvasGroupVisibilityPanelBase, IDisposable
 {
     [SerializeField] private TextMeshProUGUI BattleResult;
     [SerializeField] private Button ReturnForestSceneButton;
@@ -33,14 +35,14 @@ public class GridFightEndedPanel : MonoBehaviour, IDisposable
         }
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         if (ReturnForestSceneButton != null)
         {
             ReturnForestSceneButton.onClick.AddListener(OnReturnClicked);
         }
-
-        gameObject.SetActive(false);
     }
 
     private void HandleBattleState(BattleState state)
@@ -63,7 +65,7 @@ public class GridFightEndedPanel : MonoBehaviour, IDisposable
             BattleResult.text = playerWon ? "Victory!" : "Defeat...";
         }
 
-        gameObject.SetActive(true);
+        ShowPanel();
     }
 
     private bool DeterminePlayerVictory(BattleState state)
@@ -82,6 +84,27 @@ public class GridFightEndedPanel : MonoBehaviour, IDisposable
     private void OnReturnClicked()
     {
         var targetScene = BattleStateCache.GetReturnSceneOrDefault();
+        var networkManager = NetworkManager.Singleton;
+        if (networkManager != null && networkManager.IsListening)
+        {
+            if (networkManager.IsServer || networkManager.IsHost)
+            {
+                networkManager.SceneManager.LoadScene(targetScene.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
+                return;
+            }
+
+#if UNITY_2023_1_OR_NEWER
+            var gateway = UnityEngine.Object.FindFirstObjectByType<GameNetworkCommandGateway>();
+#else
+            var gateway = UnityEngine.Object.FindObjectOfType<GameNetworkCommandGateway>();
+#endif
+            if (gateway != null && gateway.RequestReturnToAdventure())
+                return;
+
+            Debug.LogWarning("[GridFightEndedPanel] Waiting for the host to return the party to the adventure scene.", this);
+            return;
+        }
+
         SceneLoader.Load(targetScene);
     }
 
@@ -90,9 +113,10 @@ public class GridFightEndedPanel : MonoBehaviour, IDisposable
         _disposables.Dispose();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         Dispose();
+        base.OnDestroy();
     }
 }
 

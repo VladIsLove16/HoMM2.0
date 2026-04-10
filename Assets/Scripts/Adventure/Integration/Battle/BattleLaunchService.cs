@@ -1,7 +1,9 @@
 using System;
 using Adventure.Domain.Inventory;
-using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Players;
 using Adventure.Infrastructure.State;
+using Adventure.Multiplayer;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Adventure.Integration.Battle
@@ -12,20 +14,23 @@ namespace Adventure.Integration.Battle
     public sealed class BattleLaunchService
     {
         private readonly MushroomInventoryModel _inventory;
-        private readonly PlayerMovementController _playerMovement;
+        private readonly ILocalAdventurePlayerProvider _localPlayerProvider;
         private readonly IGridConfigurationGateway _gridGateway;
         private readonly ArmyFormationResolver _formationResolver;
+        private readonly OnlineBattleLaunchService _onlineBattleLaunchService;
 
         public BattleLaunchService(
             MushroomInventoryModel inventory,
-            PlayerMovementController playerMovement,
+            ILocalAdventurePlayerProvider localPlayerProvider,
             IGridConfigurationGateway gridGateway,
-            ArmyFormationResolver formationResolver)
+            ArmyFormationResolver formationResolver,
+            OnlineBattleLaunchService onlineBattleLaunchService = null)
         {
             _inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
-            _playerMovement = playerMovement;
+            _localPlayerProvider = localPlayerProvider;
             _gridGateway = gridGateway ?? throw new ArgumentNullException(nameof(gridGateway));
             _formationResolver = formationResolver ?? throw new ArgumentNullException(nameof(formationResolver));
+            _onlineBattleLaunchService = onlineBattleLaunchService;
         }
 
         public Action PrepareLaunch(BattleLaunchContext context)
@@ -38,9 +43,10 @@ namespace Adventure.Integration.Battle
                 ? context.EnemyArmy.Convert()
                 : Array.Empty<UnitStackData>();
 
-            if (_playerMovement != null)
+            var playerMovement = _localPlayerProvider.MovementController;
+            if (playerMovement != null)
             {
-                BattleStateCache.CapturePlayerTransform(_playerMovement.transform);
+                BattleStateCache.CapturePlayerTransform(playerMovement.transform);
             }
 
             BattleStateCache.StoreInventorySnapshot(playerStacks);
@@ -48,9 +54,17 @@ namespace Adventure.Integration.Battle
 
             var payload = new BattleSetupPayload(
                 new BattleArmies(playerStacks, enemyStacks),
-                context.ReturnScene);
+                context.ReturnScene,
+                _gridGateway.PlayerTeam,
+                _gridGateway.PlayerTeam);
 
             _gridGateway.PrepareBattle(payload, _formationResolver);
+
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                Debug.LogError("[BattleLaunchService] Online battle handoff from Adventure is not configured yet. Use a dedicated network battle session transition.");
+                return null;
+            }
 
             return () => SceneLoader.Load(_gridGateway.BattleScene);
         }
@@ -59,6 +73,26 @@ namespace Adventure.Integration.Battle
         {
             var finalize = PrepareLaunch(context);
             finalize?.Invoke();
+        }
+
+        public bool LaunchOnline(BattleLaunchContext context)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+            {
+                Debug.LogWarning("[BattleLaunchService] StartOnlineBattle requested outside of a network session.");
+                return false;
+            }
+
+            if (_onlineBattleLaunchService == null)
+            {
+                Debug.LogError("[BattleLaunchService] OnlineBattleLaunchService is not available.");
+                return false;
+            }
+
+            return _onlineBattleLaunchService.TryLaunch(context);
         }
     }
 }

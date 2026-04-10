@@ -9,48 +9,41 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Zenject;
+using SharedView;
 
 namespace Adventure.Presentation.Dialog
 {
-    public sealed class DialogueUIView : MonoBehaviour
+    public sealed class DialogueUIView : CanvasGroupPanelViewBase<DialogVM>
     {
-        [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private TextMeshProUGUI speakerText;
         [SerializeField] private TextMeshProUGUI bodyText;
         [SerializeField] private Transform choicesRoot;
         [SerializeField] private Button choiceButtonPrefab;
 
-        [Inject] private DialogVM _viewModel;
         private readonly List<Button> _spawnedButtons = new List<Button>();
-        private readonly CompositeDisposable _bindings = new CompositeDisposable();
 
         [Inject]
-        public void Construct(DialogVM viewModel)
+        public override void Construct(DialogVM viewModel)
         {
-            _viewModel = viewModel;
-            _viewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(_bindings);
-            _viewModel.IsOpen.Subscribe(OnOpenStateChanged).AddTo(_bindings);
-            _viewModel.EnemyArmy.Subscribe(OnVMEnemyArmyChanged).AddTo(_bindings); 
-            Hide();
-            Debug.Log("dialog ui constuct");
+            base.Construct(viewModel);
+        }
+
+        protected override void OnInitialized()
+        {
+            ViewModel.CurrentNode.Subscribe(OnNodeChanged).AddTo(Bindings);
+            ViewModel.EnemyArmy.Subscribe(OnVMEnemyArmyChanged).AddTo(Bindings);
+        }
+
+        protected override void OnDestroy()
+        {
+            ClearChoicesButtons();
+            base.OnDestroy();
         }
 
         private void OnVMEnemyArmyChanged(ArmyLineupSO x)
         {
-            
         }
 
-        private void OnDestroy()
-        {
-            _bindings.Dispose();
-        }
-        private void OnOpenStateChanged(bool state)
-        {
-            if(!state)
-                Hide();
-            else
-                Show();
-        }
         private void OnNodeChanged(DialogueNode node)
         {
             if (node == null)
@@ -92,7 +85,7 @@ namespace Adventure.Presentation.Dialog
 
         private void OnButtonClicked(DialogueChoice choice)
         {
-            _viewModel.SelectChoice(choice.Id);
+            ViewModel.SelectChoice(choice.Id);
             Debug.Log("u clicked choice " + choice.Text);   
         }
 
@@ -104,22 +97,6 @@ namespace Adventure.Presentation.Dialog
                     Destroy(button.gameObject);
             }
             _spawnedButtons.Clear();
-        }
-
-        private void Show()
-        {
-            if (canvasGroup == null) return;
-            canvasGroup.alpha = 1f;
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
-        }
-
-        private void Hide()
-        {
-            if (canvasGroup == null) return;
-            canvasGroup.alpha = 0f;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
         }
     }
 }

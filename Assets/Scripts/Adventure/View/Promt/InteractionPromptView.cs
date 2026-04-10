@@ -11,6 +11,8 @@ namespace Adventure.Presentation.Interaction
 
         public void Show(string binding, string action)
         {
+            EnsureVisible();
+
             if (bindingLabel != null)
                 bindingLabel.text = binding;
             if (actionLabel != null)
@@ -22,10 +24,6 @@ namespace Adventure.Presentation.Interaction
                 root.interactable = false;
                 root.blocksRaycasts = false;
             }
-            else
-            {
-                gameObject.SetActive(true);
-            }
         }
 
         public void Hide()
@@ -35,10 +33,28 @@ namespace Adventure.Presentation.Interaction
                 root.alpha = 0f;
                 root.interactable = false;
                 root.blocksRaycasts = false;
+
+                if (root.gameObject != gameObject)
+                {
+                    gameObject.SetActive(false);
+                }
             }
             else
             {
                 gameObject.SetActive(false);
+            }
+        }
+
+        private void EnsureVisible()
+        {
+            if (root != null && !root.gameObject.activeSelf)
+            {
+                root.gameObject.SetActive(true);
+            }
+
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
             }
         }
     }

@@ -25,6 +25,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     private readonly IGameCommandExecutor _gameCommandExecutor;
     private readonly ITurnStateViewModel _turnState;
     private readonly IBattleControlModeService _battleControlModes;
+    private readonly IBattleAnimationGate _animationGate;
+    private readonly IGameConfigurationService _gameConfigurationService;
     private readonly ActionResolver _actionResolver;
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Dictionary<IGridContent, UnitViewModel> _uvms = new();
@@ -38,16 +40,20 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         IGameCommandExecutor actionExecutor,
         ITurnStateViewModel turnState,
         ActionResolver actionResolver,
+        IGameConfigurationService gameConfigurationService,
         IGridRenderSettings gridRenderSettings,
-        [InjectOptional] IBattleControlModeService battleControlModes = null)
+        [InjectOptional] IBattleControlModeService battleControlModes = null,
+        [InjectOptional] IBattleAnimationGate animationGate = null)
     {
         _gameModel = model ?? throw new ArgumentNullException(nameof(model));
         _movementSystem = movementSystem ?? throw new ArgumentNullException(nameof(movementSystem));
         _gameCommandExecutor = actionExecutor ?? throw new ArgumentNullException(nameof(actionExecutor));
         _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
         _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
+        _gameConfigurationService = gameConfigurationService ?? throw new ArgumentNullException(nameof(gameConfigurationService));
         RenderSettings = gridRenderSettings ?? throw new ArgumentNullException(nameof(gridRenderSettings));
         _battleControlModes = battleControlModes;
+        _animationGate = animationGate;
 
         _gameModel.GameChange_Initialized += OnGameModelGridInitialized;
         _gameModel.GameChange_UnitSpawned += OnGameModelUnitSpawned;
@@ -64,6 +70,17 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         if (_battleControlModes != null)
         {
             _battleControlModes.TeamModeChanged
+                .Subscribe(_ => RefreshCurrentTurnPreview())
+                .AddTo(_subscriptions);
+        }
+
+        if (_animationGate != null)
+        {
+            Observable.FromEvent<Action<bool>, bool>(
+                    handler => isLocked => handler(isLocked),
+                    handler => _animationGate.LockStateChanged += handler,
+                    handler => _animationGate.LockStateChanged -= handler)
+                .Where(isLocked => !isLocked)
                 .Subscribe(_ => RefreshCurrentTurnPreview())
                 .AddTo(_subscriptions);
         }
@@ -376,7 +393,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         var rows = Mathf.Clamp(DeploymentRows, 1, Height);
         var result = new List<Vector2Int>();
 
-        if (team == Team.Red)
+        if (!IsBottomTeam(team))
         {
             for (var y = Height - rows; y < Height; y++)
             for (var x = 0; x < Width; x++)
@@ -485,8 +502,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         if (IsCellOccupied(coords) && model.Position != coords)
             return false;
 
-        _gameModel.MoveObject(model, coords);
-        return true;
+        return _gameCommandExecutor.TryDeployUnit(model.Position, coords);
     }
 
     public void SetCell(UnitViewModel draggedVM, Vector2Int coords)
@@ -746,9 +762,15 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
         var rows = Mathf.Clamp(DeploymentRows, 1, Height);
 
-        return team == Team.Red
+        return !IsBottomTeam(team)
             ? cell.y >= Height - rows
             : cell.y < rows;
+    }
+
+    private bool IsBottomTeam(Team team)
+    {
+        var bottomTeam = _gameConfigurationService?.BattlefieldBottomTeam ?? Team.Blue;
+        return team == bottomTeam;
     }
 }
    

@@ -32,6 +32,7 @@ namespace Adventure.Domain.Dialog
     {
         None,
         StartBattle,
-        EndDialogue
+        EndDialogue,
+        StartOnlineBattle
     }
 }

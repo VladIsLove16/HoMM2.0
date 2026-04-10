@@ -92,7 +92,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         isExecuting = false;
 
         transform.position = worldPosition;
-        Play(UnitAnimationState.Idle);
+        TransitionToIdle();
         FaceDefaultDirection();
 
         LogDebugEvent($"Snapped instantly to {worldPosition}");
@@ -182,16 +182,14 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
                 LogDebugEvent($"Teleporting to: {point}");
                 transform.position = point;
             }
-            _animationController?.SetWalking(false);
-            Play(UnitAnimationState.Idle);
+            TransitionToIdle();
             LogDebugEvent("Movement Finished (instant)");
             FaceDefaultDirection();
             yield return null;
             yield break;
         }
 
-        _currentAnimationState = UnitAnimationState.Walk;
-        ApplyAnimationSpeed(UnitAnimationState.Walk);
+        EnterState(UnitAnimationState.Walk);
         _animationController?.SetWalking(true);
 
         foreach (var point in route)
@@ -206,8 +204,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         }
 
         LogDebugEvent("Movement Finished");
-        _animationController?.SetWalking(false);
-        Play(UnitAnimationState.Idle);
+        TransitionToIdle();
         FaceDefaultDirection();
     }
 
@@ -221,7 +218,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             yield break;
         }
 
-        var speed = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
+        var speed = _animationSpeedSettings?.MovementMultiplier ?? 1f;
 
         while (Vector3.Distance(transform.position, worldPos) > 0.05f)
         {
@@ -259,11 +256,19 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
 
     public void Play(UnitAnimationState state)
     {
-        if (_animationController == null) return;
-        _currentAnimationState = state;
-        ApplyAnimationSpeed(state);
-        _animationController.PlayAnimation(state);
-        LogDebugEvent($"Animation Trigger Set: {state}");
+        if (_animationController == null)
+        {
+            Debug.LogWarning("[UnitView3D] Cannot play animation, UnitAnimatorController is not assigned.");
+            return;
+        }
+
+        if (state == UnitAnimationState.Idle)
+        {
+            TransitionToIdle();
+            return;
+        }
+
+        EnterState(state);
     }
 
     public void Dispose()
@@ -328,7 +333,6 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     public void HandleTurnStarted()
     {
         LogDebugEvent("Unit Turn Started");
-        EnqueueAction(PlayAnimationRoutine(UnitAnimationState.Idle));
     }
     
     public void HandleHealthChanged()
@@ -365,6 +369,29 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         var multiplier = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
         var isInstant = _animationSpeedSettings?.IsInstant ?? false;
         _animationController.SetPlaybackSpeed(multiplier, isInstant);
+    }
+
+    private void EnterState(UnitAnimationState state)
+    {
+        if (_animationController == null)
+            return;
+
+        _currentAnimationState = state;
+        ApplyAnimationSpeed(state);
+        _animationController.PlayAnimation(state);
+        LogDebugEvent($"Animation Trigger Set: {state}");
+    }
+
+    private void TransitionToIdle()
+    {
+        if (_animationController == null)
+            return;
+
+        _animationController.SetWalking(false);
+        _currentAnimationState = UnitAnimationState.Idle;
+        _animationController.SetPlaybackSpeed(1f, false);
+        _animationController.PlayAnimation(UnitAnimationState.Idle);
+        LogDebugEvent("Animation Trigger Set: Idle");
     }
 
     private float ScaleDuration(float baseDuration)
@@ -478,7 +505,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         yield return PlayAnimationRoutine(UnitAnimationState.Attack, UnitAnimationEvent.AttackFinished);
         if (!_isDead)
         {
-            Play(UnitAnimationState.Idle);
+            TransitionToIdle();
             FaceDefaultDirection();
         }
     }
@@ -492,7 +519,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         yield return PlayAnimationRoutine(UnitAnimationState.Hit, UnitAnimationEvent.HitFinished);
         if (!_isDead)
         {
-            Play(UnitAnimationState.Idle);
+            TransitionToIdle();
             FaceDefaultDirection();
         }
     }
@@ -551,7 +578,9 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         }
 
         _animationController.AnimationEventRaised += Handler;
-        var safety = 5f;
+        yield return null;
+
+        var safety = ResolveAnimationEventTimeoutSeconds(eventId);
         var iterationBudget = 2000;
         try
         {
@@ -561,11 +590,32 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
                 safety -= delta;
                 yield return null;
             }
+
+            if (!completed)
+            {
+                UnityLogger.Log(
+                    $"[UnitView3D] Timeout while waiting for animation event {eventId} on {_vm?.Model?.UnitType.Value}. " +
+                    "Check Animation Event wiring on the clip.",
+                    LogCategory.Unit);
+            }
         }
         finally
         {
             _animationController.AnimationEventRaised -= Handler;
         }
+    }
+
+    private float ResolveAnimationEventTimeoutSeconds(UnitAnimationEvent eventId)
+    {
+        if (_animationController != null && _animationController.TryGetCurrentClipLength(out var clipLength))
+        {
+            var speed = _animationController.GetPlaybackSpeed();
+            return Mathf.Max(0.15f, (clipLength / speed) + 0.15f);
+        }
+
+        var fallback = eventId == UnitAnimationEvent.DieFinished ? 2.5f : 1.25f;
+        var speedMultiplier = _animationSpeedSettings?.PlaybackMultiplier ?? 1f;
+        return Mathf.Max(0.15f, fallback / Mathf.Max(0.01f, speedMultiplier));
     }
 
     private bool IsInstantMode() => _animationSpeedSettings != null && _animationSpeedSettings.IsInstant;
@@ -576,4 +626,3 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     }
 }
  
-

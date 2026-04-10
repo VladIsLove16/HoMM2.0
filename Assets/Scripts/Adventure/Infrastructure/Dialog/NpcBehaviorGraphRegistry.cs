@@ -1,4 +1,5 @@
 using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Players;
 using Adventure.Infrastructure.State;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,17 +8,17 @@ namespace Adventure.Infrastructure.Dialog
 {
     public sealed class NpcBehaviorGraphRegistry
     {
-        private readonly Transform _playerTransform;
+        private readonly ILocalAdventurePlayerProvider _localPlayerProvider;
         private readonly Dictionary<string, NpcBehaviorGraphBridge> _registry = new();
 
         private string _pendingDialogId;
         private NpcBehaviorGraphBridge _activeBridge;
 
-        public NpcBehaviorGraphRegistry(PlayerMovementController playerMovementController)
+        public NpcBehaviorGraphRegistry(ILocalAdventurePlayerProvider localPlayerProvider)
         {
-            _playerTransform = playerMovementController != null
-                ? playerMovementController.transform
-                : null;
+            _localPlayerProvider = localPlayerProvider;
+            if (_localPlayerProvider != null)
+                _localPlayerProvider.PlayerChanged += HandlePlayerChanged;
         }
 
         public void Register(string dialogId, NpcBehaviorGraphBridge bridge)
@@ -29,7 +30,7 @@ namespace Adventure.Infrastructure.Dialog
 
             _registry[dialogId] = bridge;
             bridge.AssignDialogueId(dialogId);
-            bridge.ConfigurePlayer(_playerTransform);
+            bridge.ConfigurePlayer(_localPlayerProvider?.PlayerTransform);
         }
 
         public void Unregister(string dialogId, NpcBehaviorGraphBridge bridge)
@@ -127,6 +128,26 @@ namespace Adventure.Infrastructure.Dialog
             }
 
             _pendingDialogId = null;
+        }
+
+        private void HandlePlayerChanged()
+        {
+            var playerTransform = _localPlayerProvider?.PlayerTransform;
+            foreach (var bridge in _registry.Values)
+            {
+                bridge?.ConfigurePlayer(playerTransform);
+            }
+        }
+
+        public void ConfigureDialogPlayer(string dialogId, Transform playerTransform)
+        {
+            if (string.IsNullOrEmpty(dialogId) || playerTransform == null)
+                return;
+
+            if (_registry.TryGetValue(dialogId, out var bridge))
+            {
+                bridge.ConfigurePlayer(playerTransform);
+            }
         }
     }
 }

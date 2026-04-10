@@ -182,6 +182,74 @@ MonoBehaviour:
     m_Localized: Exit
     m_Metadata:
       m_Items: []
+  - m_Id: 37892145387397120
+    m_Localized: Time is money, friend!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39502227330031616
+    m_Localized: Singleplayer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39502323815800832
+    m_Localized: Multiplayer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39504093271023616
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39503082015940608
+    m_Localized: Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39505000000000000
+    m_Localized: Shared Adventure
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39506000000000000
+    m_Localized: Direct GridFight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39507000000000000
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39508000000000000
+    m_Localized: Direct GridFight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39509000000000000
+    m_Localized: Shared Adventure
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39510000000000000
+    m_Localized: Change Army
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39511000000000000
+    m_Localized: 
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39540922259070976
+    m_Localized: Game started
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39541081927835648
+    m_Localized: Shared adventure mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39541740186099712
+    m_Localized: Army preset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39543813883551744
+    m_Localized: No army preset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40936773179138048
+    m_Localized: Achievements
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

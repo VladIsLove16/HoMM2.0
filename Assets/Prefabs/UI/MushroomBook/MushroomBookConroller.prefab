@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 8452249211180264113}
   - component: {fileID: 4939655397479201325}
   - component: {fileID: 4650067020503959231}
+  - component: {fileID: 2206307451289212042}
   m_Layer: 5
   m_Name: MushroomBookConroller
   m_TagString: Untagged
@@ -114,6 +115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d890d7bcf55d8134cbd96c47972fda89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 2206307451289212042}
   pageSlots:
   - {fileID: 5579989135614384611}
   - {fileID: 4399347914861305500}
@@ -130,6 +132,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2206307451289212041}
   m_CullTransparentMesh: 1
+--- !u!225 &2206307451289212042
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2206307451289212041}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &2213689033287602633
 GameObject:
   m_ObjectHideFlags: 0

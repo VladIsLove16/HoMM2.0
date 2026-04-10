@@ -6,7 +6,6 @@ using Zenject;
 
 namespace Assets.Scripts.Adventure.Infrastructure.Input
 {
-    [DefaultExecutionOrder(-200)]
     public sealed class AdventureInput :  IDisposable
     {
         private InputSystem_Adventure _playerMap;

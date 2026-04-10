@@ -6,8 +6,9 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using SharedView;
 
-public class UnitStatsPanel : MonoBehaviour, IDisposable
+public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
 {
     [SerializeField] Canvas canvas;
     [SerializeField] Button closeButton;
@@ -42,9 +43,9 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
     private void ToggleStartingVivsibilty()
     {
         if (enableOnStart)
-            Show();
+            ShowPanelImmediate();
         else
-            Hide();
+            HidePanelImmediate();
     }
 
     private void OnGameViewModel_UnitStatsRequested(UnitViewModel unit)
@@ -114,14 +115,14 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
 
     public void Show()
     {
-        gameObject.SetActive(true); 
+        ShowPanel(); 
         // Position should be set by the caller or through GameViewModel events
         Show(Vector3.zero); // Default position
     }
     [ContextMenu("Hide")]
     public void Hide()
     {
-        gameObject.SetActive(false);
+        HidePanel();
         _vm?.Dispose();
         _disposables.Clear();
     }
@@ -134,5 +135,11 @@ public class UnitStatsPanel : MonoBehaviour, IDisposable
         }
         _vm?.Dispose();
         _disposables.Dispose();
+    }
+
+    protected override void OnDestroy()
+    {
+        Dispose();
+        base.OnDestroy();
     }
 }

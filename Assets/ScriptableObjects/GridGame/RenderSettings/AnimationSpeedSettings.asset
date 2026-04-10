@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8db442272e5e3074eb98c9de2aba52bf, type: 3}
   m_Name: AnimationSpeedSettings
   m_EditorClassIdentifier: 
-  mode: 1
+  mode: 2
   normalPlaybackMultiplier: 1
   fastPlaybackMultiplier: 5
   veryFastPlaybackMultiplier: 10
-  veryFastIsInstant: 1
+  movementSpeedScale: 2.8
+  veryFastIsInstant: 0

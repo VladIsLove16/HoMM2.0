@@ -5,6 +5,7 @@
         "UniRx",
         "NaughtyAttributes.Core",
         "Zenject",
+        "GameCore",
         "Unity.Services.Core",
         "Unity.Services.Authentication",
         "Unity.Services.Multiplayer",

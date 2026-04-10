@@ -8,7 +8,6 @@ using UniRx;
 using Zenject;
 using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Adventure.Application.Dialog
 {
@@ -84,17 +83,26 @@ namespace Adventure.Application.Dialog
            
             var currentNode = _session.CurrentNode;
             var selectedChoice = currentNode?.Choices?.FirstOrDefault(c => c.Id == choiceId);
-            var action = _session.SelectChoice(choiceId);
+            if (selectedChoice == null)
+                throw new InvalidOperationException($"Choice '{choiceId}' not found");
+
+            var action = selectedChoice.Action;
             if (action == DialogueChoiceAction.StartBattle)
             {
                 StartBattle(selectedChoice);
             }
+            else if (action == DialogueChoiceAction.StartOnlineBattle)
+            {
+                StartOnlineBattle(selectedChoice);
+            }
             else if (action == DialogueChoiceAction.EndDialogue)
             {
+                _session.SelectChoice(choiceId);
                 EndDialog();
             }
             else
             {
+                _session.SelectChoice(choiceId);
                 ContinueDialog();
             }
             _playerChoiceEventChannel?.SendEventMessage(action);
@@ -117,12 +125,20 @@ namespace Adventure.Application.Dialog
 
         private void StartBattle(DialogueChoice selectedChoice)
         {
-            _currentNode.SetValueAndForceNotify(null);
             var enemyArmy = _enenyArmy.Value;
             var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
             var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
             var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
             battleLaunchService.Launch(context);
+        }
+
+        private void StartOnlineBattle(DialogueChoice selectedChoice)
+        {
+            var enemyArmy = _enenyArmy.Value;
+            var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
+            var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
+            var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
+            battleLaunchService.LaunchOnline(context);
         }
 
         private void EndDialog()

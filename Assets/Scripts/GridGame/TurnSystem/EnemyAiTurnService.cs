@@ -8,6 +8,7 @@ public sealed class EnemyAiTurnService : IDisposable
 {
     private readonly ITurnService _turnService;
     private readonly IBattleControlModeService _battleControlModes;
+    private readonly IBattleAnimationGate _animationGate;
     private readonly ActionResolver _resolver;
     private readonly ActionPipeline _pipeline;
     private readonly MovementSystem _movementSystem;
@@ -22,6 +23,7 @@ public sealed class EnemyAiTurnService : IDisposable
     public EnemyAiTurnService(
         ITurnService turnService,
         IBattleControlModeService battleControlModes,
+        IBattleAnimationGate animationGate,
         ActionResolver resolver,
         ActionPipeline pipeline,
         MovementSystem movementSystem,
@@ -30,6 +32,7 @@ public sealed class EnemyAiTurnService : IDisposable
     {
         _turnService = turnService ?? throw new ArgumentNullException(nameof(turnService));
         _battleControlModes = battleControlModes ?? throw new ArgumentNullException(nameof(battleControlModes));
+        _animationGate = animationGate ?? throw new ArgumentNullException(nameof(animationGate));
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
         _movementSystem = movementSystem ?? throw new ArgumentNullException(nameof(movementSystem));
@@ -46,6 +49,13 @@ public sealed class EnemyAiTurnService : IDisposable
 
         _battleControlModes.TeamModeChanged
             .Subscribe(_ => ScheduleProcessingIfNeeded())
+            .AddTo(_disposables);
+
+        Observable.FromEvent<Action<bool>, bool>(
+                handler => isLocked => handler(isLocked),
+                handler => _animationGate.LockStateChanged += handler,
+                handler => _animationGate.LockStateChanged -= handler)
+            .Subscribe(OnAnimationGateStateChanged)
             .AddTo(_disposables);
     }
 
@@ -77,6 +87,12 @@ public sealed class EnemyAiTurnService : IDisposable
         if (!ShouldControlCurrentUnit())
             return;
 
+        if (_animationGate.IsLocked)
+        {
+            UnityLogger.Log("[EnemyAiTurnService] AI scheduling deferred until battle animation completes.", LogCategory.AI);
+            return;
+        }
+
         var delaySeconds = _battleControlModes.IsFastResolveActive.Value ? 0f : _config.AiTurnDelaySeconds;
         if (delaySeconds <= 0f)
         {
@@ -89,10 +105,29 @@ public sealed class EnemyAiTurnService : IDisposable
             .Subscribe(_ => ProcessEnemyTurn());
     }
 
+    private void OnAnimationGateStateChanged(bool isLocked)
+    {
+        if (isLocked)
+        {
+            _pendingTurn?.Dispose();
+            _pendingTurn = null;
+            UnityLogger.Log("[EnemyAiTurnService] Pending AI action canceled while animation is playing.", LogCategory.AI);
+            return;
+        }
+
+        ScheduleProcessingIfNeeded();
+    }
+
     private void ProcessEnemyTurn()
     {
         if (_isProcessing)
             return;
+
+        if (_animationGate.IsLocked)
+        {
+            UnityLogger.Log("[EnemyAiTurnService] AI turn blocked because animation gate is still locked.", LogCategory.AI);
+            return;
+        }
 
         if (_turnService.Mode != GameMode.SinglePlayer || _turnService.BattleState != BattleState.inProgress)
             return;

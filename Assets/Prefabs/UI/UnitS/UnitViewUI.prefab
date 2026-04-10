@@ -126,7 +126,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.2}
+  m_AnchoredPosition: {x: 0, y: -0.25}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7230708982245183046
@@ -622,7 +622,7 @@ MonoBehaviour:
   healthAmountText: {fileID: 8411989273149192596}
   damagePopupText: {fileID: 2365492047851017662}
   faceCamera: 1
-  damagePopupFadeIn: 0.08
+  damagePopupFadeIn: 0.4
   damagePopupHold: 0.5
-  damagePopupFadeOut: 0.2
-  damagePopupMoveUp: 28
+  damagePopupFadeOut: 0.3
+  damagePopupMoveUp: 0.5

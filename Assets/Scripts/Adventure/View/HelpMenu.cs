@@ -1,41 +1,13 @@
-using Adventure.Settings.ViewModel;
-using System;
-using UniRx;
+ï»¿using Adventure.Application.VMs;
+using SharedView;
 using UnityEngine;
+using Zenject;
 
-/// <summary>
-/// ÎØÈÁÎ×ÍÛÉ ÊÎÄ! Ïåğåïèñàòü íà MVVM
-/// </summary>
-public class HelpMenu : MonoBehaviour, IAdventureGameActiveMenu
+public class HelpMenu : CanvasGroupPanelViewBase<HelpMenuViewModel>
 {
-    private ReactiveProperty<bool> isOpen = new(false);
-    public InputMode InputMode => InputMode.Enabled;
-    public IReadOnlyReactiveProperty<bool> IsOpen => isOpen;
-    private void Awake()
+    [Inject]
+    public override void Construct(HelpMenuViewModel viewModel)
     {
-        IsOpen.Subscribe(SetState);
+        base.Construct(viewModel);
     }
-    internal void Toggle()
-    {
-        SetState(!isOpen.Value);
-    }
-    private void SetState(bool state)
-    {
-        isOpen.SetValueAndForceNotify(state);
-        if (state)
-            Open();
-        else
-            Close();
-    }
-    public void Close()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void Open()
-    {
-       gameObject.SetActive(!isOpen.Value);
-    }
-
-    
 }

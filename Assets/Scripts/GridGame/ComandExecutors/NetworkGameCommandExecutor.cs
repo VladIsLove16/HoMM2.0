@@ -27,4 +27,15 @@ public class NetworkGameCommandExecutor : IGameCommandExecutor
         }
         return true;
     }
+
+    public bool TryDeployUnit(Vector2Int fromCell, Vector2Int toCell)
+    {
+        if (!_gateway.RequestDeployUnit(fromCell, toCell))
+        {
+            Debug.LogWarning($"[NetworkGameCommandExecutor] Unable to send deployment move {fromCell} -> {toCell}.");
+            return false;
+        }
+
+        return true;
+    }
 }

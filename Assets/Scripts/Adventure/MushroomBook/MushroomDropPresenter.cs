@@ -1,6 +1,6 @@
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Inventory;
-using Adventure.Infrastructure.Movement;
+using Adventure.Infrastructure.Players;
 using Adventure.Presentation.Mushroom;
 using UnityEngine;
 using Zenject;
@@ -15,18 +15,18 @@ namespace Adventure.MushroomBook
     {
         private MushroomBookViewModel _viewModel;
         private AdventureMushroomAssetMap _assetMap;
-        private PlayerMovementController _player;
+        private ILocalAdventurePlayerProvider _localPlayerProvider;
        [SerializeField] private LayerMask _layerMask;
 
         private readonly Vector3 _spawnOffset = new Vector3(0f, 0.05f, 0f);
         private const float GroundRayDistance = 5f;
         [Inject]
             
-        public void Construct(AdventureMushroomAssetMap assetMap, MushroomBookViewModel viewModel,PlayerMovementController playerController)
+        public void Construct(AdventureMushroomAssetMap assetMap, MushroomBookViewModel viewModel, ILocalAdventurePlayerProvider localPlayerProvider)
         {
             _viewModel = viewModel;
             _assetMap= assetMap;
-            _player = playerController;
+            _localPlayerProvider = localPlayerProvider;
 
             if (_viewModel != null)
             {
@@ -72,14 +72,15 @@ namespace Adventure.MushroomBook
 
         private Vector3 ResolveSpawnPosition(Vector3 fallback)
         {
-            if (_player == null)
+            var player = _localPlayerProvider?.MovementController;
+            if (player == null)
             {
-                Debug.LogError("playerController not setted");
+                Debug.LogError("PlayerMovementController is not available for mushroom drop.", this);
                 return fallback + _spawnOffset;
 
             }
 
-            var origin = _player.transform.position + _spawnOffset;
+            var origin = player.transform.position + _spawnOffset;
             var rayOrigin = origin + Vector3.up * 1f;
             if (Physics.Raycast(rayOrigin, Vector3.down, out var hit, GroundRayDistance, _layerMask.value, QueryTriggerInteraction.Ignore))
             {

@@ -50,7 +50,7 @@ namespace Adventure.Infrastructure.Dialog
 
         private void OnChoiceActionTriggered(DialogueChoiceAction action)
         {
-            if (action == DialogueChoiceAction.StartBattle)
+            if (action == DialogueChoiceAction.StartBattle || action == DialogueChoiceAction.StartOnlineBattle)
             {
                 _registry.NotifyBattleRequested();
             }

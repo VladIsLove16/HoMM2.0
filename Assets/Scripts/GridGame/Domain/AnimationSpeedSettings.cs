@@ -12,6 +12,7 @@ public sealed class AnimationSpeedSettings : ScriptableObject, IAnimationSpeedSe
     [SerializeField, Min(0.01f)] private float normalPlaybackMultiplier = 1f;
     [SerializeField, Min(0.01f)] private float fastPlaybackMultiplier = 2f;
     [SerializeField, Min(0.01f)] private float veryFastPlaybackMultiplier = 4f;
+    [SerializeField, Min(0.01f)] private float movementSpeedScale = 1f;
     [SerializeField] private bool veryFastIsInstant = true;
 
     private float? _overridePlaybackMultiplier;
@@ -28,6 +29,9 @@ public sealed class AnimationSpeedSettings : ScriptableObject, IAnimationSpeedSe
         AnimationSpeedMode.VeryFast => veryFastPlaybackMultiplier,
         _ => 1f
     };
+
+    public float MovementSpeedScale => movementSpeedScale;
+    public float MovementMultiplier => PlaybackMultiplier * movementSpeedScale;
 
     public bool IsInstant => _overrideIsInstant ?? (_mode.Value == AnimationSpeedMode.VeryFast && veryFastIsInstant);
 

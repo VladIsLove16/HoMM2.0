@@ -1,4 +1,5 @@
 using Adventure.Application.Dialog;
+using Adventure.Application.VMs;
 using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
 using Adventure.Infrastructure.Dialog;
@@ -6,23 +7,25 @@ using Adventure.Infrastructure.Interaction;
 using Adventure.Infrastructure.Inventory;
 using Adventure.Infrastructure.Movement;
 using Adventure.Infrastructure.Persistence;
+using Adventure.Infrastructure.Players;
 using Adventure.Infrastructure.State;
 using Adventure.Integration.Battle;
+using Adventure.Multiplayer;
 using Adventure.Presentation.Dialog;
 using Adventure.Presentation.Mushroom;
 using Adventure.Settings.Configuration;
 using Adventure.Settings.Model;
 using Adventure.Settings.View;
 using Adventure.Settings.ViewModel;
-using Game.Events;
-using Game.Achievements;
 using Assets.Scripts.Adventure.Infrastructure.Input;
+using CustomEventBus;
+using Game.Achievements;
+using Game.Events;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 using UnityEngine.Audio;
-using CustomEventBus;
+using Zenject;
 
 public sealed class AdventureGameplayInstaller : MonoInstaller
 {
@@ -34,6 +37,10 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     [Header("Input Tuning")]
     [SerializeField] private MouseSensitivityProfileSO mouseSensitivityProfile;
+
+    [Header("Multiplayer")]
+    [SerializeField] private NetworkAdventurePlayer networkPlayerPrefab;
+    [SerializeField] private Transform[] multiplayerSpawnPoints;
 
     [Header("Battle")]
     [SerializeField] private GridConfigurationGateway gridConfigurationGateway;
@@ -59,6 +66,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [Header("Behavior Graph Events")]
     [SerializeField] private PlayerChosenDialogOption playerChosenDialogOptionChannel;
     [SerializeField] private BattleFinishedChannel battleFinishedChannel;
+
     public override void InstallBindings()
     {
         BindDatabases();
@@ -76,11 +84,13 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.Bind<MushroomInventoryModel>().AsSingle().WithArguments(playerStartArmy.Convert());
         Container.Bind<AudioMixer>().FromInstance(audioMixer).AsSingle().NonLazy();
     }
+
     private void BindsVMS()
     {
         Container.BindInterfacesAndSelfTo<MushroomBookViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle().WithArguments(playerChosenDialogOptionChannel);
         Container.BindInterfacesAndSelfTo<AdventureGameSettingsViewModel>().AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<HelpMenuViewModel>().AsSingle();
         Container.Bind<AdventureMenusCoordinatorViewModel>().AsSingle();
         Container.BindInterfacesAndSelfTo<Game.Achievements.AchievementsViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<Adventure.Application.VMs.AdventureAchievementsMenuAdapter>().AsSingle();
@@ -99,6 +109,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         {
             Debug.LogWarning("[AdventureGameplayInstaller] AchievementsView is not assigned.", this);
         }
+
         if (achievementToastView != null)
         {
             Container.Bind<Game.Achievements.AchievementToastView>().FromInstance(achievementToastView).AsSingle().NonLazy();
@@ -107,6 +118,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         {
             Debug.LogWarning("[AdventureGameplayInstaller] AchievementToastView is not assigned.", this);
         }
+
         Container.Bind<AdventureGameSettingsView>().FromInstance(gameSettingsView).AsSingle().NonLazy();
         if (mushroomDropPresenter != null)
         {
@@ -115,6 +127,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
                 .AsSingle()
                 .NonLazy();
         }
+
         Container.Bind<NpcDialogueTrigger>()
             .FromComponentsInHierarchy()
             .AsTransient();
@@ -122,33 +135,41 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             .FromComponentsInHierarchy()
             .AsTransient();
         Container.BindInterfacesAndSelfTo<CursorView>().AsSingle().WithArguments(cursorStateTextures).NonLazy();
-        Container.BindInterfacesAndSelfTo<HelpMenu>().FromInstance(helpMenu).AsSingle().NonLazy();
+        Container.Bind<HelpMenu>().FromInstance(helpMenu).AsSingle().NonLazy();
     }
+
     private void BindTools()
     {
         Container.Bind<AdventureDevTools>().FromInstance(devTools).AsSingle().NonLazy();
     }
+
     private void BindServices()
     {
         BindPersistence();
         BindAchievementServices();
         BindMouseSensitivity();
-            Container.Bind<PauseController>().AsSingle();
-            var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
-            Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle(); 
-            Container.Bind<BattleLaunchService>().AsSingle();
-            Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
-            Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
-            Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
+        Container.Bind<PauseController>().AsSingle();
+        var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
+        Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();
+        Container.Bind<OnlineBattleLaunchService>().AsSingle();
+        Container.Bind<BattleLaunchService>().AsSingle();
+        Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
+        Container.BindInterfacesAndSelfTo<AdventureMultiplayerRuntimeBootstrap>()
+            .AsSingle()
+            .WithArguments(networkPlayerPrefab, multiplayerSpawnPoints ?? Array.Empty<Transform>())
+            .NonLazy();
+        Container.Bind<NpcBehaviorGraphRegistry>().AsSingle();
+        Container.BindInterfacesTo<NpcDialogueBehaviorMediator>().AsSingle().NonLazy();
 
-            if (gridConfigurationGateway != null)
-            {
-                Container.Bind<IGridConfigurationGateway>().FromInstance(gridConfigurationGateway).AsSingle();
+        if (gridConfigurationGateway != null)
+        {
+            Container.Bind<IGridConfigurationGateway>().FromInstance(gridConfigurationGateway).AsSingle();
         }
         else
         {
             Debug.LogError("GridConfigurationGateway is not assigned on AdventureGameplayInstaller", this);
         }
+
         Container.Bind<EventBus>().AsSingle();
     }
 
@@ -167,6 +188,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
             Container.Bind<AchievementCatalog>().FromInstance(achievementCatalog).AsSingle();
             Container.Bind<IAchievementDefinitionProvider>().To<AchievementCatalogDefinitionProvider>().AsSingle();
         }
+
         Container.Bind<IAchievementStorage>().To<PlayerPrefsAchievementStorage>().AsSingle();
         Container.Bind<ICurrencyWallet>().To<GameStateCurrencyWallet>().AsSingle();
         Container.Bind<IAchievementService>().To<AchievementService>().AsSingle();
@@ -230,11 +252,12 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
 
     private void BindInputs()
     {
+        Container.BindInterfacesAndSelfTo<LocalAdventurePlayerProvider>().AsSingle();
         Container.Bind<PlayerMovementController>().FromInstance(playerMovementController).AsSingle().NonLazy();
         Container.Bind<PlayerInteractionController>().FromInstance(interactionController).AsSingle().NonLazy();
+        Container.BindInterfacesAndSelfTo<SceneLocalAdventurePlayerRegistrar>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<AdventureInput>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<AdventureInputRouter>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<InputModeViewModel>().AsSingle().NonLazy();
     }
-
 }

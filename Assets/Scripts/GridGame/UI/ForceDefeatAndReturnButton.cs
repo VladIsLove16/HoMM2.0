@@ -1,6 +1,7 @@
 using Adventure.Infrastructure.State;
 using CustomEventBus;
 using Game.Events;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -45,6 +46,27 @@ namespace GridGame.UI
             BattleStateCache.CompleteBattle(playerWon: false);
             _eventBus?.Invoke(new BattleCompletedCustomEvent(false));
             var targetScene = BattleStateCache.GetReturnSceneOrDefault();
+            var networkManager = NetworkManager.Singleton;
+            if (networkManager != null && networkManager.IsListening)
+            {
+                if (networkManager.IsServer || networkManager.IsHost)
+                {
+                    networkManager.SceneManager.LoadScene(targetScene.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
+                    return;
+                }
+
+#if UNITY_2023_1_OR_NEWER
+                var gateway = UnityEngine.Object.FindFirstObjectByType<GameNetworkCommandGateway>();
+#else
+                var gateway = UnityEngine.Object.FindObjectOfType<GameNetworkCommandGateway>();
+#endif
+                if (gateway != null && gateway.RequestReturnToAdventure())
+                    return;
+
+                Debug.LogWarning("[ForceDefeatAndReturnButton] Waiting for the host to return the party to the adventure scene.", this);
+                return;
+            }
+
             SceneLoader.Load(targetScene);
         }
     }

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using Zenject;
+using SharedView;
 
-public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
+public class AttackActionPanel : CanvasGroupVisibilityPanelBase, IAttackActionPanel
 {
     [SerializeField] private TMPro.TextMeshProUGUI damageText;
-    [SerializeField] private GameObject panelRoot;
     private GameViewModel _gameViewModel;
     [SerializeField] bool enableOnStart = false;
     [Inject]
@@ -15,7 +15,7 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
         {
             Debug.LogError("[AttackActionPanel] Missing GameViewModel binding. Panel disabled.", this);
             enabled = false;
-            if (panelRoot != null) panelRoot.SetActive(false);
+            HidePanelImmediate();
             return;
         }
 
@@ -25,25 +25,25 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     private void ToggleStartingVivsibilty()
     {
         if (enableOnStart)
-            Show();
+            ShowPanelImmediate();
         else
-            Hide();
+            HidePanelImmediate();
     }
 
     private void Show()
     {
-        gameObject.SetActive(true);
+        ShowPanel();
     }
     private void Show(DamageContextPreview info)
     {
-        panelRoot.SetActive(true);
+        ShowPanel();
         damageText.text = $"Damage: {info.Damage.DamageAmount} \nDied: {info.Damage.DieAmount}";
         // Можно добавить отображение статуса, дебаффов и т.п.
     }
 
     private void Hide()
     {
-        panelRoot.SetActive(false);
+        HidePanel();
     }
 
     private void OnActionPreviewChanged(DamageContextPreview preview)
@@ -60,11 +60,13 @@ public class AttackActionPanel : MonoBehaviour, IAttackActionPanel
     
    
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (_gameViewModel != null)
         {
             _gameViewModel.DamageContextPreviewChanged -= OnActionPreviewChanged;
         }
+
+        base.OnDestroy();
     }
 }

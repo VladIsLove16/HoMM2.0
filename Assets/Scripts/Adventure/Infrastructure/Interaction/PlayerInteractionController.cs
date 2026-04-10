@@ -11,7 +11,7 @@ namespace Adventure.Infrastructure.Interaction
         private const string DefaultInteractPrompt = "Interact";
         private const string DefaultCollectPrompt = "Collect";
 
-        [Inject] private AdventureInput playerInput;
+        [Inject(Optional = true)] private AdventureInput playerInput;
         [SerializeField] private Camera playerCamera;
         [SerializeField] private float interactDistance = 2f;
         [SerializeField] private LayerMask interactionMask = ~0;
@@ -50,11 +50,6 @@ namespace Adventure.Infrastructure.Interaction
             if (!enabled)
             {
                 Debug.LogWarning("PlayerInteractionController not enabled!");
-                return;
-            }
-            if(playerInput == null)
-            {
-                Debug.LogWarning("adventureCharacterInput is not ready!");
                 return;
             }
 

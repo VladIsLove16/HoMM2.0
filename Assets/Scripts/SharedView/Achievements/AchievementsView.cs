@@ -1,63 +1,50 @@
-using System;
 using System.Collections.Generic;
-using Game.Achievements;
-using UniRx;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 using Zenject;
-using TMPro;
-using UnityEngine.Localization;
+using SharedView;
 
 namespace Game.Achievements
 {
-    public sealed class AchievementsView : MonoBehaviour
+    public sealed class AchievementsView : CanvasGroupPanelViewBase<AchievementsViewModel>
     {
-        [SerializeField] private GameObject root;
         [SerializeField] private AchievementEntryView itemPrefab;
         [SerializeField] private Transform listRoot;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button closeButton;
+
         [Header("Empty State")]
         [SerializeField] private GameObject emptyStateRoot;
         [SerializeField] private TMP_Text emptyStateLabel;
         [SerializeField] private LocalizedString emptyStateLocalized;
-        [SerializeField, TextArea] private string emptyStateFallback = "Ошибка загрузки достижений.";
+        [SerializeField, TextArea] private string emptyStateFallback = "Error loading achievements.";
 
-        private AchievementsViewModel _viewModel;
         private readonly Dictionary<AchievementEntryViewModel, AchievementEntryView> _views = new();
-        private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
         [Inject]
-        public void Construct(AchievementsViewModel viewModel)
+        public override void Construct(AchievementsViewModel viewModel)
         {
-            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-            Bind();
+            base.Construct(viewModel);
         }
 
-        public void Setup(GameObject rootObject, AchievementEntryView prefab, Transform rootList, Button reset, Button close)
+        public void Setup(AchievementEntryView prefab, Transform rootList, Button reset, Button close)
         {
-            root = rootObject;
             itemPrefab = prefab;
             listRoot = rootList;
             resetButton = reset;
             closeButton = close;
         }
 
-        private void Bind()
+        public void Toggle()
         {
-            if (_viewModel == null)
-                return;
+            ViewModel?.Toggle();
+        }
 
-            _subscriptions.Clear();
+        protected override void OnInitialized()
+        {
             _views.Clear();
-
-            _subscriptions.Add(_viewModel.IsOpen.Subscribe(isOpen =>
-            {
-                if (root != null)
-                {
-                    root.SetActive(isOpen);
-                }
-            }));
 
             if (resetButton != null)
             {
@@ -74,21 +61,38 @@ namespace Game.Achievements
             BuildList();
         }
 
+        protected override void OnDestroy()
+        {
+            if (resetButton != null)
+            {
+                resetButton.onClick.RemoveListener(OnResetClicked);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveListener(OnCloseClicked);
+            }
+
+            base.OnDestroy();
+        }
+
         private void BuildList()
         {
-            if (itemPrefab == null || listRoot == null || _viewModel == null)
+            if (itemPrefab == null || listRoot == null || ViewModel == null)
                 return;
 
             foreach (Transform child in listRoot)
             {
                 Destroy(child.gameObject);
             }
+
             _views.Clear();
 
-            foreach (var entry in _viewModel.Entries)
+            foreach (var entry in ViewModel.Entries)
             {
                 if (entry == null)
                     continue;
+
                 var instance = Instantiate(itemPrefab, listRoot);
                 instance.Bind(entry);
                 _views[entry] = instance;
@@ -97,21 +101,14 @@ namespace Game.Achievements
             UpdateEmptyState();
         }
 
-        public void Toggle()
-        {
-            if (_viewModel == null)
-                return;
-            _viewModel.Toggle();
-        }
-
         private void OnResetClicked()
         {
-            _viewModel?.ResetAll();
+            ViewModel?.ResetAll();
         }
 
         private void OnCloseClicked()
         {
-            _viewModel?.Close();
+            ViewModel?.Close();
         }
 
         private void UpdateEmptyState()
@@ -121,6 +118,7 @@ namespace Game.Achievements
             {
                 emptyStateRoot.SetActive(!hasEntries);
             }
+
             if (!hasEntries && emptyStateLabel != null)
             {
                 emptyStateLabel.text = ResolveLocalized(emptyStateLocalized, emptyStateFallback);
@@ -137,11 +135,6 @@ namespace Game.Achievements
             }
 
             return fallback ?? string.Empty;
-        }
-
-        private void OnDisable()
-        {
-            _subscriptions.Clear();
         }
     }
 }

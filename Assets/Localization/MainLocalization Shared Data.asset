@@ -188,6 +188,78 @@ MonoBehaviour:
     m_Key: Settings.Exit
     m_Metadata:
       m_Items: []
+  - m_Id: 37892145387397120
+    m_Key: Time is money, friend!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39502227330031616
+    m_Key: MainMenu.Singleplayer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39502323815800832
+    m_Key: MainMenu.Multiplayer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39503082015940608
+    m_Key: MainMenu.Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39504093271023616
+    m_Key: MainMenu.Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39505000000000000
+    m_Key: UI.SharedAdventure
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39506000000000000
+    m_Key: UI.DirectGridFight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39507000000000000
+    m_Key: UI.Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39508000000000000
+    m_Key: Lobby.DirectGridFightToggle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39509000000000000
+    m_Key: Lobby.SharedAdventureMode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39510000000000000
+    m_Key: Lobby.ChangeArmy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39511000000000000
+    m_Key: Lobby.ArmyPresetFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39512000000000000
+    m_Key: Lobby.NoArmyPreset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39540922259070976
+    m_Key: MainMenu.GameStarted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39541081927835648
+    m_Key: MainMenu.SharedAdventureMode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39541740186099712
+    m_Key: Lobby.ArmyPreset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39543813883551744
+    m_Key: Lobby.NoArmypreset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40936773179138048
+    m_Key: UI.Achievements
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

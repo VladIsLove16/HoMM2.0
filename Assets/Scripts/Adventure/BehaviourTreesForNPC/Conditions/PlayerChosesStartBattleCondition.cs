@@ -11,7 +11,7 @@ public partial class PlayerChosesStartBattleCondition : Condition
 
     public override bool IsTrue()
     {
-        return Yesorno == DialogueChoiceAction.StartBattle;
+        return Yesorno == DialogueChoiceAction.StartBattle || Yesorno == DialogueChoiceAction.StartOnlineBattle;
     }
 
     public override void OnStart()

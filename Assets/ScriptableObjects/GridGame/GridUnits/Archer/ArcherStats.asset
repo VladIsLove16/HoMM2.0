@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Health: 12
   maxHealth: 12
-  Damage: 5
+  Damage: 0
   SpellPower: 0
   Offense: 2
   Defense: 1
   MoveSpeed: 3
   AttackRange: 5
+  AllowAdjacentRanged: 1
   CanFly: 0
   invulnerableEffects: 

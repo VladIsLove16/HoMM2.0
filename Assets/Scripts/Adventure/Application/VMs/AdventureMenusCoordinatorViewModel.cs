@@ -58,11 +58,12 @@ public class AdventureMenusCoordinatorViewModel
         }
     }
 
-    internal void CloseFirst()
+    internal void CloseTopmost()
     {
         if (!_activeMenus.Any())
             return;
-        var menu = _activeMenus.First();
+
+        var menu = _activeMenus[^1];
         menu.Close();
         // Close() will trigger OnMenuStateChanged, which removes/pop mode.
     }

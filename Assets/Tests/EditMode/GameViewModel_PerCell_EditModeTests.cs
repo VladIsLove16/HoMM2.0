@@ -77,6 +77,7 @@ namespace Tests.EditMode.ViewModels
             public TurnService TurnService { get; } = new(new TurnQueue());
             public TurnStateViewModel TurnState { get; }
             public GameViewModel ViewModel { get; }
+            public GameConfigurationService GameConfigurationService { get; }
             public UnitModel BlueUnit { get; private set; }
             public UnitModel RedUnit { get; private set; }
 
@@ -84,6 +85,9 @@ namespace Tests.EditMode.ViewModels
             {
                 Width = width;
                 Height = height;
+                GameConfigurationService = ScriptableObject.CreateInstance<GameConfigurationService>();
+                GameConfigurationService.SetTeam(Team.Blue);
+                GameConfigurationService.SetBattlefieldBottomTeam(Team.Blue);
 
                 var stats = ScriptableObject.CreateInstance<UnitStats>();
                 stats.MaxHealth = 10;
@@ -97,7 +101,7 @@ namespace Tests.EditMode.ViewModels
                 GameModel = new GameModel(factory, MovementSystem);
                 ActionResolver = new ActionResolver(GameModel, MovementSystem);
                 TurnState = new TurnStateViewModel(TurnService);
-                ViewModel = new GameViewModel(GameModel, MovementSystem, _commandExecutor, TurnState, ActionResolver, new TestGridRenderSettings());
+                ViewModel = new GameViewModel(GameModel, MovementSystem, _commandExecutor, TurnState, ActionResolver, GameConfigurationService, new TestGridRenderSettings());
 
                 GameModel.InitializeGrid(Width, Height);
                 GameModel.SpawnUnit(new UnitSpawnParams(0, 0, UnitType.Archer, 1, Team.Blue));
@@ -128,6 +132,11 @@ namespace Tests.EditMode.ViewModels
             }
 
             public bool Execute(ActionType type, ActionContext ctx)
+            {
+                return true;
+            }
+
+            public bool TryDeployUnit(Vector2Int fromCell, Vector2Int toCell)
             {
                 return true;
             }

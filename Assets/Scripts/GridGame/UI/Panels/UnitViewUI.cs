@@ -20,7 +20,6 @@ public class UnitViewUI : MonoBehaviour, IDisposable
     private CompositeDisposable _disposables = new();
     private Camera _camera;
     private Sequence _damagePopupSequence;
-    private Vector3 _damagePopupBaseLocalPosition;
 
     public virtual void Init(UnitViewModel vm)
     {
@@ -48,7 +47,6 @@ public class UnitViewUI : MonoBehaviour, IDisposable
             .AddTo(_disposables);
 
         healthBar.Init();
-        CacheDamagePopupDefaults();
 
         UpdateHealth();
         UpdateAmount();
@@ -102,16 +100,12 @@ public class UnitViewUI : MonoBehaviour, IDisposable
             transform.rotation = _camera.transform.rotation;
         }
     }
-
-    private void CacheDamagePopupDefaults()
+    [ContextMenu("Play")]
+    private void Play()
     {
-        if (damagePopupText == null)
-            return;
-
-        _damagePopupBaseLocalPosition = damagePopupText.transform.localPosition;
-        SetDamagePopupVisible(false, true, 0f);
+        DamageContext damageContext = new(0, DamageType.pure,null);
+        ShowDamagePopup(damageContext);
     }
-
     private void ShowDamagePopup(DamageContext context)
     {
         if (damagePopupText == null || context == null)
@@ -119,29 +113,26 @@ public class UnitViewUI : MonoBehaviour, IDisposable
 
         _damagePopupSequence?.Kill();
 
+        var baseLocalPosition = damagePopupText.transform.localPosition;
+
         damagePopupText.text = $"-{context.DamageAmount}";
-        damagePopupText.transform.localPosition = _damagePopupBaseLocalPosition;
-        SetDamagePopupVisible(true, true, 0f);
+        damagePopupText.alpha = 0f;
+        damagePopupText.gameObject.SetActive(true);
+        damagePopupText.transform.localPosition = baseLocalPosition;
 
         _damagePopupSequence = DOTween.Sequence()
             .Append(DOTween.To(() => damagePopupText.alpha, value => damagePopupText.alpha = value, 1f, damagePopupFadeIn))
-            .Join(damagePopupText.transform.DOLocalMoveY(_damagePopupBaseLocalPosition.y + damagePopupMoveUp, damagePopupFadeIn))
+            .Join(damagePopupText.transform.DOLocalMoveY(baseLocalPosition.y + damagePopupMoveUp, damagePopupFadeIn))
             .AppendInterval(damagePopupHold)
             .Append(DOTween.To(() => damagePopupText.alpha, value => damagePopupText.alpha = value, 0f, damagePopupFadeOut))
-            .OnComplete(() => SetDamagePopupVisible(false, true, 0f));
-    }
+            .OnComplete(() =>
+            {
+                if (damagePopupText == null)
+                    return;
 
-    private void SetDamagePopupVisible(bool visible, bool resetPosition, float alpha)
-    {
-        if (damagePopupText == null)
-            return;
-
-        if (resetPosition)
-        {
-            damagePopupText.transform.localPosition = _damagePopupBaseLocalPosition;
-        }
-
-        damagePopupText.alpha = alpha;
-        damagePopupText.gameObject.SetActive(visible);
+                damagePopupText.transform.localPosition = baseLocalPosition;
+                damagePopupText.alpha = 0f;
+                damagePopupText.gameObject.SetActive(false);
+            });
     }
 }

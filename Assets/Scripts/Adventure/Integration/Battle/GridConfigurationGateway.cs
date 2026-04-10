@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using Adventure.Infrastructure.State;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Adventure.Integration.Battle
 {
-
     public sealed class GridConfigurationGateway : MonoBehaviour, IGridConfigurationGateway
     {
+        private static GridConfigurationGateway _instance;
+
         [SerializeField] private GameConfigurationService configurationService;
         [SerializeField] private SceneLoader.Scene battleScene = SceneLoader.Scene.GridFight;
         [SerializeField] private int gridWidth = 10;
@@ -23,12 +25,21 @@ namespace Adventure.Integration.Battle
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
-            if (_runtimeContent == null)
+            if (_instance != null && _instance != this)
             {
-                _runtimeContent = ScriptableObject.CreateInstance<GridContentEntrySO>();
-                _runtimeContent.name = "RuntimeBattleConfig";
+                Destroy(gameObject);
+                return;
             }
+
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+            EnsureRuntimeContent();
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance == this)
+                _instance = null;
         }
 
         public void PrepareBattle(BattleSetupPayload payload, ArmyFormationResolver formationResolver)
@@ -39,12 +50,7 @@ namespace Adventure.Integration.Battle
                 return;
             }
 
-            if (!_runtimeContent)
-            {
-                _runtimeContent = ScriptableObject.CreateInstance<GridContentEntrySO>();
-                _runtimeContent.name = "RuntimeBattleConfig";
-            }
-
+            EnsureRuntimeContent();
             _lastPayload = payload;
 
             _runtimeContent.Width = Mathf.Max(1, gridWidth);
@@ -53,8 +59,13 @@ namespace Adventure.Integration.Battle
 
             configurationService.SetAvailableConfigurations(new List<GridContentEntrySO> { _runtimeContent });
             configurationService.SetSelectedConfiguration(0);
-            configurationService.SetGameMode(GameMode.SinglePlayer);
-            configurationService.SetTeam(playerTeam);
+            configurationService.SetGameMode(NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening
+                ? GameMode.Multiplayer
+                : configurationService.CurrentGameMode);
+            configurationService.SetTeam(payload.LocalTeam != Team.None ? payload.LocalTeam : ResolveConfiguredPlayerTeam());
+            configurationService.SetBattlefieldBottomTeam(payload.BattlefieldBottomTeam != Team.None
+                ? payload.BattlefieldBottomTeam
+                : ResolveConfiguredPlayerTeam());
 
             BattleStateCache.SetReturnScene(payload.ReturnScene);
         }
@@ -62,15 +73,17 @@ namespace Adventure.Integration.Battle
         private List<GridContentEntrySO.UnitContent> BuildUnitContents(BattleSetupPayload payload, ArmyFormationResolver resolver)
         {
             var contents = new List<GridContentEntrySO.UnitContent>();
+            var bottomTeam = payload.BattlefieldBottomTeam != Team.None ? payload.BattlefieldBottomTeam : ResolveConfiguredPlayerTeam();
+            var topTeam = ResolveEnemyTeam(bottomTeam);
             if (resolver != null)
             {
-                contents.AddRange(resolver.CreatePlayerFormation(payload.Armies.PlayerUnits, gridWidth));
-                contents.AddRange(resolver.CreateEnemyFormation(payload.Armies.EnemyUnits, gridWidth));
+                contents.AddRange(OverrideTeam(resolver.CreatePlayerFormation(payload.Armies.PlayerUnits, gridWidth), bottomTeam));
+                contents.AddRange(OverrideTeam(resolver.CreateEnemyFormation(payload.Armies.EnemyUnits, gridWidth), topTeam));
             }
             else
             {
-                contents.AddRange(CreateFlatFormation(payload.Armies.PlayerUnits, gridWidth, 0, Team.Blue));
-                contents.AddRange(CreateFlatFormation(payload.Armies.EnemyUnits, gridWidth, gridHeight - 1, Team.Red));
+                contents.AddRange(CreateFlatFormation(payload.Armies.PlayerUnits, gridWidth, 0, bottomTeam));
+                contents.AddRange(CreateFlatFormation(payload.Armies.EnemyUnits, gridWidth, gridHeight - 1, topTeam));
             }
 
             return contents;
@@ -101,6 +114,48 @@ namespace Adventure.Integration.Battle
                 };
 
                 x = (x + 1) % Mathf.Max(1, width);
+            }
+        }
+
+        private void EnsureRuntimeContent()
+        {
+            if (_runtimeContent != null)
+                return;
+
+            _runtimeContent = ScriptableObject.CreateInstance<GridContentEntrySO>();
+            _runtimeContent.name = "RuntimeBattleConfig";
+        }
+
+        private Team ResolveConfiguredPlayerTeam()
+        {
+            if (configurationService != null && configurationService.Team != Team.None)
+                return configurationService.Team;
+
+            return playerTeam != Team.None ? playerTeam : Team.Blue;
+        }
+
+        private static Team ResolveEnemyTeam(Team localTeam)
+        {
+            return localTeam switch
+            {
+                Team.Red => Team.Blue,
+                Team.Green => Team.Yellow,
+                Team.Yellow => Team.Green,
+                _ => Team.Red
+            };
+        }
+
+        private static IEnumerable<GridContentEntrySO.UnitContent> OverrideTeam(
+            IEnumerable<GridContentEntrySO.UnitContent> contents,
+            Team team)
+        {
+            if (contents == null)
+                yield break;
+
+            foreach (var content in contents)
+            {
+                content.Team = team;
+                yield return content;
             }
         }
     }

@@ -68,6 +68,11 @@ public class InGameUI_TurnState_EditModeTests
         {
             StartBattleInvoked = true;
         }
+
+        public bool TryDeployUnit(Vector2Int fromCell, Vector2Int toCell)
+        {
+            return true;
+        }
     }
 
     private sealed class StubTurnState : ITurnStateViewModel
