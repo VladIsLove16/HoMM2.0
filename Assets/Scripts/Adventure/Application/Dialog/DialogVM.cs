@@ -15,24 +15,22 @@ namespace Adventure.Application.Dialog
     {
         private readonly IDialogRepository _repository;
         private readonly IDialogStateStore _stateStore;
-        private readonly PlayerChosenDialogOption _playerChoiceEventChannel;
         private readonly ReactiveProperty<DialogueNode> _currentNode = new ReactiveProperty<DialogueNode>();
         private readonly ReactiveProperty<ArmyLineupSO> _enenyArmy = new ReactiveProperty<ArmyLineupSO>();
         private readonly IArmyLineupFormatter _armyFormatter;
         private DialogueSession _session;
         private string _activeDialogId;
+        public string ActiveDialogId => _activeDialogId;
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
         [Inject] private BattleLaunchService battleLaunchService;
         public DialogVM(
             IDialogRepository repository,
             IDialogStateStore stateStore,
-            PlayerChosenDialogOption playerChoiceEventChannel = null,
             IArmyLineupFormatter armyFormatter = null)
         {
             _repository = repository;
             _stateStore = stateStore;
-            _playerChoiceEventChannel = playerChoiceEventChannel;
             _armyFormatter = armyFormatter ?? new DefaultArmyLineupFormatter();
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
@@ -87,6 +85,8 @@ namespace Adventure.Application.Dialog
                 throw new InvalidOperationException($"Choice '{choiceId}' not found");
 
             var action = selectedChoice.Action;
+            ChoiceActionTriggered?.Invoke(action);
+
             if (action == DialogueChoiceAction.StartBattle)
             {
                 StartBattle(selectedChoice);
@@ -98,15 +98,16 @@ namespace Adventure.Application.Dialog
             else if (action == DialogueChoiceAction.EndDialogue)
             {
                 _session.SelectChoice(choiceId);
-                EndDialog();
+                if (_isOpen.Value)
+                {
+                    Close();
+                }
             }
             else
             {
                 _session.SelectChoice(choiceId);
                 ContinueDialog();
             }
-            _playerChoiceEventChannel?.SendEventMessage(action);
-            ChoiceActionTriggered?.Invoke(action);
         }
 
         private void ContinueDialog()
@@ -141,23 +142,25 @@ namespace Adventure.Application.Dialog
             battleLaunchService.LaunchOnline(context);
         }
 
-        private void EndDialog()
+        public void Close()
         {
-            _isOpen.SetValueAndForceNotify(false);
+            if (!_isOpen.Value && _session == null && _currentNode.Value == null && _enenyArmy.Value == null && string.IsNullOrEmpty(_activeDialogId))
+            {
+                return;
+            }
+
+            var dialogId = _activeDialogId;
             _session = null;
             _currentNode.SetValueAndForceNotify(null);
             _enenyArmy.SetValueAndForceNotify(null);
-            _activeDialogId = null;
-        }
-        public void Close()
-        {
-            _session = null;
-            _currentNode.SetValueAndForceNotify(null);
-            if (!string.IsNullOrEmpty(_activeDialogId))
+
+            if (!string.IsNullOrEmpty(dialogId))
             {
-                _stateStore?.ClearState(_activeDialogId);
+                _stateStore?.ClearState(dialogId);
             }
+
             _isOpen.SetValueAndForceNotify(false);
+            _activeDialogId = null;
         }
 
         public void Open()

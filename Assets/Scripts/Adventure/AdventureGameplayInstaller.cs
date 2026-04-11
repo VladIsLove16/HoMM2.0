@@ -63,10 +63,6 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private AdventureDevTools devTools;
     [Header("Achievements")]
     [SerializeField] private AchievementCatalog achievementCatalog;
-    [Header("Behavior Graph Events")]
-    [SerializeField] private PlayerChosenDialogOption playerChosenDialogOptionChannel;
-    [SerializeField] private BattleFinishedChannel battleFinishedChannel;
-
     public override void InstallBindings()
     {
         BindDatabases();
@@ -88,7 +84,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     private void BindsVMS()
     {
         Container.BindInterfacesAndSelfTo<MushroomBookViewModel>().AsSingle();
-        Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle().WithArguments(playerChosenDialogOptionChannel);
+        Container.BindInterfacesAndSelfTo<DialogVM>().AsSingle();
         Container.BindInterfacesAndSelfTo<AdventureGameSettingsViewModel>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<HelpMenuViewModel>().AsSingle();
         Container.Bind<AdventureMenusCoordinatorViewModel>().AsSingle();
@@ -153,7 +149,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();
         Container.Bind<OnlineBattleLaunchService>().AsSingle();
         Container.Bind<BattleLaunchService>().AsSingle();
-        Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().WithArguments(battleFinishedChannel).NonLazy();
+        Container.BindInterfacesTo<AdventureStateBootstrap>().AsSingle().NonLazy();
         Container.BindInterfacesAndSelfTo<AdventureMultiplayerRuntimeBootstrap>()
             .AsSingle()
             .WithArguments(networkPlayerPrefab, multiplayerSpawnPoints ?? Array.Empty<Transform>())

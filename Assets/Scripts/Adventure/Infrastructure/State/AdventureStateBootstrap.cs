@@ -11,19 +11,16 @@ namespace Adventure.Infrastructure.State
         private readonly DialogVM _dialogVM;
         private readonly ILocalAdventurePlayerProvider _localPlayerProvider;
         private readonly NpcBehaviorGraphRegistry _behaviorGraphRegistry;
-        private readonly BattleFinishedChannel _battleFinishedChannel;
         private bool _playerTransformApplied;
 
         public AdventureStateBootstrap(
             DialogVM dialogVM,
             ILocalAdventurePlayerProvider localPlayerProvider,
-            NpcBehaviorGraphRegistry behaviorGraphRegistry,
-            BattleFinishedChannel battleFinishedChannel = null)
+            NpcBehaviorGraphRegistry behaviorGraphRegistry)
         {
             _dialogVM = dialogVM;
             _localPlayerProvider = localPlayerProvider;
             _behaviorGraphRegistry = behaviorGraphRegistry;
-            _battleFinishedChannel = battleFinishedChannel;
         }
 
         public void Initialize()
@@ -92,7 +89,6 @@ namespace Adventure.Infrastructure.State
             if (outcome != BattleOutcome.Unknown)
             {
                 _behaviorGraphRegistry?.NotifyBattleOutcome(outcome);
-                _battleFinishedChannel?.SendEventMessage(outcome);
             }
         }
     }

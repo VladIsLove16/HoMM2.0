@@ -1,6 +1,9 @@
+using Adventure.Domain.Dialog;
+using Adventure.Infrastructure.Movement;
 using Adventure.Infrastructure.State;
 using Unity.Behavior;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
@@ -8,57 +11,81 @@ namespace Adventure.Infrastructure.Dialog
     [DisallowMultipleComponent]
     public sealed class NpcBehaviorGraphBridge : MonoBehaviour
     {
+        private const string DebugPrefix = "[NpcBehaviorGraphBridge]";
+
         private static class BlackboardKeys
         {
-            public const string PlayerTransform = "PlayerTransform";
-            public const string LookDistance = "LookDistance";
-            public const string IsPlayerInDialog = "IsPlayerInDialog";
-            public const string DialogueChoiceOpened = "DialogueChoiceOpened";
-            public const string BattleRequested = "BattleRequested";
-            public const string BattleOutcome = "New BattleOutcome";
-            public const string DialogueEventChannel = "New DialogueEventChannel";
-            public const string ChoiceEventChannel = "New ChoiceEventChannel";
-            public const string BattleResultChannel = "New BattleResultChannel";
+            public const string PlayerMovementController = "Player Movement Controller";
+            public const string TalkingDistance = "TalkingDistance";
+            public const string ReactedToReachingTalkingDistance = "Reacted to reaching talking distance";
+            public const string TimesPlayerClosedDialog = "Times player closed dialog";
+            public const string State = "State";
+            public const string BattleOutcome = "Last BattleOutcome";
+            public const string LastChosenDialogOption = "Last chosen dialog option";
+            public const string DialogueEventChannel = "New Player  talking with npc";
+            public const string ChoiceEventChannel = "New Player chosen dialog option";
+            public const string BattleResultChannel = "BattleFinishedChannel";
         }
 
         [SerializeField] private BehaviorGraphAgent agent;
         [SerializeField, Min(0.5f)] private float lookDistance = 5f;
         [Header("Event Channels")]
-        [SerializeField] private EventChannel dialogueEventChannel;
-        [SerializeField] private EventChannel choiceEventChannel;
-        [SerializeField] private EventChannel battleResultChannel;
+        [Tooltip("Template asset. A dedicated runtime instance is cloned per NPC bridge.")]
+        [FormerlySerializedAs("dialogueEventChannelTemplate")]
+        [FormerlySerializedAs("dialogueEventChannel")]
+        [SerializeField] private PlayerTalkingWithNpcStateChannel dialogStateChannelTemplate;
+        [Tooltip("Template asset. A dedicated runtime instance is cloned per NPC bridge.")]
+        [FormerlySerializedAs("choiceEventChannel")]
+        [SerializeField] private PlayerChosenDialogOption choiceEventChannelTemplate;
+        [Tooltip("Template asset. A dedicated runtime instance is cloned per NPC bridge.")]
+        [FormerlySerializedAs("battleResultChannel")]
+        [SerializeField] private BattleFinishedChannel battleResultChannelTemplate;
         [Header("Presentation")]
         [SerializeField] private NpcAnimationController animationController;
 
-        private BlackboardVariable<Transform> _playerTransformVariable;
-        private BlackboardVariable<float> _lookDistanceVariable;
-        private BlackboardVariable<bool> _isPlayerInDialogVariable;
-        private BlackboardVariable<bool> _dialogueChoiceVariable;
-        private BlackboardVariable<bool> _battleRequestedVariable;
+        private BlackboardVariable<PlayerMovementController> _playerMovementControllerVariable;
+        private BlackboardVariable<float> _talkingDistanceVariable;
+        private BlackboardVariable<bool> _reactedToReachingTalkingDistanceVariable;
+        private BlackboardVariable<int> _timesPlayerClosedDialogVariable;
+        private BlackboardVariable<NPCState> _stateVariable;
         private BlackboardVariable<BattleOutcome> _battleOutcomeVariable;
-        private BlackboardVariable<EventChannel> _dialogueEventChannelVariable;
-        private BlackboardVariable<EventChannel> _choiceEventChannelVariable;
-        private BlackboardVariable<EventChannel> _battleResultChannelVariable;
+        private BlackboardVariable<DialogueChoiceAction> _lastChosenDialogOptionVariable;
+        private BlackboardVariable<PlayerTalkingWithNpcStateChannel> _dialogStateChannelVariable;
+        private BlackboardVariable<PlayerChosenDialogOption> _choiceEventChannelVariable;
+        private BlackboardVariable<BattleFinishedChannel> _battleResultChannelVariable;
         private bool _variablesBound;
         private string _dialogId;
+        private PlayerTalkingWithNpcStateChannel _runtimeDialogStateChannel;
+        private PlayerChosenDialogOption _runtimeChoiceEventChannel;
+        private BattleFinishedChannel _runtimeBattleResultChannel;
 
         private void Awake()
         {
             agent = GetComponent<BehaviorGraphAgent>();
 
+            CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
             ApplyStaticConfiguration();
         }
 
         private void Start()
         {
+            CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
             ApplyStaticConfiguration();
         }
 
         private void OnEnable()
         {
+            CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
+        }
+
+        private void OnDestroy()
+        {
+            DestroyRuntimeEventChannel(_runtimeDialogStateChannel);
+            DestroyRuntimeEventChannel(_runtimeChoiceEventChannel);
+            DestroyRuntimeEventChannel(_runtimeBattleResultChannel);
         }
 
         private void OnValidate()
@@ -73,46 +100,67 @@ namespace Adventure.Infrastructure.Dialog
             _dialogId = dialogId;
         }
 
-        public void ConfigurePlayer(Transform playerTransform)
+        public void ConfigurePlayer(PlayerMovementController playerMovementController)
         {
-            AssignValue(_playerTransformVariable, BlackboardKeys.PlayerTransform, playerTransform);
+            AssignValue(_playerMovementControllerVariable, BlackboardKeys.PlayerMovementController, playerMovementController);
         }
 
         private void ApplyStaticConfiguration()
         {
-            AssignValue(_lookDistanceVariable, BlackboardKeys.LookDistance, lookDistance);
-            AssignValue(_dialogueEventChannelVariable, BlackboardKeys.DialogueEventChannel, dialogueEventChannel);
-            AssignValue(_choiceEventChannelVariable, BlackboardKeys.ChoiceEventChannel, choiceEventChannel);
-            AssignValue(_battleResultChannelVariable, BlackboardKeys.BattleResultChannel, battleResultChannel);
+            AssignValue(_talkingDistanceVariable, BlackboardKeys.TalkingDistance, lookDistance);
+            AssignValue(_dialogStateChannelVariable, BlackboardKeys.DialogueEventChannel, _runtimeDialogStateChannel ?? dialogStateChannelTemplate);
+            AssignValue(_choiceEventChannelVariable, BlackboardKeys.ChoiceEventChannel, _runtimeChoiceEventChannel ?? choiceEventChannelTemplate);
+            AssignValue(_battleResultChannelVariable, BlackboardKeys.BattleResultChannel, _runtimeBattleResultChannel ?? battleResultChannelTemplate);
         }
 
         public void NotifyDialogOpened()
         {
-            AssignValue(_isPlayerInDialogVariable, BlackboardKeys.IsPlayerInDialog, true);
-            ResolveDialogueChannel()?.SendEventMessage();
+            ResolveDialogStateChannel()?.SendEventMessage();
             animationController?.PlayAnimation(NpcAnimationType.Greeting);
         }
 
         public void NotifyDialogClosed()
         {
-            AssignValue(_isPlayerInDialogVariable, BlackboardKeys.IsPlayerInDialog, false);
-            AssignValue(_dialogueChoiceVariable, BlackboardKeys.DialogueChoiceOpened, false);
-            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, false);
+            Debug.Log(
+                $"{DebugPrefix} NotifyDialogClosed start npc='{name}' dialog='{_dialogId}' " +
+                $"reactedBound={_reactedToReachingTalkingDistanceVariable != null} " +
+                $"stateBound={_stateVariable != null} " +
+                $"timesClosedBound={_timesPlayerClosedDialogVariable != null}",
+                this);
+
+            var reactedAssigned = AssignValue(
+                _reactedToReachingTalkingDistanceVariable,
+                BlackboardKeys.ReactedToReachingTalkingDistance,
+                true);
+            var timesClosedAssigned = IncrementValue(
+                _timesPlayerClosedDialogVariable,
+                BlackboardKeys.TimesPlayerClosedDialog);
+            var stateAssigned = AssignValue(_stateVariable, BlackboardKeys.State, NPCState.None);
+
+            ResolveDialogStateChannel()?.SendEventMessage();
             animationController?.PlayAnimation(NpcAnimationType.Bye);
+
+            Debug.Log(
+                $"{DebugPrefix} NotifyDialogClosed end npc='{name}' dialog='{_dialogId}' " +
+                $"reactedAssigned={reactedAssigned} reactedValue={FormatValue(_reactedToReachingTalkingDistanceVariable)} " +
+                $"stateAssigned={stateAssigned} stateValue={FormatValue(_stateVariable)} " +
+                $"timesClosedAssigned={timesClosedAssigned} timesClosedValue={FormatValue(_timesPlayerClosedDialogVariable)}",
+                this);
         }
 
         public void NotifyChoiceWindowState(bool isOpen)
         {
-            AssignValue(_dialogueChoiceVariable, BlackboardKeys.DialogueChoiceOpened, isOpen);
-            if (isOpen)
-            {
-                ResolveChoiceChannel()?.SendEventMessage();
-            }
+            _ = isOpen;
+        }
+
+        public void NotifyChoiceAction(DialogueChoiceAction action)
+        {
+            AssignValue(_lastChosenDialogOptionVariable, BlackboardKeys.LastChosenDialogOption, action);
+            ResolveChoiceChannel()?.SendEventMessage(action);
         }
 
         public void NotifyBattleRequested()
         {
-            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, true);
             animationController?.PlayAnimation(NpcAnimationType.BattleStart);
         }
 
@@ -124,8 +172,7 @@ namespace Adventure.Infrastructure.Dialog
             }
 
             AssignValue(_battleOutcomeVariable, BlackboardKeys.BattleOutcome, outcome);
-            ResolveBattleResultChannel()?.SendEventMessage();
-            AssignValue(_battleRequestedVariable, BlackboardKeys.BattleRequested, false);
+            ResolveBattleResultChannel()?.SendEventMessage(outcome);
 
             if (animationController == null)
                 return;
@@ -143,13 +190,14 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            BindVariable(BlackboardKeys.PlayerTransform, ref _playerTransformVariable);
-            BindVariable(BlackboardKeys.LookDistance, ref _lookDistanceVariable);
-            BindVariable(BlackboardKeys.IsPlayerInDialog, ref _isPlayerInDialogVariable);
-            BindVariable(BlackboardKeys.DialogueChoiceOpened, ref _dialogueChoiceVariable);
-            BindVariable(BlackboardKeys.BattleRequested, ref _battleRequestedVariable);
+            BindVariable(BlackboardKeys.PlayerMovementController, ref _playerMovementControllerVariable);
+            BindVariable(BlackboardKeys.TalkingDistance, ref _talkingDistanceVariable);
+            BindVariable(BlackboardKeys.ReactedToReachingTalkingDistance, ref _reactedToReachingTalkingDistanceVariable);
+            BindVariable(BlackboardKeys.TimesPlayerClosedDialog, ref _timesPlayerClosedDialogVariable);
+            BindVariable(BlackboardKeys.State, ref _stateVariable);
             BindVariable(BlackboardKeys.BattleOutcome, ref _battleOutcomeVariable);
-            BindVariable(BlackboardKeys.DialogueEventChannel, ref _dialogueEventChannelVariable);
+            BindVariable(BlackboardKeys.LastChosenDialogOption, ref _lastChosenDialogOptionVariable);
+            BindVariable(BlackboardKeys.DialogueEventChannel, ref _dialogStateChannelVariable);
             BindVariable(BlackboardKeys.ChoiceEventChannel, ref _choiceEventChannelVariable);
             BindVariable(BlackboardKeys.BattleResultChannel, ref _battleResultChannelVariable);
 
@@ -169,46 +217,95 @@ namespace Adventure.Infrastructure.Dialog
             }
         }
 
-        private void AssignValue<T>(BlackboardVariable<T> variable, string variableKey, T value)
+        private bool AssignValue<T>(BlackboardVariable<T> variable, string variableKey, T value)
         {
-            if (variable != null)
+            if (variable == null)
             {
-                variable.Value = value;
+                Debug.LogWarning(
+                    $"[NpcBehaviorGraphBridge] Blackboard variable '{variableKey}' is not bound for dialog '{_dialogId}'",
+                    this);
+                return false;
             }
-            else
+
+            if (agent != null && variable.GUID.Valid && agent.SetVariableValue(variable.GUID, value))
             {
-                TrySetBlackboardValue(variableKey, value);
+                return true;
             }
+
+            variable.Value = value;
+            return true;
         }
 
-        private EventChannel ResolveDialogueChannel()
+        private bool IncrementValue(BlackboardVariable<int> variable, string variableKey)
         {
-            return _dialogueEventChannelVariable?.Value ?? dialogueEventChannel;
+            if (variable == null)
+            {
+                Debug.LogWarning(
+                    $"[NpcBehaviorGraphBridge] Blackboard variable '{variableKey}' is not bound for dialog '{_dialogId}'",
+                    this);
+                return false;
+            }
+
+            var nextValue = variable.Value + 1;
+            return AssignValue(variable, variableKey, nextValue);
         }
 
-        private EventChannel ResolveChoiceChannel()
+        private PlayerTalkingWithNpcStateChannel ResolveDialogStateChannel()
         {
-            return _choiceEventChannelVariable?.Value ?? choiceEventChannel;
+            return _runtimeDialogStateChannel ?? _dialogStateChannelVariable?.Value ?? dialogStateChannelTemplate;
         }
 
-        private EventChannel ResolveBattleResultChannel()
+        private PlayerChosenDialogOption ResolveChoiceChannel()
         {
-            return _battleResultChannelVariable?.Value ?? battleResultChannel;
+            return _runtimeChoiceEventChannel ?? _choiceEventChannelVariable?.Value ?? choiceEventChannelTemplate;
         }
 
-        private void TrySetBlackboardValue<T>(string variable, T value)
+        private BattleFinishedChannel ResolveBattleResultChannel()
         {
-            if (agent == null || string.IsNullOrEmpty(variable))
+            return _runtimeBattleResultChannel ?? _battleResultChannelVariable?.Value ?? battleResultChannelTemplate;
+        }
+
+        private void CreateRuntimeEventChannels()
+        {
+            _runtimeDialogStateChannel ??= CreateRuntimeEventChannel(dialogStateChannelTemplate, "DialogueState");
+            _runtimeChoiceEventChannel ??= CreateRuntimeEventChannel(choiceEventChannelTemplate, "Choice");
+            _runtimeBattleResultChannel ??= CreateRuntimeEventChannel(battleResultChannelTemplate, "BattleResult");
+        }
+
+        private T CreateRuntimeEventChannel<T>(T template, string channelLabel) where T : ScriptableObject
+        {
+            if (template == null)
+            {
+                return null;
+            }
+
+            var runtimeInstance = Instantiate(template);
+            var ownerName = string.IsNullOrWhiteSpace(name) ? "Npc" : name;
+            runtimeInstance.name = $"{template.name} [{ownerName}:{channelLabel}:Runtime]";
+            runtimeInstance.hideFlags = HideFlags.DontSave;
+            return runtimeInstance;
+        }
+
+        private static void DestroyRuntimeEventChannel(Object channel)
+        {
+            if (channel == null)
             {
                 return;
             }
 
-            if (!agent.SetVariableValue(variable, value))
+            if (UnityEngine.Application.isPlaying)
             {
-                Debug.LogWarning(
-                    $"[NpcBehaviorGraphBridge] Failed to set blackboard variable '{variable}' on dialog '{_dialogId}'",
-                    this);
+                Destroy(channel);
             }
+            else
+            {
+                DestroyImmediate(channel);
+            }
+        }
+
+        private static string FormatValue<T>(BlackboardVariable<T> variable)
+        {
+            return variable == null ? "null" : variable.Value?.ToString() ?? "null";
         }
     }
 }

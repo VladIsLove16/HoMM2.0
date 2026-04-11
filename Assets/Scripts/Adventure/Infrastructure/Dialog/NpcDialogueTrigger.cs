@@ -7,6 +7,7 @@ using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
+    [RequireComponent(typeof(NpcBehaviorGraphBridge))]
     public sealed class NpcDialogueTrigger : MonoBehaviour, IInteractable
     {
         [SerializeField] private DialogueGraphSO dialogue;
@@ -16,11 +17,23 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private NpcBehaviorGraphBridge behaviorGraphBridge;
         private DialogVM _dialogVM;
         private NpcBehaviorGraphRegistry _behaviorGraphRegistry;
+
+        private void Reset()
+        {
+            ResolveBehaviorBridge();
+        }
+
+        private void OnValidate()
+        {
+            ResolveBehaviorBridge();
+        }
+
         [Inject]
         public void Construct(DialogVM dialogVM, NpcBehaviorGraphRegistry behaviorGraphRegistry)
         {
             _dialogVM = dialogVM;
             _behaviorGraphRegistry = behaviorGraphRegistry;
+            ResolveBehaviorBridge();
             EnsureDialogIDExist();
             RegisterBridge();
         }
@@ -52,17 +65,42 @@ namespace Adventure.Infrastructure.Dialog
             }
 
             _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogue.Id, context.PlayerTransform);
+            _behaviorGraphRegistry?.Activate(dialogue.Id, behaviorGraphBridge);
             battleAnimationController?.PlayAnimation(NpcAnimationType.Greeting);
-            _behaviorGraphRegistry?.SetPendingDialog(dialogue.Id);
             bool isDialogStarted = _dialogVM.TryStartDialog(dialogue.Id, lineup);
             if (!isDialogStarted)
             {
                 _behaviorGraphRegistry?.ClearPending(dialogue.Id);
+                _behaviorGraphRegistry?.ClearActive(dialogue.Id, behaviorGraphBridge);
                 Debug.LogWarning($"Dialogue '{dialogue.Id}' could not be started");
                 return;
             }
+        }
 
-            _behaviorGraphRegistry?.ForceActivate(dialogue.Id);
+        public bool TryStopCurrentDialogueFromNpc()
+        {
+            if (dialogue == null)
+            {
+                Debug.LogWarning($"Dialogue asset is not set for {name}", this);
+                return false;
+            }
+
+            if (_dialogVM == null)
+            {
+                Debug.LogWarning($"DialogVM is not injected for {name}", this);
+                return false;
+            }
+
+            if (_dialogVM.ActiveDialogId != dialogue.Id)
+            {
+                return false;
+            }
+
+            ResolveBehaviorBridge();
+            _behaviorGraphRegistry?.Activate(dialogue.Id, behaviorGraphBridge);
+            battleAnimationController?.PlayAnimation(NpcAnimationType.Bye);
+            _dialogVM.Close();
+            return true;
         }
 
         public void SetLineup(ArmyLineupSO newLineup)
@@ -74,6 +112,8 @@ namespace Adventure.Infrastructure.Dialog
 
         private void RegisterBridge()
         {
+            ResolveBehaviorBridge();
+
             if (dialogue == null || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
             {
                 return;
@@ -84,12 +124,24 @@ namespace Adventure.Infrastructure.Dialog
 
         private void UnregisterBridge()
         {
+            ResolveBehaviorBridge();
+
             if (dialogue == null || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
             {
                 return;
             }
 
             _behaviorGraphRegistry.Unregister(dialogue.Id, behaviorGraphBridge);
+        }
+
+        private void ResolveBehaviorBridge()
+        {
+            if (behaviorGraphBridge != null)
+            {
+                return;
+            }
+
+            behaviorGraphBridge = GetComponent<NpcBehaviorGraphBridge>();
         }
     }
 }
