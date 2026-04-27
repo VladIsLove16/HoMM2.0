@@ -1,5 +1,4 @@
 using Adventure.Infrastructure.Dialog;
-using log4net;
 using System;
 using Unity.Behavior;
 using Unity.Properties;

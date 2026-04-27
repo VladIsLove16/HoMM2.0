@@ -70,7 +70,7 @@ public sealed class CursorView : IDisposable
     {
         if (cursorTexture == null)
         {
-            Debug.LogWarning("Attempting to set null cursor texture");
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             return;
         }
         Cursor.SetCursor(cursorTexture, Vector2.zero, CursorMode.Auto);

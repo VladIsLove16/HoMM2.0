@@ -25,7 +25,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 using Zenject;
+using Adventure.Presentation.Cursor;
 
 public sealed class AdventureGameplayInstaller : MonoInstaller
 {
@@ -57,6 +59,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private Game.Achievements.AchievementsView achievementsView;
     [SerializeField] private Game.Achievements.AchievementToastView achievementToastView;
     [SerializeField] private AdventureGameSettingsView gameSettingsView;
+    [SerializeField] private RawImage crosshairImage;
     [SerializeField] private Adventure.MushroomBook.MushroomDropPresenter mushroomDropPresenter;
     [SerializeField] private HelpMenu helpMenu;
     [SerializeField] private AudioMixer audioMixer;
@@ -116,6 +119,18 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         }
 
         Container.Bind<AdventureGameSettingsView>().FromInstance(gameSettingsView).AsSingle().NonLazy();
+        if (crosshairImage != null)
+        {
+            Container.BindInterfacesAndSelfTo<AdventureCrosshairPresenter>()
+                .AsSingle()
+                .WithArguments(crosshairImage)
+                .NonLazy();
+        }
+        else
+        {
+            Debug.LogWarning("[AdventureGameplayInstaller] Crosshair image is not assigned.", this);
+        }
+
         if (mushroomDropPresenter != null)
         {
             Container.Bind<Adventure.MushroomBook.MushroomDropPresenter>()

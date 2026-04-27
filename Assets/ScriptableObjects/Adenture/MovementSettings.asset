@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 788af8445299f364ea30acca73af515f, type: 3}
   m_Name: MovementSettings
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  moveSpeed: 10
   sprintMultiplier: 1.5
   acceleration: 10
   gravity: -9.81

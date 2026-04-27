@@ -12,6 +12,7 @@ namespace Adventure.Settings.View
     public sealed class GridGameSettingsView : GameSettingsViewBase<GridGameSettingsViewModel>
     {
         [SerializeField] private TMP_Dropdown animationSpeedDropdown;
+        [SerializeField] private GameObject mouseSensitivityPanelRoot;
         private Action<AnimationSpeedMode> _animationSetter;
         private bool _animationConfigured;
         [SerializeField] LocalizedString animationSpeedOption1;
@@ -42,6 +43,7 @@ namespace Adventure.Settings.View
         public override void TryInitialize()
         {
             base.TryInitialize();
+            HideMouseSensitivityPanel();
             if (ViewModel != null)
             {
                 ConfigureAnimationControls();
@@ -89,6 +91,22 @@ namespace Adventure.Settings.View
             labels.Add(animationSpeedOption2.GetLocalizedString());
             labels.Add(animationSpeedOption3.GetLocalizedString());
             return labels;
+        }
+
+        private void HideMouseSensitivityPanel()
+        {
+            if (mouseSensitivityPanelRoot == null)
+            {
+                var sensitivityTransform = transform.Find("Buttons/SensetivityPanel");
+                if (sensitivityTransform == null)
+                    sensitivityTransform = transform.Find("Buttons/SensitivityPanel");
+
+                if (sensitivityTransform != null)
+                    mouseSensitivityPanelRoot = sensitivityTransform.gameObject;
+            }
+
+            if (mouseSensitivityPanelRoot != null && mouseSensitivityPanelRoot.activeSelf)
+                mouseSensitivityPanelRoot.SetActive(false);
         }
         
     }

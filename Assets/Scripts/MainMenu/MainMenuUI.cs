@@ -1,6 +1,9 @@
+using Adventure.Infrastructure.Persistence;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-1000)]
 public class mainmenuUI : MonoBehaviour
 {
     [Header("Static Buttons")]
@@ -29,6 +32,7 @@ public class mainmenuUI : MonoBehaviour
 
     private void Awake()
     {
+        ApplySavedLocale();
         TryResolveEmbeddedLobbyReferences();
 
         if (!ValidateRequiredReferences(out var errorMessage))
@@ -48,6 +52,27 @@ public class mainmenuUI : MonoBehaviour
         }
 
         ShowPrimaryMenu();
+    }
+
+    private static void ApplySavedLocale()
+    {
+        LocalizationSettings.InitializationOperation.WaitForCompletion();
+
+        var locales = LocalizationSettings.AvailableLocales?.Locales;
+        if (locales == null || locales.Count == 0)
+            return;
+
+        var storage = new JsonFileStorage();
+        var data = storage.Load<GameSettingsSaveData>("game-settings");
+        if (data == null)
+            return;
+
+        var index = Mathf.Clamp(data.LanguageIndex, 0, locales.Count - 1);
+        var targetLocale = locales[index];
+        if (targetLocale != null && LocalizationSettings.SelectedLocale != targetLocale)
+        {
+            LocalizationSettings.SelectedLocale = targetLocale;
+        }
     }
 
     public void OnPlayButtonClicked()

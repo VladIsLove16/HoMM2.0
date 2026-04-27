@@ -10,14 +10,22 @@ public class GridCursorViewModel : ICursorViewModel, IDisposable
     public IReadOnlyReactiveProperty<bool> IsLocked => _isLocked;
     private readonly ReactiveProperty<bool> _isLocked = new(false);
     private ActionResolver _actionResolver;
+    private IDisposable _inputGateSubscription;
     private bool _isDisposed;
 
     [Inject]
-    void Construct(ActionResolver actionResolver)
+    void Construct(ActionResolver actionResolver, IGameplayInputGate inputGate = null)
     {
         _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
         _actionResolver.ActionResolved += OnActionPreviewChanged;
         _actionResolver.ActionNotResolved += OnActionNotResolved;
+
+        if (inputGate != null)
+        {
+            _inputGateSubscription = inputGate.IsBlocked
+                .DistinctUntilChanged()
+                .Subscribe(OnInputBlockedChanged);
+        }
     }
 
     private void OnActionPreviewChanged(ActionPlan plan)
@@ -37,6 +45,13 @@ public class GridCursorViewModel : ICursorViewModel, IDisposable
         _isLocked.Value = false;
         _cursorState.Value = visual;
     }
+
+    private void OnInputBlockedChanged(bool isBlocked)
+    {
+        if (isBlocked)
+            Unlock(CursorVisualState.Default);
+    }
+
     private void OnActionNotResolved()
     {
         if (_isLocked.Value)
@@ -74,5 +89,8 @@ public class GridCursorViewModel : ICursorViewModel, IDisposable
             _actionResolver.ActionNotResolved -= OnActionNotResolved;
             _actionResolver = null;
         }
+
+        _inputGateSubscription?.Dispose();
+        _inputGateSubscription = null;
     }
 }

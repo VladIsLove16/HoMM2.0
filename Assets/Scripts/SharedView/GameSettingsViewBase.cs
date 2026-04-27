@@ -35,12 +35,21 @@ namespace Adventure.Settings.View
         private bool _waitingLocalizationInit;
         private bool _achievementsBound;
 
-        [InjectOptional] private AchievementsViewModel _achievementsViewModel;
+        private AchievementsViewModel _achievementsViewModel;
 
         [Inject]
         public override void Construct(TViewModel vm)
         {
             base.Construct(vm);
+        }
+
+        [Inject]
+        private void InjectAchievementsViewModel([InjectOptional] AchievementsViewModel achievementsViewModel = null)
+        {
+            _achievementsViewModel = achievementsViewModel;
+
+            if (_uiInitialized)
+                BindAchievementsButton();
         }
 
         protected override void OnDestroy()

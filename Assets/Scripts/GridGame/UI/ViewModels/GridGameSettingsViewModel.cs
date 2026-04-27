@@ -42,6 +42,7 @@ namespace Adventure.Settings.ViewModel
         }
         public override void ExitGame()
         {
+            Close();
             SceneLoader.Load(SceneLoader.Scene.Adventure);
         }
     }

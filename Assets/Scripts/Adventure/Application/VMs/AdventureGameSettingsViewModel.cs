@@ -21,6 +21,7 @@ namespace Adventure.Settings.ViewModel
         public InputMode InputMode => _inputMode;
         public override void ExitGame()
         {
+            Close();
             SceneLoader.Load(SceneLoader.Scene.MainMenu);
         }
     }

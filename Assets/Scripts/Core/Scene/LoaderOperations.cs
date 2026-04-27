@@ -13,6 +13,7 @@ public static partial class SceneLoader
 
     public static void Load(Scene scene, Func<IEnumerator> loadRoutineOverride = null)
     {
+        Time.timeScale = 1f;
         _customLoadRoutineFactory = loadRoutineOverride;
         onLoaderCallback = () =>
         {
