@@ -15,5 +15,5 @@ MonoBehaviour:
   playerUnits:
   - UnitType: 0
     Amount: 10
-  - UnitType: 2
-    Amount: 5
+  - UnitType: 1
+    Amount: 150

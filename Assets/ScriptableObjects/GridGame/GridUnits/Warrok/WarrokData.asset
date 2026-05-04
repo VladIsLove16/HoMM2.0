@@ -16,7 +16,7 @@ MonoBehaviour:
   sharedData: {fileID: 11400000, guid: 3a556e7b976f64d48ad1a9b88b6bb489, type: 2}
   unitStats:
     UseInline: 0
-    Reference: {fileID: 11400000, guid: ece113b70b1077c459cba2b62d38ba7b, type: 2}
+    Reference: {fileID: 11400000, guid: d4a21e8e71b214040a0be8c7c6fc52e7, type: 2}
     Inline:
       displayName: 
       description: 

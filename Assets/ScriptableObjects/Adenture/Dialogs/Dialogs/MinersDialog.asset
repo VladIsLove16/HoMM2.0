@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ae2ddc16c1c2a74cb3f8111eb9151fe, type: 3}
+  m_Name: MinersDialog
+  m_EditorClassIdentifier: GameCore::DialogueGraphSO
+  startNode: {fileID: 11400000, guid: ab67da9d36bd176439706aee321df250, type: 2}
+  additionalNodes:
+  - {fileID: 11400000, guid: ab67da9d36bd176439706aee321df250, type: 2}
+  - {fileID: 11400000, guid: 8a6dfc8b8db3aa141af774fe8ef32e76, type: 2}
+  - {fileID: 11400000, guid: ef62d82f8b8c9474097c83d5caa938ef, type: 2}
+  - {fileID: 11400000, guid: f0179d0503ca471488d0d80a14110b53, type: 2}
+  - {fileID: 11400000, guid: 171468ec54bb80546b9128a82d4a7178, type: 2}

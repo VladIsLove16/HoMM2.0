@@ -31,13 +31,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.autolod": {
-      "version": "https://github.com/Unity-Technologies/AutoLOD.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "9492bc0620ea02944745c41e1f51b241580e342c"
-    },
     "com.unity.behavior": {
       "version": "1.0.15",
       "depth": 0,
@@ -349,6 +342,16 @@
         "com.unity.searcher": "4.9.3"
       }
     },
+    "com.unity.terrain-tools": {
+      "version": "5.3.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.terrain": "1.0.0",
+        "com.unity.modules.terrainphysics": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.test-framework": {
       "version": "1.6.0",
       "depth": 0,
@@ -410,6 +413,13 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.whinarn.unitymeshsimplifier": {
+      "version": "https://github.com/Whinarn/UnityMeshSimplifier.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "53fdb3122645bcd3ad2c258235200dff3dfbaa9b"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: GameConfigurationService
   m_EditorClassIdentifier: 
   _configs:
-  - {fileID: 11400000, guid: 5b4ecc80f6a732144a34c5a42c3f041a, type: 2}
+  - {fileID: 11400000, guid: 501d0e0d9db24e74794936d348352095, type: 2}
   PlayerStartArmy: {fileID: 11400000, guid: d653ab32bb8777d49ac339d04f5aca1b, type: 2}
   _selectedIndex: 0
   _team: 0
+  _battlefieldBottomTeam: 0
   _mode: 0

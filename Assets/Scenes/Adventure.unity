@@ -616,7 +616,7 @@ TerrainCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 2
   m_TerrainData: {fileID: 15600000, guid: 3a42a59f2279fc142864186bbffaa206, type: 2}
@@ -815,6 +815,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fbf84aded4113e4ba20c585b45af994, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &237937882
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1202350507}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_Name
+      value: Warrok
+      objectReference: {fileID: 0}
+    - target: {fileID: 1096695464039504049, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.34
+      objectReference: {fileID: 0}
+    - target: {fileID: 1096695464039504049, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.93
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+--- !u!4 &237937883 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ff4b3845eb84c1c43b5904c38f2e4153, type: 3}
+  m_PrefabInstance: {fileID: 237937882}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &287663200
 GameObject:
   m_ObjectHideFlags: 0
@@ -5788,6 +5858,324 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1 &391062459 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 1182665947}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &391062460 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 1182665947}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &391062461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391062459}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 391062464}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+  choiceEventChannelTemplate: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+  battleResultChannelTemplate: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+  animationController: {fileID: 391062463}
+--- !u!195 &391062462
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391062459}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &391062463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391062459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90edf94420cb4c49b376efd4a259a449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 391062465}
+  greetTrigger: Greet
+  byeTrigger: Bye
+  battleStartTrigger: StartBattle
+  talkingTrigger: Talking
+  battleWonTrigger: BattleWon
+  battleLostTrigger: BattleLost
+  startWalkingWithRotation: StartWalkingWithRotation
+  lookAroundTrigger: LookAround
+  WalkingBool: Walking
+--- !u!114 &391062464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391062459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: -5034600826329088132, guid: b484978a767ae5544a621338e26a5b77, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 7620560237347734224
+  - rid: 7620560237347734225
+  - rid: 7620560237347734226
+  - rid: 7620560237347734227
+  - rid: 7620560237347734228
+  - rid: 7620560237347734229
+  - rid: 7620560237347734230
+  - rid: 7620560237347734231
+  - rid: 7620560237347734232
+  - rid: 7620560237347734233
+  - rid: 7620560237347734234
+  - rid: 7620560237347734235
+  - rid: 7620560237347734236
+  - rid: 7620560238350172366
+  - rid: 7620560238686240853
+  - rid: 7620560238686240856
+  - rid: 2713839387985838084
+  - rid: 2713839410653167616
+  - rid: 2713839461132927066
+  - rid: 2713839461132927069
+  - rid: 2713839461132927075
+  - rid: 2713839461132927078
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 2713839387985838084
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9812277216613674483
+          m_Value1: 1723955186642564923
+        Name: NpcName
+        m_Value: Blind Witch
+    - rid: 2713839410653167616
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 845032274767513362
+          m_Value1: 9183530163365663689
+        Name: PatrolingBoredAmount
+        m_Value: 0
+    - rid: 2713839461132927066
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7473855323243467250
+          m_Value1: 6262416327590967470
+        Name: InteruptionDialogChance
+        m_Value: 0
+    - rid: 2713839461132927069
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2820492635876365255
+          m_Value1: 10459080001080480291
+        Name: BoredomLimit
+        m_Value: 9999
+    - rid: 2713839461132927075
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10196179752356813584
+          m_Value1: 3281638431642223713
+        Name: PatrolingWannaGrabAmount
+        m_Value: 0
+    - rid: 2713839461132927078
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5295321592624615934
+          m_Value1: 9841616879742145834
+        Name: GrabbingDistance
+        m_Value: 0
+    - rid: 7620560237347734224
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 391062459}
+    - rid: 7620560237347734225
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Dialog.NpcAnimationController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10793545298726726168
+          m_Value1: 335446000253577310
+        Name: SelfAnimator
+        m_Value: {fileID: 391062463}
+    - rid: 7620560237347734226
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Movement.PlayerMovementController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1182282511040317622
+          m_Value1: 1206639419209158929
+        Name: Player Movement Controller
+        m_Value: {fileID: 221153544}
+    - rid: 7620560237347734227
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1668146757385717029
+          m_Value1: 5968458991384921635
+        Name: PantrolPointA
+        m_Value: {fileID: 6445884304777760408}
+    - rid: 7620560237347734228
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5325592238351503815
+          m_Value1: 18364859122948937788
+        Name: PatrolPointB
+        m_Value: {fileID: 3370622717338104234}
+    - rid: 7620560237347734229
+      type: {class: 'BlackboardVariable`1[[BattleFinishedChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 147072582219765505
+          m_Value1: 15640907332456222908
+        Name: BattleFinishedChannel
+        m_Value: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+    - rid: 7620560237347734230
+      type: {class: 'BlackboardVariable`1[[PlayerChosenDialogOption, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1857413167128651165
+          m_Value1: 14345240687486946430
+        Name: New Player chosen dialog option
+        m_Value: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+    - rid: 7620560237347734231
+      type: {class: 'BlackboardVariable`1[[AnimationEndedGrabbing, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13845425816625794816
+          m_Value1: 16905494431571644656
+        Name: AnimationEndedGrabbing
+        m_Value: {fileID: 11400000, guid: 61ac8d8707cc0d94ab40cd40eaad665f, type: 2}
+    - rid: 7620560237347734232
+      type: {class: 'BlackboardVariable`1[[PlayerTalkingWithNpcStateChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7363065750734085426
+          m_Value1: 2360157669766836611
+        Name: New Player  talking with npc
+        m_Value: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+    - rid: 7620560237347734233
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17455088845407900575
+          m_Value1: 2652002625922195186
+        Name: NavMeshPatroling
+        m_Value: 1
+    - rid: 7620560237347734234
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1556637036820255788
+          m_Value1: 13642802236087118727
+        Name: SwitchTargetDelay
+        m_Value: 3
+    - rid: 7620560237347734235
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12620877223934169643
+          m_Value1: 5461965901140985226
+        Name: MoveSpeed
+        m_Value: 0
+    - rid: 7620560237347734236
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5172545610163355179
+          m_Value1: 7431598691477423329
+        Name: SlowdownDistance
+        m_Value: 2
+    - rid: 7620560238350172366
+      type: {class: 'BlackboardVariable`1[[UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4233992815652450759
+          m_Value1: 6760168740389524521
+        Name: New Nav Mesh Agent
+        m_Value: {fileID: 391062462}
+    - rid: 7620560238686240853
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15806635632461219994
+          m_Value1: 915968850386014901
+        Name: AvailableNavigatingTargets
+        m_Value:
+        - {fileID: 1239281843769856383}
+        - {fileID: 5553919526941763570}
+        - {fileID: 3076016886795273187}
+        - {fileID: 6932271427332088789}
+    - rid: 7620560238686240856
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15720746435413945264
+          m_Value1: 5558052790941166666
+        Name: StopDistance
+        m_Value: 1
+--- !u!95 &391062465
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391062459}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: dfd44cbccdb191f49bec2410eeb94fc5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &412603918 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7210950921581840669, guid: 4537bfca088a4124e8930a3d957b2130, type: 3}
@@ -6057,6 +6445,10 @@ PrefabInstance:
       propertyPath: battleAnimationController
       value: 
       objectReference: {fileID: 448219578}
+    - target: {fileID: 7520119136127570424, guid: 6c575b29c96580a4f9a630be62057616, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6731,7 +7123,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 539626188}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
   m_Name: 
@@ -7702,6 +8094,114 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1624200709}
   m_SourcePrefab: {fileID: 100100000, guid: c1e47673b97450c4b85e4ce87c1b22be, type: 3}
+--- !u!1001 &610952755
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 758468908}
+    m_Modifications:
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 56.84
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 14.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Name
+      value: Miner2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: Name
+      value: Miners
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: lineup
+      value: 
+      objectReference: {fileID: 11400000, guid: 5361ffa78b5945549be420b0d955b0ed, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: 3e87560682bc3a942a6bb70d80cd8b13, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogueId
+      value: WitchDialog
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: orchestrator
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: behaviorGraphBridge
+      value: 
+      objectReference: {fileID: 1274232376}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: battleAnimationController
+      value: 
+      objectReference: {fileID: 1274232378}
+    - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Height
+      value: 1.72
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1274232380}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1274232379}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1274232378}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1274232377}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1274232376}
+  m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
 --- !u!1001 &613328974
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7752,7 +8252,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: m_Name
-      value: "\u0411\u043E\u043C\u0436\u0438\u0445\u0430"
+      value: TentKeeper
       objectReference: {fileID: 0}
     - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: m_IsActive
@@ -7760,16 +8260,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: Name
-      value: Witch
+      value: Tent keeper
       objectReference: {fileID: 0}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: lineup
       value: 
-      objectReference: {fileID: 11400000, guid: 26687decd75428d44b57e626caf94f21, type: 2}
+      objectReference: {fileID: 11400000, guid: 3a0af55e3e5a6204a82e34ac798f8bd6, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogue
       value: 
-      objectReference: {fileID: 11400000, guid: 83454603260f48f45a497f208584b8fc, type: 2}
+      objectReference: {fileID: 11400000, guid: bb519f9af16593642a64820045c901c5, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
@@ -8292,8 +8792,12 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8047135755570936086}
+  - {fileID: 1376400804}
+  - {fileID: 1274232375}
+  - {fileID: 391062460}
   - {fileID: 1403131033}
   - {fileID: 539626189}
+  - {fileID: 1202350507}
   - {fileID: 1539597235}
   - {fileID: 448219576}
   m_Father: {fileID: 1374579569}
@@ -9135,6 +9639,114 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 877958522}
   m_CullTransparentMesh: 1
+--- !u!1001 &878505286
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 758468908}
+    m_Modifications:
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 56.84
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 14.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Name
+      value: Miner1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: Name
+      value: Miners
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: lineup
+      value: 
+      objectReference: {fileID: 11400000, guid: 5361ffa78b5945549be420b0d955b0ed, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: 3e87560682bc3a942a6bb70d80cd8b13, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogueId
+      value: WitchDialog
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: orchestrator
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: behaviorGraphBridge
+      value: 
+      objectReference: {fileID: 1376400805}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: battleAnimationController
+      value: 
+      objectReference: {fileID: 1376400807}
+    - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Height
+      value: 1.72
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1376400809}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1376400808}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1376400807}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1376400806}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1376400805}
+  m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
 --- !u!1 &943390645
 GameObject:
   m_ObjectHideFlags: 0
@@ -9936,6 +10548,114 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1597077084293971083, guid: 70482b15f0d85914eb52f732244c5ec4, type: 3}
   m_PrefabInstance: {fileID: 947950463}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1182665947
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 758468908}
+    m_Modifications:
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -4.097
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10.681
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 50.767
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.26011828
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.96557677
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 149.846
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Name
+      value: BlindWitch
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: Name
+      value: BlindWitch_Npctrigger
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: lineup
+      value: 
+      objectReference: {fileID: 11400000, guid: f3fe034f99f30af4586f148abbb3cb53, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: d01b5269fe54125489b35b7821e4c0bf, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogueId
+      value: WitchDialog
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: orchestrator
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: behaviorGraphBridge
+      value: 
+      objectReference: {fileID: 391062461}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: battleAnimationController
+      value: 
+      objectReference: {fileID: 391062463}
+    - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Height
+      value: 1.72
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 391062465}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 391062464}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 391062463}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 391062462}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 391062461}
+  m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
 --- !u!1 &1183208345
 GameObject:
   m_ObjectHideFlags: 0
@@ -9976,6 +10696,395 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1818496507408475737, guid: 750d1885783382d408422f59631a8288, type: 3}
   m_PrefabInstance: {fileID: 4680141580590530263}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1202350506
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 758468908}
+    m_Modifications:
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 58.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 73.38
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Name
+      value: EnterKeeper
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: Name
+      value: Warrok
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: lineup
+      value: 
+      objectReference: {fileID: 11400000, guid: 9b47efeb192ae4a4ab13f1bc7ef1cd84, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: d063b58c4ca1fa249a8c0bcfc13d127b, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogueId
+      value: WitchDialog
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: orchestrator
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: behaviorGraphBridge
+      value: 
+      objectReference: {fileID: 1202350509}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: battleAnimationController
+      value: 
+      objectReference: {fileID: 1202350511}
+    - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Height
+      value: 1.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 9117772193966944512, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 9117772193966944512, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 237937883}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1202350513}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1202350512}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1202350511}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1202350510}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1202350509}
+  m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+--- !u!4 &1202350507 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 1202350506}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1202350508 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 1202350506}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1202350509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202350508}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 1202350512}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+  choiceEventChannelTemplate: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+  battleResultChannelTemplate: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+  animationController: {fileID: 1202350511}
+--- !u!195 &1202350510
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202350508}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &1202350511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202350508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90edf94420cb4c49b376efd4a259a449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1202350513}
+  greetTrigger: Greet
+  byeTrigger: Bye
+  battleStartTrigger: StartBattle
+  talkingTrigger: Talking
+  battleWonTrigger: BattleWon
+  battleLostTrigger: BattleLost
+  startWalkingWithRotation: StartWalkingWithRotation
+  lookAroundTrigger: LookAround
+  WalkingBool: Walking
+--- !u!114 &1202350512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202350508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: -5034600826329088132, guid: b484978a767ae5544a621338e26a5b77, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 7620560237347734224
+  - rid: 7620560237347734225
+  - rid: 7620560237347734226
+  - rid: 7620560237347734227
+  - rid: 7620560237347734228
+  - rid: 7620560237347734229
+  - rid: 7620560237347734230
+  - rid: 7620560237347734231
+  - rid: 7620560237347734232
+  - rid: 7620560237347734233
+  - rid: 7620560237347734234
+  - rid: 7620560237347734235
+  - rid: 7620560237347734236
+  - rid: 7620560238350172366
+  - rid: 7620560238686240853
+  - rid: 7620560238686240856
+  - rid: 971234404977082458
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 971234404977082458
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9812277216613674483
+          m_Value1: 1723955186642564923
+        Name: NpcName
+        m_Value: Warrok
+    - rid: 7620560237347734224
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 1202350508}
+    - rid: 7620560237347734225
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Dialog.NpcAnimationController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10793545298726726168
+          m_Value1: 335446000253577310
+        Name: SelfAnimator
+        m_Value: {fileID: 1202350511}
+    - rid: 7620560237347734226
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Movement.PlayerMovementController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1182282511040317622
+          m_Value1: 1206639419209158929
+        Name: Player Movement Controller
+        m_Value: {fileID: 221153544}
+    - rid: 7620560237347734227
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1668146757385717029
+          m_Value1: 5968458991384921635
+        Name: PantrolPointA
+        m_Value: {fileID: 4941260105499766287}
+    - rid: 7620560237347734228
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5325592238351503815
+          m_Value1: 18364859122948937788
+        Name: PatrolPointB
+        m_Value: {fileID: 5657166359795059353}
+    - rid: 7620560237347734229
+      type: {class: 'BlackboardVariable`1[[BattleFinishedChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 147072582219765505
+          m_Value1: 15640907332456222908
+        Name: BattleFinishedChannel
+        m_Value: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+    - rid: 7620560237347734230
+      type: {class: 'BlackboardVariable`1[[PlayerChosenDialogOption, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1857413167128651165
+          m_Value1: 14345240687486946430
+        Name: New Player chosen dialog option
+        m_Value: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+    - rid: 7620560237347734231
+      type: {class: 'BlackboardVariable`1[[AnimationEndedGrabbing, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13845425816625794816
+          m_Value1: 16905494431571644656
+        Name: AnimationEndedGrabbing
+        m_Value: {fileID: 11400000, guid: 61ac8d8707cc0d94ab40cd40eaad665f, type: 2}
+    - rid: 7620560237347734232
+      type: {class: 'BlackboardVariable`1[[PlayerTalkingWithNpcStateChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7363065750734085426
+          m_Value1: 2360157669766836611
+        Name: New Player  talking with npc
+        m_Value: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+    - rid: 7620560237347734233
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17455088845407900575
+          m_Value1: 2652002625922195186
+        Name: NavMeshPatroling
+        m_Value: 1
+    - rid: 7620560237347734234
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1556637036820255788
+          m_Value1: 13642802236087118727
+        Name: SwitchTargetDelay
+        m_Value: 3
+    - rid: 7620560237347734235
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12620877223934169643
+          m_Value1: 5461965901140985226
+        Name: MoveSpeed
+        m_Value: 1
+    - rid: 7620560237347734236
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5172545610163355179
+          m_Value1: 7431598691477423329
+        Name: SlowdownDistance
+        m_Value: 2
+    - rid: 7620560238350172366
+      type: {class: 'BlackboardVariable`1[[UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4233992815652450759
+          m_Value1: 6760168740389524521
+        Name: New Nav Mesh Agent
+        m_Value: {fileID: 1202350510}
+    - rid: 7620560238686240853
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15806635632461219994
+          m_Value1: 915968850386014901
+        Name: AvailableNavigatingTargets
+        m_Value:
+        - {fileID: 1239281843769856383}
+        - {fileID: 5553919526941763570}
+        - {fileID: 3076016886795273187}
+        - {fileID: 6932271427332088789}
+    - rid: 7620560238686240856
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15720746435413945264
+          m_Value1: 5558052790941166666
+        Name: StopDistance
+        m_Value: 1
+--- !u!95 &1202350513
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202350508}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: dfd44cbccdb191f49bec2410eeb94fc5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1252718762
 GameObject:
   m_ObjectHideFlags: 0
@@ -10051,6 +11160,324 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252718762}
   m_CullTransparentMesh: 1
+--- !u!1 &1274232374 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 610952755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1274232375 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 610952755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1274232376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274232374}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 1274232379}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+  choiceEventChannelTemplate: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+  battleResultChannelTemplate: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+  animationController: {fileID: 1274232378}
+--- !u!195 &1274232377
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274232374}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &1274232378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274232374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90edf94420cb4c49b376efd4a259a449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1274232380}
+  greetTrigger: Greet
+  byeTrigger: Bye
+  battleStartTrigger: StartBattle
+  talkingTrigger: Talking
+  battleWonTrigger: BattleWon
+  battleLostTrigger: BattleLost
+  startWalkingWithRotation: StartWalkingWithRotation
+  lookAroundTrigger: LookAround
+  WalkingBool: Walking
+--- !u!114 &1274232379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274232374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: -5034600826329088132, guid: b484978a767ae5544a621338e26a5b77, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 7620560237347734224
+  - rid: 7620560237347734225
+  - rid: 7620560237347734226
+  - rid: 7620560237347734227
+  - rid: 7620560237347734228
+  - rid: 7620560237347734229
+  - rid: 7620560237347734230
+  - rid: 7620560237347734231
+  - rid: 7620560237347734232
+  - rid: 7620560237347734233
+  - rid: 7620560237347734234
+  - rid: 7620560237347734235
+  - rid: 7620560237347734236
+  - rid: 7620560238350172366
+  - rid: 7620560238686240853
+  - rid: 7620560238686240856
+  - rid: 2713839387985838084
+  - rid: 2713839461132927064
+  - rid: 2713839461132927067
+  - rid: 2713839461132927071
+  - rid: 2713839461132927073
+  - rid: 2713839461132927076
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 2713839387985838084
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9812277216613674483
+          m_Value1: 1723955186642564923
+        Name: NpcName
+        m_Value: Witch
+    - rid: 2713839461132927064
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7473855323243467250
+          m_Value1: 6262416327590967470
+        Name: InteruptionDialogChance
+        m_Value: 0
+    - rid: 2713839461132927067
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2820492635876365255
+          m_Value1: 10459080001080480291
+        Name: BoredomLimit
+        m_Value: 9999
+    - rid: 2713839461132927071
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 845032274767513362
+          m_Value1: 9183530163365663689
+        Name: PatrolingBoredAmount
+        m_Value: 0
+    - rid: 2713839461132927073
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10196179752356813584
+          m_Value1: 3281638431642223713
+        Name: PatrolingWannaGrabAmount
+        m_Value: 0
+    - rid: 2713839461132927076
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5295321592624615934
+          m_Value1: 9841616879742145834
+        Name: GrabbingDistance
+        m_Value: 0
+    - rid: 7620560237347734224
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 1274232374}
+    - rid: 7620560237347734225
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Dialog.NpcAnimationController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10793545298726726168
+          m_Value1: 335446000253577310
+        Name: SelfAnimator
+        m_Value: {fileID: 1274232378}
+    - rid: 7620560237347734226
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Movement.PlayerMovementController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1182282511040317622
+          m_Value1: 1206639419209158929
+        Name: Player Movement Controller
+        m_Value: {fileID: 221153544}
+    - rid: 7620560237347734227
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1668146757385717029
+          m_Value1: 5968458991384921635
+        Name: PantrolPointA
+        m_Value: {fileID: 6445884304777760408}
+    - rid: 7620560237347734228
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5325592238351503815
+          m_Value1: 18364859122948937788
+        Name: PatrolPointB
+        m_Value: {fileID: 3370622717338104234}
+    - rid: 7620560237347734229
+      type: {class: 'BlackboardVariable`1[[BattleFinishedChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 147072582219765505
+          m_Value1: 15640907332456222908
+        Name: BattleFinishedChannel
+        m_Value: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+    - rid: 7620560237347734230
+      type: {class: 'BlackboardVariable`1[[PlayerChosenDialogOption, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1857413167128651165
+          m_Value1: 14345240687486946430
+        Name: New Player chosen dialog option
+        m_Value: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+    - rid: 7620560237347734231
+      type: {class: 'BlackboardVariable`1[[AnimationEndedGrabbing, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13845425816625794816
+          m_Value1: 16905494431571644656
+        Name: AnimationEndedGrabbing
+        m_Value: {fileID: 11400000, guid: 61ac8d8707cc0d94ab40cd40eaad665f, type: 2}
+    - rid: 7620560237347734232
+      type: {class: 'BlackboardVariable`1[[PlayerTalkingWithNpcStateChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7363065750734085426
+          m_Value1: 2360157669766836611
+        Name: New Player  talking with npc
+        m_Value: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+    - rid: 7620560237347734233
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17455088845407900575
+          m_Value1: 2652002625922195186
+        Name: NavMeshPatroling
+        m_Value: 1
+    - rid: 7620560237347734234
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1556637036820255788
+          m_Value1: 13642802236087118727
+        Name: SwitchTargetDelay
+        m_Value: 3
+    - rid: 7620560237347734235
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12620877223934169643
+          m_Value1: 5461965901140985226
+        Name: MoveSpeed
+        m_Value: 0
+    - rid: 7620560237347734236
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5172545610163355179
+          m_Value1: 7431598691477423329
+        Name: SlowdownDistance
+        m_Value: 2
+    - rid: 7620560238350172366
+      type: {class: 'BlackboardVariable`1[[UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4233992815652450759
+          m_Value1: 6760168740389524521
+        Name: New Nav Mesh Agent
+        m_Value: {fileID: 1274232377}
+    - rid: 7620560238686240853
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15806635632461219994
+          m_Value1: 915968850386014901
+        Name: AvailableNavigatingTargets
+        m_Value:
+        - {fileID: 1239281843769856383}
+        - {fileID: 5553919526941763570}
+        - {fileID: 3076016886795273187}
+        - {fileID: 6932271427332088789}
+    - rid: 7620560238686240856
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15720746435413945264
+          m_Value1: 5558052790941166666
+        Name: StopDistance
+        m_Value: 1
+--- !u!95 &1274232380
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274232374}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: dfd44cbccdb191f49bec2410eeb94fc5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1329366144
 GameObject:
   m_ObjectHideFlags: 0
@@ -10141,6 +11568,324 @@ Transform:
   - {fileID: 1126013997}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1376400803 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 878505286}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1376400804 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 878505286}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1376400805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376400803}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 1376400808}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+  choiceEventChannelTemplate: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+  battleResultChannelTemplate: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+  animationController: {fileID: 1376400807}
+--- !u!195 &1376400806
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376400803}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &1376400807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376400803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90edf94420cb4c49b376efd4a259a449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1376400809}
+  greetTrigger: Greet
+  byeTrigger: Bye
+  battleStartTrigger: StartBattle
+  talkingTrigger: Talking
+  battleWonTrigger: BattleWon
+  battleLostTrigger: BattleLost
+  startWalkingWithRotation: StartWalkingWithRotation
+  lookAroundTrigger: LookAround
+  WalkingBool: Walking
+--- !u!114 &1376400808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376400803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: -5034600826329088132, guid: b484978a767ae5544a621338e26a5b77, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 7620560237347734224
+  - rid: 7620560237347734225
+  - rid: 7620560237347734226
+  - rid: 7620560237347734227
+  - rid: 7620560237347734228
+  - rid: 7620560237347734229
+  - rid: 7620560237347734230
+  - rid: 7620560237347734231
+  - rid: 7620560237347734232
+  - rid: 7620560237347734233
+  - rid: 7620560237347734234
+  - rid: 7620560237347734235
+  - rid: 7620560237347734236
+  - rid: 7620560238350172366
+  - rid: 7620560238686240853
+  - rid: 7620560238686240856
+  - rid: 2713839387985838084
+  - rid: 2713839461132927065
+  - rid: 2713839461132927068
+  - rid: 2713839461132927072
+  - rid: 2713839461132927074
+  - rid: 2713839461132927077
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 2713839387985838084
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9812277216613674483
+          m_Value1: 1723955186642564923
+        Name: NpcName
+        m_Value: Witch
+    - rid: 2713839461132927065
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7473855323243467250
+          m_Value1: 6262416327590967470
+        Name: InteruptionDialogChance
+        m_Value: 0
+    - rid: 2713839461132927068
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2820492635876365255
+          m_Value1: 10459080001080480291
+        Name: BoredomLimit
+        m_Value: 9999
+    - rid: 2713839461132927072
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 845032274767513362
+          m_Value1: 9183530163365663689
+        Name: PatrolingBoredAmount
+        m_Value: 0
+    - rid: 2713839461132927074
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10196179752356813584
+          m_Value1: 3281638431642223713
+        Name: PatrolingWannaGrabAmount
+        m_Value: 0
+    - rid: 2713839461132927077
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5295321592624615934
+          m_Value1: 9841616879742145834
+        Name: GrabbingDistance
+        m_Value: 0
+    - rid: 7620560237347734224
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 1376400803}
+    - rid: 7620560237347734225
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Dialog.NpcAnimationController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10793545298726726168
+          m_Value1: 335446000253577310
+        Name: SelfAnimator
+        m_Value: {fileID: 1376400807}
+    - rid: 7620560237347734226
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Movement.PlayerMovementController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1182282511040317622
+          m_Value1: 1206639419209158929
+        Name: Player Movement Controller
+        m_Value: {fileID: 221153544}
+    - rid: 7620560237347734227
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1668146757385717029
+          m_Value1: 5968458991384921635
+        Name: PantrolPointA
+        m_Value: {fileID: 6445884304777760408}
+    - rid: 7620560237347734228
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5325592238351503815
+          m_Value1: 18364859122948937788
+        Name: PatrolPointB
+        m_Value: {fileID: 3370622717338104234}
+    - rid: 7620560237347734229
+      type: {class: 'BlackboardVariable`1[[BattleFinishedChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 147072582219765505
+          m_Value1: 15640907332456222908
+        Name: BattleFinishedChannel
+        m_Value: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+    - rid: 7620560237347734230
+      type: {class: 'BlackboardVariable`1[[PlayerChosenDialogOption, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1857413167128651165
+          m_Value1: 14345240687486946430
+        Name: New Player chosen dialog option
+        m_Value: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+    - rid: 7620560237347734231
+      type: {class: 'BlackboardVariable`1[[AnimationEndedGrabbing, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13845425816625794816
+          m_Value1: 16905494431571644656
+        Name: AnimationEndedGrabbing
+        m_Value: {fileID: 11400000, guid: 61ac8d8707cc0d94ab40cd40eaad665f, type: 2}
+    - rid: 7620560237347734232
+      type: {class: 'BlackboardVariable`1[[PlayerTalkingWithNpcStateChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7363065750734085426
+          m_Value1: 2360157669766836611
+        Name: New Player  talking with npc
+        m_Value: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+    - rid: 7620560237347734233
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17455088845407900575
+          m_Value1: 2652002625922195186
+        Name: NavMeshPatroling
+        m_Value: 1
+    - rid: 7620560237347734234
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1556637036820255788
+          m_Value1: 13642802236087118727
+        Name: SwitchTargetDelay
+        m_Value: 3
+    - rid: 7620560237347734235
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12620877223934169643
+          m_Value1: 5461965901140985226
+        Name: MoveSpeed
+        m_Value: 0
+    - rid: 7620560237347734236
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5172545610163355179
+          m_Value1: 7431598691477423329
+        Name: SlowdownDistance
+        m_Value: 2
+    - rid: 7620560238350172366
+      type: {class: 'BlackboardVariable`1[[UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4233992815652450759
+          m_Value1: 6760168740389524521
+        Name: New Nav Mesh Agent
+        m_Value: {fileID: 1376400806}
+    - rid: 7620560238686240853
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15806635632461219994
+          m_Value1: 915968850386014901
+        Name: AvailableNavigatingTargets
+        m_Value:
+        - {fileID: 1239281843769856383}
+        - {fileID: 5553919526941763570}
+        - {fileID: 3076016886795273187}
+        - {fileID: 6932271427332088789}
+    - rid: 7620560238686240856
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15720746435413945264
+          m_Value1: 5558052790941166666
+        Name: StopDistance
+        m_Value: 1
+--- !u!95 &1376400809
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1376400803}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: dfd44cbccdb191f49bec2410eeb94fc5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1384874567
 GameObject:
   m_ObjectHideFlags: 0
@@ -10233,7 +11978,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403131032}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
   m_Name: 
@@ -10323,6 +12068,8 @@ MonoBehaviour:
   - rid: 2713839387985838081
   - rid: 2713839387985838082
   - rid: 2713839387985838083
+  - rid: 2713839461132927070
+  - rid: 2713839461132927079
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -10362,6 +12109,22 @@ MonoBehaviour:
           m_Value1: 1723955186642564923
         Name: NpcName
         m_Value: "\u0411\u043E\u043C\u0436\u0438\u0445\u0430"
+    - rid: 2713839461132927070
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 2820492635876365255
+          m_Value1: 10459080001080480291
+        Name: BoredomLimit
+        m_Value: 9999
+    - rid: 2713839461132927079
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5295321592624615934
+          m_Value1: 9841616879742145834
+        Name: GrabbingDistance
+        m_Value: 0
     - rid: 7620560237347734224
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -10783,6 +12546,10 @@ PrefabInstance:
       propertyPath: agent
       value: 
       objectReference: {fileID: 1539597239}
+    - target: {fileID: 7520119136127570424, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: m_Height
       value: 1.72
@@ -11675,6 +13442,100 @@ Transform:
   - {fileID: 443782197}
   m_Father: {fileID: 1374579569}
   m_LocalEulerAnglesHint: {x: 6.586, y: 0, z: 0}
+--- !u!1 &1868715537
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1868715540}
+  - component: {fileID: 1868715539}
+  - component: {fileID: 1868715538}
+  m_Layer: 0
+  m_Name: Terrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!154 &1868715538
+TerrainCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868715537}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_TerrainData: {fileID: 15600000, guid: 49a11ad8dcc1a72408835ceceaef5e08, type: 2}
+  m_EnableTreeColliders: 1
+--- !u!218 &1868715539
+Terrain:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868715537}
+  m_Enabled: 1
+  serializedVersion: 6
+  m_TerrainData: {fileID: 15600000, guid: 49a11ad8dcc1a72408835ceceaef5e08, type: 2}
+  m_TreeDistance: 5000
+  m_TreeBillboardDistance: 50
+  m_TreeCrossFadeLength: 5
+  m_TreeMaximumFullLODCount: 50
+  m_DetailObjectDistance: 80
+  m_DetailObjectDensity: 1
+  m_HeightmapPixelError: 5
+  m_SplatMapDistance: 1000
+  m_HeightmapMinimumLODSimplification: 0
+  m_HeightmapMaximumLOD: 0
+  m_ShadowCastingMode: 2
+  m_DrawHeightmap: 1
+  m_DrawInstanced: 0
+  m_DrawTreesAndFoliage: 1
+  m_StaticShadowCaster: 0
+  m_IgnoreQualitySettings: 0
+  m_ReflectionProbeUsage: 1
+  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_BakeLightProbesForTrees: 1
+  m_PreserveTreePrototypeLayers: 0
+  m_DeringLightProbesForTrees: 1
+  m_ReceiveGI: 1
+  m_ScaleInLightmap: 0.0256
+  m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
+  m_GroupingID: 0
+  m_RenderingLayerMask: 1
+  m_AllowAutoConnect: 1
+  m_EnableHeightmapRayTracing: 1
+  m_EnableTreesAndDetailsRayTracing: 0
+  m_TreeMotionVectorModeOverride: 3
+--- !u!4 &1868715540
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868715537}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -900.3, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2123118484}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1870820954
 GameObject:
   m_ObjectHideFlags: 0
@@ -11835,7 +13696,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3294208536604426464, guid: 48c4335c9b485ce49a9ab4f4f6f52150, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.37
+      value: 6.3
       objectReference: {fileID: 0}
     - target: {fileID: 3294208536604426464, guid: 48c4335c9b485ce49a9ab4f4f6f52150, type: 3}
       propertyPath: m_LocalPosition.z
@@ -12546,6 +14407,410 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1374579569}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2123118483
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1868715540}
+    m_Modifications:
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9998616
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.016640073
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -1.907
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Name
+      value: "\u0411\u043E\u043C\u0436\u0438\u0445\u0430 (1)"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: Name
+      value: Witch
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: lineup
+      value: 
+      objectReference: {fileID: 11400000, guid: 26687decd75428d44b57e626caf94f21, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: 83454603260f48f45a497f208584b8fc, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: dialogueId
+      value: WitchDialog
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: orchestrator
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: behaviorGraphBridge
+      value: 
+      objectReference: {fileID: 2123118486}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: battleAnimationController
+      value: 
+      objectReference: {fileID: 2123118488}
+    - target: {fileID: 8131524497291773740, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: m_Height
+      value: 1.72
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2123118490}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2123118489}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2123118488}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2123118487}
+    - targetCorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2123118486}
+  m_SourcePrefab: {fileID: 100100000, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+--- !u!4 &2123118484 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2239508038832846996, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 2123118483}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2123118485 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056989746382058328, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+  m_PrefabInstance: {fileID: 2123118483}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2123118486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123118485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 2123118489}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+  choiceEventChannelTemplate: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+  battleResultChannelTemplate: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+  animationController: {fileID: 2123118488}
+--- !u!195 &2123118487
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123118485}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &2123118488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123118485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90edf94420cb4c49b376efd4a259a449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 2123118490}
+  greetTrigger: Greet
+  byeTrigger: Bye
+  battleStartTrigger: StartBattle
+  talkingTrigger: Talking
+  battleWonTrigger: BattleWon
+  battleLostTrigger: BattleLost
+  startWalkingWithRotation: StartWalkingWithRotation
+  lookAroundTrigger: LookAround
+  WalkingBool: Walking
+--- !u!114 &2123118489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123118485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_Graph: {fileID: -5034600826329088132, guid: b484978a767ae5544a621338e26a5b77, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 7620560237347734224
+  - rid: 7620560237347734225
+  - rid: 7620560237347734226
+  - rid: 7620560237347734227
+  - rid: 7620560237347734228
+  - rid: 7620560237347734229
+  - rid: 7620560237347734230
+  - rid: 7620560237347734231
+  - rid: 7620560237347734232
+  - rid: 7620560237347734233
+  - rid: 7620560237347734234
+  - rid: 7620560237347734235
+  - rid: 7620560237347734236
+  - rid: 7620560238350172366
+  - rid: 7620560238686240853
+  - rid: 7620560238686240856
+  - rid: 2713839387985838080
+  - rid: 2713839387985838081
+  - rid: 2713839387985838082
+  - rid: 2713839387985838083
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  NetcodeRunOnlyOnOwner: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 2713839387985838080
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 845032274767513362
+          m_Value1: 9183530163365663689
+        Name: PatrolingBoredAmount
+        m_Value: 0
+    - rid: 2713839387985838081
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10196179752356813584
+          m_Value1: 3281638431642223713
+        Name: PatrolingWannaGrabAmount
+        m_Value: 0
+    - rid: 2713839387985838082
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7473855323243467250
+          m_Value1: 6262416327590967470
+        Name: InteruptionDialogChance
+        m_Value: 0
+    - rid: 2713839387985838083
+      type: {class: 'BlackboardVariable`1[[System.String, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9812277216613674483
+          m_Value1: 1723955186642564923
+        Name: NpcName
+        m_Value: "\u0411\u043E\u043C\u0436\u0438\u0445\u0430"
+    - rid: 7620560237347734224
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 2123118485}
+    - rid: 7620560237347734225
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Dialog.NpcAnimationController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10793545298726726168
+          m_Value1: 335446000253577310
+        Name: SelfAnimator
+        m_Value: {fileID: 2123118488}
+    - rid: 7620560237347734226
+      type: {class: 'BlackboardVariable`1[[Adventure.Infrastructure.Movement.PlayerMovementController, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1182282511040317622
+          m_Value1: 1206639419209158929
+        Name: Player Movement Controller
+        m_Value: {fileID: 221153544}
+    - rid: 7620560237347734227
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1668146757385717029
+          m_Value1: 5968458991384921635
+        Name: PantrolPointA
+        m_Value: {fileID: 6445884304777760408}
+    - rid: 7620560237347734228
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Transform, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5325592238351503815
+          m_Value1: 18364859122948937788
+        Name: PatrolPointB
+        m_Value: {fileID: 3370622717338104234}
+    - rid: 7620560237347734229
+      type: {class: 'BlackboardVariable`1[[BattleFinishedChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 147072582219765505
+          m_Value1: 15640907332456222908
+        Name: BattleFinishedChannel
+        m_Value: {fileID: 11400000, guid: ccf4e3982716ede4ba898352732c8a49, type: 2}
+    - rid: 7620560237347734230
+      type: {class: 'BlackboardVariable`1[[PlayerChosenDialogOption, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1857413167128651165
+          m_Value1: 14345240687486946430
+        Name: New Player chosen dialog option
+        m_Value: {fileID: 11400000, guid: b356ca244d2362c4db0603dd376795be, type: 2}
+    - rid: 7620560237347734231
+      type: {class: 'BlackboardVariable`1[[AnimationEndedGrabbing, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13845425816625794816
+          m_Value1: 16905494431571644656
+        Name: AnimationEndedGrabbing
+        m_Value: {fileID: 11400000, guid: 61ac8d8707cc0d94ab40cd40eaad665f, type: 2}
+    - rid: 7620560237347734232
+      type: {class: 'BlackboardVariable`1[[PlayerTalkingWithNpcStateChannel, AdventureGameplay]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 7363065750734085426
+          m_Value1: 2360157669766836611
+        Name: New Player  talking with npc
+        m_Value: {fileID: 11400000, guid: ef0555b057e48ca4f9fbe8682cdea9fa, type: 2}
+    - rid: 7620560237347734233
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17455088845407900575
+          m_Value1: 2652002625922195186
+        Name: NavMeshPatroling
+        m_Value: 1
+    - rid: 7620560237347734234
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1556637036820255788
+          m_Value1: 13642802236087118727
+        Name: SwitchTargetDelay
+        m_Value: 3
+    - rid: 7620560237347734235
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 12620877223934169643
+          m_Value1: 5461965901140985226
+        Name: MoveSpeed
+        m_Value: 0
+    - rid: 7620560237347734236
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5172545610163355179
+          m_Value1: 7431598691477423329
+        Name: SlowdownDistance
+        m_Value: 2
+    - rid: 7620560238350172366
+      type: {class: 'BlackboardVariable`1[[UnityEngine.AI.NavMeshAgent, UnityEngine.AIModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4233992815652450759
+          m_Value1: 6760168740389524521
+        Name: New Nav Mesh Agent
+        m_Value: {fileID: 2123118487}
+    - rid: 7620560238686240853
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15806635632461219994
+          m_Value1: 915968850386014901
+        Name: AvailableNavigatingTargets
+        m_Value: []
+    - rid: 7620560238686240856
+      type: {class: 'BlackboardVariable`1[[System.Single, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 15720746435413945264
+          m_Value1: 5558052790941166666
+        Name: StopDistance
+        m_Value: 1
+--- !u!95 &2123118490
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123118485}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 3f38b09d048c65f45a464f9f8f07fd86, type: 3}
+  m_Controller: {fileID: 9100000, guid: dfd44cbccdb191f49bec2410eeb94fc5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2132559171
 GameObject:
   m_ObjectHideFlags: 0
@@ -12693,6 +14958,7 @@ PrefabInstance:
     - {fileID: 3597789246176122633, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
     - {fileID: 7428397337864422615, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
     - {fileID: 4014643807703960110, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
+    - {fileID: 6489949889232399303, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8f2c0ead549bb004db669f633d115ed0, type: 3}
@@ -13397,7 +15663,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1547743944607731783, guid: e93259670786758419f355d54db0dab6, type: 3}
       propertyPath: m_Alpha
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1547743944607731783, guid: e93259670786758419f355d54db0dab6, type: 3}
       propertyPath: m_Enabled
@@ -13587,6 +15853,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7657404546151956817, guid: e93259670786758419f355d54db0dab6, type: 3}
+      propertyPath: m_Name
+      value: RoflButton
+      objectReference: {fileID: 0}
     - target: {fileID: 7969019393628143367, guid: e93259670786758419f355d54db0dab6, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -13624,13 +15894,57 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1374579569}
     m_Modifications:
+    - target: {fileID: 340389410814493190, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 914196044473440574, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1524358820634953914, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2018927670218209716, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2236230184520912593, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2343622814225117766, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3211559343690687677, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3325586869045859013, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3468862328855846432, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3566431449996599955, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 4021753317817050078, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_UIInputModule
       value: 
       objectReference: {fileID: 217468191}
+    - target: {fileID: 4770342366555985173, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5210564357132496449, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5220084499638363498, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_LocalPosition.x
@@ -13638,7 +15952,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5220084499638363498, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 7.24
       objectReference: {fileID: 0}
     - target: {fileID: 5220084499638363498, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_LocalPosition.z
@@ -13672,13 +15986,105 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5289892959566232190, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5815420820493545252, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 1463
+      objectReference: {fileID: 0}
     - target: {fileID: 5931240243386663305, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: promptView
       value: 
       objectReference: {fileID: 106020569}
+    - target: {fileID: 5975396239012951847, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5989553309811296070, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 6528520941518286128, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
       propertyPath: m_Name
       value: AdventurePlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322994765541992657, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7757207330755871201, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7852013533780590737, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7906094273680195413, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7961206821553342798, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8354272327462986515, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8530980071493723032, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539398993168472559, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8791531740081992849, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.52572036
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.39816937
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7137521
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.23587553
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 184.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -70.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020694117446957346, guid: a87e5da59ac2e2547becb6215bd48443, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 125
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14859,7 +17265,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8047135755570936087}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
   m_Name: 
@@ -15016,6 +17422,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 116218017}
+  - {fileID: 1868715540}
   - {fileID: 1876267595}
   - {fileID: 856593199}
   - {fileID: 1374579569}

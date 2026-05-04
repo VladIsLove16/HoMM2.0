@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cbe19bf3a8d75f47901224117f0a144, type: 3}
   m_Name: ArcherStats
   m_EditorClassIdentifier: 
-  Health: 12
-  maxHealth: 12
-  Damage: 0
+  Health: 9
+  maxHealth: 9
+  Damage: 4
   SpellPower: 0
   Offense: 2
   Defense: 1
   MoveSpeed: 3
-  AttackRange: 5
+  AttackRange: 10
   AllowAdjacentRanged: 1
   CanFly: 0
   invulnerableEffects: 
