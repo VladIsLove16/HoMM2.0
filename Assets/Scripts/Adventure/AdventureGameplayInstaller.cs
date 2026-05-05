@@ -2,12 +2,14 @@ using Adventure.Application.Dialog;
 using Adventure.Application.VMs;
 using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
+using Adventure.Domain.Progression;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Infrastructure.Interaction;
 using Adventure.Infrastructure.Inventory;
 using Adventure.Infrastructure.Movement;
 using Adventure.Infrastructure.Persistence;
 using Adventure.Infrastructure.Players;
+using Adventure.Infrastructure.Progression;
 using Adventure.Infrastructure.State;
 using Adventure.Integration.Battle;
 using Adventure.Multiplayer;
@@ -256,6 +258,8 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     {
         Container.Bind<IDialogRepository>().FromInstance(dialogueDatabase).AsSingle();
         Container.Bind<IDialogStateStore>().To<PlayerPrefsDialogStateStore>().AsSingle();
+        Container.Bind<IStoryFlagsStore>().To<PlayerPrefsStoryFlagsStore>().AsSingle();
+        Container.Bind<IStoryFlagsService>().To<StoryFlagsService>().AsSingle();
         Container.Bind<IUnitStatsProvider>().FromInstance(mushroomAssetMap).AsSingle();
         Container.Bind<IUnitViewDefinition<MushroomCollectible>>().FromInstance(mushroomAssetMap).AsSingle();
         Container.Bind<AdventureMushroomAssetMap>().FromInstance(mushroomAssetMap).AsSingle();

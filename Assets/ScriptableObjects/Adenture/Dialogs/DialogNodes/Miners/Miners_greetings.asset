@@ -61,6 +61,11 @@ MonoBehaviour:
     NextNode: {fileID: 11400000, guid: ef62d82f8b8c9474097c83d5caa938ef, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: c623a55dc16e4b42b392ab3d18be88b5, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   - Id: 1
     Text: "\u041B\u0435\u0441\u043D\u0438\u043A \u0441\u043A\u0430\u0437\u0430\u043B,
       \u0432\u044B \u0437\u043D\u0430\u0435\u0442\u0435 \u0434\u043E\u0440\u043E\u0433\u0443.
@@ -79,6 +84,11 @@ MonoBehaviour:
     NextNode: {fileID: 11400000, guid: f0179d0503ca471488d0d80a14110b53, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: c623a55dc16e4b42b392ab3d18be88b5, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   references:
     version: 2
     RefIds: []

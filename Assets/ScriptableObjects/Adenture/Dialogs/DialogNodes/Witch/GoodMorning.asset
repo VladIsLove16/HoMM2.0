@@ -49,6 +49,11 @@ MonoBehaviour:
     NextNode: {fileID: 0}
     VictoryNode: {fileID: 11400000, guid: 5c61f27c9a8a4f80afbfd7446f0cf76f, type: 2}
     DefeatNode: {fileID: 11400000, guid: dc7a8824a1254e8f90ab0eadc447adb4, type: 2}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   - Id: leave
     Text: I'll be back later.
     TextLocalized:
@@ -64,6 +69,11 @@ MonoBehaviour:
     NextNode: {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   - Id: Army
     Text: What's army u have?
     TextLocalized:
@@ -79,6 +89,11 @@ MonoBehaviour:
     NextNode: {fileID: 11400000, guid: d935dd1e49dd00f4ab49bad199aaa2b2, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   references:
     version: 2
     RefIds: []

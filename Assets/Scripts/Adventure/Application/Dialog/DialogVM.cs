@@ -1,6 +1,7 @@
 using System;
 using Adventure.Domain.Dialog;
 using Adventure.Domain.Inventory;
+using Adventure.Domain.Progression;
 using Adventure.Infrastructure.Dialog;
 using Adventure.Integration.Battle;
 using Adventure.Settings.ViewModel;
@@ -18,6 +19,7 @@ namespace Adventure.Application.Dialog
         private readonly ReactiveProperty<DialogueNode> _currentNode = new ReactiveProperty<DialogueNode>();
         private readonly ReactiveProperty<ArmyLineupSO> _enenyArmy = new ReactiveProperty<ArmyLineupSO>();
         private readonly IArmyLineupFormatter _armyFormatter;
+        private readonly IStoryFlagsService _storyFlagsService;
         private DialogueSession _session;
         private string _activeDialogId;
         public string ActiveDialogId => _activeDialogId;
@@ -27,10 +29,12 @@ namespace Adventure.Application.Dialog
         public DialogVM(
             IDialogRepository repository,
             IDialogStateStore stateStore,
+            IStoryFlagsService storyFlagsService,
             IArmyLineupFormatter armyFormatter = null)
         {
             _repository = repository;
             _stateStore = stateStore;
+            _storyFlagsService = storyFlagsService;
             _armyFormatter = armyFormatter ?? new DefaultArmyLineupFormatter();
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
@@ -62,7 +66,7 @@ namespace Adventure.Application.Dialog
             var resolver = BuildTextResolver(armyLineupSO);
             _session = new DialogueSession(graph, startNodeId, resolver);
             _session.IsCompleted.Subscribe(OnSessionStateChanged);
-            _currentNode.SetValueAndForceNotify(_session.CurrentNode);
+            RefreshCurrentNode();
             _isOpen.SetValueAndForceNotify(true);
             return true;
         }
@@ -78,11 +82,12 @@ namespace Adventure.Application.Dialog
         {
             if (_session == null)
                 throw new InvalidOperationException("Dialog not started");
-           
-            var currentNode = _session.CurrentNode;
-            var selectedChoice = currentNode?.Choices?.FirstOrDefault(c => c.Id == choiceId);
-            if (selectedChoice == null)
+
+            var selectedChoice = _currentNode.Value?.Choices?.FirstOrDefault(c => c.Id == choiceId);
+            if (selectedChoice == null || !selectedChoice.IsAvailable)
                 throw new InvalidOperationException($"Choice '{choiceId}' not found");
+
+            _storyFlagsService?.SetMany(selectedChoice.GrantedFlagIds);
 
             var action = selectedChoice.Action;
             ChoiceActionTriggered?.Invoke(action);
@@ -120,7 +125,7 @@ namespace Adventure.Application.Dialog
             else
             {
                 _stateStore?.SaveState(new DialogStateSnapshot(_activeDialogId, _session.CurrentNode.Id));
-                _currentNode.SetValueAndForceNotify(_session.CurrentNode);
+                RefreshCurrentNode();
             }
         }
 
@@ -179,6 +184,47 @@ namespace Adventure.Application.Dialog
                 tokens["Army"] = armyText;
             }
             return new DialogueTextResolver(tokens);
+        }
+
+        private void RefreshCurrentNode()
+        {
+            _currentNode.SetValueAndForceNotify(BuildPresentedNode(_session?.CurrentNode));
+        }
+
+        private DialogueNode BuildPresentedNode(DialogueNode sourceNode)
+        {
+            if (sourceNode == null)
+            {
+                return null;
+            }
+
+            if (sourceNode.Choices == null || sourceNode.Choices.Count == 0)
+            {
+                return sourceNode;
+            }
+
+            var presentedChoices = new List<DialogueChoice>(sourceNode.Choices.Count);
+            foreach (var choice in sourceNode.Choices)
+            {
+                if (choice == null)
+                {
+                    continue;
+                }
+
+                var isAvailable = _storyFlagsService?.HasAll(choice.RequiredFlagIds) ?? true;
+                if (!isAvailable && choice.HideIfLocked)
+                {
+                    continue;
+                }
+
+                var choiceText = isAvailable || string.IsNullOrWhiteSpace(choice.LockedText)
+                    ? choice.Text
+                    : choice.LockedText;
+
+                presentedChoices.Add(choice.WithPresentation(choiceText, isAvailable));
+            }
+
+            return new DialogueNode(sourceNode.Id, sourceNode.Speaker, sourceNode.Text, presentedChoices);
         }
     }
 }

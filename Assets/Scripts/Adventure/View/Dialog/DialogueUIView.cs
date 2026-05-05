@@ -79,7 +79,11 @@ namespace Adventure.Presentation.Dialog
             var label = button.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
                 label.text = choice.Text;
-            button.onClick.AddListener(() => OnButtonClicked(choice));
+            button.interactable = choice.IsAvailable;
+            if (choice.IsAvailable)
+            {
+                button.onClick.AddListener(() => OnButtonClicked(choice));
+            }
             _spawnedButtons.Add(button);
         }
 

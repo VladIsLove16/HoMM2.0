@@ -1,6 +1,8 @@
 using Adventure.Application.Dialog;
+using Adventure.Domain.Progression;
 using Adventure.Infrastructure.Interaction;
 using Adventure.Integration.Battle;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using static Adventure.Infrastructure.Dialog.NpcAnimationController;
@@ -13,10 +15,13 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private DialogueGraphSO dialogue;
         [SerializeField] ArmyLineupSO lineup;
         [SerializeField] string Name;
+        [SerializeField] private List<StoryFlagDefinitionSO> requiredFlags = new();
+        [SerializeField] private DialogueGraphSO fallbackDialogue;
         [SerializeField] private NpcAnimationController battleAnimationController;
         [SerializeField] private NpcBehaviorGraphBridge behaviorGraphBridge;
         private DialogVM _dialogVM;
         private NpcBehaviorGraphRegistry _behaviorGraphRegistry;
+        private IStoryFlagsService _storyFlagsService;
 
         private void Reset()
         {
@@ -29,10 +34,14 @@ namespace Adventure.Infrastructure.Dialog
         }
 
         [Inject]
-        public void Construct(DialogVM dialogVM, NpcBehaviorGraphRegistry behaviorGraphRegistry)
+        public void Construct(
+            DialogVM dialogVM,
+            NpcBehaviorGraphRegistry behaviorGraphRegistry,
+            IStoryFlagsService storyFlagsService)
         {
             _dialogVM = dialogVM;
             _behaviorGraphRegistry = behaviorGraphRegistry;
+            _storyFlagsService = storyFlagsService;
             ResolveBehaviorBridge();
             EnsureDialogIDExist();
             RegisterBridge();
@@ -49,37 +58,38 @@ namespace Adventure.Infrastructure.Dialog
         }
         private void EnsureDialogIDExist()
         {
-            if (dialogue == null || _dialogVM == null)
+            if (_dialogVM == null)
                 return;
 
-            if (!_dialogVM.DialogExist(dialogue.Id))
-                Debug.LogWarning("Dialog wih id " + dialogue.Id+ " doesn not exist on go " + name);
+            EnsureDialogExists(dialogue);
+            EnsureDialogExists(fallbackDialogue);
         }
 
         public void Interact(PlayerInteractionContext context)
         {
-            if (dialogue == null)
+            var dialogueToStart = ResolveDialogueToStart();
+            if (dialogueToStart == null)
             {
-                Debug.LogWarning($"Dialogue asset is not set for {name}", this);
+                Debug.LogWarning($"Dialogue asset is not available or still locked for {name}", this);
                 return;
             }
 
-            _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogue.Id, context.PlayerTransform);
-            _behaviorGraphRegistry?.Activate(dialogue.Id, behaviorGraphBridge);
+            _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogueToStart.Id, context.PlayerTransform);
+            _behaviorGraphRegistry?.Activate(dialogueToStart.Id, behaviorGraphBridge);
             battleAnimationController?.PlayAnimation(NpcAnimationType.Greeting);
-            bool isDialogStarted = _dialogVM.TryStartDialog(dialogue.Id, lineup);
+            bool isDialogStarted = _dialogVM.TryStartDialog(dialogueToStart.Id, lineup);
             if (!isDialogStarted)
             {
-                _behaviorGraphRegistry?.ClearPending(dialogue.Id);
-                _behaviorGraphRegistry?.ClearActive(dialogue.Id, behaviorGraphBridge);
-                Debug.LogWarning($"Dialogue '{dialogue.Id}' could not be started");
+                _behaviorGraphRegistry?.ClearPending(dialogueToStart.Id);
+                _behaviorGraphRegistry?.ClearActive(dialogueToStart.Id, behaviorGraphBridge);
+                Debug.LogWarning($"Dialogue '{dialogueToStart.Id}' could not be started");
                 return;
             }
         }
 
         public bool TryStopCurrentDialogueFromNpc()
         {
-            if (dialogue == null)
+            if (dialogue == null && fallbackDialogue == null)
             {
                 Debug.LogWarning($"Dialogue asset is not set for {name}", this);
                 return false;
@@ -91,13 +101,13 @@ namespace Adventure.Infrastructure.Dialog
                 return false;
             }
 
-            if (_dialogVM.ActiveDialogId != dialogue.Id)
+            if (!MatchesActiveDialogue(_dialogVM.ActiveDialogId))
             {
                 return false;
             }
 
             ResolveBehaviorBridge();
-            _behaviorGraphRegistry?.Activate(dialogue.Id, behaviorGraphBridge);
+            _behaviorGraphRegistry?.Activate(_dialogVM.ActiveDialogId, behaviorGraphBridge);
             battleAnimationController?.PlayAnimation(NpcAnimationType.Bye);
             _dialogVM.Close();
             return true;
@@ -114,24 +124,26 @@ namespace Adventure.Infrastructure.Dialog
         {
             ResolveBehaviorBridge();
 
-            if (dialogue == null || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
+            if ((dialogue == null && fallbackDialogue == null) || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
             {
                 return;
             }
 
-            _behaviorGraphRegistry.Register(dialogue.Id, behaviorGraphBridge);
+            RegisterDialogue(dialogue);
+            RegisterDialogue(fallbackDialogue);
         }
 
         private void UnregisterBridge()
         {
             ResolveBehaviorBridge();
 
-            if (dialogue == null || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
+            if ((dialogue == null && fallbackDialogue == null) || behaviorGraphBridge == null || _behaviorGraphRegistry == null)
             {
                 return;
             }
 
-            _behaviorGraphRegistry.Unregister(dialogue.Id, behaviorGraphBridge);
+            UnregisterDialogue(dialogue);
+            UnregisterDialogue(fallbackDialogue);
         }
 
         private void ResolveBehaviorBridge()
@@ -142,6 +154,88 @@ namespace Adventure.Infrastructure.Dialog
             }
 
             behaviorGraphBridge = GetComponent<NpcBehaviorGraphBridge>();
+        }
+
+        private DialogueGraphSO ResolveDialogueToStart()
+        {
+            if (dialogue == null && fallbackDialogue == null)
+            {
+                return null;
+            }
+
+            if (HasAllRequiredFlags())
+            {
+                return dialogue;
+            }
+
+            return fallbackDialogue;
+        }
+
+        private bool HasAllRequiredFlags()
+        {
+            if (requiredFlags == null || requiredFlags.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var flag in requiredFlags)
+            {
+                if (flag == null || string.IsNullOrWhiteSpace(flag.Id))
+                {
+                    continue;
+                }
+
+                if (!(_storyFlagsService?.Has(flag.Id) ?? false))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool MatchesActiveDialogue(string dialogId)
+        {
+            if (string.IsNullOrWhiteSpace(dialogId))
+            {
+                return false;
+            }
+
+            return (dialogue != null && dialogue.Id == dialogId)
+                || (fallbackDialogue != null && fallbackDialogue.Id == dialogId);
+        }
+
+        private void EnsureDialogExists(DialogueGraphSO dialogueAsset)
+        {
+            if (dialogueAsset == null)
+            {
+                return;
+            }
+
+            if (!_dialogVM.DialogExist(dialogueAsset.Id))
+            {
+                Debug.LogWarning("Dialog wih id " + dialogueAsset.Id + " doesn not exist on go " + name);
+            }
+        }
+
+        private void RegisterDialogue(DialogueGraphSO dialogueAsset)
+        {
+            if (dialogueAsset == null)
+            {
+                return;
+            }
+
+            _behaviorGraphRegistry.Register(dialogueAsset.Id, behaviorGraphBridge);
+        }
+
+        private void UnregisterDialogue(DialogueGraphSO dialogueAsset)
+        {
+            if (dialogueAsset == null)
+            {
+                return;
+            }
+
+            _behaviorGraphRegistry.Unregister(dialogueAsset.Id, behaviorGraphBridge);
         }
     }
 }

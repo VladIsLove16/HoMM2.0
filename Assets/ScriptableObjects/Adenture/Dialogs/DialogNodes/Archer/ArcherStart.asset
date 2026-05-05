@@ -22,7 +22,17 @@ MonoBehaviour:
     NextNode: {fileID: 0}
     VictoryNode: {fileID: 11400000, guid: 8d8d5aaea5f74b71a16e7c99243518c3, type: 2}
     DefeatNode: {fileID: 11400000, guid: 9f2b8632c51c4b2d8b2586b82d06f5fd, type: 2}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: 5f27b9a36bb947079c9a6e22c54ba3d1, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   - Id: leave
     Text: I'll be back later.
     Action: 2
     NextNode: {fileID: 11400000, guid: b15791099651688429abe37b04877a9b, type: 2}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: 5f27b9a36bb947079c9a6e22c54ba3d1, type: 2}
+    HideIfLocked: 0
+    LockedText: 

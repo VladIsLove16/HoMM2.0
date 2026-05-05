@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Adventure.Domain.Dialog;
+using Adventure.Domain.Progression;
 using UnityEngine;
 using UnityEngine.Localization;
 
@@ -16,6 +17,10 @@ public sealed class DialogueNodeSO : ScriptableObject
         public DialogueNodeSO NextNode;
         public DialogueNodeSO VictoryNode;
         public DialogueNodeSO DefeatNode;
+        public List<StoryFlagDefinitionSO> RequiredFlags;
+        public List<StoryFlagDefinitionSO> GrantedFlags;
+        public bool HideIfLocked;
+        [TextArea] public string LockedText;
     }
 
     [SerializeField] private string nodeId;
@@ -37,7 +42,17 @@ public sealed class DialogueNodeSO : ScriptableObject
             var victoryId = choice.VictoryNode != null ? choice.VictoryNode.NodeId : nextId;
             var defeatId = choice.DefeatNode != null ? choice.DefeatNode.NodeId : victoryId;
             var resolvedChoiceText = ResolveLocalizedString(choice.TextLocalized, choice.Text);
-            domainChoices.Add(new DialogueChoice(choice.Id, resolvedChoiceText, nextId, choice.Action, victoryId, defeatId));
+            domainChoices.Add(new DialogueChoice(
+                choice.Id,
+                resolvedChoiceText,
+                nextId,
+                choice.Action,
+                victoryId,
+                defeatId,
+                ResolveFlagIds(choice.RequiredFlags),
+                ResolveFlagIds(choice.GrantedFlags),
+                choice.HideIfLocked,
+                choice.LockedText));
         }
         return new DialogueNode(nodeId, resolvedSpeaker, resolvedText, domainChoices);
     }
@@ -52,5 +67,26 @@ public sealed class DialogueNodeSO : ScriptableObject
         }
 
         return fallback ?? string.Empty;
+    }
+
+    private static IReadOnlyList<string> ResolveFlagIds(List<StoryFlagDefinitionSO> flags)
+    {
+        if (flags == null || flags.Count == 0)
+        {
+            return System.Array.Empty<string>();
+        }
+
+        var ids = new List<string>(flags.Count);
+        foreach (var flag in flags)
+        {
+            if (flag == null || string.IsNullOrWhiteSpace(flag.Id))
+            {
+                continue;
+            }
+
+            ids.Add(flag.Id);
+        }
+
+        return ids;
     }
 }

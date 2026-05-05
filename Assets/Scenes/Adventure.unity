@@ -8163,6 +8163,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 3e87560682bc3a942a6bb70d80cd8b13, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 84f615e01b434ecebbdcff55b5d6f2cc, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
       objectReference: {fileID: 0}
@@ -8270,6 +8278,14 @@ PrefabInstance:
       propertyPath: dialogue
       value: 
       objectReference: {fileID: 11400000, guid: bb519f9af16593642a64820045c901c5, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 5f27b9a36bb947079c9a6e22c54ba3d1, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
@@ -9708,6 +9724,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 3e87560682bc3a942a6bb70d80cd8b13, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 84f615e01b434ecebbdcff55b5d6f2cc, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
       objectReference: {fileID: 0}
@@ -10764,6 +10788,14 @@ PrefabInstance:
       propertyPath: dialogue
       value: 
       objectReference: {fileID: 11400000, guid: d063b58c4ca1fa249a8c0bcfc13d127b, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
@@ -13881,6 +13913,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: d063b58c4ca1fa249a8c0bcfc13d127b, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
       objectReference: {fileID: 0}
@@ -14475,6 +14515,14 @@ PrefabInstance:
       propertyPath: dialogue
       value: 
       objectReference: {fileID: 11400000, guid: 83454603260f48f45a497f208584b8fc, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: c623a55dc16e4b42b392ab3d18be88b5, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
@@ -16963,6 +17011,14 @@ PrefabInstance:
       propertyPath: dialogue
       value: 
       objectReference: {fileID: 11400000, guid: 83454603260f48f45a497f208584b8fc, type: 2}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
+      propertyPath: requiredFlags.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: c623a55dc16e4b42b392ab3d18be88b5, type: 2}
     - target: {fileID: 7051651732106025540, guid: 67f57e4331440694bb1b6e0ebd93150a, type: 3}
       propertyPath: dialogueId
       value: WitchDialog
