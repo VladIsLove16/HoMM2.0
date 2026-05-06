@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 6659fbc2452779141aa450dad4784e18
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
@@ -34,8 +34,8 @@ ModelImporter:
       name: Greetings
       takeName: mixamo.com
       internalID: -203655887218126122
-      firstFrame: 0
-      lastFrame: 153
+      firstFrame: 43
+      lastFrame: 147
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -85,6 +85,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8

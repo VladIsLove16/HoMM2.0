@@ -6,6 +6,7 @@ namespace Adventure.Infrastructure.Dialog
     public enum NpcAnimationType
     {
         Greeting,
+        Grabbing,
         Talking,
         BattleStart,
         BattleWon,

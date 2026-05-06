@@ -25,6 +25,7 @@ using Game.Achievements;
 using Game.Events;
 using System;
 using System.Collections.Generic;
+using SharedView.Audio;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -65,6 +66,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
     [SerializeField] private Adventure.MushroomBook.MushroomDropPresenter mushroomDropPresenter;
     [SerializeField] private HelpMenu helpMenu;
     [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private GameAudioSettingsSO gameAudioSettings;
     [SerializeField] private AdventureDevTools devTools;
     [Header("Achievements")]
     [SerializeField] private AchievementCatalog achievementCatalog;
@@ -161,6 +163,7 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         BindPersistence();
         BindAchievementServices();
         BindMouseSensitivity();
+        BindAudioServices();
         Container.Bind<PauseController>().AsSingle();
         var resolver = new ArmyFormationResolver(playerFrontlineY, enemyFrontlineY, columnSpacing);
         Container.Bind<ArmyFormationResolver>().FromInstance(resolver).AsSingle();
@@ -184,6 +187,22 @@ public sealed class AdventureGameplayInstaller : MonoInstaller
         }
 
         Container.Bind<EventBus>().AsSingle();
+    }
+
+    private void BindAudioServices()
+    {
+        var settings = gameAudioSettings != null
+            ? gameAudioSettings
+            : Resources.Load<GameAudioSettingsSO>("Audio/GameAudioSettings");
+
+        if (settings == null)
+        {
+            Debug.LogWarning("[AdventureGameplayInstaller] GameAudioSettingsSO is not assigned and fallback resource was not found.", this);
+        }
+
+        Container.Bind<GameAudioSettingsSO>().FromInstance(settings).AsSingle();
+        Container.BindInterfacesAndSelfTo<GameAudioService>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<ButtonAudioFeedbackBinder>().AsSingle().NonLazy();
     }
 
     private void BindAchievementServices()

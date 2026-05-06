@@ -33,6 +33,11 @@ namespace Adventure.Infrastructure.Dialog
             ResolveBehaviorBridge();
         }
 
+        private void Awake()
+        {
+            NpcRendererShadowSettings.Apply(gameObject);
+        }
+
         [Inject]
         public void Construct(
             DialogVM dialogVM,
@@ -49,6 +54,7 @@ namespace Adventure.Infrastructure.Dialog
 
         private void OnEnable()
         {
+            NpcRendererShadowSettings.Apply(gameObject);
             RegisterBridge();
         }
 

@@ -81,6 +81,11 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectHovered(IGameViewObject gameViewObject)
     {
+        HandleGameViewObjectHovered(gameViewObject, gameViewObject != null ? gameViewObject.transform.position : Vector3.zero);
+    }
+
+    public void HandleGameViewObjectHovered(IGameViewObject gameViewObject, Vector3 worldPosition)
+    {
         if (gameViewObject == null)
             return;
 
@@ -99,7 +104,7 @@ public class GameView3D : MonoBehaviour
             _lastHoverable = hoverable;
         }
 
-        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        if (TryResolveCoords(worldPosition, out var coords))
         {
             ProcessCellHover(coords);
         }
@@ -107,10 +112,15 @@ public class GameView3D : MonoBehaviour
 
     public void HandleGameViewObjectSelected(IGameViewObject gameViewObject)
     {
+        HandleGameViewObjectSelected(gameViewObject, gameViewObject != null ? gameViewObject.transform.position : Vector3.zero);
+    }
+
+    public void HandleGameViewObjectSelected(IGameViewObject gameViewObject, Vector3 worldPosition)
+    {
         if (gameViewObject == null || IsInteractionLocked())
             return;
 
-        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        if (TryResolveCoords(worldPosition, out var coords))
         {
             ProcessCellSelected(coords);
         }
@@ -118,10 +128,15 @@ public class GameView3D : MonoBehaviour
 
     public void HandleActionPerformed(IGameViewObject gameViewObject)
     {
+        HandleActionPerformed(gameViewObject, gameViewObject != null ? gameViewObject.transform.position : Vector3.zero);
+    }
+
+    public void HandleActionPerformed(IGameViewObject gameViewObject, Vector3 worldPosition)
+    {
         if (gameViewObject == null)
             return;
 
-        if (TryResolveCoords(gameViewObject.transform.position, out var coords))
+        if (TryResolveCoords(worldPosition, out var coords))
         {
             ProcessCellAction(coords);
         }

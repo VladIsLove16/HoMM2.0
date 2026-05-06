@@ -33,7 +33,7 @@ namespace Tests.EditMode.ActionHandlers
             _baseStats.Offense = 20;
             _baseStats.Defense = 15;
             _baseStats.MoveSpeed = 3;
-            _baseStats.AttackRange = 1;
+            _baseStats.AttackRange = 0;
             _baseStats.CanFly = false;
             _baseStats.InvulnerableEffects = new List<StatusEffectType>();
 
@@ -49,7 +49,7 @@ namespace Tests.EditMode.ActionHandlers
         }
         
         [Test]
-        public void CanExecute_DiagonalAttackWith1AttackRange_ReturnsTrue()
+        public void CanExecute_DiagonalAdjacentAttackForMeleeUnit_ReturnsTrue()
         {
             _model.SpawnUnit(new UnitSpawnParams(1, 1, UnitType.Archer, TestAmount, Team.Red));
             var ctx = new ActionContext(new Vector2Int(0, 0), new Vector2Int(1, 1), default, default);

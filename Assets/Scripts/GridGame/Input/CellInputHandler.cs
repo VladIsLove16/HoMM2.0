@@ -70,7 +70,7 @@ public class CellInputHandler : MonoBehaviour
             if (_lastHoveredCollider == hit.collider)
                 return;
 
-            _gameView3D?.HandleGameViewObjectHovered(obj);
+            _gameView3D?.HandleGameViewObjectHovered(obj, hit.point);
             _lastHoveredCollider = hit.collider;
             _lastHoveredCell = null;
             return;
@@ -93,7 +93,7 @@ public class CellInputHandler : MonoBehaviour
         var obj = hit.collider.GetComponent<IGameViewObject>();
         if (obj != null && obj.IsSelectable)
         {
-            _gameView3D?.HandleGameViewObjectSelected(obj);
+            _gameView3D?.HandleGameViewObjectSelected(obj, hit.point);
         }
         else
         {
@@ -113,7 +113,7 @@ public class CellInputHandler : MonoBehaviour
         var obj = hit.collider.GetComponent<IGameViewObject>();
         if (obj != null)
         {
-            _gameView3D?.HandleActionPerformed(obj);
+            _gameView3D?.HandleActionPerformed(obj, hit.point);
             return;
         }
 

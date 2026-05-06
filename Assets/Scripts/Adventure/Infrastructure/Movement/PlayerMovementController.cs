@@ -1,5 +1,6 @@
 using Adventure.Domain.Movement;
 using Adventure.Settings.Configuration;
+using SharedView.Audio;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Assets.Scripts.Adventure.Infrastructure.Input;
@@ -23,9 +24,11 @@ namespace Adventure.Infrastructure.Movement
         private bool _sprintInput;
         private Vector2 _pendingLookInput;
         private bool _useExternalInput;
+        private float _nextFootstepTime;
         [FormerlySerializedAs("adventureCharacterInput")]
         [Inject(Optional = true)] private AdventureInput legacyInputProvider;
         [Inject(Optional = true)] private IMouseSensitivityService _mouseSensitivityService;
+        [Inject(Optional = true)] private IGameAudioService _audioService;
 
         private void Awake()
         {
@@ -138,6 +141,28 @@ namespace Adventure.Infrastructure.Movement
             }
 
             _state.SetGrounded(_controller.isGrounded);
+            TryPlayFootstep(velocity);
+        }
+
+        private void TryPlayFootstep(Vector3 velocity)
+        {
+            if (_audioService == null || !_controller.isGrounded)
+                return;
+
+            var horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+            if (horizontalVelocity.sqrMagnitude < 0.04f)
+                return;
+
+            if (Time.time < _nextFootstepTime)
+                return;
+
+            var settingsSo = _audioService.Settings;
+            var interval = _sprintInput
+                ? settingsSo != null ? settingsSo.SprintStepInterval : 0.34f
+                : settingsSo != null ? settingsSo.WalkStepInterval : 0.48f;
+
+            _nextFootstepTime = Time.time + Mathf.Max(0.05f, interval);
+            _audioService.PlayPlayerFootstep(transform.position);
         }
 
         private void TryStepUp(Vector3 attemptedMove)

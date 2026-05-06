@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29bfe3fc7935435d92566041ceac3805, type: 3}
+  m_Name: GameAudioSettings
+  m_EditorClassIdentifier: 
+  effectsMixerGroup: {fileID: -5090782498751160636, guid: 2e62866bfcccc384e88b37af4e90671c, type: 2}
+  buttonHover:
+    clips:
+    - {fileID: 8300000, guid: e5dfebab92501504ca62ac4c8a5670c6, type: 3}
+    volume: 0.7
+    pitchMin: 0.96
+    pitchMax: 1.04
+  buttonClick:
+    clips:
+    - {fileID: 8300000, guid: b76418f3c9153ee459a985cc20639957, type: 3}
+    volume: 0.85
+    pitchMin: 0.98
+    pitchMax: 1.02
+  playerFootsteps:
+    clips:
+    - {fileID: 8300000, guid: 90bebc0612372984894785e8c4cf24af, type: 3}
+    - {fileID: 8300000, guid: 68dfb57743a5bb44ba8bcd5efc5a3d21, type: 3}
+    volume: 0.42
+    pitchMin: 0.92
+    pitchMax: 1.08
+  walkStepInterval: 0.48
+  sprintStepInterval: 0.34
+  meleeImpact:
+    clips:
+    - {fileID: 8300000, guid: 3457cd5eaabcc1a41b889cf5cbf57f67, type: 3}
+    volume: 0.9
+    pitchMin: 0.95
+    pitchMax: 1.05
+  rangedImpact:
+    clips:
+    - {fileID: 8300000, guid: 36a08575123fc59478a50178da2acfc4, type: 3}
+    volume: 0.85
+    pitchMin: 0.95
+    pitchMax: 1.05
+  magicImpact:
+    clips:
+    - {fileID: 8300000, guid: 89dae706391ab484ab2805641c1f5ba4, type: 3}
+    - {fileID: 8300000, guid: d5a2957093c735f45b0d9bcc785943ef, type: 3}
+    volume: 0.85
+    pitchMin: 0.95
+    pitchMax: 1.05
+  genericImpact:
+    clips:
+    - {fileID: 8300000, guid: c3018e3c42700a441b6e77a2b13c74f2, type: 3}
+    volume: 0.85
+    pitchMin: 0.95
+    pitchMax: 1.05

@@ -48,6 +48,8 @@ public class RangedAttackHandler : IActionHandler, IAttackActionHandler
         bool isAdjacent = dist <= 1.01f;
         if (unit.ModifiedStats == null)
             return false;
+        if (unit.ModifiedStats.AttackRange <= 0)
+            return false;
         if (!unit.ModifiedStats.AllowAdjacentRanged && isAdjacent)
             return false;
         return dist <= unit.ModifiedStats.AttackRange;

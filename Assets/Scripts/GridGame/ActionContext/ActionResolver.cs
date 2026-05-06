@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using SharedView.Audio;
 using UnityEngine;
+using Zenject;
 public class ActionResolver
 {
+    private const int MeleeAttackRange = 1;
+
     public event Action<ActionPlan> ActionResolved;
     public System.Action ActionNotResolved;
 
@@ -15,7 +19,12 @@ public class ActionResolver
     private readonly GameModel _gameModel;
 
     private Dictionary<ActionType, IActionHandler> actionDict = new();
-    public ActionResolver(GameModel gameModel, MovementSystem movementSystem)
+    public ActionResolver(
+        GameModel gameModel,
+        MovementSystem movementSystem,
+        [InjectOptional] IGameAudioService audioService = null,
+        [InjectOptional] IUnitAudioProfileProvider unitAudioProfileProvider = null,
+        [InjectOptional] IWorldToCellProvider worldToCellProvider = null)
     {
         _movementSystem = movementSystem;
         _gameModel = gameModel;
@@ -24,7 +33,7 @@ public class ActionResolver
         MoveActionHandler = new(movementSystem, gameModel);
         RangedAttackHandler = new(movementSystem, gameModel);
         AttackActionHandler = new(movementSystem, gameModel);
-        SpellActionHandler = new(movementSystem, gameModel);
+        SpellActionHandler = new(movementSystem, gameModel, audioService, unitAudioProfileProvider, worldToCellProvider);
         actionDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
         actionDict.Add(ActionType.Attack, AttackActionHandler);
         actionDict.Add(ActionType.Move, MoveActionHandler);
@@ -94,7 +103,7 @@ public class ActionResolver
 
         // 4) Вражеская цель: сначала пробуем стрелять, затем удар с подходом/без
         var attackerForRanged = fromUnit;
-        if (attackerForRanged != null && attackerForRanged.ModifiedStats != null && IsEnemy(attackerForRanged, targetUnit))
+        if (attackerForRanged != null && HasRangedAttack(attackerForRanged) && IsEnemy(attackerForRanged, targetUnit))
         {
             _movementSystem.GetRouteIgnoringObstacles(ctx.FromCell, ctx.TargetCell, out var routeRanged);
             var distRanged = _movementSystem.GetRouteCost(routeRanged);
@@ -129,7 +138,7 @@ public class ActionResolver
         {
             _movementSystem.GetRouteIgnoringObstacles(ctx.FromCell, ctx.TargetCell, out var routeMelee);
             var distMelee = _movementSystem.GetRouteCost(routeMelee);
-            if (routeMelee != null && fromUnit.ModifiedStats != null && Mathf.Floor(distMelee) <= fromUnit.ModifiedStats.AttackRange)
+            if (routeMelee != null && CanPerformMeleeAttack(fromUnit, distMelee))
             {
                 actionType = ActionType.Attack;
                 return true;
@@ -179,13 +188,16 @@ public class ActionResolver
             if (routeAttack == null) return false;
 
             var dist = _movementSystem.GetRouteCost(routeAttack);
-            if (attacker.ModifiedStats == null || Mathf.Floor(dist) > attacker.ModifiedStats.AttackRange)
+            if (!CanPerformMeleeAttack(attacker, dist))
                 return false;
 
             return true;
         }
 
         bool IsEnemy(UnitModel a, UnitModel b) => b != null && a != null && a.Team.Value != b.Team.Value;
-        bool IsMeleeUnit(UnitModel unit) => unit != null && unit.ModifiedStats != null && unit.ModifiedStats.AttackRange <= 1;
+        bool HasRangedAttack(UnitModel unit) => unit != null && unit.ModifiedStats != null && unit.ModifiedStats.AttackRange > 0;
+        bool IsMeleeUnit(UnitModel unit) => unit != null && unit.ModifiedStats != null && unit.ModifiedStats.AttackRange <= 0;
+        bool CanPerformMeleeAttack(UnitModel unit, float distance) =>
+            IsMeleeUnit(unit) && Mathf.FloorToInt(distance) <= MeleeAttackRange;
     }
 }

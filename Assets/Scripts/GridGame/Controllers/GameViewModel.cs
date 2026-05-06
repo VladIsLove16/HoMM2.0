@@ -7,6 +7,8 @@ using Zenject;
 
 public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 {
+    private const int MeleeAttackRange = 1;
+
     public event Action<int, int> GridInited;
     public event Action<UnitViewModel> UnitStatsRequested;
     public event Action<PreviewResult> PreviewChanged;
@@ -271,7 +273,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
             return;
 
         var fromCell = activeUnit.Position;
-        var actionContext = new ActionContext(fromCell, coords.Key, SpellType.None, coords.Value);
+        var attackFromCell = ResolveAttackFromCell(activeUnit, coords.Key, coords.Value);
+        var actionContext = new ActionContext(fromCell, coords.Key, SpellType.None, attackFromCell);
         if (!_actionResolver.TryResolvePlan(actionContext, out var plan))
         {
             Debug.LogWarning($"[GameViewModel] No action handler for {coords.Key}");
@@ -572,7 +575,8 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     public bool ToGridPair(Vector3 position, out KeyValuePair<Vector2Int, Vector2Int> coords)
     {
         var success = ToGrid(position, out var main);
-        coords = new KeyValuePair<Vector2Int, Vector2Int>(main, main);
+        var attackFrom = ResolvePreferredAdjacentCell(position, main);
+        coords = new KeyValuePair<Vector2Int, Vector2Int>(main, attackFrom);
         return success;
     }
     private bool TryAddUnitReachablePreview(PreviewResult preview, UnitModel unit)
@@ -664,7 +668,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
     private Vector2Int ResolveAttackFromCell(ICombatObject attacker, Vector2Int targetCell, Vector2Int nearestCell)
     {
-        if (nearestCell.x >= 0 && nearestCell.y >= 0)
+        if (IsInBounds(nearestCell) && nearestCell != targetCell)
             return nearestCell;
 
         if (attacker is not UnitModel unit || unit.ModifiedStats == null)
@@ -678,13 +682,55 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         return attacker.Position;
     }
 
+    private Vector2Int ResolvePreferredAdjacentCell(Vector3 worldPosition, Vector2Int mainCell)
+    {
+        var center = ToWorld(mainCell.x, mainCell.y);
+        var offset = worldPosition - center;
+        var planarOffset = new Vector2(offset.x, offset.z);
+        if (planarOffset.sqrMagnitude <= 0.0001f)
+            return mainCell;
+
+        var directions = new[]
+        {
+            Vector2Int.right,
+            Vector2Int.up + Vector2Int.right,
+            Vector2Int.up,
+            Vector2Int.up + Vector2Int.left,
+            Vector2Int.left,
+            Vector2Int.down + Vector2Int.left,
+            Vector2Int.down,
+            Vector2Int.down + Vector2Int.right,
+        };
+
+        var normalizedOffset = planarOffset.normalized;
+        var bestCell = mainCell;
+        var bestScore = float.NegativeInfinity;
+
+        foreach (var direction in directions)
+        {
+            var candidate = mainCell + direction;
+            if (!IsInBounds(candidate))
+                continue;
+
+            var direction2D = new Vector2(direction.x, direction.y).normalized;
+            var score = Vector2.Dot(normalizedOffset, direction2D);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestCell = candidate;
+            }
+        }
+
+        return bestCell;
+    }
+
     private bool TryFindAttackFromCell(UnitModel attacker, Vector2Int targetCell, out Vector2Int attackFrom)
     {
         attackFrom = attacker.Position.Value;
         var stats = attacker.ModifiedStats;
         if (stats == null)
             return false;
-        if (stats.AttackRange > 1)
+        if (stats.AttackRange > 0)
             return false;
 
         var reachable = _movementSystem.GetReachableCells(attacker.Position.Value, stats.MoveSpeed);
@@ -704,7 +750,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
                 continue;
 
             var attackDistance = _movementSystem.GetRouteCost(attackRoute);
-            if (attackDistance > stats.AttackRange)
+            if (Mathf.FloorToInt(attackDistance) > MeleeAttackRange)
                 continue;
 
             if (!_movementSystem.GetRoute(attacker.Position.Value, cell, out var moveRoute))

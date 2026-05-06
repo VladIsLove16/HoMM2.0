@@ -13,6 +13,7 @@ using Adventure.Settings.ViewModel;
 using Adventure.Settings.Model;
 using UnityEngine.Audio;
 using Adventure.Settings.View;
+using SharedView.Audio;
 
 public class GridGameMonoInstaller : MonoInstaller
 {
@@ -21,6 +22,7 @@ public class GridGameMonoInstaller : MonoInstaller
     [SerializeField] private GameNetworkCommandGateway networkCommandGateway;
     [SerializeField] private SceneLoadWatcher sceneLoadWatcher;
     [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private GameAudioSettingsSO gameAudioSettings;
     [Header("View model dependencies")]
     [SerializeField] private GridUnitAssetMap gridUnitAssets;
     [SerializeField] private GridRenderSettingsSO gridRenderSettings;
@@ -97,6 +99,7 @@ public class GridGameMonoInstaller : MonoInstaller
         BindPersistenceServices();
         BindAchievementServices();
         BindMouseSensitivity();
+        BindAudioServices();
         Container.Bind<GameNetworkCommandGateway>().FromInstance(networkCommandGateway).AsSingle();
         Container.Bind<SceneLoadWatcher>().FromInstance(sceneLoadWatcher).AsSingle();
         Container.Bind<IBattleAnimationGate>().To<BattleAnimationGate>().AsSingle();
@@ -120,6 +123,22 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<EventBus>().AsSingle();
         Container.Bind<PauseController>().AsSingle();
         Container.Bind<AudioMixer>().AsSingle();
+    }
+
+    private void BindAudioServices()
+    {
+        var settings = gameAudioSettings != null
+            ? gameAudioSettings
+            : Resources.Load<GameAudioSettingsSO>("Audio/GameAudioSettings");
+
+        if (settings == null)
+        {
+            Debug.LogWarning("[GridGameMonoInstaller] GameAudioSettingsSO is not assigned and fallback resource was not found.", this);
+        }
+
+        Container.Bind<GameAudioSettingsSO>().FromInstance(settings).AsSingle();
+        Container.BindInterfacesAndSelfTo<GameAudioService>().AsSingle().NonLazy();
+        Container.BindInterfacesTo<ButtonAudioFeedbackBinder>().AsSingle().NonLazy();
     }
 
     private void BindMouseSensitivity()
@@ -192,6 +211,7 @@ public class GridGameMonoInstaller : MonoInstaller
     {
         Container.Bind<GameSettingsModel>().FromMethod(_ => GameSettingsRuntimeStore.Resolve()).AsSingle();
         Container.BindInterfacesAndSelfTo<GridUnitAssetMap>().FromInstance(gridUnitAssets).AsSingle();
+        Container.Bind<IUnitAudioProfileProvider>().FromInstance(gridUnitAssets).AsSingle();
         Container.Bind<StatusEffectDatas>().FromInstance(statusEffectDatas).AsSingle();
 
         Container.Bind<UnitModelFactory>().AsSingle();

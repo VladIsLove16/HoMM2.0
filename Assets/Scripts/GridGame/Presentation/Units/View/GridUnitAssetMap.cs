@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharedView.Audio;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 [CreateAssetMenu(menuName = "Units/Grid Unit Map")]
-public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D>, IUnitStatsProvider
+public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D>, IUnitStatsProvider, IUnitAudioProfileProvider
 {
     [Serializable]
     private struct Entry
@@ -58,6 +59,12 @@ public class GridUnitAssetMap : ScriptableObject, IUnitViewDefinition<UnitView3D
     {
         shared = null;
         return _lookup != null && _lookup.TryGetValue(type, out var entry) && (shared = entry.UnitDataSO.SharedData) != null;
+    }
+
+    public bool TryGetAudioProfile(UnitType type, out UnitAudioProfile profile)
+    {
+        profile = null;
+        return _lookup != null && _lookup.TryGetValue(type, out var entry) && (profile = entry.UnitDataSO.AudioProfile) != null;
     }
 
     public bool TryGetAssetReference(UnitType type, out AssetReferenceGameObject prefabReference)

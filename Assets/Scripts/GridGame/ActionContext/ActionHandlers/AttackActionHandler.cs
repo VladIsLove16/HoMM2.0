@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class AttackActionHandler : IActionHandler, IAttackActionHandler
 {
+    private const int MeleeAttackRange = 1;
+
     public ActionType ActionType
     {
         get
@@ -32,7 +34,7 @@ public class AttackActionHandler : IActionHandler, IAttackActionHandler
             return;
         }
 
-        attacker.SendDamage(new(target, true)); 
+        attacker.SendDamage(new(target, false));
     }
     public bool CanExecute(ActionContext ctx)
     {
@@ -62,7 +64,10 @@ public class AttackActionHandler : IActionHandler, IAttackActionHandler
         if (attacker.ModifiedStats == null)
             return false;
 
-        if (Mathf.Floor(routeCost)> attacker.ModifiedStats.AttackRange)
+        if (attacker.ModifiedStats.AttackRange > 0)
+            return false;
+
+        if (Mathf.FloorToInt(routeCost) > MeleeAttackRange)
             return false;
         return true;
     }

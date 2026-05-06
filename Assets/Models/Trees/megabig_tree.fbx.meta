@@ -3,7 +3,12 @@ guid: 70e01b1fbfe796c4e885a5048b0bbc5f
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: megabig_listva
+    second: {fileID: 2100000, guid: d2bbd95e0a6a56447bca87f5eff49d81, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

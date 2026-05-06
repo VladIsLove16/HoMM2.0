@@ -103,6 +103,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -214,9 +215,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26e817b2d7811f42908ccc86a6d6f74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Image: {fileID: 4275698453715469790, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
-  StatText: {fileID: 442744392758624545, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
-  StatAmount: {fileID: 2470124826809868631, guid: 962640dae0ed7b843a3ca082b6c9e048, type: 3}
+  Image: {fileID: 4275698453715469790}
+  StatText: {fileID: 442744392758624545}
+  StatAmount: {fileID: 2470124826809868631}
 --- !u!1 &3597570878699103332
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,6 +396,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

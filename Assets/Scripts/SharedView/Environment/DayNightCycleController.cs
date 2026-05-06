@@ -149,15 +149,17 @@ public class DayNightCycleController : MonoBehaviour
         sunLight.transform.rotation = Quaternion.Euler(sunAngle, profile.sunRotationOffsetY, 0f);
         sunLight.color = sunColor;
         sunLight.intensity = sunIntensity;
+        SetLightActive(sunLight, sunIntensity > 0.001f);
 
         if (moonLight != null)
         {
             moonLight.transform.rotation = Quaternion.Euler(sunAngle - 180f, profile.sunRotationOffsetY, 0f);
             moonLight.color = moonColor;
             moonLight.intensity = moonIntensity;
+            SetLightActive(moonLight, moonIntensity > 0.001f);
         }
 
-        RenderSettings.sun = sunLight;
+        RenderSettings.sun = moonLight != null && moonIntensity > sunIntensity ? moonLight : sunLight;
         RenderSettings.ambientLight = ambientColor;
         RenderSettings.fog = true;
         RenderSettings.fogColor = fogColor;
@@ -195,6 +197,25 @@ public class DayNightCycleController : MonoBehaviour
             SunColor = sunColor,
             SunIntensity = sunIntensity
         };
+    }
+
+    private static void SetLightActive(Light light, bool active)
+    {
+        if (light == null)
+            return;
+
+        light.enabled = active;
+
+        var transform = light.transform;
+        if (transform.parent != null && transform.parent.gameObject.activeSelf != active)
+        {
+            transform.parent.gameObject.SetActive(active);
+        }
+
+        if (light.gameObject.activeSelf != active)
+        {
+            light.gameObject.SetActive(active);
+        }
     }
 
     private void InitializeSkybox()

@@ -16,14 +16,25 @@ namespace Adventure.Infrastructure.Dialog
         [SerializeField] private string startWalkingWithRotation = "StartWalkingWithRotation";
         [SerializeField] private string lookAroundTrigger = "LookingAround";
         [SerializeField] private string WalkingBool = "Walking";
+        [SerializeField] private bool forceRendererShadows = true;
+
         private Action _onSequenceComplete;
+
         private void Awake()
         {
             if (animator == null)
             {
                 animator = GetComponent<Animator>();
             }
+
+            ApplyRendererShadowSettings();
         }
+
+        private void OnEnable()
+        {
+            ApplyRendererShadowSettings();
+        }
+
         public void PlayAnimation(NpcAnimationType animationType, Action onSequenceComplete = null)
         {
             string battleTrigger = ResolveAnimation(animationType);
@@ -41,6 +52,15 @@ namespace Adventure.Infrastructure.Dialog
         {
             animator.SetBool(WalkingBool, walking);
         }
+
+        private void ApplyRendererShadowSettings()
+        {
+            if (!forceRendererShadows)
+                return;
+
+            NpcRendererShadowSettings.Apply(gameObject);
+        }
+
         /// <summary>
         /// Invoked from animation events. Once the configured event fires we continue loading.
         /// </summary>

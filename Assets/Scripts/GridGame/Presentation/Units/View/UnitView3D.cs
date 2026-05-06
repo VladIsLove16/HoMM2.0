@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using SharedView.Audio;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -15,6 +16,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
     [Inject] private IMaterialProvider _teamMaterials;
     [Inject] private IBattleAnimationGate _animationGate;
     [Inject] private IAnimationSpeedSettings _animationSpeedSettings;
+    [Inject(Optional = true)] private IGameAudioService _audioService;
+    [Inject(Optional = true)] private IUnitAudioProfileProvider _unitAudioProfileProvider;
 
     private Queue<IEnumerator> actionQueue = new();
     private bool isExecuting = false;
@@ -503,6 +506,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             FaceTowards(targetWorldPosition.Value);
         }
         yield return PlayAnimationRoutine(UnitAnimationState.Attack, UnitAnimationEvent.AttackFinished);
+        PlayAttackAudio(targetWorldPosition ?? transform.position);
         if (!_isDead)
         {
             TransitionToIdle();
@@ -517,11 +521,59 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             FaceTowards(attackerWorldPosition.Value);
         }
         yield return PlayAnimationRoutine(UnitAnimationState.Hit, UnitAnimationEvent.HitFinished);
+        PlayDamageTakenAudio();
         if (!_isDead)
         {
             TransitionToIdle();
             FaceDefaultDirection();
         }
+    }
+
+    private void PlayAttackAudio(Vector3 impactPosition)
+    {
+        if (_audioService == null)
+            return;
+
+        var sfxType = ResolveAttackSfxType();
+        var clipSet = ResolveAudioProfile()?.GetAttackClips(sfxType);
+        if (clipSet != null && clipSet.HasClips)
+        {
+            _audioService.Play(clipSet, impactPosition);
+            return;
+        }
+
+        _audioService.PlayCombatImpact(sfxType, impactPosition);
+    }
+
+    private void PlayDamageTakenAudio()
+    {
+        if (_audioService == null)
+            return;
+
+        var clipSet = ResolveAudioProfile()?.DamageTaken;
+        if (clipSet != null && clipSet.HasClips)
+        {
+            _audioService.Play(clipSet, transform.position);
+        }
+    }
+
+    private CombatSfxType ResolveAttackSfxType()
+    {
+        var stats = _vm?.Model?.ModifiedStats;
+        if (stats != null && stats.AttackRange > 0)
+            return CombatSfxType.Ranged;
+
+        return CombatSfxType.Melee;
+    }
+
+    private UnitAudioProfile ResolveAudioProfile()
+    {
+        if (_unitAudioProfileProvider == null || _vm == null)
+            return null;
+
+        return _unitAudioProfileProvider.TryGetAudioProfile(_vm.UnitType, out var profile)
+            ? profile
+            : null;
     }
 
     private void FaceTowards(Vector3 worldTarget)

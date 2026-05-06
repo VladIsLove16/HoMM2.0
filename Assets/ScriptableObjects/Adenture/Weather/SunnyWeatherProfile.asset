@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weatherId: Default
   description: 
-  sunIntensityMultiplier: 1
+  sunIntensityMultiplier: 1.25
   sunColorTint: {r: 1, g: 1, b: 1, a: 1}
   ambientColorTint: {r: 1, g: 1, b: 1, a: 1}
   overrideFog: 0

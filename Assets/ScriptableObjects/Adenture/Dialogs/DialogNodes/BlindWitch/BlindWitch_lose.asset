@@ -63,6 +63,11 @@ MonoBehaviour:
     NextNode: {fileID: 0}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    HideIfLocked: 0
+    LockedText: 
   references:
     version: 2
     RefIds: []

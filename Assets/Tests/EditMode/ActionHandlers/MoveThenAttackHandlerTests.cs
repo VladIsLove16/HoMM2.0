@@ -35,7 +35,7 @@ namespace Tests.EditMode.ActionHandlers
             _baseStats.Offense = 20;
             _baseStats.Defense = 15;
             _baseStats.MoveSpeed = 3;
-            _baseStats.AttackRange = 2;
+            _baseStats.AttackRange = 0;
             _baseStats.CanFly = false;
             _baseStats.InvulnerableEffects = new List<StatusEffectType>();
 
