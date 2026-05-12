@@ -4,18 +4,19 @@ namespace Tests.TestHelpers
 {
     public static class SceneTransitionTestSetup
     {
-        private static GameConfigurationService _service;
-        public static IGameConfigurationService EnsureService()
-        {
-             _service = ScriptableObject.CreateInstance<GameConfigurationService>();
+        private static SinglePlayerStartConfigurationSO _configuration;
 
-            _service.Clear();
-            return _service;
+        public static SinglePlayerStartConfigurationSO EnsureService()
+        {
+            _configuration = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
+
+            _configuration.Clear();
+            return _configuration;
         }
 
         public static void DestroyService()
         {
-            _service.Clear();
+            _configuration?.Clear();
         }
     }
 }

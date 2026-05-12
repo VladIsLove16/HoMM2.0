@@ -30,7 +30,12 @@ namespace Adventure.Domain.Dialog
                     choice.NextNodeId,
                     choice.Action,
                     choice.BattleVictoryNodeId,
-                    choice.BattleDefeatNodeId));
+                    choice.BattleDefeatNodeId,
+                    choice.RequiredFlagIds,
+                    choice.GrantedFlagIds,
+                    choice.HideIfLocked,
+                    choice.LockedText,
+                    choice.IsAvailable));
             }
 
             return new DialogueNode(node.Id, resolvedSpeaker, resolvedText, resolvedChoices);

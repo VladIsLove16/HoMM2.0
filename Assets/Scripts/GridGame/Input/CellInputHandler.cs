@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 
 
@@ -242,7 +243,14 @@ public class CellInputHandler : MonoBehaviour
         if (_pointerInitialized)
             return _currentPointerPosition;
 
-        return (Vector2)Input.mousePosition;
+        var pointer = Pointer.current;
+        if (pointer != null)
+        {
+            _currentPointerPosition = pointer.position.ReadValue();
+            _pointerInitialized = true;
+        }
+
+        return _currentPointerPosition;
     }
 
     private bool TryGetDragPlanePoint(out Vector3 worldPos)

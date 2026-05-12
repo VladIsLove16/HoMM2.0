@@ -29,6 +29,7 @@ namespace Adventure.Infrastructure.Movement
         [Inject(Optional = true)] private AdventureInput legacyInputProvider;
         [Inject(Optional = true)] private IMouseSensitivityService _mouseSensitivityService;
         [Inject(Optional = true)] private IGameAudioService _audioService;
+        [Inject(Optional = true)] private IInputModeVM _inputModeVM;
 
         private void Awake()
         {
@@ -63,9 +64,13 @@ namespace Adventure.Infrastructure.Movement
                 var provider = legacyInputProvider;
                 if (provider != null)
                 {
-                    move = provider.Move;
-                    lookDelta = provider.Look;
-                    sprint = provider.IsSprinting;
+                    move = _inputModeVM == null || _inputModeVM.CanMove
+                        ? provider.Move
+                        : Vector2.zero;
+                    lookDelta = _inputModeVM == null || _inputModeVM.CanLook
+                        ? provider.Look
+                        : Vector2.zero;
+                    sprint = (_inputModeVM == null || _inputModeVM.CanMove) && provider.IsSprinting;
                 }
                 else
                 {
@@ -127,6 +132,19 @@ namespace Adventure.Infrastructure.Movement
             _pendingLookInput = Vector2.zero;
         }
 
+        public void ClearMoveInput()
+        {
+            _useExternalInput = true;
+            _moveInput = Vector2.zero;
+            _sprintInput = false;
+        }
+
+        public void ClearLookInput()
+        {
+            _useExternalInput = true;
+            _pendingLookInput = Vector2.zero;
+        }
+
         private void PerformMove(Vector3 velocity, float deltaTime)
         {
             if(velocity.sqrMagnitude < VELOCITYTHRESHOLD)
@@ -158,10 +176,16 @@ namespace Adventure.Infrastructure.Movement
 
             var settingsSo = _audioService.Settings;
             var interval = _sprintInput
-                ? settingsSo != null ? settingsSo.SprintStepInterval : 0.34f
-                : settingsSo != null ? settingsSo.WalkStepInterval : 0.48f;
+                ? settingsSo?.SprintStepInterval ?? 0.34f
+                : settingsSo?.WalkStepInterval ?? 0.48f;
 
             _nextFootstepTime = Time.time + Mathf.Max(0.05f, interval);
+            if (settingsSo == null || settingsSo.PlayerFootstepSpace == FootstepPlaybackSpace.Character)
+            {
+                _audioService.Play(settingsSo?.PlayerFootsteps);
+                return;
+            }
+
             _audioService.PlayPlayerFootstep(transform.position);
         }
 

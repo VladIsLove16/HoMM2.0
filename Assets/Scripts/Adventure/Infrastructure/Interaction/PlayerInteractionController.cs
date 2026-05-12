@@ -153,6 +153,12 @@ namespace Adventure.Infrastructure.Interaction
             if (interactable == null)
                 return false;
 
+            if (!interactable.CanInteract)
+            {
+                interactable = null;
+                return false;
+            }
+
             return true;
         }
     }

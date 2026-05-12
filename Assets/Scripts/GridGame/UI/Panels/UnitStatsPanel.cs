@@ -34,9 +34,25 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
 
     private void Start()
     {
-        _statusEffectDict = statusEffectDatas.ToDictionary();
+        _statusEffectDict = statusEffectDatas != null
+            ? statusEffectDatas.ToDictionary()
+            : new Dictionary<StatusEffectType, StatusEffectData>();
+
+        if (statusEffectDatas == null)
+        {
+            Debug.LogWarning("[UnitStatsPanel] StatusEffectDatas is not injected or assigned. Status effect icons will be hidden.", this);
+        }
+
         _statusEffectViewModels = new List<StatusEffectViewModel>();
-        _gameViewModel.UnitStatsRequested += OnGameViewModel_UnitStatsRequested;
+        if (_gameViewModel != null)
+        {
+            _gameViewModel.UnitStatsRequested += OnGameViewModel_UnitStatsRequested;
+        }
+        else
+        {
+            Debug.LogWarning("[UnitStatsPanel] GameViewModel is not injected. Unit stats panel will not receive selection events.", this);
+        }
+
         ToggleStartingVivsibilty();
     }
 
@@ -50,24 +66,34 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
 
     private void OnGameViewModel_UnitStatsRequested(UnitViewModel unit)
     {
+        if (unit == null)
+            return;
+
         var vm = new UnitStatsViewModel(unit.Model);
         Init(vm);
     }
 
     public void Init(UnitStatsViewModel vm)
     {
+        if (vm == null)
+            return;
+
         _vm = vm;
 
-        _vm.Health.Subscribe(val => healthText.text = val.ToString()).AddTo(_disposables);
-        _vm.MaxHealth.Subscribe(val => maxHealthText.text = val.ToString()).AddTo(_disposables);
-        _vm.AttackDamage.Subscribe(val => attackDamageText.text = val.ToString()).AddTo(_disposables);
-        _vm.MoveSpeed.Subscribe(val => moveSpeedText.text = val.ToString()).AddTo(_disposables);
+        _vm.Health.Subscribe(val => SetText(healthText, val)).AddTo(_disposables);
+        _vm.MaxHealth.Subscribe(val => SetText(maxHealthText, val)).AddTo(_disposables);
+        _vm.AttackDamage.Subscribe(val => SetText(attackDamageText, val)).AddTo(_disposables);
+        _vm.MoveSpeed.Subscribe(val => SetText(moveSpeedText, val)).AddTo(_disposables);
         _vm.Amount.Subscribe(OnAmountChanged).AddTo(_disposables);
 
         _vm.StatusEffects.ObserveAdd().Subscribe(e => AddStatusEffect(e.Value)).AddTo(_disposables);
         _vm.StatusEffects.ObserveReset().Subscribe(_ => RefreshStatusEffects()).AddTo(_disposables);
 
-        closeButton.onClick.AddListener(Hide);
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(Hide);
+            closeButton.onClick.AddListener(Hide);
+        }
 
         RefreshStatusEffects();
         Show();
@@ -75,14 +101,23 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
 
     private void OnAmountChanged(int obj)
     {
+        if (amountText == null)
+            return;
+
         amountText.text = obj.ToString();
     }
 
     private void AddStatusEffect(StatusEffectViewModel e)
     {
+        if (e == null || statusEffectIconPrefab == null || statusEffectIconsParent == null)
+            return;
+
+        if (_statusEffectDict == null || !_statusEffectDict.TryGetValue(e.Type, out var data) || data == null)
+            return;
+
         _statusEffectViewModels.Add(e);
         var icon = Instantiate(statusEffectIconPrefab, statusEffectIconsParent);
-        icon.sprite = _statusEffectDict[e.Type].Sprite;
+        icon.sprite = data.Sprite;
         _statusEffectIcons.Add(icon);
     }
 
@@ -90,8 +125,16 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
     private void RefreshStatusEffects()
     {
         foreach (var icon in _statusEffectIcons)
-            Destroy(icon.gameObject);
+        {
+            if (icon != null)
+            {
+                Destroy(icon.gameObject);
+            }
+        }
         _statusEffectIcons.Clear();
+
+        if (_vm == null)
+            return;
 
         foreach (var effect in _vm.StatusEffects)
             AddStatusEffect(effect);
@@ -99,10 +142,16 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
 
     public void Show(Vector3 worldPosition)
     {
+        if (Camera.main == null)
+            return;
+
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition) + showOffset;
 
         // ��������� �������� ������
         RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect == null || canvas == null)
+            return;
+
         Vector2 panelSize = panelRect.sizeDelta * canvas.scaleFactor;
 
         // ����������� ������� � �������� ������
@@ -125,6 +174,14 @@ public class UnitStatsPanel : CanvasGroupVisibilityPanelBase, IDisposable
         HidePanel();
         _vm?.Dispose();
         _disposables.Clear();
+    }
+
+    private static void SetText(TextMeshProUGUI text, int value)
+    {
+        if (text != null)
+        {
+            text.text = value.ToString();
+        }
     }
 
     public void Dispose()

@@ -14,11 +14,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeId: witchVictory
   speaker: Witch
+  speakerLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   text: Well done! Perhaps the legends are true.
+  textLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   choices:
   - Id: leave
     Text: Until next time.
+    TextLocalized:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
     Action: 2
     NextNode: {fileID: 11400000, guid: 1eda5238b33512a4b9b09968297a0c90, type: 2}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags:
+    - {fileID: 11400000, guid: b1820af4dcef4d7ebd0fc5cf4a93a512, type: 2}
+    HideIfLocked: 0
+    LockedText: 
+  references:
+    version: 2
+    RefIds: []

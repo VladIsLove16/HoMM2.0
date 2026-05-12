@@ -23,7 +23,7 @@ namespace Adventure.Domain.Dialog
             NextNodeId = nextNodeId;
             Action = action;
             BattleVictoryNodeId = string.IsNullOrEmpty(battleVictoryNodeId) ? nextNodeId : battleVictoryNodeId;
-            BattleDefeatNodeId = string.IsNullOrEmpty(battleDefeatNodeId) ? BattleVictoryNodeId : battleDefeatNodeId;
+            BattleDefeatNodeId = string.IsNullOrEmpty(battleDefeatNodeId) ? nextNodeId : battleDefeatNodeId;
             RequiredFlagIds = requiredFlagIds ?? System.Array.Empty<string>();
             GrantedFlagIds = grantedFlagIds ?? System.Array.Empty<string>();
             HideIfLocked = hideIfLocked;

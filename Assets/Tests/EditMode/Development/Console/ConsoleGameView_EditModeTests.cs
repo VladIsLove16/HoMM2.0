@@ -85,13 +85,13 @@ public class ConsoleGameView_EditModeTests
         public IGridRenderSettings GridSettings { get; } = new TestGridRenderSettings();
         public ActionResolver ActionResolver { get; }
         public IGameCommandExecutor CommandExecutor { get; } = new NullCommandExecutor();
-        public GameConfigurationService GameConfigurationService { get; }
+        public SinglePlayerStartConfigurationSO StartConfiguration { get; }
 
         public GameModelBuilder()
         {
-            GameConfigurationService = ScriptableObject.CreateInstance<GameConfigurationService>();
-            GameConfigurationService.SetTeam(Team.Blue);
-            GameConfigurationService.SetBattlefieldBottomTeam(Team.Blue);
+            StartConfiguration = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
+            StartConfiguration.SetTeam(Team.Blue);
+            StartConfiguration.SetBattlefieldBottomTeam(Team.Blue);
 
             var unitStats = ScriptableObject.CreateInstance<UnitStats>();
             unitStats.MaxHealth = 10;
@@ -107,7 +107,7 @@ public class ConsoleGameView_EditModeTests
             ActionResolver = new ActionResolver(GameModel, MovementSystem);
             ConcreteTurnService = new TurnService(new TurnQueue());
             TurnStateViewModel = new TurnStateViewModel(ConcreteTurnService);
-            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnStateViewModel, ActionResolver, GameConfigurationService, GridSettings);
+            GameViewModel = new GameViewModel(GameModel, MovementSystem, CommandExecutor, TurnStateViewModel, ActionResolver, StartConfiguration, GridSettings);
         }
     }
 

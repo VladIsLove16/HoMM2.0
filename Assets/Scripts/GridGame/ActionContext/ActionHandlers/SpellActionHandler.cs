@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using SharedView.Audio;
 using UnityEngine;
-using Zenject;
 public class SpellActionHandler : IActionHandler
 {
     public ActionType ActionType
@@ -18,19 +17,16 @@ public class SpellActionHandler : IActionHandler
     private readonly GameModel _gameModel;
     private readonly IGameAudioService _audioService;
     private readonly IUnitAudioProfileProvider _unitAudioProfileProvider;
-    private readonly IWorldToCellProvider _worldToCellProvider;
 
     public SpellActionHandler(
         MovementSystem movementSystem,
         GameModel gameModel,
         IGameAudioService audioService = null,
-        IUnitAudioProfileProvider unitAudioProfileProvider = null,
-        IWorldToCellProvider worldToCellProvider = null)
+        IUnitAudioProfileProvider unitAudioProfileProvider = null)
     {
         _gameModel = gameModel;
         _audioService = audioService;
         _unitAudioProfileProvider = unitAudioProfileProvider;
-        _worldToCellProvider = worldToCellProvider;
     }
 
     public void Execute(ActionContext ctx)
@@ -50,28 +46,25 @@ public class SpellActionHandler : IActionHandler
 
     private void PlayMagicAudio(ActionContext ctx)
     {
-        if (_audioService == null)
-            return;
+        //if (_audioService == null)
+        //    return;
 
-        var position = _worldToCellProvider != null
-            ? _worldToCellProvider.ToWorld(ctx.TargetCell.x, ctx.TargetCell.y)
-            : new Vector3(ctx.TargetCell.x, 0f, ctx.TargetCell.y);
+        //var position = new Vector3(ctx.TargetCell.x, 0f, ctx.TargetCell.y);
 
-        var casterCell = _gameModel?.GetCell(ctx.FromCell);
-        var casterUnit = casterCell?.Unit;
-        if (casterUnit != null &&
-            _unitAudioProfileProvider != null &&
-            _unitAudioProfileProvider.TryGetAudioProfile(casterUnit.UnitType.Value, out var profile))
-        {
-            var clipSet = profile?.GetAttackClips(CombatSfxType.Magic);
-            if (clipSet != null && clipSet.HasClips)
-            {
-                _audioService.Play(clipSet, position);
-                return;
-            }
-        }
+        //var casterCell = _gameModel?.GetCell(ctx.FromCell);
+        //var casterUnit = casterCell?.Unit;
+        //if (casterUnit != null &&
+        //    _unitAudioProfileProvider != null &&
+        //    _unitAudioProfileProvider.TryGetAudioProfile(casterUnit.UnitType.Value, out var profile))
+        //{
+        //    if (clipSet != null && clipSet.HasClips)
+        //    {
+        //        _audioService.Play(clipSet, position);
+        //        return;
+        //    }
+        //}
 
-        _audioService.PlayCombatImpact(CombatSfxType.Magic, position);
+        //_audioService.PlayCombatImpact(CombatSfxType.Magic, position);
     }
 
 

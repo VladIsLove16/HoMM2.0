@@ -13,7 +13,7 @@ namespace Game.Achievements
     public sealed class AchievementToastView : MonoBehaviour
     {
         [Header("UI")]
-        [SerializeField] private GameObject root;
+        [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private RectTransform toastRect;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text descriptionText;
@@ -50,7 +50,7 @@ namespace Game.Achievements
         {
             if (toastRect == null)
             {
-                toastRect = root != null ? root.GetComponent<RectTransform>() : GetComponent<RectTransform>();
+                toastRect = canvasGroup != null ? canvasGroup.GetComponent<RectTransform>() : GetComponent<RectTransform>();
             }
             SetVisible(false);
         }
@@ -106,8 +106,8 @@ namespace Game.Achievements
 
         private void SetVisible(bool visible)
         {
-            if (root != null)
-                root.SetActive(visible);
+            if (canvasGroup != null)
+                canvasGroup.alpha = visible?1:0;
             else
                 gameObject.SetActive(visible);
         }

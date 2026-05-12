@@ -741,7 +741,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  gameConfigurationService: {fileID: 11400000, guid: 826b593e69c0a7e45b2b2b78633b385b, type: 2}
+  singlePlayerStartConfiguration: {fileID: 11400000, guid: 9de629cb02cc2f145be4189b287b022e, type: 2}
   defaultHostTeam: 0
   defaultClientTeam: 1
   requestedTeam: 2

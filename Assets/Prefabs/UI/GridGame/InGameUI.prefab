@@ -496,7 +496,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StartBattle: {fileID: 739274183230028162}
-  LoseBattle: {fileID: 0}
   turnNumber: {fileID: 2893656897501513323}
   turnNumberAnimator: {fileID: 2505248150232287296}
   battleStateAnimator: {fileID: 8152644556202876662}

@@ -18,11 +18,15 @@ namespace Adventure.Application.Dialog
         private readonly IDialogStateStore _stateStore;
         private readonly ReactiveProperty<DialogueNode> _currentNode = new ReactiveProperty<DialogueNode>();
         private readonly ReactiveProperty<ArmyLineupSO> _enenyArmy = new ReactiveProperty<ArmyLineupSO>();
+        private readonly ReactiveProperty<ArmyLineupSO> _victoryReward = new ReactiveProperty<ArmyLineupSO>();
+        private readonly ReactiveProperty<string> _victoryRewardId = new ReactiveProperty<string>();
         private readonly IArmyLineupFormatter _armyFormatter;
         private readonly IStoryFlagsService _storyFlagsService;
         private DialogueSession _session;
         private string _activeDialogId;
+        private string _activeReturnNpcKey;
         public string ActiveDialogId => _activeDialogId;
+        public string ActiveReturnNpcKey => _activeReturnNpcKey;
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         private readonly ReactiveProperty<bool> _isOpen = new(false);
         [Inject] private BattleLaunchService battleLaunchService;
@@ -39,6 +43,7 @@ namespace Adventure.Application.Dialog
         }
         public IReadOnlyReactiveProperty<DialogueNode> CurrentNode => _currentNode;
         public IReadOnlyReactiveProperty<ArmyLineupSO> EnemyArmy => _enenyArmy;
+        public IReadOnlyReactiveProperty<ArmyLineupSO> VictoryReward => _victoryReward;
         public InputMode InputMode => InputMode.Blocked;
 
         public event Action<DialogueChoiceAction> ChoiceActionTriggered;
@@ -47,7 +52,13 @@ namespace Adventure.Application.Dialog
             return _repository.TryGet(dialogId, out var graph);
         }
 
-        public bool TryStartDialog(string dialogId, ArmyLineupSO armyLineupSO, string startNodeId = null)
+        public bool TryStartDialog(
+            string dialogId,
+            ArmyLineupSO armyLineupSO,
+            string startNodeId = null,
+            ArmyLineupSO victoryReward = null,
+            string victoryRewardId = null,
+            string returnNpcKey = null)
         {
             if (string.IsNullOrEmpty(dialogId))
                 return false;
@@ -56,7 +67,10 @@ namespace Adventure.Application.Dialog
                 return false;
 
             _enenyArmy.SetValueAndForceNotify(armyLineupSO);
+            _victoryReward.SetValueAndForceNotify(victoryReward);
+            _victoryRewardId.SetValueAndForceNotify(victoryRewardId);
             _activeDialogId = dialogId;
+            _activeReturnNpcKey = returnNpcKey;
 
             if (string.IsNullOrEmpty(startNodeId) && _stateStore != null && _stateStore.TryLoadState(dialogId, out var snapshot) && !string.IsNullOrEmpty(snapshot.CurrentNodeId))
             {
@@ -117,16 +131,27 @@ namespace Adventure.Application.Dialog
 
         private void ContinueDialog()
         {
-            if (_session.IsCompleted.Value)
+            var session = _session;
+            if (session == null)
             {
-                _stateStore?.ClearState(_activeDialogId);
-                _currentNode.Value = null;
+                return;
             }
-            else
+
+            if (session.IsCompleted.Value)
             {
-                _stateStore?.SaveState(new DialogStateSnapshot(_activeDialogId, _session.CurrentNode.Id));
-                RefreshCurrentNode();
+                Close();
+                return;
             }
+
+            var currentNode = session.CurrentNode;
+            if (currentNode == null)
+            {
+                Close();
+                return;
+            }
+
+            _stateStore?.SaveState(new DialogStateSnapshot(_activeDialogId, currentNode.Id));
+            RefreshCurrentNode();
         }
 
         private void StartBattle(DialogueChoice selectedChoice)
@@ -134,7 +159,15 @@ namespace Adventure.Application.Dialog
             var enemyArmy = _enenyArmy.Value;
             var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
             var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
-            var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
+            var context = new BattleLaunchContext(
+                enemyArmy,
+                _activeDialogId,
+                victoryNodeId,
+                defeatNodeId,
+                victoryReward: _victoryReward.Value,
+                victoryRewardId: _victoryRewardId.Value,
+                returnNpcKey: _activeReturnNpcKey,
+                fallbackNodeId: selectedChoice?.NextNodeId);
             battleLaunchService.Launch(context);
         }
 
@@ -143,7 +176,15 @@ namespace Adventure.Application.Dialog
             var enemyArmy = _enenyArmy.Value;
             var victoryNodeId = selectedChoice?.BattleVictoryNodeId;
             var defeatNodeId = selectedChoice?.BattleDefeatNodeId;
-            var context = new BattleLaunchContext(enemyArmy, _activeDialogId, victoryNodeId, defeatNodeId);
+            var context = new BattleLaunchContext(
+                enemyArmy,
+                _activeDialogId,
+                victoryNodeId,
+                defeatNodeId,
+                victoryReward: _victoryReward.Value,
+                victoryRewardId: _victoryRewardId.Value,
+                returnNpcKey: _activeReturnNpcKey,
+                fallbackNodeId: selectedChoice?.NextNodeId);
             battleLaunchService.LaunchOnline(context);
         }
 
@@ -158,6 +199,8 @@ namespace Adventure.Application.Dialog
             _session = null;
             _currentNode.SetValueAndForceNotify(null);
             _enenyArmy.SetValueAndForceNotify(null);
+            _victoryReward.SetValueAndForceNotify(null);
+            _victoryRewardId.SetValueAndForceNotify(null);
 
             if (!string.IsNullOrEmpty(dialogId))
             {
@@ -165,6 +208,7 @@ namespace Adventure.Application.Dialog
             }
 
             _isOpen.SetValueAndForceNotify(false);
+            _activeReturnNpcKey = null;
             _activeDialogId = null;
         }
 

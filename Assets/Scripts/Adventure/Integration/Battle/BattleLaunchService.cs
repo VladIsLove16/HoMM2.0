@@ -50,7 +50,17 @@ namespace Adventure.Integration.Battle
             }
 
             BattleStateCache.StoreInventorySnapshot(playerStacks);
-            BattleStateCache.ScheduleBattleDialog(context.DialogId, context.EnemyArmy, context.VictoryNodeId, context.DefeatNodeId);
+            BattleStateCache.ScheduleBattleDialog(
+                context.DialogId,
+                context.EnemyArmy,
+                context.VictoryNodeId,
+                context.DefeatNodeId,
+                context.ReturnNpcKey,
+                context.FallbackNodeId);
+            BattleStateCache.ScheduleBattleReward(context.VictoryReward != null
+                ? context.VictoryReward.Convert()
+                : Array.Empty<UnitStackData>(),
+                context.VictoryRewardId);
 
             var payload = new BattleSetupPayload(
                 new BattleArmies(playerStacks, enemyStacks),

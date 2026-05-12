@@ -6,6 +6,7 @@ namespace Adventure.Domain.Dialog
     {
         private readonly Dictionary<string, DialogueNode> _nodes;
         public string StartNodeId { get; }
+        public IEnumerable<DialogueNode> Nodes => _nodes.Values;
 
         public DialogueGraph(string startNodeId, IEnumerable<DialogueNode> nodes)
         {

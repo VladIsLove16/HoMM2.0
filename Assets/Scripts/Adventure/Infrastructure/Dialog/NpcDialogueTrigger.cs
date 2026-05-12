@@ -1,4 +1,5 @@
 using Adventure.Application.Dialog;
+using Adventure.Domain.Dialog;
 using Adventure.Domain.Progression;
 using Adventure.Infrastructure.Interaction;
 using Adventure.Integration.Battle;
@@ -9,12 +10,19 @@ using static Adventure.Infrastructure.Dialog.NpcAnimationController;
 
 namespace Adventure.Infrastructure.Dialog
 {
+    public interface IInitialBattleReturnNpc
+    {
+        bool TryStartReturnDialog(ArmyLineupSO battleLineup, BattleOutcome outcome);
+    }
+
     [RequireComponent(typeof(NpcBehaviorGraphBridge))]
-    public sealed class NpcDialogueTrigger : MonoBehaviour, IInteractable
+    public sealed class NpcDialogueTrigger : MonoBehaviour, IInteractable, IInitialBattleReturnNpc
     {
         [SerializeField] private DialogueGraphSO dialogue;
         [SerializeField] ArmyLineupSO lineup;
+        [SerializeField] private ArmyLineupSO victoryReward;
         [SerializeField] string Name;
+        [SerializeField] private string returnNpcKey;
         [SerializeField] private List<StoryFlagDefinitionSO> requiredFlags = new();
         [SerializeField] private DialogueGraphSO fallbackDialogue;
         [SerializeField] private NpcAnimationController battleAnimationController;
@@ -22,6 +30,8 @@ namespace Adventure.Infrastructure.Dialog
         private DialogVM _dialogVM;
         private NpcBehaviorGraphRegistry _behaviorGraphRegistry;
         private IStoryFlagsService _storyFlagsService;
+        public bool CanInteract => ResolveDialogueToStart() != null;
+        public string ReturnNpcKey => ResolveReturnNpcKey();
 
         private void Reset()
         {
@@ -80,10 +90,16 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogueToStart.Id, context.PlayerTransform);
+            _behaviorGraphRegistry?.ConfigureDialogPlayer(dialogueToStart.Id, context.PlayerTransform, ReturnNpcKey);
             _behaviorGraphRegistry?.Activate(dialogueToStart.Id, behaviorGraphBridge);
             battleAnimationController?.PlayAnimation(NpcAnimationType.Greeting);
-            bool isDialogStarted = _dialogVM.TryStartDialog(dialogueToStart.Id, lineup);
+            bool isDialogStarted = _dialogVM.TryStartDialog(
+                dialogueToStart.Id,
+                lineup,
+                dialogueToStart.StartNodeId,
+                victoryReward: victoryReward,
+                victoryRewardId: ResolveVictoryRewardId(dialogueToStart),
+                returnNpcKey: ReturnNpcKey);
             if (!isDialogStarted)
             {
                 _behaviorGraphRegistry?.ClearPending(dialogueToStart.Id);
@@ -91,6 +107,106 @@ namespace Adventure.Infrastructure.Dialog
                 Debug.LogWarning($"Dialogue '{dialogueToStart.Id}' could not be started");
                 return;
             }
+        }
+
+        public bool TryStartReturnDialog(ArmyLineupSO battleLineup, BattleOutcome outcome)
+        {
+            var dialogueToStart = ResolveDialogueToStart();
+            if (dialogueToStart == null)
+            {
+                Debug.LogWarning($"Return dialogue asset is not available or still locked for {name}", this);
+                return false;
+            }
+
+            if (_dialogVM == null)
+            {
+                Debug.LogWarning($"DialogVM is not injected for return NPC {name}", this);
+                return false;
+            }
+
+            ResolveBehaviorBridge();
+            _behaviorGraphRegistry?.Activate(dialogueToStart.Id, behaviorGraphBridge);
+
+            var startNodeId = ResolveReturnStartNodeId(dialogueToStart, outcome);
+            var isDialogStarted = _dialogVM.TryStartDialog(
+                dialogueToStart.Id,
+                battleLineup != null ? battleLineup : lineup,
+                startNodeId,
+                victoryReward,
+                ResolveVictoryRewardId(dialogueToStart),
+                ReturnNpcKey);
+
+            if (!isDialogStarted)
+            {
+                _behaviorGraphRegistry?.ClearActive(dialogueToStart.Id, behaviorGraphBridge);
+                Debug.LogWarning($"Return dialogue '{dialogueToStart.Id}' could not be started");
+                return false;
+            }
+
+            if (outcome != BattleOutcome.Unknown)
+            {
+                _behaviorGraphRegistry?.NotifyBattleOutcome(outcome);
+            }
+
+            return true;
+        }
+
+        private static string ResolveReturnStartNodeId(DialogueGraphSO dialogueToStart, BattleOutcome outcome)
+        {
+            if (dialogueToStart == null)
+            {
+                return null;
+            }
+
+            var fallbackNodeId = string.IsNullOrEmpty(dialogueToStart.StartNodeId)
+                ? null
+                : dialogueToStart.StartNodeId;
+
+            if (outcome == BattleOutcome.Unknown)
+            {
+                return fallbackNodeId;
+            }
+
+            var graph = dialogueToStart.ToDomain();
+            foreach (var node in graph.Nodes)
+            {
+                var choices = node?.Choices;
+                if (choices == null)
+                {
+                    continue;
+                }
+
+                for (var i = 0; i < choices.Count; i++)
+                {
+                    var choice = choices[i];
+                    if (choice == null || !IsBattleChoice(choice.Action))
+                    {
+                        continue;
+                    }
+
+                    var resultNodeId = outcome == BattleOutcome.PlayerWon
+                        ? choice.BattleVictoryNodeId
+                        : choice.BattleDefeatNodeId;
+
+                    if (!string.IsNullOrEmpty(resultNodeId))
+                    {
+                        return resultNodeId;
+                    }
+
+                    if (!string.IsNullOrEmpty(choice.NextNodeId))
+                    {
+                        return choice.NextNodeId;
+                    }
+                }
+            }
+
+            return fallbackNodeId;
+        }
+
+        private static bool IsBattleChoice(DialogueChoiceAction action)
+        {
+            return action == DialogueChoiceAction.StartBattle
+                || action == DialogueChoiceAction.StartOnlineBattle;
         }
 
         public bool TryStopCurrentDialogueFromNpc()
@@ -211,6 +327,19 @@ namespace Adventure.Infrastructure.Dialog
                 || (fallbackDialogue != null && fallbackDialogue.Id == dialogId);
         }
 
+        private string ResolveVictoryRewardId(DialogueGraphSO dialogueAsset)
+        {
+            if (dialogueAsset == null || string.IsNullOrWhiteSpace(dialogueAsset.Id))
+            {
+                return null;
+            }
+
+            var npcKey = ReturnNpcKey;
+            return string.IsNullOrWhiteSpace(npcKey)
+                ? $"npc-dialogue:{dialogueAsset.Id}:victory-reward"
+                : $"npc-dialogue:{dialogueAsset.Id}:{npcKey}:victory-reward";
+        }
+
         private void EnsureDialogExists(DialogueGraphSO dialogueAsset)
         {
             if (dialogueAsset == null)
@@ -231,7 +360,7 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            _behaviorGraphRegistry.Register(dialogueAsset.Id, behaviorGraphBridge);
+            _behaviorGraphRegistry.Register(dialogueAsset.Id, ReturnNpcKey, behaviorGraphBridge);
         }
 
         private void UnregisterDialogue(DialogueGraphSO dialogueAsset)
@@ -241,7 +370,41 @@ namespace Adventure.Infrastructure.Dialog
                 return;
             }
 
-            _behaviorGraphRegistry.Unregister(dialogueAsset.Id, behaviorGraphBridge);
+            _behaviorGraphRegistry.Unregister(dialogueAsset.Id, ReturnNpcKey, behaviorGraphBridge);
+        }
+
+        private string ResolveReturnNpcKey()
+        {
+            if (!string.IsNullOrWhiteSpace(returnNpcKey))
+            {
+                return returnNpcKey.Trim();
+            }
+
+            return BuildHierarchyKey(transform);
+        }
+
+        private static string BuildHierarchyKey(Transform source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            var parts = new List<string>();
+            var current = source;
+            while (current != null)
+            {
+                parts.Add($"{current.name}[{current.GetSiblingIndex()}]");
+                current = current.parent;
+            }
+
+            parts.Reverse();
+
+            var scene = source.gameObject.scene;
+            var sceneKey = !string.IsNullOrWhiteSpace(scene.path)
+                ? scene.path
+                : scene.name;
+            return $"{sceneKey}:{string.Join("/", parts)}";
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Adventure.Domain.Progression
         void Set(string flagId);
         void SetMany(IEnumerable<string> flagIds);
         void Clear(string flagId);
+        void ReplaceAll(IEnumerable<string> flagIds);
         void ResetAll();
     }
 }

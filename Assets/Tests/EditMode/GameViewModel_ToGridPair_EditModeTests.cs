@@ -59,13 +59,13 @@ namespace Tests.EditMode.ViewModels
             public TurnService TurnService { get; } = new(new TurnQueue());
             public TurnStateViewModel TurnState { get; }
             public GameViewModel ViewModel { get; }
-            public GameConfigurationService GameConfigurationService { get; }
+            public SinglePlayerStartConfigurationSO StartConfiguration { get; }
 
             public Harness()
             {
-                GameConfigurationService = ScriptableObject.CreateInstance<GameConfigurationService>();
-                GameConfigurationService.SetTeam(Team.Blue);
-                GameConfigurationService.SetBattlefieldBottomTeam(Team.Blue);
+                StartConfiguration = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
+                StartConfiguration.SetTeam(Team.Blue);
+                StartConfiguration.SetBattlefieldBottomTeam(Team.Blue);
 
                 var stats = ScriptableObject.CreateInstance<UnitStats>();
                 stats.MaxHealth = 10;
@@ -85,7 +85,7 @@ namespace Tests.EditMode.ViewModels
                 GameModel = new GameModel(factory, MovementSystem);
                 ActionResolver = new ActionResolver(GameModel, MovementSystem);
                 TurnState = new TurnStateViewModel(TurnService);
-                ViewModel = new GameViewModel(GameModel, MovementSystem, _commandExecutor, TurnState, ActionResolver, GameConfigurationService, renderSettings);
+                ViewModel = new GameViewModel(GameModel, MovementSystem, _commandExecutor, TurnState, ActionResolver, StartConfiguration, renderSettings);
 
                 GameModel.InitializeGrid(3, 3);
             }

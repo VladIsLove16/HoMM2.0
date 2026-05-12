@@ -12,6 +12,7 @@ namespace Adventure.Infrastructure.Dialog
     public sealed class NpcBehaviorGraphBridge : MonoBehaviour
     {
         private const string DebugPrefix = "[NpcBehaviorGraphBridge]";
+        private static readonly bool VerboseLogging = false;
 
         private static class BlackboardKeys
         {
@@ -58,6 +59,8 @@ namespace Adventure.Infrastructure.Dialog
         private PlayerTalkingWithNpcStateChannel _runtimeDialogStateChannel;
         private PlayerChosenDialogOption _runtimeChoiceEventChannel;
         private BattleFinishedChannel _runtimeBattleResultChannel;
+        private PlayerMovementController _configuredPlayerMovementController;
+        private bool _hasConfiguredPlayerMovementController;
 
         private void Awake()
         {
@@ -66,6 +69,7 @@ namespace Adventure.Infrastructure.Dialog
             CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
             ApplyStaticConfiguration();
+            ApplyPlayerConfiguration();
         }
 
         private void Start()
@@ -73,12 +77,15 @@ namespace Adventure.Infrastructure.Dialog
             CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
             ApplyStaticConfiguration();
+            ApplyPlayerConfiguration();
         }
 
         private void OnEnable()
         {
             CreateRuntimeEventChannels();
             TryBindBlackboardVariables();
+            ApplyStaticConfiguration();
+            ApplyPlayerConfiguration();
         }
 
         private void OnDestroy()
@@ -102,15 +109,33 @@ namespace Adventure.Infrastructure.Dialog
 
         public void ConfigurePlayer(PlayerMovementController playerMovementController)
         {
-            AssignValue(_playerMovementControllerVariable, BlackboardKeys.PlayerMovementController, playerMovementController);
+            _configuredPlayerMovementController = playerMovementController;
+            _hasConfiguredPlayerMovementController = true;
+
+            TryBindBlackboardVariables();
+            ApplyPlayerConfiguration();
         }
 
         private void ApplyStaticConfiguration()
         {
-            AssignValue(_talkingDistanceVariable, BlackboardKeys.TalkingDistance, lookDistance);
-            AssignValue(_dialogStateChannelVariable, BlackboardKeys.DialogueEventChannel, _runtimeDialogStateChannel ?? dialogStateChannelTemplate);
-            AssignValue(_choiceEventChannelVariable, BlackboardKeys.ChoiceEventChannel, _runtimeChoiceEventChannel ?? choiceEventChannelTemplate);
-            AssignValue(_battleResultChannelVariable, BlackboardKeys.BattleResultChannel, _runtimeBattleResultChannel ?? battleResultChannelTemplate);
+            AssignValue(_talkingDistanceVariable, BlackboardKeys.TalkingDistance, lookDistance, false);
+            AssignValue(_dialogStateChannelVariable, BlackboardKeys.DialogueEventChannel, _runtimeDialogStateChannel ?? dialogStateChannelTemplate, false);
+            AssignValue(_choiceEventChannelVariable, BlackboardKeys.ChoiceEventChannel, _runtimeChoiceEventChannel ?? choiceEventChannelTemplate, false);
+            AssignValue(_battleResultChannelVariable, BlackboardKeys.BattleResultChannel, _runtimeBattleResultChannel ?? battleResultChannelTemplate, false);
+        }
+
+        private void ApplyPlayerConfiguration()
+        {
+            if (!_hasConfiguredPlayerMovementController)
+            {
+                return;
+            }
+
+            AssignValue(
+                _playerMovementControllerVariable,
+                BlackboardKeys.PlayerMovementController,
+                _configuredPlayerMovementController,
+                false);
         }
 
         public void NotifyDialogOpened()
@@ -121,12 +146,15 @@ namespace Adventure.Infrastructure.Dialog
 
         public void NotifyDialogClosed()
         {
-            Debug.Log(
-                $"{DebugPrefix} NotifyDialogClosed start npc='{name}' dialog='{_dialogId}' " +
-                $"reactedBound={_reactedToReachingTalkingDistanceVariable != null} " +
-                $"stateBound={_stateVariable != null} " +
-                $"timesClosedBound={_timesPlayerClosedDialogVariable != null}",
-                this);
+            if (VerboseLogging)
+            {
+                Debug.Log(
+                    $"{DebugPrefix} NotifyDialogClosed start npc='{name}' dialog='{_dialogId}' " +
+                    $"reactedBound={_reactedToReachingTalkingDistanceVariable != null} " +
+                    $"stateBound={_stateVariable != null} " +
+                    $"timesClosedBound={_timesPlayerClosedDialogVariable != null}",
+                    this);
+            }
 
             var reactedAssigned = AssignValue(
                 _reactedToReachingTalkingDistanceVariable,
@@ -140,12 +168,15 @@ namespace Adventure.Infrastructure.Dialog
             ResolveDialogStateChannel()?.SendEventMessage();
             animationController?.PlayAnimation(NpcAnimationType.Bye);
 
-            Debug.Log(
-                $"{DebugPrefix} NotifyDialogClosed end npc='{name}' dialog='{_dialogId}' " +
-                $"reactedAssigned={reactedAssigned} reactedValue={FormatValue(_reactedToReachingTalkingDistanceVariable)} " +
-                $"stateAssigned={stateAssigned} stateValue={FormatValue(_stateVariable)} " +
-                $"timesClosedAssigned={timesClosedAssigned} timesClosedValue={FormatValue(_timesPlayerClosedDialogVariable)}",
-                this);
+            if (VerboseLogging)
+            {
+                Debug.Log(
+                    $"{DebugPrefix} NotifyDialogClosed end npc='{name}' dialog='{_dialogId}' " +
+                    $"reactedAssigned={reactedAssigned} reactedValue={FormatValue(_reactedToReachingTalkingDistanceVariable)} " +
+                    $"stateAssigned={stateAssigned} stateValue={FormatValue(_stateVariable)} " +
+                    $"timesClosedAssigned={timesClosedAssigned} timesClosedValue={FormatValue(_timesPlayerClosedDialogVariable)}",
+                    this);
+            }
         }
 
         public void NotifyChoiceWindowState(bool isOpen)
@@ -166,7 +197,7 @@ namespace Adventure.Infrastructure.Dialog
 
         public void NotifyBattleOutcome(BattleOutcome outcome)
         {
-            if (outcome == default)
+            if (outcome == BattleOutcome.Unknown)
             {
                 return;
             }
@@ -202,6 +233,8 @@ namespace Adventure.Infrastructure.Dialog
             BindVariable(BlackboardKeys.BattleResultChannel, ref _battleResultChannelVariable);
 
             _variablesBound = true;
+            ApplyStaticConfiguration();
+            ApplyPlayerConfiguration();
         }
 
         private void BindVariable<T>(string key, ref BlackboardVariable<T> storage)
@@ -217,13 +250,17 @@ namespace Adventure.Infrastructure.Dialog
             }
         }
 
-        private bool AssignValue<T>(BlackboardVariable<T> variable, string variableKey, T value)
+        private bool AssignValue<T>(BlackboardVariable<T> variable, string variableKey, T value, bool logIfMissing = true)
         {
             if (variable == null)
             {
-                Debug.LogWarning(
-                    $"[NpcBehaviorGraphBridge] Blackboard variable '{variableKey}' is not bound for dialog '{_dialogId}'",
-                    this);
+                if (logIfMissing)
+                {
+                    Debug.LogWarning(
+                        $"[NpcBehaviorGraphBridge] Blackboard variable '{variableKey}' is not bound for dialog '{_dialogId}'",
+                        this);
+                }
+
                 return false;
             }
 

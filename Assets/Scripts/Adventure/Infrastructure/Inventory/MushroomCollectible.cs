@@ -15,6 +15,7 @@ namespace Adventure.Infrastructure.Inventory
         [SerializeField] private bool destroyOnCollect = true;
         public UnitType Type => UnitType;
         public bool CanCollect { get; private set; } = true;
+        public bool CanInteract => CanCollect;
         private MushroomBookViewModel _mushroomCollectionViewModel;
 
         private void Awake()

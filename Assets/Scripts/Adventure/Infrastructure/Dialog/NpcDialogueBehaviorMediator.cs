@@ -70,7 +70,7 @@ namespace Adventure.Infrastructure.Dialog
             if (!string.IsNullOrEmpty(dialogId))
             {
                 _lastKnownDialogId = dialogId;
-                _registry.ForceActivate(dialogId);
+                _registry.ForceActivate(dialogId, _dialogVM.ActiveReturnNpcKey);
             }
 
             return dialogId;

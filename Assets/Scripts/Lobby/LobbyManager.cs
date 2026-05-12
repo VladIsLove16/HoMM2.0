@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class LobbyManager : NetworkBehaviour
 {
@@ -13,8 +12,7 @@ public class LobbyManager : NetworkBehaviour
     private static readonly Team[] SelectableTeams = { Team.Blue, Team.Red, Team.Green, Team.Yellow };
 
     [Header("Game Configuration")]
-    [FormerlySerializedAs("GameConfigurationService")]
-    [SerializeField] private GameConfigurationService gameConfigurationService;
+    [SerializeField] private SinglePlayerStartConfigurationSO singlePlayerStartConfiguration;
 
     [Header("Team Selection")]
     [SerializeField] private Team defaultHostTeam = Team.Blue;
@@ -151,12 +149,12 @@ public class LobbyManager : NetworkBehaviour
 
     public void StartSinglePlayer()
     {
-        EnsureGameConfigurationService();
+        EnsureSinglePlayerStartConfiguration();
 
-        if (gameConfigurationService != null)
+        if (singlePlayerStartConfiguration != null)
         {
-            gameConfigurationService.SetGameMode(GameMode.SinglePlayer);
-            gameConfigurationService.SetTeam(Team.Blue);
+            singlePlayerStartConfiguration.SetGameMode(GameMode.SinglePlayer);
+            singlePlayerStartConfiguration.SetTeam(Team.Blue);
             ApplyConfigurationToService();
         }
 
@@ -224,8 +222,8 @@ public class LobbyManager : NetworkBehaviour
 
     public GridContentEntrySO GetSelectedConfig()
     {
-        EnsureGameConfigurationService();
-        var configs = gameConfigurationService != null ? gameConfigurationService.AvailableConfigs : null;
+        EnsureSinglePlayerStartConfiguration();
+        var configs = singlePlayerStartConfiguration != null ? singlePlayerStartConfiguration.AvailableConfigs : null;
         if (configs != null && _selectedConfigIndex.Value >= 0 && _selectedConfigIndex.Value < configs.Count)
             return configs[_selectedConfigIndex.Value];
 
@@ -234,19 +232,19 @@ public class LobbyManager : NetworkBehaviour
 
     public (int width, int height) GetSelectedGridSize()
     {
-        EnsureGameConfigurationService();
-        var selectedConfig = gameConfigurationService != null ? gameConfigurationService.GetSelectedConfiguration() : null;
+        EnsureSinglePlayerStartConfiguration();
+        var selectedConfig = singlePlayerStartConfiguration != null ? singlePlayerStartConfiguration.GetSelectedConfiguration() : null;
         return selectedConfig != null ? (selectedConfig.Width, selectedConfig.Height) : (0, 0);
     }
 
     public GridContentEntrySO GetConfigByIndex(int index)
     {
-        EnsureGameConfigurationService();
-        if (gameConfigurationService?.AvailableConfigs != null &&
+        EnsureSinglePlayerStartConfiguration();
+        if (singlePlayerStartConfiguration?.AvailableConfigs != null &&
             index >= 0 &&
-            index < gameConfigurationService.AvailableConfigs.Count)
+            index < singlePlayerStartConfiguration.AvailableConfigs.Count)
         {
-            return gameConfigurationService.AvailableConfigs[index];
+            return singlePlayerStartConfiguration.AvailableConfigs[index];
         }
 
         return null;
@@ -290,9 +288,9 @@ public class LobbyManager : NetworkBehaviour
 
     internal void SetGameModeMode(GameMode gameMode)
     {
-        EnsureGameConfigurationService();
-        if (gameConfigurationService != null)
-            gameConfigurationService.SetGameMode(gameMode);
+        EnsureSinglePlayerStartConfiguration();
+        if (singlePlayerStartConfiguration != null)
+            singlePlayerStartConfiguration.SetGameMode(gameMode);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -326,10 +324,10 @@ public class LobbyManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void ChangeConfigServerRpc(int configIndex)
     {
-        var max = Mathf.Max((gameConfigurationService?.AvailableConfigs?.Count ?? 0) - 1, 0);
+        var max = Mathf.Max((singlePlayerStartConfiguration?.AvailableConfigs?.Count ?? 0) - 1, 0);
         var clamped = Mathf.Clamp(configIndex, 0, max);
 
-        gameConfigurationService?.SetSelectedConfiguration(clamped);
+        singlePlayerStartConfiguration?.SetSelectedConfiguration(clamped);
         _selectedConfigIndex.Value = clamped;
     }
 
@@ -440,10 +438,10 @@ public class LobbyManager : NetworkBehaviour
         Team localTeam,
         Team battlefieldBottomTeam)
     {
-        EnsureGameConfigurationService();
-        if (gameConfigurationService == null)
+        EnsureSinglePlayerStartConfiguration();
+        if (singlePlayerStartConfiguration == null)
         {
-            Debug.LogError("[LobbyManager] GameConfigurationService is not assigned.", this);
+            Debug.LogError("[LobbyManager] SinglePlayerStartConfiguration is not assigned.", this);
             return;
         }
 
@@ -471,11 +469,11 @@ public class LobbyManager : NetworkBehaviour
             battlefieldBottomTeam,
             ResolveOpponentTeam(battlefieldBottomTeam));
 
-        gameConfigurationService.SetAvailableConfigurations(new List<GridContentEntrySO> { _runtimeDirectGridFightConfig });
-        gameConfigurationService.SetSelectedConfiguration(0);
-        gameConfigurationService.SetGameMode(GameMode.Multiplayer);
-        gameConfigurationService.SetTeam(localTeam);
-        gameConfigurationService.SetBattlefieldBottomTeam(battlefieldBottomTeam);
+        singlePlayerStartConfiguration.SetAvailableConfigurations(new List<GridContentEntrySO> { _runtimeDirectGridFightConfig });
+        singlePlayerStartConfiguration.SetSelectedConfiguration(0);
+        singlePlayerStartConfiguration.SetGameMode(GameMode.Multiplayer);
+        singlePlayerStartConfiguration.SetTeam(localTeam);
+        singlePlayerStartConfiguration.SetBattlefieldBottomTeam(battlefieldBottomTeam);
     }
 
     private List<GridContentEntrySO.UnitContent> BuildDirectGridFightContents(
@@ -580,12 +578,12 @@ public class LobbyManager : NetworkBehaviour
     {
         OnConfigChanged?.Invoke(newValue);
 
-        if (gameConfigurationService == null)
+        if (singlePlayerStartConfiguration == null)
             return;
 
-        var count = gameConfigurationService.AvailableConfigs?.Count ?? 0;
+        var count = singlePlayerStartConfiguration.AvailableConfigs?.Count ?? 0;
         var clamped = count > 0 ? Mathf.Clamp(newValue, 0, count - 1) : -1;
-        gameConfigurationService.SetSelectedConfiguration(clamped);
+        singlePlayerStartConfiguration.SetSelectedConfiguration(clamped);
     }
 
     private void OnNetworkGameStartedChanged(bool _, bool newValue)
@@ -628,29 +626,29 @@ public class LobbyManager : NetworkBehaviour
 
     private void ApplyConfigurationToService()
     {
-        EnsureGameConfigurationService();
-        gameConfigurationService?.SetSelectedConfiguration(_selectedConfigIndex.Value);
+        EnsureSinglePlayerStartConfiguration();
+        singlePlayerStartConfiguration?.SetSelectedConfiguration(_selectedConfigIndex.Value);
 
         var local = FindLocalPlayerData();
         if (local.HasValue)
-            gameConfigurationService?.SetTeam(local.Value.Team);
+            singlePlayerStartConfiguration?.SetTeam(local.Value.Team);
     }
 
     private void ApplyNetworkStateToLocalService()
     {
-        EnsureGameConfigurationService();
-        if (gameConfigurationService == null)
+        EnsureSinglePlayerStartConfiguration();
+        if (singlePlayerStartConfiguration == null)
             return;
 
-        var count = gameConfigurationService.AvailableConfigs?.Count ?? 0;
+        var count = singlePlayerStartConfiguration.AvailableConfigs?.Count ?? 0;
         var clamped = count > 0 ? Mathf.Clamp(_selectedConfigIndex.Value, 0, count - 1) : -1;
-        gameConfigurationService.SetSelectedConfiguration(clamped);
+        singlePlayerStartConfiguration.SetSelectedConfiguration(clamped);
 
         var local = FindLocalPlayerData();
         if (!local.HasValue)
             return;
 
-        gameConfigurationService.SetTeam(local.Value.Team);
+        singlePlayerStartConfiguration.SetTeam(local.Value.Team);
         OnLocalPlayerTeamChanged?.Invoke(local.Value);
     }
 
@@ -889,10 +887,10 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
-        if (gameConfigurationService != null)
+        if (singlePlayerStartConfiguration != null)
         {
-            gameConfigurationService.SetGameMode(GameMode.Multiplayer);
-            gameConfigurationService.SetTeam(defaultHostTeam);
+            singlePlayerStartConfiguration.SetGameMode(GameMode.Multiplayer);
+            singlePlayerStartConfiguration.SetTeam(defaultHostTeam);
         }
 
         GameLaunchPreferences.SetMultiplayerStartScene(SceneLoader.Scene.Adventure);
@@ -908,10 +906,10 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
-        if (gameConfigurationService != null)
+        if (singlePlayerStartConfiguration != null)
         {
-            gameConfigurationService.SetGameMode(GameMode.Multiplayer);
-            gameConfigurationService.SetTeam(defaultClientTeam);
+            singlePlayerStartConfiguration.SetGameMode(GameMode.Multiplayer);
+            singlePlayerStartConfiguration.SetTeam(defaultClientTeam);
         }
 
         await sessionLobbyService.JoinByCodeAsync(playerName, joinCode);
@@ -926,10 +924,10 @@ public class LobbyManager : NetworkBehaviour
             return;
         }
 
-        if (gameConfigurationService != null)
+        if (singlePlayerStartConfiguration != null)
         {
-            gameConfigurationService.SetGameMode(GameMode.Multiplayer);
-            gameConfigurationService.SetTeam(defaultClientTeam);
+            singlePlayerStartConfiguration.SetGameMode(GameMode.Multiplayer);
+            singlePlayerStartConfiguration.SetTeam(defaultClientTeam);
         }
 
         await sessionLobbyService.JoinBySessionIdAsync(playerName, sessionId);
@@ -1001,9 +999,9 @@ public class LobbyManager : NetworkBehaviour
                 return directGridFightArmyPresets;
         }
 
-        if (gameConfigurationService != null && gameConfigurationService.GetPlayerArmy() != null)
+        if (singlePlayerStartConfiguration != null && singlePlayerStartConfiguration.GetPlayerArmy() != null)
         {
-            directGridFightArmyPresets = new List<ArmyLineupSO> { gameConfigurationService.GetPlayerArmy() };
+            directGridFightArmyPresets = new List<ArmyLineupSO> { singlePlayerStartConfiguration.GetPlayerArmy() };
             return directGridFightArmyPresets;
         }
 
@@ -1142,7 +1140,7 @@ public class LobbyManager : NetworkBehaviour
 
     private void EnsureLobbyDependencies()
     {
-        EnsureGameConfigurationService();
+        EnsureSinglePlayerStartConfiguration();
 
         if (sessionLobbyService != null)
             return;
@@ -1215,14 +1213,14 @@ public class LobbyManager : NetworkBehaviour
         };
     }
 
-    private void EnsureGameConfigurationService()
+    private void EnsureSinglePlayerStartConfiguration()
     {
-        if (gameConfigurationService != null)
+        if (singlePlayerStartConfiguration != null)
             return;
 
-        gameConfigurationService = ScriptableObject.CreateInstance<GameConfigurationService>();
-        gameConfigurationService.name = "RuntimeGameConfigurationService";
-        Debug.LogWarning("[LobbyManager] GameConfigurationService is not assigned. Using runtime instance.", this);
+        singlePlayerStartConfiguration = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
+        singlePlayerStartConfiguration.name = "RuntimeSinglePlayerStartConfiguration";
+        Debug.LogWarning("[LobbyManager] SinglePlayerStartConfiguration is not assigned. Using runtime instance.", this);
     }
 
     private NetworkManager ResolveNetworkManager()

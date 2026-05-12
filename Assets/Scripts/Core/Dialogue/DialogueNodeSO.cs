@@ -40,7 +40,7 @@ public sealed class DialogueNodeSO : ScriptableObject
         {
             var nextId = choice.NextNode != null ? choice.NextNode.nodeId : null;
             var victoryId = choice.VictoryNode != null ? choice.VictoryNode.NodeId : nextId;
-            var defeatId = choice.DefeatNode != null ? choice.DefeatNode.NodeId : victoryId;
+            var defeatId = choice.DefeatNode != null ? choice.DefeatNode.NodeId : nextId;
             var resolvedChoiceText = ResolveLocalizedString(choice.TextLocalized, choice.Text);
             domainChoices.Add(new DialogueChoice(
                 choice.Id,

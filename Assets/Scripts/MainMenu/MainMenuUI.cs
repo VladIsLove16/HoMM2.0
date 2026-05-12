@@ -1,7 +1,7 @@
-using Adventure.Infrastructure.Persistence;
+using UniRx;
 using UnityEngine;
-using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
+using Zenject;
 
 [DefaultExecutionOrder(-1000)]
 public class mainmenuUI : MonoBehaviour
@@ -18,6 +18,10 @@ public class mainmenuUI : MonoBehaviour
     [SerializeField] private RectTransform settingsPanelRoot;
     [SerializeField] private LobbyUI lobbyUI;
 
+    private MainMenuViewModel _viewModel;
+    private CompositeDisposable _bindings;
+    private bool _staticReferencesValid;
+
     private void Reset()
     {
         TryResolveEmbeddedLobbyReferences();
@@ -30,9 +34,15 @@ public class mainmenuUI : MonoBehaviour
         TryResolveMainMenuRoot();
     }
 
+    [Inject]
+    public void Construct(MainMenuViewModel viewModel)
+    {
+        _viewModel = viewModel;
+        TryBindViewModel();
+    }
+
     private void Awake()
     {
-        ApplySavedLocale();
         TryResolveEmbeddedLobbyReferences();
 
         if (!ValidateRequiredReferences(out var errorMessage))
@@ -42,52 +52,40 @@ public class mainmenuUI : MonoBehaviour
             return;
         }
 
-        HideNetworkMenu();
-        HideSettingsPanel();
-
         if (settingsPanelRoot == null)
         {
             SettingsButton.interactable = false;
             Debug.LogWarning("[MainMenuUI] Settings panel is not assigned. Settings button is disabled.", this);
         }
 
-        ShowPrimaryMenu();
+        _staticReferencesValid = true;
+        TryBindViewModel();
     }
 
-    private static void ApplySavedLocale()
+    private void OnEnable()
     {
-        LocalizationSettings.InitializationOperation.WaitForCompletion();
+        TryBindViewModel();
+    }
 
-        var locales = LocalizationSettings.AvailableLocales?.Locales;
-        if (locales == null || locales.Count == 0)
-            return;
-
-        var storage = new JsonFileStorage();
-        var data = storage.Load<GameSettingsSaveData>("game-settings");
-        if (data == null)
-            return;
-
-        var index = Mathf.Clamp(data.LanguageIndex, 0, locales.Count - 1);
-        var targetLocale = locales[index];
-        if (targetLocale != null && LocalizationSettings.SelectedLocale != targetLocale)
-        {
-            LocalizationSettings.SelectedLocale = targetLocale;
-        }
+    private void OnDisable()
+    {
+        _bindings?.Dispose();
+        _bindings = null;
     }
 
     public void OnPlayButtonClicked()
     {
-        StartSinglePlayer();
+        _viewModel?.StartSinglePlayer();
     }
 
     public void OnSettingsButtonClicked()
     {
-        ToggleSettingsPanel();
+        _viewModel?.ToggleSettingsPanel();
     }
 
     public void OnQuitButtonClicked()
     {
-        QuitGame();
+        _viewModel?.QuitGame();
     }
 
     private bool ValidateRequiredReferences(out string errorMessage)
@@ -132,40 +130,45 @@ public class mainmenuUI : MonoBehaviour
         return true;
     }
 
-    private void ShowPrimaryMenu()
+    private void BindButtons()
     {
-        SetMainMenuVisible(true);
-        HideNetworkMenu();
-        HideSettingsPanel();
-        BindButton(SingleplayerButton, StartSinglePlayer);
-        BindButton(NetworkPlayButton, OpenNetworkLobby);
-        BindButton(SettingsButton, ToggleSettingsPanel);
-        BindButton(QuitButton, QuitGame);
+        BindButton(SingleplayerButton, OnPlayButtonClicked);
+        BindButton(NetworkPlayButton, () => _viewModel?.OpenNetworkLobby());
+        BindButton(SettingsButton, OnSettingsButtonClicked);
+        BindButton(QuitButton, OnQuitButtonClicked);
     }
 
-    private void StartSinglePlayer()
+    private void TryBindViewModel()
     {
-        SceneLoader.Load(SceneLoader.Scene.Adventure);
+        if (!_staticReferencesValid || !isActiveAndEnabled || _viewModel == null || _bindings != null)
+            return;
+
+        BindButtons();
+
+        _bindings = new CompositeDisposable();
+        _viewModel.IsSettingsPanelOpen
+            .Subscribe(SetSettingsPanelVisible)
+            .AddTo(_bindings);
+        _viewModel.ActiveScreen
+            .Subscribe(ApplyScreen)
+            .AddTo(_bindings);
     }
 
-    private void OpenNetworkLobby()
-    {
-        GameLaunchPreferences.SetMultiplayerStartScene(SceneLoader.Scene.Adventure);
-        ShowLobbyConnectionFlow();
-    }
-
-    private void ToggleSettingsPanel()
+    private void SetSettingsPanelVisible(bool visible)
     {
         if (settingsPanelRoot == null)
         {
-            Debug.LogWarning("[MainMenuUI] Settings panel is not assigned.", this);
+            if (visible)
+            {
+                Debug.LogWarning("[MainMenuUI] Settings panel is not assigned.", this);
+            }
+
             return;
         }
 
-        var show = !settingsPanelRoot.gameObject.activeSelf;
-        settingsPanelRoot.gameObject.SetActive(show);
+        settingsPanelRoot.gameObject.SetActive(visible);
 
-        if (show)
+        if (visible)
             HideNetworkMenu();
     }
 
@@ -199,9 +202,18 @@ public class mainmenuUI : MonoBehaviour
         button.onClick.AddListener(callback);
     }
 
-    private static void QuitGame()
+    private void ApplyScreen(MainMenuScreen screen)
     {
-        Application.Quit();
+        switch (screen)
+        {
+            case MainMenuScreen.NetworkConnection:
+                ShowLobbyConnectionFlow();
+                break;
+            default:
+                SetMainMenuVisible(true);
+                HideNetworkMenu();
+                break;
+        }
     }
 
     private void TryResolveEmbeddedLobbyReferences()
@@ -267,4 +279,5 @@ public class mainmenuUI : MonoBehaviour
         SettingsButton.gameObject.SetActive(visible);
         QuitButton.gameObject.SetActive(visible);
     }
+
 }

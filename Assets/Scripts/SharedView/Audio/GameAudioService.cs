@@ -46,7 +46,6 @@ namespace SharedView.Audio
             {
                 CombatSfxType.Melee => _settings.MeleeImpact,
                 CombatSfxType.Ranged => _settings.RangedImpact,
-                CombatSfxType.Magic => _settings.MagicImpact,
                 _ => _settings.GenericImpact
             };
 

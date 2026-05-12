@@ -19,6 +19,7 @@ public sealed class AdventureInputRouter : IDisposable
     [Inject] private AdventureGameSettingsViewModel settingsVM;
     [Inject] private MushroomBookViewModel bookVM;
     [InjectOptional] private HelpMenuViewModel helpMenuVM;
+
     [Inject]
     private void Construct()
     {
@@ -29,9 +30,10 @@ public sealed class AdventureInputRouter : IDisposable
         adventureCharacterInput.OpenSettingsPerformed += OnOpenSettings;
         adventureCharacterInput.OpenMushroomBookPerformed += OnOpenMushroomBook;
         adventureCharacterInput.OpenHelpMenuPerformed += OnOpenHelpMenu;
+        inputModeVM.OnModeChanged += OnInputModeChanged;
+        localPlayerProvider.PlayerChanged += OnPlayerChanged;
+        ApplyCurrentInputMode();
     }
-
-   
 
     public void Dispose()
     {
@@ -42,6 +44,8 @@ public sealed class AdventureInputRouter : IDisposable
         adventureCharacterInput.OpenSettingsPerformed -= OnOpenSettings;
         adventureCharacterInput.OpenMushroomBookPerformed -= OnOpenMushroomBook;
         adventureCharacterInput.OpenHelpMenuPerformed -= OnOpenHelpMenu;
+        inputModeVM.OnModeChanged -= OnInputModeChanged;
+        localPlayerProvider.PlayerChanged -= OnPlayerChanged;
     }
 
     private void OnMoveChanged(Vector2 move)
@@ -51,9 +55,12 @@ public sealed class AdventureInputRouter : IDisposable
             return;
 
         if (inputModeVM.CanMove)
+        {
             movementController.SetMoveInput(move);
-        else
-            movementController.SetMoveInput(Vector2.zero);
+            return;
+        }
+
+        movementController.ClearMoveInput();
     }
 
     private void OnLookChanged(Vector2 delta)
@@ -65,7 +72,10 @@ public sealed class AdventureInputRouter : IDisposable
         if (inputModeVM.CanLook)
         {
             movementController.EnqueueLookDelta(delta);
+            return;
         }
+
+        movementController.ClearLookInput();
     }
 
     private void OnSprintChanged(bool sprint)
@@ -75,7 +85,12 @@ public sealed class AdventureInputRouter : IDisposable
             return;
 
         if (inputModeVM.CanMove)
+        {
             movementController.SetSprintInput(sprint);
+            return;
+        }
+
+        movementController.SetSprintInput(false);
     }
 
     private void OnInteract()
@@ -107,5 +122,33 @@ public sealed class AdventureInputRouter : IDisposable
         }
         helpMenuVM.Toggle();
     }
+
     private void OnOpenMushroomBook() => bookVM.Toggle();
+
+    private void OnInputModeChanged(InputMode _)
+    {
+        ApplyCurrentInputMode();
+    }
+
+    private void OnPlayerChanged()
+    {
+        ApplyCurrentInputMode();
+    }
+
+    private void ApplyCurrentInputMode()
+    {
+        var movementController = localPlayerProvider.MovementController;
+        if (movementController == null)
+            return;
+
+        if (!inputModeVM.CanMove)
+        {
+            movementController.ClearMoveInput();
+        }
+
+        if (!inputModeVM.CanLook)
+        {
+            movementController.ClearLookInput();
+        }
+    }
 }

@@ -9,6 +9,7 @@ public sealed class DialogueGraphSO : ScriptableObject
     [SerializeField] private List<DialogueNodeSO> additionalNodes = new List<DialogueNodeSO>();
 
     public string Id => name;
+    public string StartNodeId => startNode != null ? startNode.NodeId : string.Empty;
 
     public DialogueGraph ToDomain()
     {

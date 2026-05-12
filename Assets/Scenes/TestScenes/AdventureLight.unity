@@ -1575,7 +1575,7 @@ MonoBehaviour:
   gameSettingsView: {fileID: 449466824}
   helpMenu: {fileID: 4639560249186062143}
   audioMixer: {fileID: 24100000, guid: 2e62866bfcccc384e88b37af4e90671c, type: 2}
-  devTools: {fileID: 2132559172}
+  storyFlagsRuntimeState: {fileID: 11400000, guid: c6f3ee2f7d4845fdb15eaab5843f730e, type: 2}
 --- !u!114 &497788006 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4939655397479201325, guid: b6c73020858b0db4c938b05eadb1a4f4, type: 3}
@@ -3192,7 +3192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8086af83dac7447bb39b54e82c737c9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  configurationService: {fileID: 11400000, guid: 826b593e69c0a7e45b2b2b78633b385b, type: 2}
+  singlePlayerStartConfiguration: {fileID: 11400000, guid: 9de629cb02cc2f145be4189b287b022e, type: 2}
   battleScene: 0
   gridWidth: 10
   gridHeight: 10

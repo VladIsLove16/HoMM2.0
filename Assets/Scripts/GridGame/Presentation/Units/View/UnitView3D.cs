@@ -505,8 +505,8 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         {
             FaceTowards(targetWorldPosition.Value);
         }
+        PlayAttackAudio();
         yield return PlayAnimationRoutine(UnitAnimationState.Attack, UnitAnimationEvent.AttackFinished);
-        PlayAttackAudio(targetWorldPosition ?? transform.position);
         if (!_isDead)
         {
             TransitionToIdle();
@@ -529,7 +529,7 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         }
     }
 
-    private void PlayAttackAudio(Vector3 impactPosition)
+    private void PlayAttackAudio()
     {
         if (_audioService == null)
             return;
@@ -538,11 +538,15 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
         var clipSet = ResolveAudioProfile()?.GetAttackClips(sfxType);
         if (clipSet != null && clipSet.HasClips)
         {
-            _audioService.Play(clipSet, impactPosition);
+            _audioService.Play(clipSet);
             return;
         }
 
-        _audioService.PlayCombatImpact(sfxType, impactPosition);
+        clipSet = ResolveDefaultAttackClipSet(sfxType);
+        if (clipSet != null && clipSet.HasClips)
+        {
+            _audioService.Play(clipSet);
+        }
     }
 
     private void PlayDamageTakenAudio()
@@ -564,6 +568,25 @@ public class UnitView3D : MonoBehaviour, IDisposable, IHoverable, IGameViewObjec
             return CombatSfxType.Ranged;
 
         return CombatSfxType.Melee;
+    }
+
+    private GameAudioClipSet ResolveDefaultAttackClipSet(CombatSfxType type)
+    {
+        var settings = _audioService?.Settings;
+        if (settings == null)
+            return null;
+
+        var clipSet = type switch
+        {
+            CombatSfxType.Ranged => settings.RangedImpact,
+            CombatSfxType.Magic => settings.MagicImpact,
+            CombatSfxType.Melee => settings.MeleeImpact,
+            _ => settings.GenericImpact
+        };
+
+        return clipSet != null && clipSet.HasClips
+            ? clipSet
+            : settings.GenericImpact;
     }
 
     private UnitAudioProfile ResolveAudioProfile()

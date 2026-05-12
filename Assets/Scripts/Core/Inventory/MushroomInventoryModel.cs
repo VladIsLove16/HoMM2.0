@@ -1,5 +1,6 @@
 using Adventure.Integration.Battle;
 using Adventure.Infrastructure.State;
+using System;
 using System.Collections.Generic;
 
 namespace Adventure.Domain.Inventory
@@ -9,6 +10,8 @@ namespace Adventure.Domain.Inventory
         private readonly Dictionary<UnitType, int> _items = new Dictionary<UnitType, int>();
 
         public IReadOnlyDictionary<UnitType, int> Items => _items;
+        public event Action InventoryChanged;
+
         public MushroomInventoryModel(IReadOnlyList<UnitStackData> unitStackDatas)
         {
             if (BattleStateCache.TryGetInventorySnapshot(out var cachedSnapshot) && cachedSnapshot != null && cachedSnapshot.Count > 0)
@@ -59,6 +62,7 @@ namespace Adventure.Domain.Inventory
             if (updateSnapshot)
             {
                 BattleStateCache.StoreInventorySnapshot(GetData());
+                InventoryChanged?.Invoke();
             }
 
             return true;
@@ -80,6 +84,7 @@ namespace Adventure.Domain.Inventory
             if (updateSnapshot)
             {
                 BattleStateCache.StoreInventorySnapshot(GetData());
+                InventoryChanged?.Invoke();
             }
         }
         public  IReadOnlyList<UnitStackData> GetData()

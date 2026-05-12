@@ -13,15 +13,15 @@ public class GameNetworkCommandGateway : NetworkBehaviour
     private ActionPipeline _pipeline;
     private GameModel _gameModel;
     private ITurnService _turnService;
-    private IGameConfigurationService _gameConfigurationService;
+    private SinglePlayerStartConfigurationSO _startConfiguration;
 
     [Inject]
-    public void Init(ActionPipeline pipeline, GameModel gameModel, ITurnService turnService, IGameConfigurationService gameConfigurationService)
+    public void Init(ActionPipeline pipeline, GameModel gameModel, ITurnService turnService, SinglePlayerStartConfigurationSO startConfiguration)
     {
         _pipeline = pipeline;
         _gameModel = gameModel;
         _turnService = turnService;
-        _gameConfigurationService = gameConfigurationService;
+        _startConfiguration = startConfiguration;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -335,7 +335,7 @@ public class GameNetworkCommandGateway : NetworkBehaviour
 
     private bool IsBottomTeam(Team team)
     {
-        var bottomTeam = _gameConfigurationService?.BattlefieldBottomTeam ?? _turnService.LocalTeam;
+        var bottomTeam = _startConfiguration?.BattlefieldBottomTeam ?? _turnService.LocalTeam;
         return team == bottomTeam;
     }
 }

@@ -41,7 +41,7 @@ namespace Adventure.Multiplayer
         [Inject(Optional = true)] private MushroomInventoryModel _inventoryModel;
         [Inject(Optional = true)] private IGridConfigurationGateway _gridConfigurationGateway;
         [Inject(Optional = true)] private ArmyFormationResolver _formationResolver;
-        [Inject(Optional = true)] private IGameConfigurationService _gameConfigurationService;
+        [Inject(Optional = true)] private SinglePlayerStartConfigurationSO _startConfiguration;
 
         private readonly NetworkVariable<FixedString128Bytes> _displayName =
             new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -342,10 +342,10 @@ namespace Adventure.Multiplayer
             var localArmy = localTeam == battlefieldBottomTeam ? bottomArmy : topArmy;
             var enemyArmy = localTeam == battlefieldBottomTeam ? topArmy : bottomArmy;
 
-            var configurationService = ResolveGameConfigurationService();
-            configurationService?.SetGameMode(GameMode.Multiplayer);
-            configurationService?.SetTeam(localTeam);
-            configurationService?.SetBattlefieldBottomTeam(battlefieldBottomTeam);
+            var startConfiguration = ResolveStartConfiguration();
+            startConfiguration?.SetGameMode(GameMode.Multiplayer);
+            startConfiguration?.SetTeam(localTeam);
+            startConfiguration?.SetBattlefieldBottomTeam(battlefieldBottomTeam);
 
             var playerMovement = ResolveLocalPlayerProvider()?.MovementController;
             if (playerMovement != null)
@@ -567,17 +567,17 @@ namespace Adventure.Multiplayer
             return _formationResolver;
         }
 
-        private IGameConfigurationService ResolveGameConfigurationService()
+        private SinglePlayerStartConfigurationSO ResolveStartConfiguration()
         {
-            if (_gameConfigurationService != null)
-                return _gameConfigurationService;
+            if (_startConfiguration != null)
+                return _startConfiguration;
 
             var sceneContext = FindSceneContext();
-            _gameConfigurationService = sceneContext != null
-                ? sceneContext.Container.TryResolve<IGameConfigurationService>()
+            _startConfiguration = sceneContext != null
+                ? sceneContext.Container.TryResolve<SinglePlayerStartConfigurationSO>()
                 : null;
 
-            return _gameConfigurationService;
+            return _startConfiguration;
         }
 
         private ILocalAdventurePlayerProvider ResolveLocalPlayerProvider()
@@ -728,7 +728,7 @@ namespace Adventure.Multiplayer
             battlefieldBottomTeam = Team.None;
 
             var initiatorIsServer = NetworkManager != null && pendingState.InitiatorClientId == NetworkManager.ServerClientId;
-            battlefieldBottomTeam = ResolveGameConfigurationService()?.Team ?? Team.Blue;
+            battlefieldBottomTeam = ResolveStartConfiguration()?.PlayerTeam ?? Team.Blue;
             opponentTeam = ResolveEnemyBattleTeam(battlefieldBottomTeam);
             initiatorTeam = initiatorIsServer ? battlefieldBottomTeam : opponentTeam;
             opponentTeam = initiatorIsServer ? opponentTeam : battlefieldBottomTeam;

@@ -30,7 +30,7 @@ public class GridGameMonoInstaller : MonoInstaller
     [SerializeField] private BattleAiControlConfigSO battleAiControlConfig;
     [Header("Model dependencies")]
     [SerializeField] private StatusEffectDatas statusEffectDatas;
-    [SerializeField] private GameConfigurationService gameConfigurationService;
+    [SerializeField] private SinglePlayerStartConfigurationSO singlePlayerStartConfiguration;
     [Header("Presentation")]
     [SerializeField] private MonoBehaviour _presentationInstaller;
     [SerializeField] private GridGameSettingsView _gridGameSettingsView;
@@ -91,7 +91,13 @@ public class GridGameMonoInstaller : MonoInstaller
 
     private void BindConfigurationService()
     {
-        Container.BindInterfacesTo<GameConfigurationService>().FromInstance(gameConfigurationService).AsSingle();
+        if (singlePlayerStartConfiguration == null)
+        {
+            singlePlayerStartConfiguration = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
+            Debug.LogWarning("[GridGameMonoInstaller] SinglePlayerStartConfiguration is not assigned. Using runtime default.", this);
+        }
+
+        Container.Bind<SinglePlayerStartConfigurationSO>().FromInstance(singlePlayerStartConfiguration).AsSingle();
     }
 
     private void BindServices()
@@ -211,7 +217,6 @@ public class GridGameMonoInstaller : MonoInstaller
     {
         Container.Bind<GameSettingsModel>().FromMethod(_ => GameSettingsRuntimeStore.Resolve()).AsSingle();
         Container.BindInterfacesAndSelfTo<GridUnitAssetMap>().FromInstance(gridUnitAssets).AsSingle();
-        Container.Bind<IUnitAudioProfileProvider>().FromInstance(gridUnitAssets).AsSingle();
         Container.Bind<StatusEffectDatas>().FromInstance(statusEffectDatas).AsSingle();
 
         Container.Bind<UnitModelFactory>().AsSingle();
@@ -223,7 +228,7 @@ public class GridGameMonoInstaller : MonoInstaller
         Container.Bind<SpellZoneFactory>().AsSingle();
         Container.Bind<SpellCasterService>().AsSingle();
         Container.Bind<GameModel>().AsSingle().NonLazy();
-          if (gameConfigurationService.CurrentGameMode == GameMode.SinglePlayer)
+        if (singlePlayerStartConfiguration.CurrentGameMode == GameMode.SinglePlayer)
         {
             Container.Bind<IGameCommandExecutor>().To<LocalGameCommandExecutor>().AsSingle();
         }

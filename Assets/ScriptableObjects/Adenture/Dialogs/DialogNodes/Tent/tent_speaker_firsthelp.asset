@@ -54,8 +54,12 @@ MonoBehaviour:
       m_LocalVariables: []
     Action: 1
     NextNode: {fileID: 11400000, guid: bfd7d2a94852b5147a17bc83dfc90cb3, type: 2}
-    VictoryNode: {fileID: 0}
-    DefeatNode: {fileID: 0}
+    VictoryNode: {fileID: 11400000, guid: bfd7d2a94852b5147a17bc83dfc90cb3, type: 2}
+    DefeatNode: {fileID: 11400000, guid: bfd7d2a94852b5147a17bc83dfc90cb3, type: 2}
+    RequiredFlags: []
+    GrantedFlags: []
+    HideIfLocked: 0
+    LockedText: 
   references:
     version: 2
     RefIds: []

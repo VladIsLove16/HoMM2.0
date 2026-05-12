@@ -92,7 +92,7 @@ namespace Tests.PlayMode.GameFlow
         public IEnumerator Setup_WithNullProviderUsesDefaultEntry()
 
         {
-            IGameConfigurationService service = ScriptableObject.CreateInstance<GameConfigurationService>();
+            var service = ScriptableObject.CreateInstance<SinglePlayerStartConfigurationSO>();
             var defaultEntry = CreateEntry(5, 4, CreateContent(UnitType.Archer, 0, 0, Team.Blue));
             var turnSystem = new TurnService();
             var gameModel = CreateSpyGameModel();
@@ -128,15 +128,19 @@ namespace Tests.PlayMode.GameFlow
             Assert.That(turnService.CombatUnits[0].Team, Is.EqualTo(Team.Red));
         }
 
-        private GameController CreateController(ITurnService turnSystem, IGameConfigurationService configurationService, SpyGameModel gameModel, GridContentEntrySO defaultEntry)
+        private GameController CreateController(
+            ITurnService turnSystem,
+            SinglePlayerStartConfigurationSO startConfiguration,
+            SpyGameModel gameModel,
+            GridContentEntrySO defaultEntry)
         {
             var go = new GameObject("GameController");
             go.SetActive(false);
             _createdObjects.Add(go);
             var controller = go.AddComponent<GameController>();
             controller.Construct(gameModel, turnSystem);
-            SetPrivateField(controller, "_configurationService", configurationService);
-            SetPrivateField(controller, "defaultEntry", defaultEntry);
+            startConfiguration.SetAvailableConfigurations(new List<GridContentEntrySO> { defaultEntry });
+            SetPrivateField(controller, "_startConfiguration", startConfiguration);
             return controller;
         }
 

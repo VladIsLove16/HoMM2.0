@@ -194,6 +194,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -330,6 +331,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -412,6 +414,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 288965804313669193}
+  - component: {fileID: 2637354508983246942}
   - component: {fileID: 2073426632619014485}
   m_Layer: 5
   m_Name: AchievmentToast
@@ -440,6 +443,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &2637354508983246942
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7028280205552426008}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &2073426632619014485
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,7 +467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43de5e8d60af182498315ca7fcad4adc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  root: {fileID: 7017663497617092102}
+  canvasGroup: {fileID: 2637354508983246942}
   toastRect: {fileID: 3931006525305841550}
   titleText: {fileID: 6786344017755560954}
   descriptionText: {fileID: 2196151178739044020}
@@ -646,6 +661,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

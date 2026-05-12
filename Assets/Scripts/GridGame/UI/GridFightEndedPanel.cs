@@ -17,14 +17,19 @@ public class GridFightEndedPanel : CanvasGroupVisibilityPanelBase, IDisposable
 
     private ITurnStateViewModel _turnState;
     private EventBus _gameplayEvents;
+    private SinglePlayerStartConfigurationSO _startConfiguration;
     private readonly CompositeDisposable _disposables = new CompositeDisposable();
     private bool _resultHandled;
 
     [Inject]
-    public void Construct(ITurnStateViewModel turnState, EventBus gameplayEvents)
+    public void Construct(
+        ITurnStateViewModel turnState,
+        EventBus gameplayEvents,
+        [InjectOptional] SinglePlayerStartConfigurationSO startConfiguration = null)
     {
         _turnState = turnState;
         _gameplayEvents = gameplayEvents;
+        _startConfiguration = startConfiguration;
         if (_turnState != null)
         {
             _turnState.BattleStateProperty
@@ -57,12 +62,19 @@ public class GridFightEndedPanel : CanvasGroupVisibilityPanelBase, IDisposable
         bool playerWon = DeterminePlayerVictory(state);
         _resultHandled = true;
 
+        _startConfiguration?.EnsureDirectBattlePostBattleContext();
         BattleStateCache.CompleteBattle(playerWon);
         _gameplayEvents?.Invoke(new BattleCompletedCustomEvent(playerWon));
 
         if (BattleResult != null)
         {
             BattleResult.text = playerWon ? "Victory!" : "Defeat...";
+        }
+
+        if (ShouldReturnImmediately(playerWon))
+        {
+            ReturnToConfiguredScene();
+            return;
         }
 
         ShowPanel();
@@ -82,6 +94,22 @@ public class GridFightEndedPanel : CanvasGroupVisibilityPanelBase, IDisposable
     }
 
     private void OnReturnClicked()
+    {
+        ReturnToConfiguredScene();
+    }
+
+    private bool ShouldReturnImmediately(bool playerWon)
+    {
+        if (!playerWon || !BattleStateCache.HasPendingPostBattleFlow())
+        {
+            return false;
+        }
+
+        var networkManager = NetworkManager.Singleton;
+        return networkManager == null || !networkManager.IsListening;
+    }
+
+    private void ReturnToConfiguredScene()
     {
         var targetScene = BattleStateCache.GetReturnSceneOrDefault();
         var networkManager = NetworkManager.Singleton;

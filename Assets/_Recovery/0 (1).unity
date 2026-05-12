@@ -10486,7 +10486,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8086af83dac7447bb39b54e82c737c9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  configurationService: {fileID: 11400000, guid: 826b593e69c0a7e45b2b2b78633b385b, type: 2}
+  singlePlayerStartConfiguration: {fileID: 11400000, guid: 9de629cb02cc2f145be4189b287b022e, type: 2}
   battleScene: 0
   gridWidth: 10
   gridHeight: 10

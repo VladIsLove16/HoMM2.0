@@ -31,3 +31,27 @@ MonoBehaviour:
       CanFly: 0
       StartingEffects: 
       InvulnerableEffects: 
+  audioProfile:
+    MeleeAttack:
+      clips:
+      - {fileID: 8300000, guid: 3457cd5eaabcc1a41b889cf5cbf57f67, type: 3}
+      volume: 1
+      pitchMin: 1
+      pitchMax: 1
+    RangedAttack:
+      clips:
+      - {fileID: 8300000, guid: 36a08575123fc59478a50178da2acfc4, type: 3}
+      volume: 1
+      pitchMin: 1
+      pitchMax: 1
+    MagicAttack:
+      clips:
+      - {fileID: 0}
+      volume: 1
+      pitchMin: 1
+      pitchMax: 1
+    DamageTaken:
+      clips: []
+      volume: 1
+      pitchMin: 1
+      pitchMax: 1

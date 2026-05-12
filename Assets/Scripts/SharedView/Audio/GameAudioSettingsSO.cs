@@ -3,6 +3,12 @@ using UnityEngine.Audio;
 
 namespace SharedView.Audio
 {
+    public enum FootstepPlaybackSpace
+    {
+        Character = 0,
+        World = 1
+    }
+
     [CreateAssetMenu(menuName = "Audio/Game Audio Settings")]
     public sealed class GameAudioSettingsSO : ScriptableObject
     {
@@ -15,6 +21,7 @@ namespace SharedView.Audio
 
         [Header("Adventure")]
         [SerializeField] private GameAudioClipSet playerFootsteps = new();
+        [SerializeField] private FootstepPlaybackSpace playerFootstepSpace = FootstepPlaybackSpace.Character;
         [SerializeField] [Min(0.05f)] private float walkStepInterval = 0.48f;
         [SerializeField] [Min(0.05f)] private float sprintStepInterval = 0.34f;
 
@@ -28,6 +35,7 @@ namespace SharedView.Audio
         public GameAudioClipSet ButtonHover => buttonHover;
         public GameAudioClipSet ButtonClick => buttonClick;
         public GameAudioClipSet PlayerFootsteps => playerFootsteps;
+        public FootstepPlaybackSpace PlayerFootstepSpace => playerFootstepSpace;
         public float WalkStepInterval => walkStepInterval;
         public float SprintStepInterval => sprintStepInterval;
         public GameAudioClipSet MeleeImpact => meleeImpact;

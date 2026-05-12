@@ -5,6 +5,6 @@ namespace SharedView.Audio
         Generic,
         Melee,
         Ranged,
-        Magic
+        Magic,
     }
 }

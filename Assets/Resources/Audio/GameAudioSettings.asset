@@ -27,11 +27,12 @@ MonoBehaviour:
     pitchMax: 1.02
   playerFootsteps:
     clips:
-    - {fileID: 8300000, guid: 90bebc0612372984894785e8c4cf24af, type: 3}
-    - {fileID: 8300000, guid: 68dfb57743a5bb44ba8bcd5efc5a3d21, type: 3}
+    - {fileID: 8300000, guid: a5fba83829c04564bb75b98fb9a5bc6a, type: 3}
+    - {fileID: 8300000, guid: 14ae0db33f1ec5541bf43b40363699d2, type: 3}
     volume: 0.42
     pitchMin: 0.92
     pitchMax: 1.08
+  playerFootstepSpace: 0
   walkStepInterval: 0.48
   sprintStepInterval: 0.34
   meleeImpact:
@@ -49,7 +50,6 @@ MonoBehaviour:
   magicImpact:
     clips:
     - {fileID: 8300000, guid: 89dae706391ab484ab2805641c1f5ba4, type: 3}
-    - {fileID: 8300000, guid: d5a2957093c735f45b0d9bcc785943ef, type: 3}
     volume: 0.85
     pitchMin: 0.95
     pitchMax: 1.05

@@ -6,32 +6,35 @@ using Zenject;
 public class GameController : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [SerializeField] private GameConfigurationService _configurationService;
+    [SerializeField] private SinglePlayerStartConfigurationSO _startConfiguration;
     private GameModel _gameModel;
     private ITurnService _turnService;
+    private SinglePlayerStartConfigurationSO _injectedStartConfiguration;
 
     [Inject]
     public void Construct(
         GameModel model,
-        ITurnService turnService)
+        ITurnService turnService,
+        [InjectOptional] SinglePlayerStartConfigurationSO startConfiguration = null)
     {
         _gameModel = model;
         _turnService = turnService;
+        _injectedStartConfiguration = startConfiguration;
         UnityLogger.Log("GameController inited with " + model.ToString());
     }
 
     private void Start()
     {
-        Setup(_configurationService);
+        Setup(ResolveStartConfiguration());
     }
 
     [Button]
     private void Setup()
     {
-        Setup(_configurationService);
+        Setup(ResolveStartConfiguration());
     }
 
-    public void Setup(IGameConfigurationService configurationService)
+    public void Setup(SinglePlayerStartConfigurationSO startConfiguration)
     {
         if (_gameModel == null || _turnService == null)
         {
@@ -39,17 +42,26 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        var service = configurationService ?? _configurationService;
-        var config = service?.GetSelectedConfiguration();
+        var activeConfiguration = startConfiguration ?? ResolveStartConfiguration();
+        if (activeConfiguration == null)
+        {
+            Debug.LogError("[GameController] SinglePlayerStartConfiguration is not assigned. Cannot setup battle grid.", this);
+            return;
+        }
+
+        activeConfiguration.EnsureSelectedBattleConfiguration();
+        var config = activeConfiguration.GetSelectedConfiguration();
         CreateGridContent(config);
-        ConfigureTurnControl(service);
+        ConfigureTurnControl(activeConfiguration);
         _turnService.StartGridPlacementPhase();
     }
 
     [Button]
     public void CreateGridContent()
     {
-        var config = _configurationService.GetSelectedConfiguration();
+        var activeConfiguration = ResolveStartConfiguration();
+        activeConfiguration?.EnsureSelectedBattleConfiguration();
+        var config = activeConfiguration != null ? activeConfiguration.GetSelectedConfiguration() : null;
         if (config == null)
         {
             Debug.LogWarning("CreateGridContent called with null configuration. Skipping grid setup.");
@@ -94,10 +106,15 @@ public class GameController : MonoBehaviour
         _turnService.AddCombatUnit(@params.UnitModel);
     }
 
-    private void ConfigureTurnControl(IGameConfigurationService service)
+    private void ConfigureTurnControl(SinglePlayerStartConfigurationSO startConfiguration)
     {
-        var team = service?.Team ?? Team.Blue;
-        var mode = service?.CurrentGameMode ?? GameMode.SinglePlayer;
+        var team = startConfiguration?.PlayerTeam ?? Team.Blue;
+        var mode = startConfiguration?.CurrentGameMode ?? GameMode.SinglePlayer;
         _turnService.ConfigureControl(team, mode);
+    }
+
+    private SinglePlayerStartConfigurationSO ResolveStartConfiguration()
+    {
+        return _injectedStartConfiguration != null ? _injectedStartConfiguration : _startConfiguration;
     }
 }

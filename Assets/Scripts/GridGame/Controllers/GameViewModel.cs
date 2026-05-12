@@ -28,7 +28,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
     private readonly ITurnStateViewModel _turnState;
     private readonly IBattleControlModeService _battleControlModes;
     private readonly IBattleAnimationGate _animationGate;
-    private readonly IGameConfigurationService _gameConfigurationService;
+    private readonly SinglePlayerStartConfigurationSO _startConfiguration;
     private readonly ActionResolver _actionResolver;
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Dictionary<IGridContent, UnitViewModel> _uvms = new();
@@ -42,7 +42,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         IGameCommandExecutor actionExecutor,
         ITurnStateViewModel turnState,
         ActionResolver actionResolver,
-        IGameConfigurationService gameConfigurationService,
+        SinglePlayerStartConfigurationSO startConfiguration,
         IGridRenderSettings gridRenderSettings,
         [InjectOptional] IBattleControlModeService battleControlModes = null,
         [InjectOptional] IBattleAnimationGate animationGate = null)
@@ -52,7 +52,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
         _gameCommandExecutor = actionExecutor ?? throw new ArgumentNullException(nameof(actionExecutor));
         _turnState = turnState ?? throw new ArgumentNullException(nameof(turnState));
         _actionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
-        _gameConfigurationService = gameConfigurationService ?? throw new ArgumentNullException(nameof(gameConfigurationService));
+        _startConfiguration = startConfiguration ?? throw new ArgumentNullException(nameof(startConfiguration));
         RenderSettings = gridRenderSettings ?? throw new ArgumentNullException(nameof(gridRenderSettings));
         _battleControlModes = battleControlModes;
         _animationGate = animationGate;
@@ -815,7 +815,7 @@ public class GameViewModel : IDisposable, IGridViewModel, IWorldToCellProvider
 
     private bool IsBottomTeam(Team team)
     {
-        var bottomTeam = _gameConfigurationService?.BattlefieldBottomTeam ?? Team.Blue;
+        var bottomTeam = _startConfiguration?.BattlefieldBottomTeam ?? Team.Blue;
         return team == bottomTeam;
     }
 }

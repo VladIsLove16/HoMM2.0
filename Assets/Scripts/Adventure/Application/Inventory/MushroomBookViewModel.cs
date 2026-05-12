@@ -74,6 +74,7 @@ namespace Adventure.Presentation.Mushroom
 
             RebuildEntries();
             UpdateCurrentPage();
+            _mushroomInventoryModel.InventoryChanged += OnInventoryChanged;
             LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         }
 
@@ -100,16 +101,16 @@ namespace Adventure.Presentation.Mushroom
 
         public bool Drop(UnitType type) => DropInternal(type, notify: true);
 
-        public void Collect(UnitType type)
+        public void Collect(UnitType type) => Collect(type, 1);
+
+        public void Collect(UnitType type, int amount)
         {
-            if (_mushroomInventoryModel == null)
+            if (_mushroomInventoryModel == null || amount <= 0)
                 return;
 
-            _mushroomInventoryModel.Add(type);
+            _mushroomInventoryModel.Add(type, amount);
             var totals = _mushroomInventoryModel.Items?.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value) ?? new Dictionary<string, int>();
             _gameplayEvents.Invoke(new MushroomCollectedCustomEvent(type.ToString(), totals));
-            RebuildEntries();
-            UpdateCurrentPage();
         }
 
         private bool DropInternal(UnitType type, bool notify)
@@ -127,8 +128,6 @@ namespace Adventure.Presentation.Mushroom
             }
 
             MushroomDropped?.Invoke(type);
-            RebuildEntries();
-            UpdateCurrentPage();
             return true;
         }
 
@@ -308,7 +307,18 @@ namespace Adventure.Presentation.Mushroom
         {
             Close();
             _subscriptions.Dispose();
+            if (_mushroomInventoryModel != null)
+            {
+                _mushroomInventoryModel.InventoryChanged -= OnInventoryChanged;
+            }
+
             LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+        }
+
+        private void OnInventoryChanged()
+        {
+            RebuildEntries();
+            UpdateCurrentPage();
         }
 
         private void OnLocaleChanged(Locale _)

@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
 using Adventure.Domain.Progression;
+using Zenject;
 
 namespace Adventure.Infrastructure.Progression
 {
     public sealed class StoryFlagsService : IStoryFlagsService
     {
         private readonly IStoryFlagsStore _store;
+        private readonly StoryFlagsRuntimeStateSO _runtimeState;
         private readonly HashSet<string> _flags = new(StringComparer.OrdinalIgnoreCase);
 
-        public StoryFlagsService(IStoryFlagsStore store)
+        public StoryFlagsService(IStoryFlagsStore store, [InjectOptional] StoryFlagsRuntimeStateSO runtimeState = null)
         {
             _store = store;
+            _runtimeState = runtimeState;
             Load();
+            SyncRuntimeState();
         }
 
         public IReadOnlyCollection<string> Flags => _flags;
@@ -55,6 +59,7 @@ namespace Adventure.Infrastructure.Progression
             if (_flags.Add(flagId))
             {
                 Save();
+                SyncRuntimeState();
             }
         }
 
@@ -79,6 +84,7 @@ namespace Adventure.Infrastructure.Progression
             if (changed)
             {
                 Save();
+                SyncRuntimeState();
             }
         }
 
@@ -92,7 +98,37 @@ namespace Adventure.Infrastructure.Progression
             if (_flags.Remove(flagId))
             {
                 Save();
+                SyncRuntimeState();
             }
+        }
+
+        public void ReplaceAll(IEnumerable<string> flagIds)
+        {
+            var nextFlags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (flagIds != null)
+            {
+                foreach (var flagId in flagIds)
+                {
+                    if (!string.IsNullOrWhiteSpace(flagId))
+                    {
+                        nextFlags.Add(flagId.Trim());
+                    }
+                }
+            }
+
+            if (_flags.SetEquals(nextFlags))
+            {
+                return;
+            }
+
+            _flags.Clear();
+            foreach (var flagId in nextFlags)
+            {
+                _flags.Add(flagId);
+            }
+
+            Save();
+            SyncRuntimeState();
         }
 
         public void ResetAll()
@@ -100,11 +136,13 @@ namespace Adventure.Infrastructure.Progression
             if (_flags.Count == 0)
             {
                 _store?.Clear();
+                SyncRuntimeState();
                 return;
             }
 
             _flags.Clear();
             _store?.Clear();
+            SyncRuntimeState();
         }
 
         private void Load()
@@ -138,6 +176,11 @@ namespace Adventure.Infrastructure.Progression
             };
 
             _store.Save(snapshot);
+        }
+
+        private void SyncRuntimeState()
+        {
+            _runtimeState?.SetSnapshot(_flags);
         }
     }
 }

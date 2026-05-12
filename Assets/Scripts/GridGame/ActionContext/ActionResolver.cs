@@ -23,8 +23,7 @@ public class ActionResolver
         GameModel gameModel,
         MovementSystem movementSystem,
         [InjectOptional] IGameAudioService audioService = null,
-        [InjectOptional] IUnitAudioProfileProvider unitAudioProfileProvider = null,
-        [InjectOptional] IWorldToCellProvider worldToCellProvider = null)
+        [InjectOptional] IUnitAudioProfileProvider unitAudioProfileProvider = null)
     {
         _movementSystem = movementSystem;
         _gameModel = gameModel;
@@ -33,7 +32,7 @@ public class ActionResolver
         MoveActionHandler = new(movementSystem, gameModel);
         RangedAttackHandler = new(movementSystem, gameModel);
         AttackActionHandler = new(movementSystem, gameModel);
-        SpellActionHandler = new(movementSystem, gameModel, audioService, unitAudioProfileProvider, worldToCellProvider);
+        SpellActionHandler = new(movementSystem, gameModel, audioService, unitAudioProfileProvider);
         actionDict.Add(ActionType.MoveThenAttack, MoveThenAttackHandler);
         actionDict.Add(ActionType.Attack, AttackActionHandler);
         actionDict.Add(ActionType.Move, MoveActionHandler);

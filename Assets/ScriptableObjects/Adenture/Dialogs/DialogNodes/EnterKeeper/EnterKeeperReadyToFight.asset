@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6a6cc8113d38b844b2277238dc5fb1c, type: 3}
   m_Name: EnterKeeperReadyToFight
   m_EditorClassIdentifier: 
-  nodeId: EnterKeeperGreetings
+  nodeId: EnterKeeperReadyToFight
   speaker: Enter Keepers
   speakerLocalized:
     m_TableReference:
@@ -49,8 +49,12 @@ MonoBehaviour:
       m_LocalVariables: []
     Action: 1
     NextNode: {fileID: 0}
-    VictoryNode: {fileID: 0}
-    DefeatNode: {fileID: 0}
+    VictoryNode: {fileID: 11400000, guid: 70e2e2c95f44f6e40a72d463ad9752a5, type: 2}
+    DefeatNode: {fileID: 11400000, guid: 4a9933265db45e1419ddcd7b59812a25, type: 2}
+    RequiredFlags: []
+    GrantedFlags: []
+    HideIfLocked: 0
+    LockedText: 
   - Id: withdraw
     Text: "\u041D\u0435 \u0433\u043E\u0442\u043E\u0432. \u041F\u0443\u043A. \u0421\u0440\u0435\u043D\u044C\u043A."
     TextLocalized:
@@ -66,6 +70,10 @@ MonoBehaviour:
     NextNode: {fileID: 0}
     VictoryNode: {fileID: 0}
     DefeatNode: {fileID: 0}
+    RequiredFlags: []
+    GrantedFlags: []
+    HideIfLocked: 0
+    LockedText: 
   references:
     version: 2
     RefIds: []

@@ -9,7 +9,7 @@ namespace Adventure.Integration.Battle
     {
         private static GridConfigurationGateway _instance;
 
-        [SerializeField] private GameConfigurationService configurationService;
+        [SerializeField] private SinglePlayerStartConfigurationSO singlePlayerStartConfiguration;
         [SerializeField] private SceneLoader.Scene battleScene = SceneLoader.Scene.GridFight;
         [SerializeField] private int gridWidth = 10;
         [SerializeField] private int gridHeight = 10;
@@ -44,9 +44,9 @@ namespace Adventure.Integration.Battle
 
         public void PrepareBattle(BattleSetupPayload payload, ArmyFormationResolver formationResolver)
         {
-            if (configurationService == null)
+            if (singlePlayerStartConfiguration == null)
             {
-                Debug.LogError("[GridConfigurationGateway] ConfigurationService is not assigned.", this);
+                Debug.LogError("[GridConfigurationGateway] SinglePlayerStartConfiguration is not assigned.", this);
                 return;
             }
 
@@ -57,13 +57,13 @@ namespace Adventure.Integration.Battle
             _runtimeContent.Height = Mathf.Max(1, gridHeight);
             _runtimeContent.contents = BuildUnitContents(payload, formationResolver);
 
-            configurationService.SetAvailableConfigurations(new List<GridContentEntrySO> { _runtimeContent });
-            configurationService.SetSelectedConfiguration(0);
-            configurationService.SetGameMode(NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening
+            singlePlayerStartConfiguration.SetAvailableConfigurations(new List<GridContentEntrySO> { _runtimeContent });
+            singlePlayerStartConfiguration.SetSelectedConfiguration(0);
+            singlePlayerStartConfiguration.SetGameMode(NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening
                 ? GameMode.Multiplayer
-                : configurationService.CurrentGameMode);
-            configurationService.SetTeam(payload.LocalTeam != Team.None ? payload.LocalTeam : ResolveConfiguredPlayerTeam());
-            configurationService.SetBattlefieldBottomTeam(payload.BattlefieldBottomTeam != Team.None
+                : singlePlayerStartConfiguration.CurrentGameMode);
+            singlePlayerStartConfiguration.SetTeam(payload.LocalTeam != Team.None ? payload.LocalTeam : ResolveConfiguredPlayerTeam());
+            singlePlayerStartConfiguration.SetBattlefieldBottomTeam(payload.BattlefieldBottomTeam != Team.None
                 ? payload.BattlefieldBottomTeam
                 : ResolveConfiguredPlayerTeam());
 
@@ -128,8 +128,8 @@ namespace Adventure.Integration.Battle
 
         private Team ResolveConfiguredPlayerTeam()
         {
-            if (configurationService != null && configurationService.Team != Team.None)
-                return configurationService.Team;
+            if (singlePlayerStartConfiguration != null && singlePlayerStartConfiguration.PlayerTeam != Team.None)
+                return singlePlayerStartConfiguration.PlayerTeam;
 
             return playerTeam != Team.None ? playerTeam : Team.Blue;
         }
