@@ -12,7 +12,8 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     {
         AllPrefabs,
         SceneUsedPrefabs,
-        SceneObjectsOnly
+        SceneObjectsOnly,
+        CurrentSceneRootObject
     }
 
     private enum SceneScope
@@ -25,9 +26,14 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     private TMP_FontAsset _newTmpFont;
     private Font _oldLegacyFont;
     private Font _newLegacyFont;
+    private GameObject _rootObject;
     private ReplacementScope _replacementScope = ReplacementScope.AllPrefabs;
     private SceneScope _sceneScope = SceneScope.CurrentScene;
     private bool _updateTmpSettings = true;
+    private bool _overrideTmpFontSize;
+    private float _newTmpFontSize = 36f;
+    private bool _overrideLegacyFontSize;
+    private int _newLegacyFontSize = 36;
 
     [MenuItem("Tools/UI/Replace Font References")]
     private static void OpenWindow()
@@ -49,9 +55,21 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Scope", EditorStyles.boldLabel);
         _replacementScope = (ReplacementScope)EditorGUILayout.EnumPopup("Replacement Mode", _replacementScope);
-        if (_replacementScope != ReplacementScope.AllPrefabs)
+        if (_replacementScope == ReplacementScope.CurrentSceneRootObject)
+            _rootObject = (GameObject)EditorGUILayout.ObjectField("Root Object", _rootObject, typeof(GameObject), true);
+        else if (_replacementScope != ReplacementScope.AllPrefabs)
             _sceneScope = (SceneScope)EditorGUILayout.EnumPopup("Scene Scope", _sceneScope);
         _updateTmpSettings = EditorGUILayout.ToggleLeft("Update TMP Settings default font", _updateTmpSettings);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Optional Size Override", EditorStyles.boldLabel);
+        _overrideTmpFontSize = EditorGUILayout.ToggleLeft("Set TMP Font Size", _overrideTmpFontSize);
+        using (new EditorGUI.DisabledScope(!_overrideTmpFontSize))
+            _newTmpFontSize = EditorGUILayout.FloatField("New TMP Size", _newTmpFontSize);
+
+        _overrideLegacyFontSize = EditorGUILayout.ToggleLeft("Set Legacy UI Font Size", _overrideLegacyFontSize);
+        using (new EditorGUI.DisabledScope(!_overrideLegacyFontSize))
+            _newLegacyFontSize = EditorGUILayout.IntField("New UI Size", _newLegacyFontSize);
 
         EditorGUILayout.HelpBox(GetScopeDescription(), MessageType.None);
 
@@ -75,7 +93,9 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     {
         var canReplaceTmp = _oldTmpFont != null && _newTmpFont != null && _oldTmpFont != _newTmpFont;
         var canReplaceLegacy = _oldLegacyFont != null && _newLegacyFont != null && _oldLegacyFont != _newLegacyFont;
-        return canReplaceTmp || canReplaceLegacy;
+        var canOverrideSize = _overrideTmpFontSize || _overrideLegacyFontSize;
+        var hasValidRootScope = _replacementScope != ReplacementScope.CurrentSceneRootObject || _rootObject != null;
+        return hasValidRootScope && (canReplaceTmp || canReplaceLegacy || canOverrideSize);
     }
 
     private void ReplaceFontReferences()
@@ -105,6 +125,9 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
                 case ReplacementScope.SceneObjectsOnly:
                     ProcessSceneObjects(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
                     break;
+                case ReplacementScope.CurrentSceneRootObject:
+                    ProcessCurrentSceneRootObject(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+                    break;
             }
 
             if (_updateTmpSettings)
@@ -115,7 +138,7 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
 
             EditorUtility.DisplayDialog(
                 "Replace Font References",
-                $"Changed assets: {changedAssetCount}\nTMP references: {replacedTmpCount}\nLegacy UI references: {replacedLegacyCount}",
+                $"Changed assets: {changedAssetCount}\nTMP components changed: {replacedTmpCount}\nLegacy UI components changed: {replacedLegacyCount}",
                 "OK");
         }
         catch (System.Exception exception)
@@ -132,6 +155,7 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
             ReplacementScope.AllPrefabs => "All Prefab Assets",
             ReplacementScope.SceneUsedPrefabs => "Prefab Assets Used In Scene Scope",
             ReplacementScope.SceneObjectsOnly => "Scene Objects Only",
+            ReplacementScope.CurrentSceneRootObject => "Objects Under Current Scene Root",
             _ => _replacementScope.ToString()
         };
     }
@@ -140,6 +164,9 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     {
         if (_replacementScope == ReplacementScope.AllPrefabs)
             return "Scene scope: not used";
+
+        if (_replacementScope == ReplacementScope.CurrentSceneRootObject)
+            return "Scene scope: selected root object in current open scene";
 
         return _sceneScope switch
         {
@@ -159,6 +186,8 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
                 "Scans the selected scene scope, finds prefab instances placed there, and updates only those prefab assets. Scene-only objects are not touched.",
             ReplacementScope.SceneObjectsOnly =>
                 "Replaces font references directly in scene objects in the selected scene scope. Prefab assets remain unchanged; prefab instances on scenes become scene overrides if needed.",
+            ReplacementScope.CurrentSceneRootObject =>
+                "Replaces font references and optional font size only under the selected root object in the current open scene. Prefab assets remain unchanged; prefab instances become scene overrides if needed.",
             _ => string.Empty
         };
     }
@@ -306,6 +335,26 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
         changedAssetCount++;
     }
 
+    private void ProcessCurrentSceneRootObject(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
+    {
+        var currentScene = SceneManager.GetActiveScene();
+        EnsureSceneCanBeProcessed(currentScene);
+
+        if (_rootObject == null)
+            throw new System.InvalidOperationException("Assign a root object for Current Scene Root Object mode.");
+
+        if (_rootObject.scene != currentScene)
+            throw new System.InvalidOperationException("Selected root object must belong to the current open scene.");
+
+        var changed = ReplaceFontsInHierarchy(_rootObject, ref replacedTmpCount, ref replacedLegacyCount);
+        if (!changed)
+            return;
+
+        EditorSceneManager.MarkSceneDirty(currentScene);
+        EditorSceneManager.SaveScene(currentScene);
+        changedAssetCount++;
+    }
+
     private static void EnsureSceneCanBeProcessed(Scene scene)
     {
         if (!scene.IsValid() || !scene.isLoaded)
@@ -350,55 +399,62 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     {
         var changed = false;
 
-        if (_oldTmpFont != null && _newTmpFont != null)
+        foreach (var tmpText in root.GetComponentsInChildren<TMP_Text>(true))
         {
-            foreach (var tmpText in root.GetComponentsInChildren<TMP_Text>(true))
-            {
-                if (tmpText.font != _oldTmpFont)
-                    continue;
+            var componentChanged = false;
 
+            if (_oldTmpFont != null && _newTmpFont != null && tmpText.font == _oldTmpFont)
+            {
                 Undo.RecordObject(tmpText, "Replace TMP Font");
                 tmpText.font = _newTmpFont;
-                EditorUtility.SetDirty(tmpText);
-                replacedTmpCount++;
-                changed = true;
+                componentChanged = true;
             }
 
-            foreach (var tmpInput in root.GetComponentsInChildren<TMP_InputField>(true))
+            if (_overrideTmpFontSize && !Mathf.Approximately(tmpText.fontSize, _newTmpFontSize))
             {
-                changed |= ReplaceTextComponentFont(tmpInput.textViewport, ref replacedTmpCount);
-                changed |= ReplaceTextComponentFont(tmpInput.textComponent, ref replacedTmpCount);
-                changed |= ReplaceTextComponentFont(tmpInput.placeholder as TMP_Text, ref replacedTmpCount);
+                if (!componentChanged)
+                    Undo.RecordObject(tmpText, "Set TMP Font Size");
+
+                tmpText.fontSize = _newTmpFontSize;
+                componentChanged = true;
             }
+
+            if (!componentChanged)
+                continue;
+
+            EditorUtility.SetDirty(tmpText);
+            replacedTmpCount++;
+            changed = true;
         }
 
-        if (_oldLegacyFont != null && _newLegacyFont != null)
+        foreach (var uiText in root.GetComponentsInChildren<Text>(true))
         {
-            foreach (var uiText in root.GetComponentsInChildren<Text>(true))
-            {
-                if (uiText.font != _oldLegacyFont)
-                    continue;
+            var componentChanged = false;
 
+            if (_oldLegacyFont != null && _newLegacyFont != null && uiText.font == _oldLegacyFont)
+            {
                 Undo.RecordObject(uiText, "Replace UI Font");
                 uiText.font = _newLegacyFont;
-                EditorUtility.SetDirty(uiText);
-                replacedLegacyCount++;
-                changed = true;
+                componentChanged = true;
             }
+
+            if (_overrideLegacyFontSize && uiText.fontSize != _newLegacyFontSize)
+            {
+                if (!componentChanged)
+                    Undo.RecordObject(uiText, "Set UI Font Size");
+
+                uiText.fontSize = _newLegacyFontSize;
+                componentChanged = true;
+            }
+
+            if (!componentChanged)
+                continue;
+
+            EditorUtility.SetDirty(uiText);
+            replacedLegacyCount++;
+            changed = true;
         }
 
         return changed;
-    }
-
-    private bool ReplaceTextComponentFont(Object candidate, ref int replacedTmpCount)
-    {
-        if (candidate is not TMP_Text tmpText || tmpText.font != _oldTmpFont)
-            return false;
-
-        Undo.RecordObject(tmpText, "Replace TMP Font");
-        tmpText.font = _newTmpFont;
-        EditorUtility.SetDirty(tmpText);
-        replacedTmpCount++;
-        return true;
     }
 }
