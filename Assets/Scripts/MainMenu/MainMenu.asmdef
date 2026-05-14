@@ -7,8 +7,10 @@
         "GUID:ddc34036f81223c4f952c69f08b3c8b3",
         "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
         "GUID:84651a3751eca9349aac36a66bba901b",
-        "Zenject",
-        "UniRx"
+        "GUID:6c18917549f31c442926e2569e8818c8",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:ee5ed074ae628da4796a0375a08e13cb",
+        "GUID:1c2a9d77c12a4e6ab41a3d162229a08d"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

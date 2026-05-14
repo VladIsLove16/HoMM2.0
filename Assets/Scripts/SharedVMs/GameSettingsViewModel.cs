@@ -14,6 +14,7 @@ namespace Adventure.Settings.ViewModel
         private const string MasterVolumeParam = "Master";
         private const string MusicVolumeParam = "Music";
         private const string EffectsVolumeParam = "Sounds";
+        private const string VoiceVolumeParam = "Voice";
 
         private const float MinNormalizedVolume = 0.0001f;
         private const float MutedDecibels = -80f;
@@ -134,7 +135,11 @@ namespace Adventure.Settings.ViewModel
 
         public void SetSoundsVolume(float value)
         {
-            ApplyVolume(EffectsVolumeParam, value, v => Audio.EffectsVolume = v);
+            ApplyVolume(EffectsVolumeParam, value, v => Audio.SoundsVolume = v);
+        }
+        public void SetVoiceVolume(float value)
+        {
+            ApplyVolume(VoiceVolumeParam, value, v => Audio.VoiceVolume = v);
         }
 
         public void SetMasterVolume(float value)
@@ -176,7 +181,7 @@ namespace Adventure.Settings.ViewModel
 
             ApplyVolume(MasterVolumeParam, data.MasterVolume, v => Audio.MasterVolume = v, persist: false);
             ApplyVolume(MusicVolumeParam, data.MusicVolume, v => Audio.MusicVolume = v, persist: false);
-            ApplyVolume(EffectsVolumeParam, data.EffectsVolume, v => Audio.EffectsVolume = v, persist: false);
+            ApplyVolume(EffectsVolumeParam, data.EffectsVolume, v => Audio.SoundsVolume = v, persist: false);
 
             Graphics.QualityLevel = data.QualityLevel;
             Graphics.ResolutionWidth = data.ResolutionWidth;
@@ -220,7 +225,7 @@ namespace Adventure.Settings.ViewModel
             {
                 MasterVolume = Audio.MasterVolume,
                 MusicVolume = Audio.MusicVolume,
-                EffectsVolume = Audio.EffectsVolume,
+                EffectsVolume = Audio.SoundsVolume,
                 QualityLevel = Graphics.QualityLevel,
                 ResolutionWidth = Graphics.ResolutionWidth,
                 ResolutionHeight = Graphics.ResolutionHeight,

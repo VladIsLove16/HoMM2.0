@@ -1,18 +1,22 @@
 using System;
 using Adventure.Infrastructure.Persistence;
+using Adventure.Settings.ViewModel;
+using Game.Achievements;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 
-public sealed class MainMenuViewModel : IDisposable
+public sealed class MainMenuViewModel : IDisposable, IAchievementsNavigation
 {
     private readonly SinglePlayerStartConfigurationSO _singlePlayerStartConfiguration;
 
-    private readonly ReactiveProperty<bool> _isSettingsPanelOpen = new(false);
     private readonly ReactiveProperty<MainMenuScreen> _activeScreen = new(MainMenuScreen.Primary);
+    private MainMenuGameSettingsViewModel _settingsViewModel;
+    private AchievementsViewModel _achievementsViewModel;
 
-    public IReadOnlyReactiveProperty<bool> IsSettingsPanelOpen => _isSettingsPanelOpen;
     public IReadOnlyReactiveProperty<MainMenuScreen> ActiveScreen => _activeScreen;
+    public bool CanOpenSettings => _settingsViewModel != null;
+    public bool CanOpenAchievements => _achievementsViewModel != null;
 
     public MainMenuViewModel(SinglePlayerStartConfigurationSO singlePlayerStartConfiguration)
     {
@@ -20,9 +24,17 @@ public sealed class MainMenuViewModel : IDisposable
         ApplySavedLocale();
     }
 
+    [Zenject.Inject]
+    private void InjectOverlayViewModels(
+        [Zenject.InjectOptional] MainMenuGameSettingsViewModel settingsViewModel = null,
+        [Zenject.InjectOptional] AchievementsViewModel achievementsViewModel = null)
+    {
+        _settingsViewModel = settingsViewModel;
+        _achievementsViewModel = achievementsViewModel;
+    }
+
     public void Dispose()
     {
-        _isSettingsPanelOpen.Dispose();
         _activeScreen.Dispose();
     }
 
@@ -44,23 +56,61 @@ public sealed class MainMenuViewModel : IDisposable
         SceneLoader.Load(_singlePlayerStartConfiguration.AdventureScene);
     }
 
-    public void ToggleSettingsPanel()
-    {
-        SetSettingsPanelOpen(!_isSettingsPanelOpen.Value);
-    }
-
-    public void HideSettingsPanel()
-    {
-        SetSettingsPanelOpen(false);
-    }
-
     public void OpenNetworkLobby()
     {
+        CloseOverlayPanels();
         GameLaunchPreferences.SetMultiplayerStartScene(SceneLoader.Scene.Adventure);
-        SetSettingsPanelOpen(false);
         _activeScreen.Value = MainMenuScreen.NetworkConnection;
     }
 
+    public void ToggleSettings()
+    {
+        if (_settingsViewModel == null)
+        {
+            Debug.LogWarning("[MainMenuViewModel] Settings view model is not available.");
+            return;
+        }
+
+        ReturnToPrimaryScreen();
+
+        if (_settingsViewModel.IsOpen.Value)
+        {
+            _settingsViewModel.Close();
+            return;
+        }
+
+        _achievementsViewModel?.Close();
+        _settingsViewModel.Open();
+    }
+    public void ToggleAChievements()
+    {
+        if (!_achievementsViewModel.IsOpen.Value)
+            OpenAchievements();
+        else
+            CloseAchievements();
+    }
+    public void OpenAchievements()
+    {
+        if (_achievementsViewModel == null)
+        {
+            Debug.LogWarning("[MainMenuViewModel] Achievements view model is not available.");
+            return;
+        }
+
+        ReturnToPrimaryScreen();
+        _achievementsViewModel.Open();
+    }
+    public void CloseAchievements()
+    {
+        if (_achievementsViewModel == null)
+        {
+            Debug.LogWarning("[MainMenuViewModel] Achievements view model is not available.");
+            return;
+        }
+
+        ReturnToPrimaryScreen();
+        _achievementsViewModel.Close();
+    }
     public void QuitGame()
     {
         Application.Quit();
@@ -77,12 +127,16 @@ public sealed class MainMenuViewModel : IDisposable
         _singlePlayerStartConfiguration.ApplyAdventureStart();
     }
 
-    private void SetSettingsPanelOpen(bool visible)
+    private void CloseOverlayPanels()
     {
-        if (_isSettingsPanelOpen.Value == visible)
-            return;
+        _achievementsViewModel?.Close();
+        _settingsViewModel?.Close();
+    }
 
-        _isSettingsPanelOpen.Value = visible;
+    private void ReturnToPrimaryScreen()
+    {
+        if (_activeScreen.Value != MainMenuScreen.Primary)
+            _activeScreen.Value = MainMenuScreen.Primary;
     }
 
     private static void ApplySavedLocale()

@@ -19,7 +19,7 @@ namespace Adventure.Settings.View
 {
     public abstract class GameSettingsViewBase<TViewModel> : CanvasGroupPanelViewBase<TViewModel> where TViewModel : GameSettingsViewModel
     {
-        [Header("Common")]
+        [Header("outdated. Use \"Section\" components ")]
         [SerializeField] private Button closeButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private Button achievementsButton;
@@ -27,6 +27,8 @@ namespace Adventure.Settings.View
         [SerializeField] private Slider effectsSlider;
         [SerializeField] private TMP_Dropdown qualityDropdown;
         [SerializeField] private TMP_Dropdown languageDropdown;
+        [Header("Optional Sections")]
+        [SerializeField] private GameSettingsSectionBase[] sections;
 
         private UnityAction _closeAction;
         private UnityAction _exitAction;
@@ -54,6 +56,8 @@ namespace Adventure.Settings.View
 
         protected override void OnDestroy()
         {
+            UnbindSections();
+
             if (_uiInitialized)
             {
                 if (closeButton != null && _closeAction != null)
@@ -110,6 +114,7 @@ namespace Adventure.Settings.View
                 return;
 
             _uiInitialized = true;
+            BindSections();
 
             if (closeButton != null)
             {
@@ -117,32 +122,33 @@ namespace Adventure.Settings.View
                 closeButton.onClick.AddListener(_closeAction);
             }
 
-            if (exitButton != null)
+            if (exitButton != null && !HasSection(GameSettingsSectionFeature.ExitGame))
             {
                 _exitAction = () => ViewModel.ExitGame();
                 exitButton.onClick.AddListener(_exitAction);
             }
 
-            BindAchievementsButton();
+            if (!HasSection(GameSettingsSectionFeature.Achievements))
+                BindAchievementsButton();
 
-            if (musicSlider != null)
+            if (musicSlider != null && !HasSection(GameSettingsSectionFeature.Audio))
             {
                 musicSlider.onValueChanged.AddListener(OnMusicSliderChanged);
                 musicSlider.SetValueWithoutNotify(ViewModel.Audio.MusicVolume);
             }
 
-            if (effectsSlider != null)
+            if (effectsSlider != null && !HasSection(GameSettingsSectionFeature.Audio))
             {
                 effectsSlider.onValueChanged.AddListener(OnEffectsSliderChanged);
-                effectsSlider.SetValueWithoutNotify(ViewModel.Audio.EffectsVolume);
+                effectsSlider.SetValueWithoutNotify(ViewModel.Audio.SoundsVolume);
             }
 
-            if (qualityDropdown != null)
+            if (qualityDropdown != null && !HasSection(GameSettingsSectionFeature.Quality))
             {
                 qualityDropdown.onValueChanged.AddListener(OnQualityChanged);
                 qualityDropdown.SetValueWithoutNotify(ViewModel.Graphics.QualityLevel);
             }
-            if (languageDropdown != null)
+            if (languageDropdown != null && !HasSection(GameSettingsSectionFeature.Language))
             {
                 ConfigureLanguageDropdown();
                 languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
@@ -230,6 +236,48 @@ namespace Adventure.Settings.View
             var textComponent = achievementsButton.GetComponentInChildren<TMP_Text>();
             if (textComponent == null)
                 return;
+        }
+
+        public GameSettingsSectionBase[] GetConfiguredSections()
+        {
+            if (sections != null && sections.Length > 0)
+                return sections;
+
+            return GetComponentsInChildren<GameSettingsSectionBase>(true);
+        }
+
+        private bool HasSection(GameSettingsSectionFeature feature)
+        {
+            var resolvedSections = GetConfiguredSections();
+            for (var i = 0; i < resolvedSections.Length; i++)
+            {
+                var section = resolvedSections[i];
+                if (section != null && section.Feature == feature)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void BindSections()
+        {
+            if (ViewModel == null)
+                return;
+
+            var resolvedSections = GetConfiguredSections();
+            for (var i = 0; i < resolvedSections.Length; i++)
+            {
+                resolvedSections[i]?.Bind(ViewModel, Bindings);
+            }
+        }
+
+        private void UnbindSections()
+        {
+            var resolvedSections = GetConfiguredSections();
+            for (var i = 0; i < resolvedSections.Length; i++)
+            {
+                resolvedSections[i]?.Unbind();
+            }
         }
     }
 }

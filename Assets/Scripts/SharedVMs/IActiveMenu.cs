@@ -8,4 +8,9 @@ namespace Adventure.Settings.ViewModel
         public void Open();
         public IReadOnlyReactiveProperty<bool> IsOpen { get; }
     }
+
+    public interface IAchievementsNavigation
+    {
+        void OpenAchievements();
+    }
 }

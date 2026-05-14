@@ -4,23 +4,25 @@ using UnityEngine.UI;
 using Zenject;
 
 [DefaultExecutionOrder(-1000)]
-public class mainmenuUI : MonoBehaviour
+public sealed class MainmenuMainPanel : MonoBehaviour
 {
     [Header("Static Buttons")]
     [SerializeField] private Button SingleplayerButton;
     [SerializeField] private Button NetworkPlayButton;
+    [SerializeField] private Button AchievementsButton;
     [SerializeField] private Button SettingsButton;
     [SerializeField] private Button QuitButton;
 
     [Header("Panels")]
     [SerializeField] private GameObject mainMenuRoot;
     [SerializeField] private RectTransform networkMenuRoot;
-    [SerializeField] private RectTransform settingsPanelRoot;
     [SerializeField] private LobbyUI lobbyUI;
 
     private MainMenuViewModel _viewModel;
     private CompositeDisposable _bindings;
     private bool _staticReferencesValid;
+    private CanvasGroup _mainMenuCanvasGroup;
+    private CanvasGroup _networkMenuCanvasGroup;
 
     private void Reset()
     {
@@ -43,8 +45,6 @@ public class mainmenuUI : MonoBehaviour
 
     private void Awake()
     {
-        TryResolveEmbeddedLobbyReferences();
-
         if (!ValidateRequiredReferences(out var errorMessage))
         {
             Debug.LogError(errorMessage, this);
@@ -52,12 +52,7 @@ public class mainmenuUI : MonoBehaviour
             return;
         }
 
-        if (settingsPanelRoot == null)
-        {
-            SettingsButton.interactable = false;
-            Debug.LogWarning("[MainMenuUI] Settings panel is not assigned. Settings button is disabled.", this);
-        }
-
+        PreparePanelCanvasGroups();
         _staticReferencesValid = true;
         TryBindViewModel();
     }
@@ -80,7 +75,12 @@ public class mainmenuUI : MonoBehaviour
 
     public void OnSettingsButtonClicked()
     {
-        _viewModel?.ToggleSettingsPanel();
+        _viewModel?.ToggleSettings();
+    }
+
+    public void OnAchievementsButtonClicked()
+    {
+        _viewModel?.ToggleAChievements();
     }
 
     public void OnQuitButtonClicked()
@@ -92,37 +92,49 @@ public class mainmenuUI : MonoBehaviour
     {
         if (SingleplayerButton == null)
         {
-            errorMessage = "[MainMenuUI] SingleplayerButton is not assigned.";
+            errorMessage = "[MainmenuMainPanel] SingleplayerButton is not assigned.";
             return false;
         }
 
         if (NetworkPlayButton == null)
         {
-            errorMessage = "[MainMenuUI] NetworkPlayButton is not assigned.";
+            errorMessage = "[MainmenuMainPanel] NetworkPlayButton is not assigned.";
             return false;
         }
 
         if (SettingsButton == null)
         {
-            errorMessage = "[MainMenuUI] SettingsButton is not assigned.";
+            errorMessage = "[MainmenuMainPanel] SettingsButton is not assigned.";
+            return false;
+        }
+
+        if (AchievementsButton == null)
+        {
+            errorMessage = "[MainmenuMainPanel] AchievementsButton is not assigned.";
             return false;
         }
 
         if (QuitButton == null)
         {
-            errorMessage = "[MainMenuUI] QuitButton is not assigned.";
+            errorMessage = "[MainmenuMainPanel] QuitButton is not assigned.";
+            return false;
+        }
+
+        if (mainMenuRoot == null)
+        {
+            errorMessage = "[MainmenuMainPanel] Main menu root is not assigned.";
             return false;
         }
 
         if (networkMenuRoot == null)
         {
-            errorMessage = "[MainMenuUI] Network menu root is not assigned.";
+            errorMessage = "[MainmenuMainPanel] Network menu root is not assigned.";
             return false;
         }
 
         if (lobbyUI == null)
         {
-            errorMessage = "[MainMenuUI] LobbyUI is not assigned.";
+            errorMessage = "[MainmenuMainPanel] LobbyUI is not assigned.";
             return false;
         }
 
@@ -133,7 +145,8 @@ public class mainmenuUI : MonoBehaviour
     private void BindButtons()
     {
         BindButton(SingleplayerButton, OnPlayButtonClicked);
-        BindButton(NetworkPlayButton, () => _viewModel?.OpenNetworkLobby());
+        BindButton(NetworkPlayButton, OnNetworkPlayButtonClicked);
+        BindButton(AchievementsButton, OnAchievementsButtonClicked);
         BindButton(SettingsButton, OnSettingsButtonClicked);
         BindButton(QuitButton, OnQuitButtonClicked);
     }
@@ -144,48 +157,27 @@ public class mainmenuUI : MonoBehaviour
             return;
 
         BindButtons();
+        UpdateButtonsState();
 
         _bindings = new CompositeDisposable();
-        _viewModel.IsSettingsPanelOpen
-            .Subscribe(SetSettingsPanelVisible)
-            .AddTo(_bindings);
         _viewModel.ActiveScreen
+            .DistinctUntilChanged()
             .Subscribe(ApplyScreen)
             .AddTo(_bindings);
     }
 
-    private void SetSettingsPanelVisible(bool visible)
+    private void OnNetworkPlayButtonClicked()
     {
-        if (settingsPanelRoot == null)
-        {
-            if (visible)
-            {
-                Debug.LogWarning("[MainMenuUI] Settings panel is not assigned.", this);
-            }
-
-            return;
-        }
-
-        settingsPanelRoot.gameObject.SetActive(visible);
-
-        if (visible)
-            HideNetworkMenu();
-    }
-
-    private void HideSettingsPanel()
-    {
-        if (settingsPanelRoot != null)
-            settingsPanelRoot.gameObject.SetActive(false);
+        _viewModel?.OpenNetworkLobby();
     }
 
     private void ShowLobbyRoot()
     {
-        networkMenuRoot.gameObject.SetActive(true);
+        SetPanelVisible(_networkMenuCanvasGroup, true);
     }
 
     private void ShowLobbyConnectionFlow()
     {
-        HideSettingsPanel();
         SetMainMenuVisible(false);
         ShowLobbyRoot();
         lobbyUI.OpenConnectionFlow();
@@ -193,7 +185,16 @@ public class mainmenuUI : MonoBehaviour
 
     private void HideNetworkMenu()
     {
-        networkMenuRoot.gameObject.SetActive(false);
+        SetPanelVisible(_networkMenuCanvasGroup, false);
+    }
+
+    private void UpdateButtonsState()
+    {
+        if (AchievementsButton != null)
+            AchievementsButton.interactable = _viewModel != null && _viewModel.CanOpenAchievements;
+
+        if (SettingsButton != null)
+            SettingsButton.interactable = _viewModel != null && _viewModel.CanOpenSettings;
     }
 
     private static void BindButton(Button button, UnityEngine.Events.UnityAction callback)
@@ -249,6 +250,7 @@ public class mainmenuUI : MonoBehaviour
     {
         if (SingleplayerButton == null ||
             NetworkPlayButton == null ||
+            AchievementsButton == null ||
             SettingsButton == null ||
             QuitButton == null)
         {
@@ -260,6 +262,7 @@ public class mainmenuUI : MonoBehaviour
             return null;
 
         return NetworkPlayButton.transform.parent == candidate &&
+               AchievementsButton.transform.parent == candidate &&
                SettingsButton.transform.parent == candidate &&
                QuitButton.transform.parent == candidate
             ? candidate
@@ -268,16 +271,54 @@ public class mainmenuUI : MonoBehaviour
 
     private void SetMainMenuVisible(bool visible)
     {
-        if (mainMenuRoot != null)
+        if (_mainMenuCanvasGroup != null)
         {
-            mainMenuRoot.SetActive(visible);
+            SetPanelVisible(_mainMenuCanvasGroup, visible);
             return;
         }
 
-        SingleplayerButton.gameObject.SetActive(visible);
-        NetworkPlayButton.gameObject.SetActive(visible);
-        SettingsButton.gameObject.SetActive(visible);
-        QuitButton.gameObject.SetActive(visible);
+        SetControlVisible(SingleplayerButton, visible);
+        SetControlVisible(NetworkPlayButton, visible);
+        SetControlVisible(AchievementsButton, visible);
+        SetControlVisible(SettingsButton, visible);
+        SetControlVisible(QuitButton, visible);
     }
 
+    private void PreparePanelCanvasGroups()
+    {
+        _mainMenuCanvasGroup = EnsureCanvasGroup(mainMenuRoot);
+        _networkMenuCanvasGroup = EnsureCanvasGroup(networkMenuRoot != null ? networkMenuRoot.gameObject : null);
+    }
+
+    private static CanvasGroup EnsureCanvasGroup(GameObject target)
+    {
+        if (target == null)
+            return null;
+
+        target.SetActive(true);
+
+        var group = target.GetComponent<CanvasGroup>();
+        if (group != null)
+            return group;
+
+        return target.AddComponent<CanvasGroup>();
+    }
+
+    private static void SetPanelVisible(CanvasGroup group, bool visible)
+    {
+        if (group == null)
+            return;
+
+        group.alpha = visible ? 1f : 0f;
+        group.interactable = visible;
+        group.blocksRaycasts = visible;
+    }
+
+    private static void SetControlVisible(Selectable selectable, bool visible)
+    {
+        if (selectable == null)
+            return;
+
+        selectable.gameObject.SetActive(visible);
+    }
 }
