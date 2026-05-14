@@ -129,7 +129,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1070532730019840
-    m_Key: SoundsLabel
+    m_Key: UI.Voice
     m_Metadata:
       m_Items: []
   - m_Id: 1070646496321536
@@ -258,6 +258,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 40936773179138048
     m_Key: UI.Achievements
+    m_Metadata:
+      m_Items: []
+  - m_Id: 53632174922780672
+    m_Key: UI.Reset
     m_Metadata:
       m_Items: []
   m_Metadata:

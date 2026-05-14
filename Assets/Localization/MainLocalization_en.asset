@@ -127,7 +127,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1070532730019840
-    m_Localized: Sounds
+    m_Localized: Voices
     m_Metadata:
       m_Items: []
   - m_Id: 1070646496321536
@@ -248,6 +248,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 40936773179138048
     m_Localized: Achievements
+    m_Metadata:
+      m_Items: []
+  - m_Id: 53632174922780672
+    m_Localized: Reset
     m_Metadata:
       m_Items: []
   references:
