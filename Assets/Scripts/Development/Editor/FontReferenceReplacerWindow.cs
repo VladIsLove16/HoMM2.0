@@ -8,12 +8,25 @@ using UnityEngine.UI;
 
 public sealed class FontReferenceReplacerWindow : EditorWindow
 {
+    private enum ReplacementScope
+    {
+        AllPrefabs,
+        SceneUsedPrefabs,
+        SceneObjectsOnly
+    }
+
+    private enum SceneScope
+    {
+        CurrentScene,
+        AllScenes
+    }
+
     private TMP_FontAsset _oldTmpFont;
     private TMP_FontAsset _newTmpFont;
     private Font _oldLegacyFont;
     private Font _newLegacyFont;
-    private bool _processPrefabs = true;
-    private bool _processScenes = true;
+    private ReplacementScope _replacementScope = ReplacementScope.AllPrefabs;
+    private SceneScope _sceneScope = SceneScope.CurrentScene;
     private bool _updateTmpSettings = true;
 
     [MenuItem("Tools/UI/Replace Font References")]
@@ -35,9 +48,12 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Scope", EditorStyles.boldLabel);
-        _processPrefabs = EditorGUILayout.ToggleLeft("Process prefabs in Assets", _processPrefabs);
-        _processScenes = EditorGUILayout.ToggleLeft("Process scenes in Assets", _processScenes);
+        _replacementScope = (ReplacementScope)EditorGUILayout.EnumPopup("Replacement Mode", _replacementScope);
+        if (_replacementScope != ReplacementScope.AllPrefabs)
+            _sceneScope = (SceneScope)EditorGUILayout.EnumPopup("Scene Scope", _sceneScope);
         _updateTmpSettings = EditorGUILayout.ToggleLeft("Update TMP Settings default font", _updateTmpSettings);
+
+        EditorGUILayout.HelpBox(GetScopeDescription(), MessageType.None);
 
         EditorGUILayout.Space();
 
@@ -66,7 +82,7 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
     {
         if (!EditorUtility.DisplayDialog(
                 "Replace Font References",
-                "This will modify scenes and prefabs under Assets. Make sure your project is saved or committed first.",
+                $"Mode: {GetScopeTitle()}\n{GetSceneScopeSummary()}\nThis will modify project assets. Make sure your project is saved or committed first.",
                 "Replace",
                 "Cancel"))
         {
@@ -76,32 +92,106 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
         var replacedTmpCount = 0;
         var replacedLegacyCount = 0;
         var changedAssetCount = 0;
+        try
+        {
+            switch (_replacementScope)
+            {
+                case ReplacementScope.AllPrefabs:
+                    ProcessAllPrefabs(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+                    break;
+                case ReplacementScope.SceneUsedPrefabs:
+                    ProcessSceneUsedPrefabs(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+                    break;
+                case ReplacementScope.SceneObjectsOnly:
+                    ProcessSceneObjects(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+                    break;
+            }
 
-        if (_processPrefabs)
-            ProcessPrefabs(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+            if (_updateTmpSettings)
+                ProcessTmpSettings(ref replacedTmpCount, ref changedAssetCount);
 
-        if (_processScenes)
-            ProcessScenes(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
 
-        if (_updateTmpSettings)
-            ProcessTmpSettings(ref replacedTmpCount, ref changedAssetCount);
-
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
-        EditorUtility.DisplayDialog(
-            "Replace Font References",
-            $"Changed assets: {changedAssetCount}\nTMP references: {replacedTmpCount}\nLegacy UI references: {replacedLegacyCount}",
-            "OK");
+            EditorUtility.DisplayDialog(
+                "Replace Font References",
+                $"Changed assets: {changedAssetCount}\nTMP references: {replacedTmpCount}\nLegacy UI references: {replacedLegacyCount}",
+                "OK");
+        }
+        catch (System.Exception exception)
+        {
+            EditorUtility.ClearProgressBar();
+            EditorUtility.DisplayDialog("Replace Font References", exception.Message, "OK");
+        }
     }
 
-    private void ProcessPrefabs(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
+    private string GetScopeTitle()
+    {
+        return _replacementScope switch
+        {
+            ReplacementScope.AllPrefabs => "All Prefab Assets",
+            ReplacementScope.SceneUsedPrefabs => "Prefab Assets Used In Scene Scope",
+            ReplacementScope.SceneObjectsOnly => "Scene Objects Only",
+            _ => _replacementScope.ToString()
+        };
+    }
+
+    private string GetSceneScopeSummary()
+    {
+        if (_replacementScope == ReplacementScope.AllPrefabs)
+            return "Scene scope: not used";
+
+        return _sceneScope switch
+        {
+            SceneScope.CurrentScene => "Scene scope: current open scene",
+            SceneScope.AllScenes => "Scene scope: all scenes under Assets",
+            _ => string.Empty
+        };
+    }
+
+    private string GetScopeDescription()
+    {
+        return _replacementScope switch
+        {
+            ReplacementScope.AllPrefabs =>
+                "Replaces font references in every prefab asset under Assets. Scene-only objects are not touched.",
+            ReplacementScope.SceneUsedPrefabs =>
+                "Scans the selected scene scope, finds prefab instances placed there, and updates only those prefab assets. Scene-only objects are not touched.",
+            ReplacementScope.SceneObjectsOnly =>
+                "Replaces font references directly in scene objects in the selected scene scope. Prefab assets remain unchanged; prefab instances on scenes become scene overrides if needed.",
+            _ => string.Empty
+        };
+    }
+
+    private void ProcessAllPrefabs(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
     {
         var prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" });
-        for (var index = 0; index < prefabGuids.Length; index++)
+        var prefabPaths = new List<string>(prefabGuids.Length);
+        foreach (var prefabGuid in prefabGuids)
+            prefabPaths.Add(AssetDatabase.GUIDToAssetPath(prefabGuid));
+
+        ProcessPrefabAssets(prefabPaths, ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+    }
+
+    private void ProcessSceneUsedPrefabs(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
+    {
+        var prefabPaths = CollectPrefabPathsUsedInScenes();
+        ProcessPrefabAssets(prefabPaths, ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+    }
+
+    private void ProcessPrefabAssets(
+        IReadOnlyList<string> prefabPaths,
+        ref int replacedTmpCount,
+        ref int replacedLegacyCount,
+        ref int changedAssetCount)
+    {
+        for (var index = 0; index < prefabPaths.Count; index++)
         {
-            var assetPath = AssetDatabase.GUIDToAssetPath(prefabGuids[index]);
-            EditorUtility.DisplayProgressBar("Replacing Fonts", $"Prefab: {assetPath}", (index + 1f) / prefabGuids.Length);
+            var assetPath = prefabPaths[index];
+            EditorUtility.DisplayProgressBar(
+                "Replacing Fonts",
+                $"Prefab: {assetPath}",
+                prefabPaths.Count == 0 ? 1f : (index + 1f) / prefabPaths.Count);
 
             var root = PrefabUtility.LoadPrefabContents(assetPath);
             var changed = ReplaceFontsInHierarchy(root, ref replacedTmpCount, ref replacedLegacyCount);
@@ -118,8 +208,14 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
         EditorUtility.ClearProgressBar();
     }
 
-    private void ProcessScenes(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
+    private void ProcessSceneObjects(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
     {
+        if (_sceneScope == SceneScope.CurrentScene)
+        {
+            ProcessCurrentSceneObjects(ref replacedTmpCount, ref replacedLegacyCount, ref changedAssetCount);
+            return;
+        }
+
         var sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" });
         var originalSceneSetup = EditorSceneManager.GetSceneManagerSetup();
 
@@ -151,16 +247,100 @@ public sealed class FontReferenceReplacerWindow : EditorWindow
         }
     }
 
+    private List<string> CollectPrefabPathsUsedInScenes()
+    {
+        if (_sceneScope == SceneScope.CurrentScene)
+        {
+            var currentScene = SceneManager.GetActiveScene();
+            EnsureSceneCanBeProcessed(currentScene);
+
+            var currentScenePrefabPaths = new HashSet<string>();
+            foreach (var root in currentScene.GetRootGameObjects())
+                CollectPrefabPaths(root, currentScenePrefabPaths);
+
+            return new List<string>(currentScenePrefabPaths);
+        }
+
+        var sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" });
+        var originalSceneSetup = EditorSceneManager.GetSceneManagerSetup();
+        var prefabPaths = new HashSet<string>();
+
+        try
+        {
+            for (var index = 0; index < sceneGuids.Length; index++)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(sceneGuids[index]);
+                EditorUtility.DisplayProgressBar(
+                    "Replacing Fonts",
+                    $"Scanning scene prefabs: {assetPath}",
+                    (index + 1f) / sceneGuids.Length);
+
+                var scene = EditorSceneManager.OpenScene(assetPath, OpenSceneMode.Single);
+                foreach (var root in scene.GetRootGameObjects())
+                    CollectPrefabPaths(root, prefabPaths);
+            }
+        }
+        finally
+        {
+            EditorSceneManager.RestoreSceneManagerSetup(originalSceneSetup);
+            EditorUtility.ClearProgressBar();
+        }
+
+        return new List<string>(prefabPaths);
+    }
+
+    private void ProcessCurrentSceneObjects(ref int replacedTmpCount, ref int replacedLegacyCount, ref int changedAssetCount)
+    {
+        var currentScene = SceneManager.GetActiveScene();
+        EnsureSceneCanBeProcessed(currentScene);
+
+        var changed = false;
+        foreach (var root in currentScene.GetRootGameObjects())
+            changed |= ReplaceFontsInHierarchy(root, ref replacedTmpCount, ref replacedLegacyCount);
+
+        if (!changed)
+            return;
+
+        EditorSceneManager.MarkSceneDirty(currentScene);
+        EditorSceneManager.SaveScene(currentScene);
+        changedAssetCount++;
+    }
+
+    private static void EnsureSceneCanBeProcessed(Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded)
+            throw new System.InvalidOperationException("Current scene is not loaded.");
+
+        if (!string.IsNullOrEmpty(scene.path))
+            return;
+
+        throw new System.InvalidOperationException("Current scene must be saved before replacing font references.");
+    }
+
+    private static void CollectPrefabPaths(GameObject root, HashSet<string> prefabPaths)
+    {
+        foreach (var transform in root.GetComponentsInChildren<Transform>(true))
+        {
+            var gameObject = transform.gameObject;
+            if (!PrefabUtility.IsPartOfPrefabInstance(gameObject))
+                continue;
+
+            var assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
+            if (!string.IsNullOrEmpty(assetPath))
+                prefabPaths.Add(assetPath);
+        }
+    }
+
     private void ProcessTmpSettings(ref int replacedTmpCount, ref int changedAssetCount)
     {
         if (_oldTmpFont == null || _newTmpFont == null)
             return;
 
         var tmpSettings = TMP_Settings.instance;
-        if (tmpSettings == null || tmpSettings.defaultFontAsset != _oldTmpFont)
+        if (tmpSettings == null || TMP_Settings.defaultFontAsset != _oldTmpFont)
             return;
 
-        tmpSettings.defaultFontAsset = _newTmpFont;
+        TMP_Settings.defaultFontAsset = _newTmpFont;
         EditorUtility.SetDirty(tmpSettings);
         replacedTmpCount++;
         changedAssetCount++;
