@@ -254,6 +254,22 @@ MonoBehaviour:
     m_Localized: Reset
     m_Metadata:
       m_Items: []
+  - m_Id: 53870644555534336
+    m_Localized: Sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 53873106976886784
+    m_Localized: 'Achievements Score:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 53982074428575744
+    m_Localized: Play dialog
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54020653318000640
+    m_Localized: Victory
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

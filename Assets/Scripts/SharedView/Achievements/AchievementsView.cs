@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UI;
@@ -14,6 +15,9 @@ namespace Game.Achievements
         [SerializeField] private Transform listRoot;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button closeButton;
+        [SerializeField] private TMP_Text totalScoreText;
+        [SerializeField] private LocalizedString totalScoreFormatLocalized;
+        [SerializeField] private string totalScoreFormatFallback = "Total Score: {0}";
 
         [Header("Empty State")]
         [SerializeField] private GameObject emptyStateRoot;
@@ -29,12 +33,13 @@ namespace Game.Achievements
             base.Construct(viewModel);
         }
 
-        public void Setup(AchievementEntryView prefab, Transform rootList, Button reset, Button close)
+        public void Setup(AchievementEntryView prefab, Transform rootList, Button reset, Button close, TMP_Text totalScore = null)
         {
             itemPrefab = prefab;
             listRoot = rootList;
             resetButton = reset;
             closeButton = close;
+            totalScoreText = totalScore;
         }
 
         public void Toggle()
@@ -59,6 +64,7 @@ namespace Game.Achievements
             }
 
             BuildList();
+            BindTotalScore();
         }
 
         protected override void OnDestroy()
@@ -123,6 +129,30 @@ namespace Game.Achievements
             {
                 emptyStateLabel.text = ResolveLocalized(emptyStateLocalized, emptyStateFallback);
             }
+        }
+
+        private void BindTotalScore()
+        {
+            if (ViewModel == null || totalScoreText == null)
+                return;
+
+            ViewModel.TotalScore
+                .Subscribe(UpdateTotalScoreText)
+                .AddTo(Bindings);
+
+            UpdateTotalScoreText(ViewModel.TotalScore.Value);
+        }
+
+        private void UpdateTotalScoreText(int totalScore)
+        {
+            if (totalScoreText == null)
+                return;
+
+            var format = ResolveLocalized(totalScoreFormatLocalized, totalScoreFormatFallback);
+            if (string.IsNullOrWhiteSpace(format))
+                format = "{0}";
+
+            totalScoreText.text = string.Format(format, totalScore);
         }
 
         private static string ResolveLocalized(LocalizedString localized, string fallback)

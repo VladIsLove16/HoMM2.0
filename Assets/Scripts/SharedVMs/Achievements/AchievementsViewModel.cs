@@ -13,6 +13,7 @@ namespace Game.Achievements
         private readonly IAchievementService _service;
         private readonly ReactiveCollection<AchievementEntryViewModel> _entries = new();
         private readonly ReactiveProperty<bool> _isOpen = new(false);
+        private readonly ReactiveProperty<int> _totalScore = new(0);
         private readonly CompositeDisposable _disposables = new();
 
         public AchievementsViewModel(IAchievementDefinitionProvider definitions, IAchievementService service)
@@ -30,6 +31,7 @@ namespace Game.Achievements
 
         public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
         public IReadOnlyReactiveCollection<AchievementEntryViewModel> Entries => _entries;
+        public IReadOnlyReactiveProperty<int> TotalScore => _totalScore;
 
         public void Open() => _isOpen.SetValueAndForceNotify(true);
         public void Close() => _isOpen.SetValueAndForceNotify(false);
@@ -71,6 +73,8 @@ namespace Game.Achievements
                     entry.UpdateProgress(progress);
                 }
             }
+
+            RefreshTotalScore();
         }
 
         private void OnAchievementUnlocked(AchievementUnlockResult result)
@@ -91,6 +95,7 @@ namespace Game.Achievements
 
             var entry = _entries.FirstOrDefault(e => e.Id == progress.Id);
             entry?.UpdateProgress(progress);
+            RefreshTotalScore();
         }
 
         private void OnLocaleChanged(UnityEngine.Localization.Locale _)
@@ -99,6 +104,25 @@ namespace Game.Achievements
             {
                 entry?.RefreshText();
             }
+
+            _totalScore.SetValueAndForceNotify(_totalScore.Value);
+        }
+
+        private void RefreshTotalScore()
+        {
+            var total = 0;
+            foreach (var definition in _definitions.All ?? Array.Empty<AchievementDefinition>())
+            {
+                if (definition == null || string.IsNullOrWhiteSpace(definition.Id))
+                    continue;
+
+                if (!_service.IsUnlocked(definition.Id))
+                    continue;
+
+                total += Math.Max(0, definition.RewardCurrencyAmount);
+            }
+
+            _totalScore.Value = total;
         }
 
         public void Dispose()
@@ -111,6 +135,7 @@ namespace Game.Achievements
                 entry?.Dispose();
             }
             _entries.Clear();
+            _totalScore.Dispose();
             _disposables.Dispose();
         }
     }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2239508038832846996}
   - component: {fileID: 7051651732106025540}
   - component: {fileID: 8131524497291773740}
+  - component: {fileID: 7520119136127570424}
   m_Layer: 0
   m_Name: WitchNPC
   m_TagString: Untagged
@@ -46,8 +47,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899fb5d2811791543b15b35b72ba2dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogueId: 0
-  orchestrator: {fileID: 0}
+  dialogue: {fileID: 0}
+  lineup: {fileID: 0}
+  victoryReward: {fileID: 0}
+  Name: 
+  returnNpcKey: 
+  requiredFlags: []
+  fallbackDialogue: {fileID: 0}
+  battleAnimationController: {fileID: 0}
+  behaviorGraphBridge: {fileID: 7520119136127570424}
 --- !u!136 &8131524497291773740
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -71,6 +79,24 @@ CapsuleCollider:
   m_Height: 2.1
   m_Direction: 1
   m_Center: {x: 0, y: 0.95, z: 0}
+--- !u!114 &7520119136127570424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5056989746382058328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c0cf3f2f1a4b8e86bb1b2b0e4b6aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AdventureGameplay::Adventure.Infrastructure.Dialog.NpcBehaviorGraphBridge
+  agent: {fileID: 0}
+  lookDistance: 5
+  dialogStateChannelTemplate: {fileID: 0}
+  choiceEventChannelTemplate: {fileID: 0}
+  battleResultChannelTemplate: {fileID: 0}
+  animationController: {fileID: 0}
 --- !u!1001 &8235320451721088081
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -123,7 +149,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Model_Witch
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: 660224fee6348b74793f91dfd0f6bee7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

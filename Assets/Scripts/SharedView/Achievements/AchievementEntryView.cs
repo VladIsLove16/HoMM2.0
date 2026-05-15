@@ -15,6 +15,7 @@ namespace Game.Achievements
         [SerializeField] private TMP_Text categoryText;
         [SerializeField] private Image iconImage;
         [SerializeField] private Slider progressSlider;
+        [SerializeField] private GameObject unlockedIndicator;
         [SerializeField] private GameObject secretOverlay;
         [SerializeField] private Sprite secretIcon;
 
@@ -42,6 +43,11 @@ namespace Game.Achievements
                 {
                     progressSlider.value = value;
                 }
+            }));
+            _subscriptions.Add(viewModel.IsUnlocked.Subscribe(isUnlocked =>
+            {
+                if (unlockedIndicator != null)
+                    unlockedIndicator.SetActive(isUnlocked);
             }));
             _subscriptions.Add(viewModel.Category.Subscribe(text => { if (categoryText != null) categoryText.text = text; }));
             _subscriptions.Add(viewModel.IsSecretLocked.Subscribe(isSecret =>
@@ -78,6 +84,7 @@ namespace Game.Achievements
             TMP_Text category,
             Image icon,
             Slider slider,
+            GameObject unlocked,
             GameObject overlay,
             Sprite secret)
         {
@@ -88,6 +95,7 @@ namespace Game.Achievements
             categoryText = category;
             iconImage = icon;
             progressSlider = slider;
+            unlockedIndicator = unlocked;
             secretOverlay = overlay;
             secretIcon = secret;
         }
